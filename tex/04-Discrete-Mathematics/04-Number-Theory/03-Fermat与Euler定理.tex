@@ -1,0 +1,52 @@
+\section{Fermat 与 Euler 定理}
+
+\subsection{乘法会置换互素余数类}
+
+若 \(\gcd(a,n)=1\)，把所有与 \(n\) 互素的余数类分别乘 \(a\)，不会产生碰撞：若 \(ar\equiv as\pmod n\)，由上一节的消去律可消去 \(a\) 得 \(r\equiv s\)。有限集合上的单射就是置换。
+
+设这些可逆余数类为 \(r_1,\ldots,r_{\varphi(n)}\)，其中 \(\varphi(n)\) 是 Euler 函数，表示 \(1\) 到 \(n\) 中与 \(n\) 互素的整数个数。乘积置换给
+
+\[
+a^{\varphi(n)}r_1\cdots r_{\varphi(n)}
+\equiv r_1\cdots r_{\varphi(n)}\pmod n.
+\]
+
+该乘积可逆，消去后得到 Euler 定理：
+
+\[
+a^{\varphi(n)}\equiv1\pmod n.
+\]
+
+当 \(p\) 为素数，\(\varphi(p)=p-1\)，得到 Fermat 小定理
+
+\[
+a^{p-1}\equiv1\pmod p,\qquad p\nmid a.
+\]
+
+等价形式 \(a^p\equiv a\pmod p\) 对所有整数 \(a\) 成立（\(p\mid a\) 时两边同为 \(0\)；否则由消去律去掉一个 \(a\)）。
+
+\subsection{用周期压缩巨大指数}
+
+计算 \(3^{100}\pmod7\)。由 Fermat 定理 \(3^6\equiv1\)，而 \(100=16\cdot6+4\)，所以
+
+\[
+3^{100}\equiv3^4=81\equiv4\pmod7.
+\]
+
+定理给指数周期的上界，实际乘法阶（使 \(a^k\equiv1\pmod n\) 的最小正整数 \(k\)）可能更小。约化指数前必须确认底数与模数互素；否则 Euler 公式前提不成立，例如 \(2\) 与 \(4\) 不互素，\(2^{\varphi(4)}=4\equiv0\not\equiv1\pmod4\)。
+
+\subsection{素性检验的边界}
+
+若某 \(a\) 使 \(a^{n-1}\not\equiv1\pmod n\)，则合数 \(n\) 被证实。但通过若干底数测试不能简单证明 \(n\) 为素数，存在伪素数（对某个底数通过该同余的合数）甚至 Carmichael 数（对所有与之互素的底数都通过的合数）。Fermat 测试是单边证据，可靠素性检验需更强方法。
+
+\subsection{RSA 的结构直觉}
+
+RSA 选择大素数 \(p,q\)，令 \(n=pq\)。选 \(e\) 与 \(\varphi(n)\) 互素，再求
+
+\[
+ed\equiv1\pmod{\varphi(n)}.
+\]
+
+加密近似为 \(c\equiv m^e\pmod n\)，解密 \(c^d\equiv m^{ed}\equiv m\) 的正确性来自 Euler/中国剩余结构：\(ed=1+k\varphi(n)\)，当 \(\gcd(m,n)=1\) 时 \(m^{ed}=m\,(m^{\varphi(n)})^k\equiv m\pmod n\)；一般情形分别在模 \(p\)、模 \(q\) 下验证，再用中国剩余定理（下一节）拼回。安全性则依赖从公开 \(n\) 恢复因子困难，不是因为模幂本身难算。
+
+这里只解释数学骨架。真实密码系统还需要安全填充、密钥长度、侧信道防护等工程条件，不能直接用``教科书 RSA''处理真实消息。

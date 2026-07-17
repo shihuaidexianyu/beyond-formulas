@@ -1,0 +1,84 @@
+\section{信息瓶颈在压缩与预测之间权衡}
+
+图像中有对象形状、背景纹理、相机噪声和拍摄时间。若任务只是识别对象，好的表示 \(Z\) 似乎应忘掉与标签无关的细节，同时保留预测 \(Y\) 所需的信息。Information bottleneck 把这两个愿望写成
+
+\[
+\min_{p(z\mid x)}
+I(X;Z)-\beta I(Z;Y),
+\qquad \beta\ge0,
+\]
+
+并要求 \(Z-X-Y\) 构成 Markov chain：表示由输入生成，给定输入后不再直接读取标签。
+
+\(I(X;Z)\) 衡量表示保留多少输入信息，\(I(Z;Y)\) 衡量表示与任务的相关信息。\(\beta\) 控制二者权衡。若只追求压缩，常数表示使 \(I(X;Z)=0\)，却完全失去预测；若表示可逆，则几乎保留输入全部信息，未必去除了无关细节。
+
+\subsection{数据处理不等式给出了不可逾越的上限}
+
+由 chain rule，
+
+\[
+I(X,Z;Y)
+=I(X;Y)+I(Z;Y\mid X)
+\]
+
+也等于
+
+\[
+I(Z;Y)+I(X;Y\mid Z).
+\]
+
+Markov 条件使 \(I(Z;Y\mid X)=0\)，因此
+
+\[
+I(Z;Y)
+=I(X;Y)-I(X;Y\mid Z)
+\le I(X;Y).
+\]
+
+对输入作处理不能创造关于标签的新信息。等号意味着给定 \(Z\) 后，\(X\) 不再为 \(Y\) 提供额外信息，即 \(Z\) 对任务是充分表示。
+
+这个定理没有说``压缩必然改善泛化''。训练分布中背景若与标签相关，保留背景确实会提高 \(I(Z;Y)\)；部署时关联消失，原目标并不会自动预见这种 shift。鲁棒性需要关于环境、因果结构或不变性的额外假设。
+
+\subsection{深度模型中 mutual information 并不容易算}
+
+高维连续变量的 mutual information 需要未知密度。更棘手的是，若 \(Z=f(X)\) 是确定性连续映射，在常见理想化条件下 \(I(X;Z)\) 可能无穷或出现与量化精度有关的病态行为。表示维数下降也不等于 mutual information 必然按直觉减少。
+
+Variational information bottleneck 常使用随机 encoder \(q_\phi(z\mid x)\) 和简单 prior \(r(z)\)。记聚合表示分布 \(q_\phi(z)=\int q_\phi(z\mid x)p(x)\,\mathrm dx\)，则 rate 项可写成 \(I(X;Z)=\mathbb E_xD_{\mathrm{KL}}(q_\phi(z\mid x)\|q_\phi(z))\)，并且
+
+\[
+\mathbb E_x
+D_{\mathrm{KL}}
+\bigl(q_\phi(z\mid x)\|r(z)\bigr)
+=I(X;Z)+D_{\mathrm{KL}}\bigl(q_\phi(z)\|r(z)\bigr)
+\ge I(X;Z),
+\]
+
+所以它给出 rate 项的上界或替代；decoder 的 log-likelihood 则给出任务信息 \(I(Z;Y)\) 的下界（至多相差与模型无关的常数）。实际优化的是这些 bounds 组合，不一定是精确 IB 目标。bound 松紧、prior 选择和 Monte Carlo 估计方差都会改变结果。
+
+因此一篇可靠实验应明确：
+
+\begin{itemize}
+\tightlist
+\item
+  encoder 是否随机，噪声如何注入；
+\item
+  哪一项是 \(I(X;Z)\) 的上界、哪一项是 \(I(Z;Y)\) 的下界；
+\item
+  \(\beta\) 改变的是哪一个近似 rate--relevance 曲线；
+\item
+  是否出现常数表示等 collapse；
+\item
+  预测、校准、分布外鲁棒性和真正估计的 rate 是否分别报告。
+\end{itemize}
+
+在小型离散问题上，可以枚举 \(p(x,y,z)\) 精确计算 mutual information，用它核对估计器和 bound。高维 neural estimator 可能有显著 bias 与 variance，单次曲线平滑不代表数值可信。
+
+\subsection{信息瓶颈是一种问题表述，不是万能解释}
+
+它最有价值的地方，是迫使我们把表示学习写成两个冲突目标：保留任务相关信息，同时限制输入细节进入表示。这一语言连接了有损压缩、充分统计量、隐私和多视图学习。但从目标到``泛化更好''\,``学到语义''\,``更抗干扰''，中间都需要额外条件和实证检验。
+
+\subsubsection{从精确小问题走向近似大模型}
+
+构造离散 \(X=(Y,N)\)，其中 \(N\) 是与 \(Y\) 独立的噪声。枚举三种表示：保留全部 \(X\)、只保留 \(Y\)、输出常数，计算各自的 \(I(X;Z)\) 与 \(I(Z;Y)\)。再让 \(N\) 在训练分布中与 \(Y\) 相关、测试分布中独立，观察训练 IB 目标为何不自动保证测试鲁棒。最后用一个 variational upper bound 估计 rate，比较它与精确值之间的 gap。
+
+更完整的信息论基础见``信息瓶颈与任务相关表示''。

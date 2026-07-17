@@ -1,0 +1,176 @@
+\section{对角化失败与 Jordan 形：独立特征方向不够时怎么办}
+
+对角化依赖一组完整的特征向量，但并非每个矩阵都能提供足够多的特征方向。最小的反例是
+
+\[
+A=\begin{pmatrix}1&1\\0&1\end{pmatrix}.
+\]
+
+它的特征多项式为
+
+\[
+(1-\lambda)^2,
+\]
+
+所以唯一特征值是 \(\lambda=1\)，代数重数为 \(2\)。然而
+
+\[
+A-I=\begin{pmatrix}0&1\\0&0\end{pmatrix},
+\]
+
+零空间只有
+
+\[
+\operatorname{span}\left\{\begin{pmatrix}1\\0\end{pmatrix}\right\}.
+\]
+
+几何重数为 \(1\)，只有一个独立特征向量，无法组成 \(\mathbb R^2\) 的基。因此 \(A\) 不可对角化。
+
+\subsection{缺失方向如何表现为额外增长}
+
+把矩阵写成
+
+\[
+A=I+N,
+\qquad
+N=\begin{pmatrix}0&1\\0&0\end{pmatrix}.
+\]
+
+因为 \(N^2=0\)，二项式展开给出
+
+\[
+A^k=(I+N)^k=I+kN
+=\begin{pmatrix}1&k\\0&1\end{pmatrix}.
+\]
+
+尽管所有特征值都等于 \(1\)，矩阵幂仍随 \(k\) 线性增长。若只看 \(|\lambda|=1\) 就断言系统有界，会得到错误结论。
+
+增长来自那个没有成为真正特征向量的方向：每次作用都会向唯一特征方向额外剪切一次，累积成系数 \(k\)。
+
+\subsection{广义特征向量补足链条}
+
+真正特征向量 \(v_1\) 满足
+
+\[
+(A-\lambda I)v_1=0.
+\]
+
+当特征向量不足时，可以寻找 \(v_2\) 满足
+
+\[
+(A-\lambda I)v_2=v_1.
+\]
+
+\(v_2\) 称为广义特征向量。它本身不会保持方向，但经过一次 \(A-\lambda I\) 后落到真正特征方向上。
+
+在上例中，取
+
+\[
+v_1=\begin{pmatrix}1\\0\end{pmatrix},
+\qquad
+v_2=\begin{pmatrix}0\\1\end{pmatrix},
+\]
+
+就有
+
+\[
+(A-I)v_2=v_1.
+\]
+
+向量 \(v_1,v_2\) 组成一条 Jordan 链。更长的链满足
+
+\[
+(A-\lambda I)v_{j+1}=v_j.
+\]
+
+\subsection{Jordan 块在记录什么}
+
+在由 Jordan 链组成的基下，矩阵会变成若干 Jordan 块：
+
+\[
+J_k(\lambda)=
+\begin{pmatrix}
+\lambda&1&0&\cdots&0\\
+0&\lambda&1&\ddots&\vdots\\
+\vdots&\ddots&\ddots&\ddots&0\\
+0&\cdots&0&\lambda&1\\
+0&\cdots&\cdots&0&\lambda
+\end{pmatrix}.
+\]
+
+对角线上的 \(\lambda\) 描述基本缩放，超对角线上的 \(1\) 描述广义方向向真正特征方向的串联。所有复方阵都与某个 Jordan 标准形相似（这是定理，此处作为事实使用，证明从略）：
+
+\[
+A=SJS^{-1}.
+\]
+
+矩阵可对角化当且仅当所有 Jordan 块大小都为 \(1\)。
+
+\subsection{Jordan 块怎样影响矩阵函数}
+
+写
+
+\[
+J=\lambda I+N,
+\]
+
+其中 \(N\) 是幂零矩阵（某个幂等于零矩阵）。若块大小为 \(r\)，则 \(N^r=0\)。\(\lambda I\) 与 \(N\) 可交换，可以用二项式定理展开，而 \(j\ge r\) 的项全部消失，因此
+
+\[
+J^k
+=\sum_{j=0}^{r-1}
+\binom{k}{j}\lambda^{k-j}N^j.
+\]
+
+除了指数型因子 \(\lambda^k\)，还会出现 \(k,k^2,\ldots\) 等多项式因子。
+
+连续时间中
+
+\[
+e^{Jt}=e^{\lambda t}
+\left(I+tN+\frac{t^2}{2!}N^2+\cdots\right).
+\]
+
+这解释了为什么连续系统在特征值实部为零时仍可能因 Jordan 块出现多项式增长，也解释了重复根微分方程解中的 \(te^{\lambda t}\) 项从哪里来。
+
+\subsection{最小多项式提供更紧凑的判断}
+
+特征多项式必须包含全部特征值及其代数重数。最小多项式则是满足
+
+\[
+m_A(A)=0
+\]
+
+的最低次数首一多项式。
+
+对每个特征值，最小多项式中因子 \((t-\lambda)\) 的指数等于对应最大 Jordan 块的大小。原因在于：在单个块 \(J_r(\lambda)\) 上，\(\big(J_r(\lambda)-\lambda I\big)^s=N^s\)，而 \(N^s=0\) 当且仅当 \(s\ge r\)，所以要使 \(m_A(A)=0\)，\((t-\lambda)\) 的指数至少要达到最大块的 \(r\)，取最低次数便恰好等于它。因此：
+
+\[
+A\text{ 可对角化}
+\quad\Longleftrightarrow\quad
+m_A(t)\text{ 没有重复根}.
+\]
+
+这个条件比``特征值是否重复''更准确。特征值可以重复，只要没有大于 \(1\) 的 Jordan 块，矩阵仍可对角化。
+
+\subsection{为什么 Jordan 形理论重要、数值上却谨慎使用}
+
+Jordan 形精确描述相似分类，是理解矩阵函数、微分方程和缺陷矩阵的强大理论工具。但它对扰动极其敏感。
+
+一个很小的数值扰动可能把重复特征值拆开，使一个 Jordan 块突然变成多个不同特征值；浮点数据也很难可靠判断一个量究竟严格为零还是非常小。因此数值软件通常使用 Schur 分解而不是直接计算 Jordan 标准形。
+
+这再次体现``数学上的标准形''与``数值计算中的稳定表示''并非总是同一选择。
+
+\subsection{与 SVD 的区别}
+
+特征分解研究同一空间中的不变方向，要求方阵，并可能缺少完整特征基。SVD 则允许输入和输出使用两套不同的正交基，适用于任意矩形矩阵，并且总是存在。
+
+因此，Jordan 形回答``一个方阵在相似变换下最接近怎样的标准形''；SVD 回答``一个线性映射沿哪些正交输入方向缩放到哪些正交输出方向''。两者解决的问题不同。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06：Similar Matrices and Jordan Form
+\end{itemize}

@@ -1,0 +1,96 @@
+\section{变分推断把后验近似变成优化}
+
+MCMC 试图让样本长期服从真实 posterior，但在海量数据或复杂隐变量模型中，充分混合可能太慢。Variational inference 选择另一种交易：在易于计算的分布族 \(\mathcal Q\) 中寻找一个 \(q_\phi(z)\) 近似 posterior。
+
+对任意 \(q_\phi\)，把 \(\log p(x)\) 写入 \(q_\phi\) 下的期望（它对 \(z\) 是常数）并加减 \(\log q_\phi(z)\)：
+
+\[
+\log p(x)
+=\mathbb E_{q_\phi}\!\left[\log\frac{p(x,z)}{p(z\mid x)}\right]
+=\mathbb E_{q_\phi}\!\left[\log\frac{p(x,z)}{q_\phi(z)}\right]
++\mathbb E_{q_\phi}\!\left[\log\frac{q_\phi(z)}{p(z\mid x)}\right].
+\]
+
+第一项记为
+
+\[
+\mathcal L(\phi)
+=\mathbb E_{q_\phi}
+[\log p(x,z)-\log q_\phi(z)],
+\]
+
+称为 ELBO；第二项正是 \(q_\phi\) 与真实 posterior 的 KL 散度，于是
+
+\[
+\log p(x)
+=\mathcal L(\phi)
++D_{\mathrm{KL}}
+\bigl(q_\phi(z)\|p(z\mid x)\bigr).
+\]
+
+因为 evidence \(\log p(x)\) 与 \(\phi\) 无关，最大化 ELBO 等价于最小化
+
+\[
+D_{\mathrm{KL}}(q_\phi\|p).
+\]
+
+后验推断于是变成优化问题。但优化目标可算，不等于近似误差消失；变分族已经预先决定了哪些 posterior 形状永远无法表达。
+
+\subsection{Mean field 用独立性换可计算性}
+
+最常见选择是
+
+\[
+q(z)=\prod_jq_j(z_j).
+\]
+
+固定其他因子时，对 \(q_j\) 优化 ELBO 可得
+
+\[
+\log q_j^*(z_j)
+=\mathbb E_{q_{-j}}[\log p(x,z)]
++\text{constant}.
+\]
+
+理由只有一步：把 ELBO 中依赖 \(q_j\) 的部分整理出来，即 \(\mathcal L=\mathbb E_{q_j}\bigl[\mathbb E_{q_{-j}}\log p(x,z)\bigr]-\mathbb E_{q_j}[\log q_j(z_j)]+\text{constant}\)，它等于 \(-D_{\mathrm{KL}}(q_j\|\tilde p_j)\) 加常数，其中 \(\tilde p_j(z_j)\propto\exp\bigl(\mathbb E_{q_{-j}}\log p(x,z)\bigr)\)；KL 散度在 \(q_j=\tilde p_j\) 时取零，最优因子因此就是上式。
+
+在共轭模型中，这给出解析的 coordinate ascent 更新。它与 EM（见上一单元``EM 用下界交替完成隐变量学习''）外形相似，但 EM 的 E 步使用当前参数下的精确潜变量 posterior，并把参数当点估计；变分 Bayes 还可为参数保留分布，只是用受限 \(q\) 近似整个 posterior。
+
+若解析期望不可得，可以用 Monte Carlo 估计梯度。对可重参数化变量写
+
+\[
+z=g_\phi(\varepsilon),\qquad
+\varepsilon\sim p(\varepsilon),
+\]
+
+便能把分布参数的梯度传过随机生成过程。此时又引入随机优化误差，需要区分：
+
+\begin{itemize}
+\tightlist
+\item
+  优化误差：尚未找到当前变分族中的最佳 \(q\)；
+\item
+  Monte Carlo 误差：随机梯度估计有限；
+\item
+  近似误差：即使优化完全，\(\mathcal Q\) 仍无法表示真实 posterior；
+\item
+  模型误差：整个概率模型与数据生成过程不符。
+\end{itemize}
+
+\subsection{KL 的方向会改变近似行为}
+
+\(D_{\mathrm{KL}}(q\|p)\) 对 \(q\) 把质量放到 \(p\) 很小的区域惩罚很重，而对 \(q\) 漏掉某个 \(p\) 的模式不一定同样敏感。因此在双峰 posterior 上，一个单峰 Gaussian \(q\) 常选择覆盖某一个峰，而不是在两峰之间铺开。上一节的双峰例子里，单链可能困在一个峰而 trace 看似平稳；这里则是近似族主动放弃另一个峰——失效机制不同，表象同样具有迷惑性。这种 mode-seeking 行为会低估尾部或多峰不确定性。
+
+mean-field 还会删除变量间 posterior 相关。即使每个边际均值看似准确，联合决策所需的 covariance 也可能严重偏小。ELBO 上升只说明当前近似目标改善，并不证明 predictive calibration 或可信区间覆盖正确。
+
+更丰富的 full-covariance family、mixture、normalizing flow 或结构化变分分布可以减小表达限制，但也增加计算和优化难度。最优 ELBO 不会因扩大族而变差，实际优化结果却可能因非凸性反而更不稳定。
+
+\subsection{怎样知道近似是否够用}
+
+在小规模版本上，可与精确枚举或经过诊断的 MCMC 比较边际、相关、尾概率和 posterior predictive 分布。多初始化能暴露局部最优；逐步增加变分族容量，可以观察关键结论是否稳定。
+
+评估必须针对用途。若只需 posterior predictive mean，低估 covariance 可能影响有限；若要用尾概率触发高风险决策，同样的近似就可能不可接受。ELBO 不是 held-out predictive score，也不能跨不同模型或实现无条件比较。
+
+\subsubsection{一个看见 KL 方向的实验}
+
+令目标 posterior 是两个相距较远、权重不等的 Gaussian 混合。分别用单 Gaussian 最小化 \(D_{\mathrm{KL}}(q\|p)\) 和 \(D_{\mathrm{KL}}(p\|q)\)，比较最优均值、方差与尾部覆盖。随后用 mean-field Gaussian 逼近一个强相关二维 posterior，记录边际方差与沿相关方向的方差。解释为什么``坐标均值正确''仍不足以支持联合不确定性判断。

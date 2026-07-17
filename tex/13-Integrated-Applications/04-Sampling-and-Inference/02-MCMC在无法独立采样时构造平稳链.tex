@@ -1,0 +1,76 @@
+\section{MCMC 在无法独立采样时构造平稳链}
+
+Bayesian posterior 常写成
+
+\[
+\pi(\theta)=p(\theta\mid y)
+\propto p(y\mid\theta)p(\theta).
+\]
+
+likelihood 与 prior 可以计算，归一化常数
+
+\[
+p(y)=\int p(y\mid\theta)p(\theta)\,d\theta
+\]
+
+却可能不可得，也难以直接从 posterior 独立采样。MCMC 的想法不是消除归一化常数，而是构造一条长期访问频率为 \(\pi\) 的 Markov 链。
+
+\subsection{Metropolis--Hastings 如何让目标分布保持不变}
+
+链的状态就是参数，以下记为 \(x\)（避开已表示固定数据的 \(y\)）。当前状态为 \(x\) 时，从提议分布 \(q(x'\mid x)\) 产生候选 \(x'\)，并以
+
+\[
+\alpha(x,x')
+=\min\left\{
+1,\,
+\frac{\pi(x')q(x\mid x')}
+{\pi(x)q(x'\mid x)}
+\right\}
+\]
+
+接受；否则留在 \(x\)。\(\pi\) 中未知的共同归一化常数在比值中抵消。
+
+记 \(K(x,x')\) 为链的一步转移核（含被拒绝时停在原处的点质量），接受规则使流量满足 detailed balance：
+
+\[
+\pi(x)K(x,x')=\pi(x')K(x',x).
+\]
+
+对 \(x\) 求和或积分便得到 \(\pi K=\pi\)，所以 \(\pi\) 是平稳分布。detailed balance 是平稳性的充分条件，不是必要条件；更重要的是，``平稳''只表示若当前已经服从 \(\pi\)，一步后仍服从 \(\pi\)，并不自动保证从任意初值都能到达它。
+
+要从初值收敛并让时间平均有效，还需要不可约、非周期、recurrence 等适当遍历条件。满足相应 Markov chain ergodic theorem 时，
+
+\[
+\frac1n\sum_{t=1}^nh(X_t)
+\longrightarrow\mathbb E_\pi[h(X)]
+\]
+
+几乎处处成立。
+
+\subsection{一万次迭代不等于一万个独立样本}
+
+相邻链状态相关。记 \(\sigma_h^2=\operatorname{Var}_\pi(h(X))\)，\(\rho_k=\operatorname{Corr}(h(X_t),h(X_{t+k}))\) 为滞后 \(k\) 的自相关，则平稳链均值 \(\bar h_n=\frac1n\sum_th(X_t)\) 的方差近似为
+
+\[
+\operatorname{Var}(\bar h_n)
+\approx\frac{\sigma_h^2}{n}
+\Bigl(1+2\sum_{k\ge1}\rho_k\Bigr).
+\]
+
+括号中的因子称为 integrated autocorrelation time \(\tau\)。与独立样本的 \(\sigma_h^2/n\) 对比，这条链相当于只有 \(n/\tau\) 个独立样本，这就是有效样本量的含义。一条移动很慢的链即使记录百万次，也可能只包含少量独立信息。
+
+随机游走提议过小时，接受率很高但每步几乎不动；过大时，候选常落到低密度区而被拒绝。接受率只是调节线索，不是效率本身。最终关心的是目标函数的 ESS、Monte Carlo 标准误和跨链一致性。
+
+多峰 posterior 暴露更严重的问题。若两个峰之间隔着极低密度谷，单链可能长时间停在一个峰。trace plot 看起来非常稳定，恰恰因为它没有发现另一峰。增加 burn-in 只会删除更多困在同一峰的样本，不能创造跨峰移动。
+
+\subsection{诊断是反证工具，不是收敛证明}
+
+实践中应从分散初值运行多条链，检查 trace、rank-normalized \(\widehat R\)、ESS、自相关和 Monte Carlo 标准误。若链间不一致，已有明确失败证据；若这些指标正常，只能说尚未发现明显问题，不能证明有限运行已探索全部 posterior。
+
+参数化也会决定几何。高度相关参数、层级模型 funnel 和不同尺度会使随机游走极慢。中心化或非中心化重参数化、标准化尺度，以及 Hamiltonian Monte Carlo 等利用梯度的提议可以显著改善探索，但仍需诊断。
+
+验证应从可知答案的简化模型开始：核对矩、分位数或解析 posterior；再做模拟恢复与 posterior predictive checks。后者检验模型能否生成与真实数据相似的结构，不能由良好的采样诊断替代。
+
+\subsubsection{让``高接受率''主动失败}
+
+对一个相关二维 Gaussian target 使用不同尺度的随机游走 Metropolis。比较接受率、每坐标 ESS 和均值的 Monte Carlo 标准误，找出接受率最高却效率很低的设置。随后换成双峰 target，从两个峰分别启动链，观察 \(\widehat R\) 与单链 trace 会给出什么不同信号。最后解释为什么``删掉前一半样本''不能解决跨峰失败。

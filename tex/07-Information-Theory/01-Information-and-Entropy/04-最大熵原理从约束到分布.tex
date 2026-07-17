@@ -1,0 +1,183 @@
+\section{最大熵原理：从约束到分布}
+
+当我们只知道若干约束，却必须选择一个完整分布时，任意补充更多形状假设可能把主观结构伪装成知识。最大熵原理提出：
+
+\begin{quote}
+在满足已知约束的分布中，选择熵最大的一个，避免加入约束之外的可预测结构。
+\end{quote}
+
+它不是说现实一定会``追求熵最大''，而是一种在明确约束和基准测度下的建模规则。
+
+\subsection{有限支撑上只知归一化}
+
+若 $X$ 有 $m$ 个可能值，只知道
+
+\[
+\sum_i p_i=1,
+\]
+最大化
+
+\[
+H(p)=-\sum_i p_i\log p_i.
+\]
+用 Lagrange 乘子：
+
+\[
+\mathcal L
+=-\sum_i p_i\log p_i
++\lambda\left(\sum_i p_i-1\right).
+\]
+对 $p_i$ 求导（对数取自然底；换底只把常数因子吸收进 $\lambda$，不影响结论）：
+
+\[
+-(\log p_i+1)+\lambda=0,
+\]
+所以所有 $p_i$ 相同，得到
+
+\[
+p_i=\frac1m.
+\]
+均匀分布不是因为``什么都不知道就一律等可能''，而是因为已经明确了有限支撑和计数基准测度，并且没有其他约束。
+
+\subsection{非负变量只知均值}
+
+在 $x\ge0$ 上最大化微分熵，约束
+
+\[
+\int f(x)\,dx=1,
+\qquad
+\int xf(x)\,dx=\mu.
+\]
+把约束用 Lagrange 乘子并入目标，对 $f$ 逐点变分，得
+
+\[
+-\bigl(\log f(x)+1\bigr)+\lambda_0+\lambda_1 x=0,
+\]
+解出 $f(x)\propto e^{\lambda_1 x}$；积分有限要求 $\lambda_1<0$，改记 $\lambda=-\lambda_1>0$，即
+
+\[
+f(x)\propto e^{-\lambda x},
+\]
+规范化和均值条件确定
+
+\[
+f(x)=\frac1\mu e^{-x/\mu}.
+\]
+所以固定非负支撑与均值时，Exponential 分布最大熵。
+
+\subsection{实线上只知均值和方差}
+
+在全实线上固定
+
+\[
+\E[X]=\mu,
+\qquad
+\Var(X)=\sigma^2,
+\]
+最大微分熵分布为 Gaussian：
+
+\[
+f(x)
+=\frac1{\sqrt{2\pi\sigma^2}}
+\exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right].
+\]
+一种简洁证明使用 KL 非负性。由 Jensen 不等式，
+
+\[
+-D(f\|g)
+=\int f(x)\log\frac{g(x)}{f(x)}\,dx
+\le\log\int g(x)\,dx
+=0,
+\]
+故 $D(f\|g)\ge0$。令 $g$ 为具有相同均值方差的 Gaussian，展开定义：
+
+\[
+D(f\|g)
+=-h(f)-\int f(x)\log g(x)\,dx.
+\]
+因为 $\log g(x)$ 是关于 $x$ 的二次函数，积分只涉及 $f$ 的前两阶矩，而 $f$ 与 $g$ 的前两阶矩相同，交叉项可换为 $g$ 自身：
+
+\[
+-\int f(x)\log g(x)\,dx
+=-\int g(x)\log g(x)\,dx
+=h(g),
+\]
+从而 $0\le D(f\|g)=h(g)-h(f)$，即
+
+\[
+h(f)\le h(g).
+\]
+\subsection{一般线性约束导出指数族}
+
+若约束为
+
+\[
+\E[T_k(X)]=c_k,
+\]
+最大熵解通常具有形式
+
+\[
+p_\theta(x)
+\propto
+\exp\left(
+\sum_k\theta_kT_k(x)
+\right).
+\]
+这就是指数族结构。Bernoulli、Poisson、Gaussian、Exponential 等许多常见分布都可由不同支撑和充分统计量约束导出。
+
+Lagrange 乘子与约束期望互为对偶，连接最大熵、配分函数、凸优化和统计力学。
+
+\subsection{最大熵依赖参考测度}
+
+连续情形的微分熵会随坐标改变，因此``最大熵''必须说明相对于哪个参考测度。对参数做非线性重参数化后，均匀或最大微分熵结论可能改变。
+
+更坐标稳健的形式是最小化相对于参考分布 $m$ 的 KL：
+
+\[
+\min_p D(p\|m)
+\]
+并满足约束。此时 $m$ 明确编码了基准结构。
+
+\subsection{约束错了，最大熵也会错}
+
+最大熵只保证不额外加入约束外结构，不保证约束充分代表现实。若只约束均值而真实数据多峰、带周期或有硬边界，最大熵模型可能严重误导。
+
+使用时应说明：
+
+\begin{itemize}
+\tightlist
+\item
+  支撑集；
+\item
+  参考测度；
+\item
+  约束来自何处；
+\item
+  约束是否可行；
+\item
+  解是否存在且可规范化；
+\item
+  哪些未建模结构可能重要。
+\end{itemize}
+
+最大熵不是逃避建模，而是把建模假设集中、透明地写成约束。
+
+\subsubsection{自己补完}
+
+在有限集合 $\{0,1,2\}$ 上选择分布，要求
+
+\[
+\E[X]=1.
+\]
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  写出最大熵 Lagrangian；
+\item
+  推导解具有 $p(x)\propto e^{\lambda x}$ 的形式；
+\item
+  利用对称约束判断 $\lambda$ 和最终分布；
+\item
+  若均值改为 $1.5$，说明分布会向哪一侧倾斜。
+\end{enumerate}

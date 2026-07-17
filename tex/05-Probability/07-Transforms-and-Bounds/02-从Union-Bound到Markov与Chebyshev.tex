@@ -1,0 +1,132 @@
+\section{从 Union Bound 到 Markov 与 Chebyshev}
+
+有时我们不需要精确概率，只需要保证失败足够少。即使不知道完整分布，只要掌握事件拆分、非负变量的均值或变量的方差，仍能得到普适上界。
+
+信息越少，结论越粗；这不是方法缺陷，而是信息限制的真实反映。
+
+\subsection{Union Bound：坏事件逐个覆盖}
+
+对任意事件 $A_1,\ldots,A_n$，不要求独立，
+
+\[
+P\left(\bigcup_{i=1}^{n}A_i\right)
+\le\sum_{i=1}^{n}P(A_i).
+\]
+这叫 Union Bound 或 Boole 不等式。右侧直接相加会把多个事件同时发生的部分重复计算，所以得到上界。
+
+若系统有一千个组件，每个在一天内失败概率不超过 $10^{-6}$，则``至少一个组件失败''的概率不超过
+
+\[
+1000\cdot10^{-6}=10^{-3}.
+\]
+不需要知道组件是否独立。若上界超过一，可以截断为一；这也表明界可能很松。
+
+Union Bound 的力量在于把复杂全局坏事件覆盖成许多容易控制的局部事件。随机算法、编码和高维统计中，这种策略极其常见。
+
+\subsection{Markov 不等式：均值控制非负尾部}
+
+若 $X\ge0$ 且 $a>0$，则
+
+\[
+P(X\ge a)
+\le\frac{\E[X{]}}{a}.
+\]
+证明只需一行逐点不等式：
+
+\[
+a\mathbf1_{\{X\ge a\}}\le X.
+\]
+它确实逐点成立：当 $X\ge a$ 时左端为 $a\le X$；当 $0\le X<a$ 时左端为 $0$，非负性正用在这里。两边取期望（期望保持不等号方向）：
+
+\[
+\E[X{]}
+\ge aP(X\ge a).
+\]
+如果平均值很小，变量经常超过一个很大阈值是不可能的。
+
+例如非负等待时间平均为 $5$ 分钟，则
+
+\[
+P(X\ge20)\le\frac14.
+\]
+这个界没有使用分布形状，所以通常不精确。某些两点分布能达到等号——例如 $P(X=a)=\E[X{]}/a$、$P(X=0)=1-\E[X{]}/a$（当 $\E[X{]}\le a$）——说明仅凭非负性和均值不能普遍做得更好。
+
+非负条件不能省略。若 $X$ 可取大负值，均值可能很小甚至为负，却仍有很大正尾概率。
+
+\subsection{Chebyshev：方差控制偏离均值}
+
+对有有限均值 $\mu$ 和方差 $\sigma^2$ 的任意变量，把 Markov 应用于非负变量
+
+\[
+(X-\mu)^2
+\]
+即可：事件 $|X-\mu|\ge a$ 等价于 $(X-\mu)^2\ge a^2$，且 $\E[(X-\mu)^2{]}=\sigma^2$，得到
+
+\[
+P(|X-\mu|\ge a)
+\le\frac{\sigma^2}{a^2}.
+\]
+写成标准差倍数：
+
+\[
+P(|X-\mu|\ge k\sigma)
+\le\frac1{k^2}.
+\]
+所以至少
+
+\[
+1-\frac1{k^2}
+\]
+的概率落在 $k$ 个标准差内。它对任何有限方差分布成立，不要求对称或 Gaussian。
+
+例如 $k=2$ 时只保证至少 $75\%$ 落在两倍标准差内，远弱于 Gaussian 的约 $95\%$。原因正是 Chebyshev 不知道分布形状。
+
+\subsection{单侧版本更强一些}
+
+若只关心一侧，Cantelli 不等式给出
+
+\[
+P(X-\mu\ge a)
+\le\frac{\sigma^2}{\sigma^2+a^2}.
+\]
+证法仍是 Markov，只是先平移再优化：对任意 $u>0$，
+\[
+P(X-\mu\ge a)
+=P(X-\mu+u\ge a+u)
+\le\frac{\sigma^2+u^2}{(a+u)^2},
+\]
+取 $u=\sigma^2/a$ 使右端最小，即得上式。``引入自由参数再优化''正是下一节 Chernoff 方法的核心动作。
+它比把 Chebyshev 的双侧界直接用于单侧更强。选择界时应根据事件结构使用可用信息，而不是总套最熟的一条。
+
+\subsection{用这些界证明平均会稳定}
+
+若 $X_1,\ldots,X_n$ 独立同分布，均值 $\mu$、方差 $\sigma^2$，样本均值满足
+
+\[
+\operatorname{Var}(\bar X_n)=\frac{\sigma^2}{n}.
+\]
+Chebyshev 给出
+
+\[
+P(|\bar X_n-\mu|\ge\varepsilon)
+\le\frac{\sigma^2}{n\varepsilon^2}
+\longrightarrow 0.
+\]
+这已经证明弱大数定律的有限方差版本。它给出 $1/n$ 级上界，但在有界独立变量下，本单元末节的 Hoeffding 集中界会把它提升为关于 $n$ 的指数衰减。
+
+\subsubsection{自己补完}
+
+随机变量 $X$ 的均值为 $10$，方差为 $9$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  若已知 $X\ge0$，用 Markov 控制 $P(X\ge30)$；
+\item
+  用 Chebyshev 控制 $P(|X-10|\ge10)$；
+\item
+  两个界分别使用了哪些信息？
+\item
+  能否仅凭这些信息判断哪个界更接近真实概率？说明原因。
+\end{enumerate}

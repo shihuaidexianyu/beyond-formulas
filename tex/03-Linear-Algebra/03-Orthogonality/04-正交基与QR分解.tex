@@ -1,0 +1,282 @@
+\section{正交基、Gram--Schmidt 与 QR 分解}
+
+普通基能够表示子空间，却不一定让表示过程简单。若基向量彼此倾斜，从一个向量中提取某个基方向的坐标时，其他方向也会同时参与，通常需要解一个方程组。
+
+正交归一基消除了这种耦合。设
+
+\[
+Q=\begin{pmatrix}q_1&\cdots&q_n\end{pmatrix}
+\]
+
+的列满足
+
+\[
+q_i^{\mathsf T}q_j=
+\begin{cases}
+1,&i=j,\\
+0,&i\ne j.
+\end{cases}
+\]
+
+那么
+
+\[
+Q^{\mathsf T}Q=I.
+\]
+
+对列空间中的向量 \(p=Qx\)，两边左乘 \(Q^{\mathsf T}\) 就得到
+
+\[
+x=Q^{\mathsf T}p.
+\]
+
+坐标不再通过联立方程求出，而是逐列做点积。投影矩阵也从
+
+\[
+A(A^{\mathsf T}A)^{-1}A^{\mathsf T}
+\]
+
+简化为
+
+\[
+P=QQ^{\mathsf T}.
+\]
+
+这说明一个实用目标：如果手中的基不正交，就把它变成张成同一子空间的正交归一基。
+
+\subsection{``正交矩阵''与``正交归一列''}
+
+矩形矩阵也可以满足 \(Q^{\mathsf T}Q=I\)，这表示它的列正交归一。但只有当 \(Q\) 是方阵时，通常才称它为正交矩阵。此时
+
+\[
+Q^{-1}=Q^{\mathsf T},
+\]
+
+并且
+
+\[
+QQ^{\mathsf T}=Q^{\mathsf T}Q=I.
+\]
+
+方形正交矩阵保持长度与夹角：
+
+\[
+\|Qx\|_2^2=x^{\mathsf T}Q^{\mathsf T}Qx=\|x\|_2^2,
+\]
+
+\[
+(Qx)^{\mathsf T}(Qy)=x^{\mathsf T}y.
+\]
+
+旋转和镜像都是典型例子。矩形 \(Q\) 不会把整个 \(\R^m\) 变换回自身，但它仍然把低维坐标 \(x\) 等距嵌入列空间：\(\|Qx\|_2=\|x\|_2\)。
+
+\subsection{Gram--Schmidt：不断减去已经解释的方向}
+
+从线性无关向量 \(a_1,\ldots,a_n\) 开始。第一个方向没有需要避开的旧方向，因此令
+
+\[
+u_1=a_1,
+\qquad
+q_1=\frac{u_1}{\|u_1\|_2}.
+\]
+
+处理 \(a_2\) 时，先减去它在 \(q_1\) 方向上的投影：
+
+\[
+u_2=a_2-(q_1^{\mathsf T}a_2)q_1,
+\qquad
+q_2=\frac{u_2}{\|u_2\|_2}.
+\]
+
+\(u_2\) 是 \(a_2\) 中无法由第一个方向解释的部分，所以它与 \(q_1\) 正交。
+
+一般地，在得到 \(q_1,\ldots,q_{k-1}\) 后，令
+
+\[
+u_k=a_k-\sum_{j=1}^{k-1}(q_j^{\mathsf T}a_k)q_j,
+\qquad
+q_k=\frac{u_k}{\|u_k\|_2}.
+\]
+
+每一步都在做同一件事：从新向量中减去它在已有子空间中的投影，只保留新的正交方向。由于只减去了前面向量的线性组合，前 \(k\) 个 \(q\) 与前 \(k\) 个 \(a\) 张成同一个子空间。
+
+如果某一步得到 \(u_k=0\)，说明 \(a_k\) 已经在前面向量的张成空间里。此时不能归一化，也恰好暴露了输入向量线性相关。算法失败的位置给出了有意义的信息，而不是一个偶然的除零错误。
+
+\subsection{一个完整例子}
+
+从
+
+\[
+a_1=\begin{pmatrix}1\\1\\1\end{pmatrix},
+\qquad
+a_2=\begin{pmatrix}1\\0\\2\end{pmatrix}
+\]
+
+开始。首先
+
+\[
+q_1=\frac1{\sqrt3}
+\begin{pmatrix}1\\1\\1\end{pmatrix}.
+\]
+
+\(a_2\) 在 \(q_1\) 方向上的坐标是
+
+\[
+q_1^{\mathsf T}a_2
+=\frac{1+0+2}{\sqrt3}
+=\sqrt3.
+\]
+
+所以对应投影为
+
+\[
+(q_1^{\mathsf T}a_2)q_1
+=\begin{pmatrix}1\\1\\1\end{pmatrix}.
+\]
+
+减去它：
+
+\[
+u_2=a_2-(q_1^{\mathsf T}a_2)q_1
+=\begin{pmatrix}0\\-1\\1\end{pmatrix},
+\]
+
+归一化得到
+
+\[
+q_2=\frac1{\sqrt2}
+\begin{pmatrix}0\\-1\\1\end{pmatrix}.
+\]
+
+现在 \(q_1^{\mathsf T}q_2=0\)，二者长度都为 \(1\)，并且它们与原来的 \(a_1,a_2\) 张成同一个平面。
+
+注意这个例子的思路不是``套用一串公式''，而是先问：\(a_2\) 中有多少已经被 \(a_1\) 的方向解释？减掉这一部分后，剩余方向才是新的信息。
+
+\subsection{把过程写成矩阵分解}
+
+令
+
+\[
+A=\begin{pmatrix}a_1&a_2&\cdots&a_n\end{pmatrix},
+\qquad
+Q=\begin{pmatrix}q_1&q_2&\cdots&q_n\end{pmatrix}.
+\]
+
+Gram--Schmidt 的每一步都把 \(a_k\) 写成 \(q_1,\ldots,q_k\) 的线性组合：
+
+\[
+a_k=r_{1k}q_1+\cdots+r_{kk}q_k.
+\]
+
+不会出现 \(q_{k+1},q_{k+2},\ldots\)，因此系数组成上三角矩阵 \(R\)，并得到
+
+\[
+A=QR.
+\]
+
+由于 \(Q^{\mathsf T}Q=I\)，
+
+\[
+R=Q^{\mathsf T}A.
+\]
+
+在刚才的例子中，
+
+\[
+Q=
+\begin{pmatrix}
+1/\sqrt3&0\\
+1/\sqrt3&-1/\sqrt2\\
+1/\sqrt3&1/\sqrt2
+\end{pmatrix},
+\]
+
+\[
+R=
+\begin{pmatrix}
+\sqrt3&\sqrt3\\
+0&\sqrt2
+\end{pmatrix}.
+\]
+
+直接相乘可以恢复
+
+\[
+A=
+\begin{pmatrix}
+1&1\\
+1&0\\
+1&2
+\end{pmatrix}.
+\]
+
+\(A=QR\) 可以看成与消元中的 \(A=LU\) 相呼应的分解：\(LU\) 追求三角结构，QR 同时得到正交几何和三角计算结构。
+
+\subsection{QR 怎样求最小二乘}
+
+假设 \(A\) 满列秩，并有简约 QR 分解 \(A=QR\)（Gram--Schmidt 给出的正是这种形式），其中 \(Q\) 的列正交归一，\(R\) 是可逆上三角矩阵。最小二乘目标变成
+
+\[
+\min_x\|QRx-b\|_2.
+\]
+
+把 \(b\) 分解为列空间中的部分和正交残差：
+
+\[
+b=QQ^{\mathsf T}b+(I-QQ^{\mathsf T})b.
+\]
+
+于是
+
+\[
+QRx-b
+=Q(Rx-Q^{\mathsf T}b)-(I-QQ^{\mathsf T})b.
+\]
+
+右边两项正交，因此
+
+\[
+\|QRx-b\|_2^2
+=\|Rx-Q^{\mathsf T}b\|_2^2
++\|(I-QQ^{\mathsf T})b\|_2^2.
+\]
+
+第二项与 \(x\) 无关。要让第一项最小，只需解上三角方程
+
+\[
+R\hat x=Q^{\mathsf T}b.
+\]
+
+这条路径没有显式形成 \(A^{\mathsf T}A\)，也没有求逆。它先用正交变换提取 \(b\) 在列空间中的坐标，再通过三角回代求参数，因此通常比正规方程更稳定。上一节末尾关于``形成 \(A^{\mathsf T}A\) 会平方条件数''的警告，正是由这条路径回应的。
+
+\subsection{数学上的 Gram--Schmidt 与数值计算中的 QR}
+
+经典 Gram--Schmidt 清楚地揭示了投影和正交化的原理，但浮点计算会产生舍入误差。当前面得到的方向不能保持完全正交时，后续误差会继续累积。
+
+实际数值软件通常采用改进 Gram--Schmidt、Householder 反射或 Givens 旋转。它们仍然追求同一个结果 \(A=QR\)，只是以更稳定的方式组织运算。
+
+因此需要区分两个问题：
+
+\begin{itemize}
+\tightlist
+\item
+  为了理解 QR 从哪里来，经典 Gram--Schmidt 是最透明的推导；
+\item
+  为了在计算机上可靠地求 QR，Householder 等方法通常更合适。
+\end{itemize}
+
+一个公式在精确算术中正确，并不自动意味着它是浮点环境中的最佳实现。
+
+\subsection{回看整条主线}
+
+这一单元从一个很简单的事实开始：垂直方向的长度平方可以相加。由此得到正交、正交补和空间分解；最近点的残差必须落在正交补中，于是产生投影；无解方程通过投影变成最小二乘；为了让投影与最小二乘更容易计算，又产生正交基、Gram--Schmidt 和 QR。
+
+这些概念不是一串并列术语，而是同一个问题不断展开后的不同层次。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06 Lecture 17：Orthogonal Matrices and Gram--Schmidt
+\end{itemize}

@@ -1,0 +1,150 @@
+\section{连续时间 Markov 链与生成矩阵}
+
+设 $X(t)$ 在离散状态空间 $S$ 中随连续时间跳变。时间齐次 Markov 性为
+
+\[
+P(X(t+s)=j\mid X(s)=i,\text{更早历史})
+=P(X(t+s)=j\mid X(s)=i).
+\]
+对每个 $t\ge0$，定义转移矩阵
+
+\[
+P(t)_{ij}=P(X(t)=j\mid X(0)=i).
+\]
+它满足
+
+\[
+P(0)=I,
+\qquad
+P(s+t)=P(s)P(t).
+\]
+第二式是 Chapman--Kolmogorov 方程的半群写法：对中间时刻 $s$ 所处状态用全概率公式求和，再用 Markov 性即得。
+\subsection{生成矩阵描述瞬时速率}
+
+对 $i\ne j$，定义
+
+\[
+q_{ij}
+=\lim_{h\downarrow0}
+\frac{P(h)_{ij}}h.
+\]
+它是从 $i$ 瞬时跳到 $j$ 的速率。令
+
+\[
+q_i=\sum_{j\ne i}q_{ij},
+\]
+并定义对角元
+
+\[
+q_{ii}=-q_i.
+\]
+矩阵 $Q=(q_{ij})$ 称为生成矩阵或速率矩阵，满足：
+
+\begin{itemize}
+\tightlist
+\item
+  非对角元 $q_{ij}\ge0$；
+\item
+  每行和为零；
+\item
+  对角元非正。
+\end{itemize}
+
+小时间 $h$ 内，
+
+\[
+P(h)_{ij}=q_{ij}h+o(h)
+\quad(i\ne j),
+\]
+\[
+P(h)_{ii}=1-q_ih+o(h).
+\]
+生成矩阵不是转移矩阵：它的行和为零而不是一，对角元可以为负，元素有``每单位时间''量纲。
+
+\subsection{驻留时间为何 Exponential}
+
+处于状态 $i$ 后，若过程要保持 Markov 性，已停留多久不能改变剩余驻留分布。连续无记忆分布只能是 Exponential：记生存函数 $S(t)=P(H_i>t)$，无记忆性给出函数方程 $S(s+t)=S(s)S(t)$，其连续解只有 $S(t)=e^{-\lambda t}$ 一族，因此离开 $i$ 前的等待时间为
+
+\[
+H_i\sim\mathrm{Exponential}(q_i).
+\]
+其平均为
+
+\[
+\E[H_i]=\frac1{q_i}.
+\]
+离开时跳到 $j\ne i$ 的条件概率为
+
+\[
+r_{ij}=\frac{q_{ij}}{q_i}.
+\]
+直观上，每个可能的目的地各有一只速率 $q_{ij}$ 的 Exponential 时钟在竞走，谁先响就跳向谁，$j$ 胜出的概率正比于其速率。
+于是 CTMC 可以由两部分构造：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  在状态 $i$ 停留 Exponential($q_i$) 时间；
+\item
+  按概率 $r_{ij}$ 选择下一状态。
+\end{enumerate}
+
+矩阵 $R=(r_{ij})$ 描述嵌入跳链。若 $q_i=0$，状态 $i$ 吸收。
+
+\subsection{跳链平稳分布不等于时间占比}
+
+跳链统计每次跳跃访问的状态，CTMC 平稳分布统计连续时间占比。若某状态离开速率很小，每次进入后停很久，时间占比会比跳跃访问比例更高。
+
+若跳链平稳分布为 $\widetilde\pi_i$，在合适正常返条件下，CTMC 时间平稳概率与
+
+\[
+\frac{\widetilde\pi_i}{q_i}
+\]
+成正比。除以离开速率，正是在补偿平均驻留时间。这一关系将在``连续时间平稳分布与流量平衡''一节用全局平衡方程验证。
+
+\subsection{一个两状态故障---修复模型}
+
+状态 $0$ 为正常，$1$ 为故障。故障速率 $\lambda$，修复速率 $\mu$：
+
+\[
+Q=
+\begin{bmatrix}
+-\lambda&\lambda\\
+\mu&-\mu
+\end{bmatrix}.
+\]
+正常平均持续 $1/\lambda$，故障平均持续 $1/\mu$。跳链每次必在两状态间交替，但 CTMC 的时间占比取决于驻留时间。这个模型在本单元还会反复出现：下一节求它的瞬态解，``平稳分布''一节算它的时间占比。
+
+这个模型依赖 Exponential 寿命与修复时间。若设备老化导致故障率随年龄增长，仅记录``正常/故障''就不 Markov；需要加入年龄或使用半 Markov/更新模型。
+
+\subsection{非爆炸性}
+
+无限状态 CTMC 可能在有限时间内完成无穷多次跳跃，称为爆炸。例如出生率为 $\lambda_n=n^2$ 的纯出生链，第 $n$ 个状态平均驻留 $1/n^2$，而 $\sum_n 1/n^2$ 收敛，期望意义下有限时间内就跑完无穷多个状态。有限状态且速率有限时不会爆炸；无限状态中若总速率 $q_i$ 随状态增长太快，需要额外检查。
+
+没有非爆炸性，路径在爆炸时刻之后如何定义会成为问题，常规转移概率也可能丢失质量。
+
+下一节会从生成矩阵的局部速率推导 $P(t)$ 的微分方程。
+
+\subsubsection{自己补完}
+
+三状态 CTMC 的非零跳转速率为
+
+\[
+q_{12}=2,\quad q_{13}=1,\quad
+q_{21}=4,\quad q_{32}=3.
+\]
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  写出生成矩阵 $Q$；
+\item
+  求各状态平均驻留时间；
+\item
+  写出嵌入跳链转移概率；
+\item
+  判断是否有吸收状态；
+\item
+  说明为什么 $Q^2$ 本身不是``两步转移矩阵''。
+\end{enumerate}

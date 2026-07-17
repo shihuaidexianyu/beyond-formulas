@@ -1,0 +1,152 @@
+\section{不放回抽样与 Hypergeometric 分布}
+
+总体中有 $N$ 个对象，其中 $K$ 个标为成功。随机不放回抽取 $n$ 个，问成功对象数量 $X$。
+
+这看起来像做 $n$ 次成败试验，但抽到一个成功对象后，剩余总体中成功比例会降低。各次结果依赖，普通 Binomial 模型不再精确。
+
+\subsection{用组合计数得到 PMF}
+
+全部大小为 $n$ 的无序样本有
+
+\[
+\binom Nn
+\]
+种，若简单随机抽样，它们等可能。
+
+要使样本中恰有 $k$ 个成功对象，需要：
+
+\begin{itemize}
+\tightlist
+\item
+  从 $K$ 个成功对象中选 $k$ 个；
+\item
+  从 $N-K$ 个失败对象中选 $n-k$ 个。
+\end{itemize}
+
+因此
+
+\[
+P(X=k)
+=\frac{\binom Kk\binom{N-K}{n-k}}
+{\binom Nn}.
+\]
+可行范围由两个抽取数都合法决定：
+
+\[
+\max(0,n-(N-K))
+\le k\le
+\min(n,K).
+\]
+支撑不能机械写成 $0,\ldots,n$。若总体成功对象不足或失败对象不足，两端会缩窄。
+
+\subsection{均值为何仍像 Binomial}
+
+令样本中第 $i$ 个位置的成功指示为 $I_i$。虽然它们依赖，但简单随机抽样中每个对象出现在任一位置是等可能的，由对称性，每个位置的边缘成功概率仍是 $K/N$。所以
+
+\[
+X=\sum_{i=1}^{n}I_i
+\]
+给出
+
+\[
+\E[X{]}=n\frac KN.
+\]
+期望与 Binomial($n,K/N$) 相同，因为期望线性性不需要独立。
+
+方差则不同。记 $p=K/N$，对 $i\ne j$ 有
+
+\[
+\operatorname{Cov}(I_i,I_j)
+=P(I_i=I_j=1)-p^2
+=\frac{K(K-1)}{N(N-1)}-p^2
+=-\frac{p(1-p)}{N-1},
+\]
+于是
+
+\[
+\operatorname{Var}(X)
+=\sum_i\operatorname{Var}(I_i)+\sum_{i\ne j}\operatorname{Cov}(I_i,I_j)
+=np(1-p)\left(1-\frac{n-1}{N-1}\right)
+=n\frac KN\left(1-\frac KN\right)\frac{N-n}{N-1}.
+\]
+最后的
+
+\[
+\frac{N-n}{N-1}
+\]
+称为有限总体修正。它小于等于一，反映不放回造成的负相关：抽到一个成功对象，会略微降低之后抽到成功的机会。
+
+当 $n=N$ 时，整个总体都被抽完，成功数必为 $K$，方差公式也变成零。
+
+\subsection{与 Binomial 的区别只在是否放回吗}
+
+若每次抽后放回并重新混匀，成功概率始终为 $K/N$，且各次独立，成功总数服从
+
+\[
+\mathrm{Binomial}\left(n,\frac KN\right).
+\]
+不放回则为 Hypergeometric。
+
+但``是否放回''只是最常见的机制表达。更根本的判断是：
+
+\begin{itemize}
+\tightlist
+\item
+  每次试验的成功概率是否保持不变？
+\item
+  给定总体组成后，各次结果是否独立？
+\end{itemize}
+
+若抽样有权重或会改变总体，可能两个标准分布都不合适。
+
+\subsection{什么时候 Binomial 近似足够好}
+
+当总体很大、抽样比例 $n/N$ 很小时，不放回对组成的改变很小，Hypergeometric 可近似为
+
+\[
+\mathrm{Binomial}\left(n,\frac KN\right).
+\]
+常见经验规则是抽样比例不超过 $5\%$ 或 $10\%$，但这不是数学定理式的统一阈值。所需精度、尾部概率和参数位置都会影响近似质量。
+
+判断近似时可先看有限总体修正：
+
+\[
+\frac{N-n}{N-1}\approx1
+\]
+是否成立。若抽走总体的一半，忽略该因子会明显高估方差。
+
+\subsection{一个质量抽检例子}
+
+一批 $100$ 个零件中恰有 $8$ 个次品，不放回抽检 $10$ 个。恰发现两个次品的概率为
+
+\[
+\frac{\binom82\binom{92}8}{\binom{100}{10}}.
+\]
+若只知道每个零件``次品概率约 $0.08$''而不知道总体次品数固定，可能使用 Binomial($10,0.08$)。两个模型对应不同现实假设：
+
+\begin{itemize}
+\tightlist
+\item
+  Hypergeometric：总体组成固定，只是不知道抽到哪些；
+\item
+  Binomial：每个对象像独立从某个生成机制产生。
+\end{itemize}
+
+数据表面相同，随机性的来源不同，分布就不同。
+
+\subsubsection{自己补完}
+
+某班 $30$ 人，其中 $12$ 人学过编程。随机不放回选 $5$ 人组成小组。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  小组中恰有两人学过编程的概率；
+\item
+  至少一人学过编程的概率；
+\item
+  求人数的期望和方差；
+\item
+  用 Binomial($5,0.4$) 近似时，哪一个量会被高估？为什么？
+\end{enumerate}

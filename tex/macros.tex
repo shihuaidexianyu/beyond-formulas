@@ -1,0 +1,56 @@
+% 全笔记统一数学宏
+% 设计原则：
+% 1. 用简短命令减少重复输入和排版差异；
+% 2. 所有宏使用 \providecommand，避免覆盖已有定义；
+% 3. 在可能产生歧义的地方保留显式写法（如 \mathbb{R}^d）。
+
+% ---- 常用数集 ----
+\providecommand{\R}{\mathbb{R}}
+\providecommand{\N}{\mathbb{N}}
+\providecommand{\Z}{\mathbb{Z}}
+\providecommand{\Q}{\mathbb{Q}}
+\providecommand{\C}{\mathbb{C}}
+
+% ---- 概率与期望 ----
+\providecommand{\E}{\mathbb{E}}
+\providecommand{\Prob}{\mathbb{P}}
+\providecommand{\Var}{\operatorname{Var}}
+\providecommand{\Cov}{\operatorname{Cov}}
+\providecommand{\Corr}{\operatorname{Corr}}
+\providecommand{\Bias}{\operatorname{Bias}}
+\providecommand{\SE}{\operatorname{SE}}
+\providecommand{\MSE}{\operatorname{MSE}}
+\providecommand{\ind}{\mathbf{1}}          % 指示函数
+
+% ---- 优化算子 ----
+\providecommand{\argmax}{\operatorname*{arg\,max}}
+\providecommand{\argmin}{\operatorname*{arg\,min}}
+
+% ---- 线性代数 ----
+\providecommand{\trans}{\mathsf{T}}        % 转置
+\providecommand{\conj}{\mathsf{H}}         % 共轭转置
+\providecommand{\trace}{\operatorname{tr}}
+\providecommand{\diag}{\operatorname{diag}}
+\providecommand{\rank}{\operatorname{rank}}
+\providecommand{\nullsp}{\operatorname{Null}}
+\providecommand{\rangesp}{\operatorname{Range}}
+
+% ---- 范数、绝对值、内积、集合 ----
+% 这些宏自动加 \left...\right，但在行内小公式中可能偏宽。
+% 如果追求紧凑，可以改用 \norm*、\abs*（需要 mathtools 的 \DeclarePairedDelimiter）。
+\providecommand{\norm}[1]{\left\lVert#1\right\rVert}
+\providecommand{\abs}[1]{\left|#1\right|}
+\providecommand{\ip}[2]{\left\langle#1,#2\right\rangle} % inner product
+\providecommand{\set}[1]{\left\{#1\right\}}
+\providecommand{\given}{\mid}
+
+% ---- 常用算子 ----
+\providecommand{\sign}{\operatorname{sign}}
+\providecommand{\relu}{\operatorname{ReLU}}
+\providecommand{\softmax}{\operatorname{softmax}}
+\providecommand{\logsumexp}{\operatorname{LSE}}
+\providecommand{\KL}{D_{\mathrm{KL}}}
+\providecommand{\TV}{\operatorname{TV}}
+
+% ---- 标注与强调 ----
+\providecommand{\eqdef}{\stackrel{\text{\tiny def}}{=}} % 按定义相等

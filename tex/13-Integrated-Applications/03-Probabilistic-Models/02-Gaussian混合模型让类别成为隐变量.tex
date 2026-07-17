@@ -1,0 +1,84 @@
+\section{Gaussian 混合模型让类别成为隐变量}
+
+生成式分类假设类别标签已知。现在把标签遮住，只保留一团可能由多个群体混合形成的数据。我们仍可想象每个样本先选择一个隐藏成分 \(Z_i\)，再由该成分生成观测：
+
+\[
+P(Z_i=k)=\pi_k,\qquad
+X_i\mid Z_i=k\sim\mathcal N(\mu_k,\Sigma_k).
+\]
+
+边缘密度为
+
+\[
+p(x_i)=\sum_{k=1}^K
+\pi_k\mathcal N(x_i\mid\mu_k,\Sigma_k).
+\]
+
+这就是 Gaussian mixture model。它可以表示多峰密度，也提供软聚类；但``成分''只是模型中的潜在解释，不会自动对应真实人群或因果类型。
+
+\subsection{软归属来自 Bayes 公式}
+
+给定参数后，样本 \(i\) 属于成分 \(k\) 的 posterior 为
+
+\[
+\gamma_{ik}
+=P(Z_i=k\mid x_i)
+=\frac{
+\pi_k\mathcal N(x_i\mid\mu_k,\Sigma_k)
+}{
+\sum_j\pi_j\mathcal N(x_i\mid\mu_j,\Sigma_j)
+}.
+\]
+
+\(\gamma_{ik}\) 称为 responsibility。它不像 k-means 那样把边界附近样本强行交给一个簇，而是保留不确定性。若两个成分重叠，一个样本同时对二者有较高责任是模型的合理表达，不是算法尚未完成。
+
+这里出现了学习上的障碍。若 \(Z_i\) 已知，混合权重、均值和 covariance 都可由分组统计量估计；若参数已知，responsibility 又可直接由 Bayes 公式计算。可现在两者都未知，观测 log-likelihood
+
+\[
+\ell(\theta)
+=\sum_i\log
+\left[
+\sum_k\pi_k
+\mathcal N(x_i\mid\mu_k,\Sigma_k)
+\right]
+\]
+
+包含``对数里的求和''，无法像有标签时那样按成分分解。下一节的 EM 正是利用``两边各自容易''的结构交替求解。
+
+\subsection{可识别性与退化不能由聚类图消除}
+
+把所有成分标签同时置换，混合密度完全不变。因此第 1 类、第 2 类没有天然顺序；两次拟合得到的标签需要按参数或匹配关系对齐。若两个成分参数相同，连成分数也无法从分布中区分。
+
+更危险的是，无约束 Gaussian mixture 的 likelihood 可能无界。把某个成分均值放到一个样本点上，并令它的 covariance 逐渐塌缩：
+
+\[
+|\Sigma_k|\to0.
+\]
+
+该样本处 Gaussian 峰值与 \(|\Sigma_k|^{-1/2}\) 成正比，会趋向无穷；其余成分仍可解释其他样本。于是``训练 likelihood 越大越好''会把模型引向退化解，而不是更有意义的密度。
+
+实践中需要 covariance floor、共享或对角 covariance、正则化或先验。多个随机初值也不可省略，因为 likelihood 非凸，局部最优与鞍点普遍存在。
+
+\subsection{成分数不是从训练拟合中白拿的}
+
+增加 \(K\) 通常不会降低最大训练 likelihood，但会增加自由度并可能制造细碎成分。可以结合 held-out log-likelihood、BIC、领域可解释性与重复抽样稳定性选择 \(K\)。这些标准回答的问题不同：预测密度最好、压缩描述最好和分群最稳定不一定选择同一个数。
+
+评估时还应检查：
+
+\begin{itemize}
+\tightlist
+\item
+  权重是否接近零；
+\item
+  covariance 的最小特征值是否塌缩；
+\item
+  多个初值是否得到相近密度，而不仅是相同标签编号；
+\item
+  合成数据上能否在允许标签置换后恢复参数；
+\item
+  真实数据是否呈明显非椭圆、重尾或离群结构。
+\end{itemize}
+
+\subsubsection{刻意触发一次失败}
+
+对二维数据拟合两个 Gaussian 成分，并逐渐减小 covariance 下界。加入一个远离主体的孤立点，观察最优 likelihood、最小特征值和该点 responsibility 的变化。然后增加随机初值，比较``最高训练 likelihood''与``最佳验证 likelihood''是否总是同一个解。这个实验应让你看见：优化成功与模型合理是两回事。

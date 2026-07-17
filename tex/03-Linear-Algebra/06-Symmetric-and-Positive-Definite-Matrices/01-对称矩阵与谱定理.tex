@@ -1,0 +1,193 @@
+\section{对称矩阵与谱定理：什么时候特征方向一定正交}
+
+一般可对角化矩阵写成
+
+\[
+A=S\Lambda S^{-1},
+\]
+
+但 \(S\) 的列可能非常不正交，甚至实矩阵也可能只有复特征值。若用这样的特征坐标处理扰动，坐标变换本身可能放大误差。
+
+实对称矩阵满足
+
+\[
+A^{\mathsf T}=A.
+\]
+
+这个看似简单的条件把输入与输出之间的配对变成对称关系：
+
+\[
+x^{\mathsf T}Ay=(Ax)^{\mathsf T}y.
+\]
+
+正是这一关系迫使特征值为实数，并让不同特征值的特征向量彼此正交。
+
+\subsection{不同特征方向为什么正交}
+
+设
+
+\[
+Av_i=\lambda_i v_i,
+\qquad
+Av_j=\lambda_j v_j.
+\]
+
+利用对称性，
+
+\[
+v_i^{\mathsf T}Av_j
+=(Av_i)^{\mathsf T}v_j.
+\]
+
+左右分别等于
+
+\[
+\lambda_jv_i^{\mathsf T}v_j
+\quad\text{和}\quad
+\lambda_iv_i^{\mathsf T}v_j.
+\]
+
+因此
+
+\[
+(\lambda_j-\lambda_i)v_i^{\mathsf T}v_j=0.
+\]
+
+若 \(\lambda_i\ne\lambda_j\)，只能有
+
+\[
+v_i^{\mathsf T}v_j=0.
+\]
+
+对重复特征值，对应特征空间内部可以使用 Gram--Schmidt 选择正交归一基（为什么这不会离开特征空间，后文有专门验证）。于是全部特征向量都能组织成一组正交归一基。
+
+\subsection{为什么特征值不会跑到复平面}
+
+即使允许复特征向量 \(v\)，实对称矩阵仍满足
+
+\[
+Av=\lambda v.
+\]
+
+用 \(v\) 的共轭转置 \(v^*\) 左乘：
+
+\[
+v^*Av=\lambda v^*v.
+\]
+
+对称实矩阵也是 Hermitian 矩阵，所以标量 \(v^*Av\) 等于它自己的共轭转置，必为实数，而 \(v^*v>0\)，于是
+
+\[
+\lambda=\frac{v^*Av}{v^*v}\in\R.
+\]
+
+因此，实对称矩阵不需要借助复数才能找到全部特征方向。
+
+\subsection{谱定理}
+
+实对称矩阵 \(A\) 总能写成
+
+\[
+A=Q\Lambda Q^{\mathsf T},
+\]
+
+其中 \(Q\) 的列是一组正交归一特征向量，
+
+\[
+Q^{\mathsf T}Q=QQ^{\mathsf T}=I,
+\]
+
+\(\Lambda\) 是实对角矩阵。
+
+这比普通对角化更强：
+
+\begin{itemize}
+\tightlist
+\item
+  一定存在完整特征基；
+\item
+  特征基可选为正交归一；
+\item
+  逆矩阵 \(Q^{-1}\) 只是转置 \(Q^{\mathsf T}\)；
+\item
+  坐标变换保持长度和夹角。
+\end{itemize}
+
+因此，实对称矩阵不会出现 Jordan 块，也不会因特征向量几乎平行而产生病态的特征基。
+
+\subsection{一个熟悉矩阵的谱分解}
+
+取
+
+\[
+A=\begin{pmatrix}2&1\\1&2\end{pmatrix}.
+\]
+
+正交归一特征向量为
+
+\[
+q_1=\frac1{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix},
+\qquad
+q_2=\frac1{\sqrt2}\begin{pmatrix}1\\-1\end{pmatrix},
+\]
+
+对应特征值为 \(3\) 和 \(1\)。所以
+
+\[
+Q=\frac1{\sqrt2}
+\begin{pmatrix}1&1\\1&-1\end{pmatrix},
+\qquad
+\Lambda=\begin{pmatrix}3&0\\0&1\end{pmatrix},
+\]
+
+并且
+
+\[
+A=Q\Lambda Q^{\mathsf T}.
+\]
+
+几何上，先用 \(Q^{\mathsf T}\) 把向量旋转到两条特征轴上，沿第一轴放大 \(3\) 倍、第二轴保持不变，再用 \(Q\) 旋转回原坐标。
+
+\subsection{按方向拆成秩一作用}
+
+把矩阵乘法按列展开，谱分解还可以写成
+
+\[
+A=\sum_{i=1}^n\lambda_iq_iq_i^{\mathsf T}.
+\]
+
+\(q_iq_i^{\mathsf T}\) 是投影到第 \(i\) 个特征方向的矩阵。\(A\) 所做的事情可以逐方向描述：先取出 \(x\) 在 \(q_i\) 上的分量，再乘以 \(\lambda_i\)，最后把各方向结果相加。
+
+这使矩阵函数也容易理解：
+
+\[
+f(A)=Qf(\Lambda)Q^{\mathsf T}
+=\sum_i f(\lambda_i)q_iq_i^{\mathsf T}.
+\]
+
+平方根、指数、逆和伪逆都可以通过对特征值逐项作用来定义，只需注意函数在相应特征值处是否有意义。
+
+\subsection{相同特征值不破坏正交化}
+
+若某个特征值重复，特征空间可能有多个维度。在同一特征空间内，任意线性组合仍属于同一特征值：
+
+\[
+A(\alpha u+\beta v)
+=\lambda(\alpha u+\beta v).
+\]
+
+因此可以在这个特征空间内部进行 Gram--Schmidt，而不会离开特征空间。对称矩阵总能得到完整正交基，重复特征值不会制造缺陷。
+
+\subsection{谱定理在数据中的含义}
+
+协方差矩阵是对称半正定矩阵（其半正定性将在下一节证明）。其特征向量给出数据变化互相正交的主方向，特征值给出对应方向的方差。PCA 正是按照特征值从大到小选择这些方向。
+
+图 Laplacian、核矩阵、Hessian 和许多能量算子也具有对称结构。谱分解把复杂耦合系统拆成彼此正交的模式，使每个模式可以独立分析。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06：Symmetric Matrices and Positive Definiteness
+\end{itemize}

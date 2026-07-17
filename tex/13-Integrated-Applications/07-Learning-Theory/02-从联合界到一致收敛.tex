@@ -1,0 +1,78 @@
+\section{从联合界到一致收敛}
+
+上一节末尾给出两条修复路线。本节走第二条：不分离数据，而是要求界对假设类中的每一个假设同时成立——无论 ERM 选出谁，它都落在界内。这条路在 \(\mathcal{H}\) 有限时畅通，并且精确地告诉我们代价是什么；它也会在一个几乎所有现实模型都会踩中的地方断裂。
+
+\subsection{Union bound 换来一致成立的界}
+
+0-1 损失下，对每个固定的 \(h\in\mathcal{H}\)，Hoeffding 不等式控制坏事件
+
+\[
+A_h=\bigl\{\abs{\widehat R(h)-R(h)}>\varepsilon\bigr\},
+\qquad
+\Prob(A_h)\le 2e^{-2n\varepsilon^2}.
+\]
+
+单个假设的安全不能保护 ERM——ERM 选中的恰恰是 \(\widehat R\) 最小、最可能``走运''的那个。但只要 \(\mathcal{H}\) 有限，union bound 可以把全部坏事件一次买断：
+
+\[
+\Prob\Bigl(\bigcup_{h\in\mathcal{H}}A_h\Bigr)
+\le\sum_{h\in\mathcal{H}}\Prob(A_h)
+\le 2\abs{\mathcal{H}}\,e^{-2n\varepsilon^2}.
+\]
+
+令右端等于 \(\delta\) 并解出 \(\varepsilon\)：以至少 \(1-\delta\) 的概率，
+
+\[
+\abs{\widehat R(h)-R(h)}
+\le\sqrt{\frac{\log\bigl(2\abs{\mathcal{H}}/\delta\bigr)}{2n}}
+\quad\text{对所有 }h\in\mathcal{H}\text{ 同时成立}.
+\]
+
+``同时''是关键。这不是对某一个 \(h\) 的陈述，而是说 \(\widehat R\) 作为函数在整个类上一致逼近 \(R\)——一致收敛（uniform convergence）。ERM 选中谁都无所谓，因为界对每个候选都成立。
+
+代价出现在根号里：\(\log\abs{\mathcal{H}}\)。假设类翻倍一次，\(\log\abs{\mathcal{H}}\) 只增加 \(\log 2\)，这是好消息；但若类的大小随某个``开关数'' \(k\) 指数增长——\(k\) 个二元决策给出 \(\abs{\mathcal{H}}=2^k\)——界宽约以 \(\sqrt{k/n}\) 变松。每一个可自由拨动的开关，都要花样本预算去买。
+
+\subsection{一致收敛保证 ERM 安全}
+
+一致界一旦成立，上一节的断裂就被修复。记
+
+\[
+\widehat h\in\argmin_{h\in\mathcal{H}}\widehat R(h),
+\qquad
+h^*\in\argmin_{h\in\mathcal{H}}R(h).
+\]
+
+在``好事件''（界对所有 \(h\) 成立）上，用 \(2\varepsilon\) 的代价把 \(\widehat h\) 与 \(h^*\) 接通：
+
+\[
+R\bigl(\widehat h\bigr)
+\le\widehat R\bigl(\widehat h\bigr)+\varepsilon
+\le\widehat R(h^*)+\varepsilon
+\le R(h^*)+2\varepsilon.
+\]
+
+第一、三处不等号来自一致界，分别用在 \(\widehat h\) 和 \(h^*\) 上；中间一处来自 ERM 的定义：\(\widehat h\) 在经验风险下不输任何假设，包括 \(h^*\)。于是超出风险（excess risk）满足
+
+\[
+R\bigl(\widehat h\bigr)-R(h^*)
+\le 2\sqrt{\frac{\log\bigl(2\abs{\mathcal{H}}/\delta\bigr)}{2n}}
+=\sqrt{\frac{2\log\bigl(2\abs{\mathcal{H}}/\delta\bigr)}{n}}.
+\]
+
+反过来解样本量：要以至少 \(1-\delta\) 的概率把超出风险压到 \(\varepsilon_0\) 以内，只需
+
+\[
+n\ge\frac{2\log\bigl(2\abs{\mathcal{H}}/\delta\bigr)}{\varepsilon_0^2}.
+\]
+
+注意依赖结构：对精度是 \(1/\varepsilon_0^2\)，对置信度是 \(\log(1/\delta)\)，对类大小是 \(\log\abs{\mathcal{H}}\)——两个对数都很便宜。用 PAC（probably approximately correct）的语言说：有限假设类在 agnostic 意义下可学，且样本量对数依赖于类的大小。这是统计学习理论给出的第一个正面答案。
+
+这个答案只控制了估计误差。若 \(R(h^*)\) 本身离问题的最优风险很远，扩大 \(\mathcal{H}\) 可以减小逼近误差，却会增大 \(\log\abs{\mathcal{H}}\) 这一项——偏差与估计误差的权衡已经写在这条不等式里，本单元最后一篇会回到它。
+
+\subsection{基数的破产}
+
+现在把上面的结果用到任何一个现实模型上，会立刻撞墙。\(\R\) 上的阈值分类器 \(h_t(x)=\sign(x-t)\)：阈值 \(t\) 取遍连续统，\(\abs{\mathcal{H}}\) 已是无限；\(\R^d\) 中的线性分类器 \(h_{w,b}(x)=\sign(w^Tx+b)\) 亦然。对无限的 \(\mathcal{H}\)，union bound 给出``不超过无穷大''的概率——什么也没有说。而``最大间隔与支持向量机''中那些表现良好的模型，恰恰都属于这种无限类。
+
+一个常见的退路是离散化：计算机里每个参数都是 64 位浮点，\(d\) 个参数的类其实有限，\(\log\abs{\mathcal{H}}\) 大约是 \(64d\) 量级。代入样本量公式确实给出一个有限的界，但这个答案显然在错的地方花了预算：同一个函数类，改用 32 位浮点``枚举''就便宜一倍，改用 128 位就贵一倍——函数集合的表达能力和存储精度毫无关系。基数是错的计量单位。
+
+正确的计量单位要到数据上找：无论 \(\mathcal{H}\) 中有多少个函数，它们在 \(n\) 个数据点上最多只能产生 \(2^n\) 种不同的标记方式；两个相差 \(10^{-9}\) 的权重向量在所有现实数据上行为一致，却被基数按两个假设计费。下一节把``在有限数据上能产生多少种行为''变成定义，并用它替换 \(\log\abs{\mathcal{H}}\)。

@@ -1,0 +1,141 @@
+\section{随机过程、时间指标与样本路径}
+
+设传感器每秒记录一次温度。单独看第十秒的读数 $X_{10}$，它只是一个随机变量；把所有时刻放在一起，
+
+\[
+X_0,X_1,X_2,\ldots
+\]
+就得到一个随机过程。它不仅要描述每个时刻可能取什么值，还要描述不同时刻怎样相关。
+
+\subsection{一个对象，两种固定方式}
+
+随机过程可以写成二维函数
+
+\[
+X:T\times\Omega\to S,
+\qquad X(t,\omega)=X_t(\omega).
+\]
+\begin{itemize}
+\tightlist
+\item
+  固定 $t$，$\omega\mapsto X_t(\omega)$ 是随机变量；
+\item
+  固定 $\omega$，$t\mapsto X_t(\omega)$ 是一条样本路径或轨迹。
+\end{itemize}
+
+这两个视角不能混淆。概率分布是对大量可能路径的总体描述；现实中一次实验通常只观察到其中一条路径。
+
+例如连续抛硬币，令
+
+\[
+X_n=\text{前 }n\text{ 次正面总数}.
+\]
+固定 $n$，$X_n$ 服从 Binomial$(n,p)$（$p$ 为单次正面概率）；固定一串抛掷结果，$n\mapsto X_n$ 是一条从零开始、每步增加零或一的阶梯路径。
+
+\subsection{时间指标与状态空间形成四种基本类型}
+
+时间集合 $T$ 可以离散或连续，状态空间 $S$ 也可以离散或连续：
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}{@{}lll@{}}
+\toprule\noalign{}
+时间 & 状态 & 例子 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+离散 & 离散 & 每天队列人数、离散时间 Markov 链 \\
+离散 & 连续 & 每小时温度、时间序列 \\
+连续 & 离散 & Poisson 计数、连续时间 Markov 链 \\
+连续 & 连续 & Brownian motion、连续噪声波形 \\
+\end{longtable}
+}
+
+``连续时间''不表示路径一定连续。Poisson 过程在连续时间上定义，路径却是跳跃阶梯；``连续状态''也不表示时间连续。
+
+选择时间尺度会改变模型。把每秒事件数聚合成每小时计数，可能隐藏短时依赖；把连续变化采样得太稀，又可能产生混叠。
+
+\subsection{状态应包含预测未来所需的信息}
+
+同一个现实系统可用不同状态表示。排队系统若只记录``队伍是否为空''，模型很简单，却无法准确预测下一次离开后的人数；记录``当前顾客数''则保留更多信息。
+
+在 Markov 建模中，状态尤其不是随意标签。若未来仍依赖未被状态包含的历史，所选状态就不具 Markov 性。常见修复是扩充状态，例如同时记录当前位置和速度、队列长度和服务阶段。
+
+\subsection{路径性质与单点分布是不同信息}
+
+两个过程可以在每个固定时刻拥有相同边缘分布，路径却完全不同。
+
+设 $Z\sim\mathcal N(0,1)$：
+
+\begin{itemize}
+\tightlist
+\item
+  过程 A：$X_t=Z$ 对所有 $t$，整条路径是随机水平线；
+\item
+  过程 B：每个整数时刻 $Y_t$ 独立服从 $\mathcal N(0,1)$，路径在时刻间无关联。
+\end{itemize}
+
+对每个固定 $t$（记号 $\overset d=$ 表示等号两边同分布），
+
+\[
+X_t\overset d=Y_t\sim\mathcal N(0,1),
+\]
+但知道 $X_0$ 就完全知道所有 $X_t$，而知道 $Y_0$ 不透露 $Y_1$。所以不能用一系列边缘分布代替过程的联合结构。
+
+路径还可能关心：
+
+\begin{itemize}
+\tightlist
+\item
+  是否连续或右连续；
+\item
+  是否只有有限次跳跃；
+\item
+  是否单调；
+\item
+  是否在有限时间爆炸；
+\item
+  是否具有有限变差。
+\end{itemize}
+
+这些性质决定积分、微分、停时和模拟方法能否使用。
+
+\subsection{过程模型的第一张清单}
+
+描述一个随机过程时，至少明确：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  时间指标 $T$；
+\item
+  状态空间 $S$；
+\item
+  初始分布；
+\item
+  不同时刻的联合依赖规则；
+\item
+  路径正则性；
+\item
+  参数是否随时间变化。
+\end{enumerate}
+
+下一节会解释``联合依赖规则''如何由有限个时刻的联合分布表达。
+
+\subsubsection{自己补完}
+
+对下列三个系统，分别说明时间指标、状态空间和一条样本路径的大致形状：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  每天收盘价；
+\item
+  医院从现在起的累计到诊人数；
+\item
+  机器在``正常、降级、故障''三状态间连续时间切换。
+\end{enumerate}
+
+再说明每个系统若改变采样时间尺度，可能丢失什么信息。

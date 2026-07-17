@@ -1,0 +1,182 @@
+\section{Uniform、Beta 与 Dirichlet 分布}
+
+这三个分布都生活在有边界的空间中：
+
+\begin{itemize}
+\tightlist
+\item
+  Uniform 把一个区间或区域内的几何位置视为同等密集；
+\item
+  Beta 在 $[0,1]$ 上提供丰富形状，常表示未知概率；
+\item
+  Dirichlet 把 Beta 推广到多个非负比例之和为一的单纯形。
+\end{itemize}
+
+它们的共同主题不是公式相似，而是怎样在受约束空间上分配概率。
+
+\subsection{Uniform：相对于什么``均匀''}
+
+若 $X\sim\mathrm{Unif}(a,b)$，密度为
+
+\[
+f_X(x)=
+\begin{cases}
+\dfrac1{b-a},&a\le x\le b,\\
+0,&\text{其他}.
+\end{cases}
+\]
+因此子区间概率只由长度决定：
+
+\[
+P(c\le X\le d)=\frac{d-c}{b-a}.
+\]
+均值与方差为
+
+\[
+\E[X]=\frac{a+b}{2},\qquad
+\operatorname{Var}(X)=\frac{(b-a)^2}{12}.
+\]
+但``均匀''依赖坐标和基准测度。$X$ 在 $[1,10]$ 上均匀时，$\log X$ 并不均匀；反过来也一样。说``参数完全未知，所以取均匀先验''时，必须说明在哪个参数化下均匀。
+
+\subsection{Beta：在零与一之间表达不同信念}
+
+$\operatorname{Beta}(\alpha,\beta)$ 分布密度为
+
+\[
+f(p)
+=\frac1{B(\alpha,\beta)}
+p^{\alpha-1}(1-p)^{\beta-1},
+\qquad0<p<1,
+\]
+其中
+
+\[
+B(\alpha,\beta)
+=\frac{\Gamma(\alpha)\Gamma(\beta)}
+{\Gamma(\alpha+\beta)}.
+\]
+参数 $\alpha,\beta>0$ 控制两端权重：
+
+\begin{itemize}
+\tightlist
+\item
+  $\alpha=\beta=1$：$\mathrm{Unif}(0,1)$；
+\item
+  $\alpha,\beta>1$：质量多在内部；
+\item
+  $\alpha<1$ 时靠近 $0$ 密度可能发散；
+\item
+  $\beta<1$ 时靠近 $1$ 密度可能发散；
+\item
+  $\alpha>\beta$ 时通常更偏向较大 $p$。
+\end{itemize}
+
+均值与方差为
+
+\[
+\E[P]=\frac{\alpha}{\alpha+\beta},
+\]
+\[
+\operatorname{Var}(P)
+=\frac{\alpha\beta}
+{(\alpha+\beta)^2(\alpha+\beta+1)}.
+\]
+比例 $\alpha/(\alpha+\beta)$ 决定中心，总浓度 $\alpha+\beta$ 决定分布围绕中心有多集中。
+
+\subsection{为什么 Beta 与 Bernoulli 自然配对}
+
+设未知成功概率 $p$ 的先验为 $\operatorname{Beta}(\alpha,\beta)$。观察到 $s$ 次成功、$f$ 次失败后，Bernoulli/Binomial 似然中与 $p$ 有关的部分为
+
+\[
+p^s(1-p)^f.
+\]
+乘上先验：
+
+\[
+p^{\alpha-1}(1-p)^{\beta-1}
+\cdot p^s(1-p)^f
+=p^{\alpha+s-1}(1-p)^{\beta+f-1}.
+\]
+所以后验仍为
+
+\[
+\mathrm{Beta}(\alpha+s,\beta+f).
+\]
+这叫共轭。可以把 $\alpha,\beta$ 粗略理解为成功与失败的伪计数，但当参数不为整数时，这只是帮助直觉的说法，不是实际观察次数。
+
+后验预测下一次成功概率是
+
+\[
+\E[p\mid\text{数据}{]}
+=\frac{\alpha+s}{\alpha+\beta+s+f}.
+\]
+它在先验均值与样本成功率之间平滑，而不是对小样本直接使用极端频率。
+
+\subsection{Dirichlet：多个类别概率}
+
+若有 $K$ 个类别概率
+
+\[
+p_1,\ldots,p_K\ge0,\qquad
+\sum_{i=1}^{K}p_i=1,
+\]
+向量 $p$ 位于 $(K-1)$ 维单纯形。Dirichlet($\alpha_1,\ldots,\alpha_K$) 密度与
+
+\[
+\prod_{i=1}^{K}p_i^{\alpha_i-1}
+\]
+成正比。
+
+其均值为
+
+\[
+\E[p_i{]}=\frac{\alpha_i}{\alpha_0},
+\qquad
+\alpha_0=\sum_j\alpha_j.
+\]
+$\alpha_i/\alpha_0$ 决定中心比例，$\alpha_0$ 决定集中程度。由于分量和固定为一，一个分量增大必迫使其他分量总和减小，所以分量之间不独立；事实上 $i\ne j$ 时
+
+\[
+\operatorname{Cov}(p_i,p_j)
+=-\frac{\alpha_i\alpha_j}{\alpha_0^2(\alpha_0+1)}<0,
+\]
+确为负相关。
+
+对 Multinomial 类别计数 $n_1,\ldots,n_K$，Dirichlet 先验更新为
+
+\[
+\mathrm{Dirichlet}
+(\alpha_1+n_1,\ldots,\alpha_K+n_K).
+\]
+$K=2$ 时，令 $p_2=1-p_1$，Dirichlet 就退化为 Beta。
+
+\subsection{从独立 Gamma 归一化得到 Dirichlet}
+
+若
+
+\[
+G_i\sim\mathrm{Gamma}(\alpha_i,1)
+\]
+相互独立，并令
+
+\[
+P_i=\frac{G_i}{\sum_jG_j},
+\]
+则 $P=(P_1,\ldots,P_K)$ 服从 Dirichlet 分布。这个构造既给出模拟方法，也解释了为何 Dirichlet 参数像``正质量''经过归一化后的浓度。
+
+\subsubsection{自己补完}
+
+某转化率 $p$ 的先验为 Beta($2,3$)。观察到十次访问中四次转化。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  写出后验分布；
+\item
+  求先验均值与后验均值；
+\item
+  与样本转化率 $0.4$ 比较；
+\item
+  若把成功和失败标签互换，Beta 参数应怎样交换？
+\end{enumerate}

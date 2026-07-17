@@ -1,0 +1,131 @@
+\section{Fokker--Planck 方程描述密度的流动}
+
+上一节追的是单条路径：连续、处处不可微、细节不可预测。本节换一个视角——不追一条路径，追一大群独立路径在每个位置形成的密度 $p(x,t)$。单条路径粗糙，密度却光滑地演化：随机性在群体层面变成确定规律。这与离散 Markov 链中``路径随机，而 $\mu_n=\mu_0P^n$ 确定''是同一个思想。
+
+\subsection{局部增量的形状}
+
+先形式地写下噪声驱动的演化
+
+\[
+dX_t=\mu(X_t)\,dt+\sigma(X_t)\,dW_t,
+\]
+
+其严格含义由下一节补完，本节只需要它的局部读法：从位置 $x$ 出发，经过小时间 $\Delta t$，
+
+\[
+\Delta X\approx\mu(x)\,\Delta t+\sigma(x)\sqrt{\Delta t}\,Z,
+\qquad Z\sim\mathcal N(0,1).
+\]
+
+即短时间内位置近似 Gaussian：均值被 $\mu$ 以 $O(\Delta t)$ 搬动，散布被 $\sigma$ 以 $O(\sqrt{\Delta t})$ 摊开。$\mu$ 称为漂移系数，$\sigma$ 称为扩散系数。这正是上一节缩放极限中``单步''的一般化：方向可以有倾向，步子大小可以随位置变化。
+
+\subsection{质量守恒给出连续性方程}
+
+概率质量不生不灭：某点密度的变化只能来自净流入。记 $J(x,t)$ 为概率通量，即单位时间净通过 $x$ 向右的概率质量，则
+
+\[
+\frac{\partial p}{\partial t}=-\frac{\partial J}{\partial x}.
+\]
+
+这是一维连续性方程，与流体力学中的质量守恒同形。问题只剩一个：通量 $J$ 由什么组成。
+
+\subsection{通量来自漂移搬运与扩散摊平}
+
+漂移让所有粒子以速度 $\mu(x)$ 平移，像河水载着染料，搬运的是密度本身：
+
+\[
+J_{\mathrm{drift}}=\mu(x)\,p.
+\]
+
+扩散让粒子对称地向四周乱动。单个粒子没有偏好，群体却有净效果：高密度一侧向外走出的粒子多于低密度一侧走进来的，净迁移与密度梯度反向，大小正比于局部散布强度（Fick 定律的直觉）。当 $\sigma$ 为常数时，
+
+\[
+J_{\mathrm{diff}}=-\frac{\sigma^2}{2}\frac{\partial p}{\partial x}.
+\]
+
+当 $\sigma$ 随位置变化，局部散布强度本身也在变，通量应写成 $-\frac12\frac{\partial}{\partial x}\big(\sigma(x)^2p\big)$；这一形式的严格来源要用下一节的工具，本节先取物理直觉。
+
+合并两项并代入连续性方程，得到 Fokker--Planck 方程
+
+\[
+\boxed{\;\frac{\partial p}{\partial t}
+=-\frac{\partial}{\partial x}\big(\mu(x)\,p\big)
++\frac12\frac{\partial^2}{\partial x^2}\big(\sigma(x)^2p\big)\;}
+\]
+
+给定初始密度 $p(x,0)$（确定性起点对应集中于一点的点质量），它决定密度的全部演化。它也称为 Kolmogorov 前向方程。
+
+\subsection{与离散链前向方程的平行}
+
+在``Kolmogorov 方程与矩阵指数''中，行分布满足主方程 $\mu'(t)=\mu(t)Q$，分量形式
+
+\[
+\frac{d}{dt}\mu_j(t)=\sum_k\mu_k(t)q_{kj}
+\]
+
+固定终点 $j$，按``从哪里跳进来''汇总流入。Fokker--Planck 方程是同一种前向视角：固定位置 $x$，问密度怎样被周围的漂移与扩散送进来。逐项对照如下：
+
+\begin{longtable}{@{}lll@{}}
+\toprule\noalign{}
+ & 离散状态（CTMC） & 连续状态（扩散） \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+演化对象 & 行向量 $\mu(t)$ & 密度函数 $p(\cdot,t)$ \\
+局部规则 & 速率矩阵 $Q$ & 漂移 $\mu(x)$、扩散 $\sigma(x)$ \\
+前向方程 & $\mu'(t)=\mu(t)Q$ & 上面的偏微分方程 \\
+闭式解 & $\mu(0)e^{tQ}$ & 一般没有，靠数值解 \\
+\end{longtable}
+
+求和换成了微分，矩阵指数 $e^{tQ}$ 的位置被微分算子的演化取代——状态连续时矩阵让位给微分方程，这正是本单元离开 Markov 链后面对的第一个代价：能写下方程，不等于能解出方程。
+
+\subsection{纯扩散回到热方程}
+
+取 $\mu=0$、$\sigma$ 为常数，方程化为热方程
+
+\[
+\frac{\partial p}{\partial t}=\frac{\sigma^2}{2}\frac{\partial^2p}{\partial x^2}.
+\]
+
+从原点处的点质量出发，其解是 Gaussian 热核
+
+\[
+p(x,t)=\frac{1}{\sqrt{2\pi\sigma^2t}}
+\exp\!\left(-\frac{x^2}{2\sigma^2t}\right),
+\]
+
+即 $\mathcal N(0,\sigma^2t)$ 的密度——恰是上一节布朗运动（强度 $\sigma$）在时刻 $t$ 的边缘分布。路径极限与偏微分方程描述同一个对象：前者看单条轨迹，后者看群体密度。方差 $\sigma^2t$ 随时间线性增长，密度被无限摊平，所以纯扩散在整条直线上没有平稳分布：摊平一旦没有约束，质量就散布到无穷远。
+
+\subsection{Ornstein--Uhlenbeck 过程：均值回归约束摊平}
+
+加入指向原点的线性漂移
+
+\[
+dX_t=-\theta X_t\,dt+\sigma\,dW_t,
+\qquad \theta>0,
+\]
+
+称为 Ornstein--Uhlenbeck（OU）过程：$\abs{X_t}$ 越大，往回拉的力越强，像弹簧。求平稳密度时令 $\partial p/\partial t=0$，并取``通量为零''的自然边界（概率不持续流向无穷远）：
+
+\[
+J=-\theta x\,p-\frac{\sigma^2}{2}\frac{dp}{dx}=0
+\;\Longrightarrow\;
+\frac{1}{p}\frac{dp}{dx}=-\frac{2\theta}{\sigma^2}x,
+\]
+
+积分得
+
+\[
+p(x)\propto\exp\!\left(-\frac{\theta}{\sigma^2}x^2\right),
+\qquad\text{即}\qquad
+\mathcal N\!\left(0,\frac{\sigma^2}{2\theta}\right).
+\]
+
+直觉很清楚：扩散不断把密度摊平，均值回归不断把粒子拉回中心，两种力量平衡出有限宽度的 Gaussian。纯扩散的摊平无约束，因而不存在平稳分布；哪怕很弱的线性回复（$\theta$ 很小）也足以约束出平稳形态，只是宽度 $\sigma^2/(2\theta)$ 很大。``扩散加回复''是制造可控平稳分布的基本机制——``数值模拟与时间反演的直觉''一节会看到，扩散生成模型正是靠 OU 式加噪把任意数据分布洗成已知的 Gaussian。
+
+\subsection{边界}
+
+Fokker--Planck 方程假设过程真是连续扩散：路径没有跳跃。有跳跃时（重尾冲击、突发事件）右端要加积分项，超出本单元范围。此外，系数 $\mu,\sigma$ 太坏（不光滑、增长过快）时演化可能不存在，或在有限时间爆炸；下一节会给出解存在唯一的常用条件。
+
+密度视角能回答``分布怎样演化''，但首次到达、路径泛函等问题仍需路径视角；而且 $dX=\mu\,dt+\sigma\,dW$ 至今只是形式记号。下一节给它严格含义。

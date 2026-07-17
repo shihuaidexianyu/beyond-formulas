@@ -1,0 +1,186 @@
+\section{Score 与 Fisher 信息衡量局部可辨认性}
+
+如果参数稍微改变，数据分布几乎不变，就很难从有限样本区分这两个参数；如果似然对参数变化非常敏感，估计可以更精确。Fisher 信息把这种局部可辨认性写成 log-likelihood 斜率的波动。
+
+对单个观测 \(X\sim p_\theta\)，score 定义为
+
+\[
+U_\theta(X) = \frac{\partial}{\partial\theta}
+\log p_\theta(X).
+\]
+
+（记号提醒：上一节 Rao--Blackwell 化中 \(U(X)\) 表示任意估计量；本节起 \(U_\theta\) 专指 score。）
+
+Fisher 信息定义为
+
+\[
+I(\theta) = \mathbb E_\theta[U_\theta(X)^2]
+\]
+在标量参数下；向量参数则为
+
+\[
+I(\theta) = \mathbb E_\theta
+\bigl[
+U_\theta(X)U_\theta(X)^T
+\bigr].
+\]
+\subsection{为什么 score 的期望通常为零}
+
+在可以交换求导与积分、且支持集不随参数变化等正则条件下，
+
+\[
+\begin{aligned}
+\mathbb E_\theta[U_\theta(X)]
+&=
+\int
+\frac{\partial}{\partial\theta}
+\log p_\theta(x)\,
+p_\theta(x)\,dx\\
+&=
+\int
+\frac{\partial}{\partial\theta}
+p_\theta(x)\,dx\\
+&=
+\frac{\partial}{\partial\theta}1
+=0.
+\end{aligned}
+\]
+
+因此 Fisher 信息也是 score 的方差：\(\operatorname{Var}(U_\theta)=\mathbb E_\theta[U_\theta^2]-(\mathbb E_\theta[U_\theta])^2\)，第二项恰为零。
+
+对 \(\mathbb E_\theta[U_\theta(X)]=0\) 再求一次导，仍交换求导与积分：
+
+\[
+\begin{aligned}
+0
+&=
+\frac{\partial}{\partial\theta}
+\int
+\frac{\partial}{\partial\theta}\log p_\theta(x)\,
+p_\theta(x)\,dx\\
+&=
+\int
+\left[
+\frac{\partial^2}{\partial\theta^2}\log p_\theta(x)
++
+\left(\frac{\partial}{\partial\theta}\log p_\theta(x)\right)^2
+\right]
+p_\theta(x)\,dx,
+\end{aligned}
+\]
+
+其中第二项用了 \(\frac{\partial}{\partial\theta}p_\theta(x)=U_\theta(x)\,p_\theta(x)\)。移项得到另一种常用形式：
+
+\[
+I(\theta) = -\mathbb E_\theta
+\left[
+\frac{\partial^2}{\partial\theta^2}
+\log p_\theta(X)
+\right].
+\]
+第一种是随机斜率平方的期望，第二种是 log-likelihood 平均负曲率。两者相等需要正则条件；不能在参数相关支持或边界模型中无条件使用。
+
+\subsection{Bernoulli 信息}
+
+对单个 Bernoulli 观测，
+
+\[
+\log p_\theta(X) = X\log\theta+(1-X)\log(1-\theta).
+\]
+score 为
+
+\[
+U_\theta(X) = \frac X\theta - \frac{1-X}{1-\theta}
+= \frac{X-\theta}{\theta(1-\theta)}.
+\]
+由 \(\mathbb E_\theta[X-\theta]=0\) 与 \(\operatorname{Var}(X)=\theta(1-\theta)\)，
+
+\[
+I_1(\theta)
+=
+\mathbb E_\theta[U_\theta(X)^2]
+=
+\frac{\operatorname{Var}(X)}{\theta^2(1-\theta)^2}
+=
+\frac{1}{\theta(1-\theta)}.
+\]
+对 \(n\) 个独立样本，score 相加，交叉协方差为零，所以
+
+\[
+I_n(\theta)=nI_1(\theta).
+\]
+
+信息随样本量线性增加，典型标准误因而按 \(1/\sqrt n\) 缩小。
+
+边界附近公式趋于无穷并不意味着估计毫无困难。\(\theta=0\) 或 \(1\) 是非规则边界，正态渐近和无偏下界需要重新分析；不能把内部信息公式直接延伸到边界。
+
+\subsection{观测信息与期望信息}
+
+实际数据给出观测信息
+
+\[
+J(\theta;x) = -\frac{\partial^2}{\partial\theta^2}
+\ell(\theta;x).
+\]
+Fisher 信息是其模型期望。MLE 附近常用
+
+\[
+J(\hat\theta;x)^{-1}
+\]
+
+估计协方差，也可用
+
+\[
+I(\hat\theta)^{-1}.
+\]
+
+两者大样本下常接近，有限样本可能不同。观测信息反映这份数据的局部曲率，期望信息平均了可能样本。
+
+若模型错设，score 方差与负 Hessian 期望不再相等，需要 sandwich covariance
+
+\[
+H^{-1}JH^{-1}
+\]
+
+而不是简单的信息逆。这里 \(H\) 是负 Hessian（期望或观测值），\(J\) 指 score 的外积二阶矩 \(\mathbb E_\theta[U_\theta U_\theta^T]\)，与上文观测信息的记号含义不同；模型正确时 \(H=J=I(\theta)\)，夹心形式退化回 \(I(\theta)^{-1}\)。
+
+\subsection{重参数化改变数值但保留几何}
+
+令 \(\eta=g(\theta)\)。链式法则给出 \(U_\eta=U_\theta\cdot d\theta/d\eta\)，平方取期望，标量情形下
+
+\[
+I_\eta(\eta) = I_\theta(\theta)
+\left(
+\frac{d\theta}{d\eta}
+\right)^2.
+\]
+因此 Fisher 信息的数值依赖参数尺度：用概率 \(\theta\)、logit \(\eta=\log(\theta/(1-\theta))\) 或百分比表示，信息数值不同。与微小参数位移组合的量
+
+\[
+I(\theta)(d\theta)^2
+\]
+
+却保持一致，像一个局部度量。
+
+在正则模型中，相邻参数分布的 KL divergence 有二阶展开
+
+\[
+D_{\mathrm{KL}}
+\bigl(
+p_\theta\Vert p_{\theta+d\theta}
+\bigr)
+\approx
+\frac12I(\theta)(d\theta)^2.
+\]
+
+Fisher 信息因此衡量分布空间中局部可区分距离。
+
+\subsection{信息矩阵奇异意味着什么}
+
+向量参数的 \(I(\theta)\) 若有零方向，说明沿某个参数方向改变对分布的一阶影响为零。原因可能是不可识别、冗余参数、标签交换对称或当前点的局部退化。
+
+优化中的 Hessian 奇异与统计不可识别相关但不完全相同；前者还受具体样本和参数化影响。检查特征值与条件数有助于发现弱识别，但不能单凭数值阈值建立模型可识别性证明。
+
+\subsubsection{留给读者}
+
+对 \(X\sim N(\mu,\sigma^2)\) 且 \(\sigma^2\) 已知，求单个观测关于 \(\mu\) 的 score 与 Fisher 信息，再推广到 \(n\) 个样本。由信息逆预测 \(\bar X\) 的方差，是否与精确抽样分布一致？

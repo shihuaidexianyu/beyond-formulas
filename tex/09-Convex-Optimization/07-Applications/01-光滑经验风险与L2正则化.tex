@@ -1,0 +1,136 @@
+\section{\texorpdfstring{光滑经验风险与 \(L_2\) 正则化}{光滑经验风险与 L_2 正则化}}
+
+监督学习常把参数选择写成经验风险最小化：
+
+\[
+\min_w
+\frac1n\sum_{i=1}^n
+\ell(y_i,w^Tx_i)
++\lambda R(w).
+\]
+
+线性预测 \(w^Tx_i\) 只是共同骨架。损失 \(\ell\) 决定模型怎样看待误差，正则项 \(R\) 决定哪些参数形状更受偏好；二者共同决定凸性、曲率和算法。
+
+\subsection{Ridge 回归让平坦方向获得曲率}
+
+把 \(n\) 个样本按行堆成设计矩阵 \(X\)（第 \(i\) 行为 \(x_i^T\)），响应堆成向量 \(y\)。平方损失与 \(L_2\) 正则给出
+
+\[
+\min_w
+\frac{1}{2n}\lVert Xw-y\rVert_2^2
++\frac\lambda2\lVert w\rVert_2^2.
+\]
+
+Hessian 为
+
+\[
+\frac1nX^TX+\lambda I.
+\]
+
+当 \(\lambda>0\) 时，它至少为 \(\lambda I\)，所以目标强凸并有唯一解，即使特征共线或样本少于特征。正则项不仅把大参数拉向零，也改善 Hessian 的条件数以及解对数据扰动的稳定性。
+
+一阶条件是
+
+\[
+\left(\frac1nX^TX+\lambda I\right)w = \frac1nX^Ty.
+\]
+实现时应解这个线性系统，或直接在增广最小二乘、QR/SVD、迭代法中利用结构，不应显式求逆。
+
+\(L_2\) 正则通常缩小所有系数，却很少产生精确零。若目标是变量选择，需要下一节的 \(L_1\) 几何；若只是控制方差和共线性，Ridge 往往更稳定。
+
+\subsection{Logistic 回归从概率模型得到凸损失}
+
+二分类标签取 \(y_i\in\{-1,1\}\)，令 margin
+
+\[
+t_i=y_i(w^Tx_i+b).
+\]
+
+logistic 损失为
+
+\[
+\ell(t)=\log(1+e^{-t}).
+\]
+
+margin 为正且大时，样本被自信地正确分类，损失趋近零；margin 为负时，损失近似线性增长。由于
+
+\[
+\ell''(t) = \frac{e^t}{(1+e^t)^2}\ge0,
+\]
+它是凸函数。与仿射 margin 复合并求和后，训练目标仍凸。
+
+若使用 \(y_i\in\{0,1\}\) 和概率
+
+\[
+p_i=\sigma(w^Tx_i+b),
+\qquad
+\sigma(z)=\frac1{1+e^{-z}},
+\]
+
+负对数似然为 \(-y_i\log p_i-(1-y_i)\log(1-p_i)\)。由 \(\sigma\) 的定义，\(\log p_i=z_i-\log(1+e^{z_i})\)、\(\log(1-p_i)=-\log(1+e^{z_i})\)，代入后写成
+
+\[
+\log(1+e^{z_i})-y_i z_i,
+\qquad z_i=w^Tx_i+b.
+\]
+
+这就是 softplus 减去线性项，仍然凸。它应通过稳定的 log-sum-exp 或 softplus 实现；直接计算极大 \(e^{z_i}\) 会溢出，而先得到接近零的概率再取对数会下溢。
+
+\subsection{Hessian 揭示数据怎样提供信息}
+
+对单个样本项求二阶导得 \(\ell''(t_i)x_ix_i^T\)，其中 \(\ell''(t)=\frac{e^t}{(1+e^t)^2}=\sigma(t)(1-\sigma(t))\) 是偶函数，所以无论用哪种标签编码都有 \(\ell''(t_i)=p_i(1-p_i)\)。对各样本求和并平均，logistic 目标的 Hessian 可写成
+
+\[
+\frac1nX^TWX+\lambda I,
+\]
+
+其中 \(W\) 是对角矩阵，元素 \(p_i(1-p_i)\ge0\)。因此 Hessian 半正定；加入 \(\lambda>0\) 后正定。
+
+\(p_i(1-p_i)\) 在 \(p_i=1/2\) 附近最大，对已经极其自信的样本接近零。曲率因此主要来自决策边界附近的样本。Newton 法与迭代重加权最小二乘（IRLS）每步求解一个加权最小二乘系统，正是利用这一结构。
+
+若数据完全线性可分且没有正则化，logistic 损失的下确界为零，却可能只有在 \(\lVert w\rVert\to\infty\) 时逼近；有限最优参数不一定存在。凸性没有替代存在性；\(L_2\) 正则使目标强凸，从而满足强制性（\(\lVert w\rVert\to\infty\) 时目标值趋于无穷），最优解在有限处达到且唯一。
+
+\subsection{约束形式与惩罚形式}
+
+把数据拟合项整体记为 \(\ell(w)\)，Ridge 可以写成惩罚形式
+
+\[
+\min_w
+\ell(w)+\lambda\lVert w\rVert_2^2,
+\]
+
+也可以写成约束形式
+
+\[
+\min_w\ell(w)
+\quad\text{subject to}\quad
+\lVert w\rVert_2^2\le t.
+\]
+
+在适当凸性和约束资格下，每个活跃约束半径对应某个非负乘子 \(\lambda\)。但参数对应由数据与解决定，不应把 \(\lambda=1/t\) 当成一般公式；约束不活跃或解不唯一时，对应关系还可能退化。
+
+\subsection{优化完成后还没有完成学习}
+
+KKT 残差和对偶间隙可以证明训练目标已经接近全局最优，却不能证明模型会泛化。还需要：
+
+\begin{itemize}
+\tightlist
+\item
+  用独立验证数据选择 \(\lambda\)；
+\item
+  统一特征尺度，否则同一 \(L_2\) 惩罚对不同单位不公平；
+\item
+  决定截距是否应惩罚；
+\item
+  检查类别不平衡、异常值和数据泄漏；
+\item
+  评估概率校准，而不只看分类准确率；
+\item
+  把优化误差与统计误差、数据漂移分开。
+\end{itemize}
+
+一个精确求解的错误损失函数仍是错误模型。
+
+\subsubsection{留给读者}
+
+证明无正则 logistic 回归在完全可分数据上可能没有有限最优解：取一个能正确分离所有样本的方向 \(w_0\)，考察 \(cw_0\) 在 \(c\to\infty\) 时每个损失项的变化。为什么损失趋近零却不在任何有限 \(c\) 处达到零？

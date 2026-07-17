@@ -1,0 +1,26 @@
+一个分布不是公式的名字，而是某种重复出现的随机机制。固定次数的独立成败试验产生 Binomial；等待第几次成功产生 Geometric 或 Negative Binomial；稀有事件在固定时间窗内的计数产生 Poisson；Poisson 到达之间的等待时间则产生 Exponential。而当极端值拒绝被平均稀释时，问题要倒过来问：矩是否存在，以及最坏的一次有多坏。
+
+因此选择分布时，先问``数据是怎样产生的''，再看参数和公式：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  成败试验中的 Bernoulli、二项与等待分布：固定试验次数与固定成功次数是两种不同停止规则。
+\item
+  不放回抽样与 Hypergeometric 分布：有限总体抽样为何产生依赖，以及何时可用 Binomial 近似。
+\item
+  Poisson 计数、Exponential 等待与 Gamma 时间：把事件数和等待时间看成同一到达过程的两面。
+\item
+  Uniform、Beta 与 Dirichlet 分布：区间或概率单纯形上的分布怎样表达无偏好与不同形状的先验。
+\item
+  Gaussian 与多元 Gaussian：为什么许多小扰动的和会形成钟形，以及协方差怎样决定椭圆几何。
+\item
+  从 Gaussian 到卡方与 Student $t$：估计均值与方差时为什么自然出现新的分布。
+\item
+  重尾分布：Cauchy 的样本均值为何永不收敛，尾指数怎样决定哪些矩存在。
+\item
+  极值分布与尾部风险：块最大值与超阈值超出量服从什么极限规律，``百年一遇''如何解读又何时失效。
+\end{enumerate}
+
+学习每个分布时至少保留五件事：随机机制、支撑集、参数含义、均值与方差（先确认它们存在）、失效边界。只记密度公式，往往最先忘掉的恰好是决定能否使用它的条件。

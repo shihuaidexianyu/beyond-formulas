@@ -1,0 +1,160 @@
+\section{联合熵、条件熵与链式法则}
+
+若要无失真描述一对离散变量 $(X,Y)$，可以直接为联合结果编码，也可以先编码 $Y$，再在已知 $Y$ 的条件下编码 $X$。两种方式的理想平均信息量应相同。
+
+\subsection{联合熵}
+
+联合熵定义为
+
+\[
+H(X,Y)
+=-\sum_{x,y}p(x,y)\log p(x,y).
+\]
+它把 $(X,Y)$ 当作一个联合随机变量。
+
+若 $(X,Y)$ 独立，
+
+\[
+p(x,y)=p(x)p(y),
+\]
+代入定义，$\log p(x,y)=\log p(x)+\log p(y)$ 使求和拆成两项，即得
+
+\[
+H(X,Y)=H(X)+H(Y).
+\]
+若 $Y=X$，描述 $X$ 后无需再描述 $Y$，所以
+
+\[
+H(X,Y)=H(X)=H(Y).
+\]
+一般有
+
+\[
+\max\{H(X),H(Y)\}
+\le H(X,Y)
+\le H(X)+H(Y).
+\]
+两个界要用到本节后面的结果：下界来自链式法则与条件熵非负，$H(X,Y)=H(X)+H(Y\mid X)\ge H(X)$，对称地也有 $H(X,Y)\ge H(Y)$；上界来自``条件化平均减少熵''，$H(X,Y)=H(Y)+H(X\mid Y)\le H(Y)+H(X)$。
+\subsection{条件熵是剩余不确定性}
+
+给定 $Y=y$ 后，$X$ 的条件熵为
+
+\[
+H(X\mid Y=y)
+=-\sum_xp(x\mid y)\log p(x\mid y).
+\]
+再按 $Y$ 的概率平均：
+
+\[
+H(X\mid Y)
+=\sum_y p(y)H(X\mid Y=y).
+\]
+这是观察 $Y$ 后，对 $X$ 平均还剩多少不确定。
+
+注意某个具体 $y$ 可以让不确定性增加：
+
+\[
+H(X\mid Y=y)>H(X)
+\]
+并非不可能。只有平均后才有
+
+\[
+H(X\mid Y)\le H(X).
+\]
+``条件化减少熵''是平均陈述，不是对每个观察值逐点成立。
+
+\subsection{链式法则}
+
+由
+
+\[
+p(x,y)=p(y)p(x\mid y)
+\]
+取负对数，再对联合分布 $p(x,y)$ 求期望：$-\log p(y)$ 的期望是 $H(Y)$，而 $-\log p(x\mid y)$ 的期望按定义正是 $H(X\mid Y)$。于是
+
+\[
+\boxed{
+H(X,Y)=H(Y)+H(X\mid Y)
+}.
+\]
+交换顺序也有
+
+\[
+H(X,Y)=H(X)+H(Y\mid X).
+\]
+对多个变量：
+
+\[
+H(X_1,\ldots,X_n)
+=\sum_{i=1}^{n}
+H(X_i\mid X_1,\ldots,X_{i-1}).
+\]
+这正是概率链式法则在对数平均下的对应。
+
+\subsection{一个带噪复制例子}
+
+令 $X\sim\mathrm{Bernoulli}(1/2)$，噪声
+
+\[
+N\sim\mathrm{Bernoulli}(\varepsilon)
+\]
+与 $X$ 独立，观测
+
+\[
+Y=X\oplus N.
+\]
+因为 $X$ 公平，$Y$ 也公平（模二加上独立噪声后，$0$ 与 $1$ 仍各占一半）：
+
+\[
+H(X)=H(Y)=1.
+\]
+给定 $X$ 后，$Y$ 的不确定只来自噪声：
+
+\[
+H(Y\mid X)=h_2(\varepsilon),
+\]
+其中 $h_2$ 是二元熵函数，上一章已定义。
+所以
+
+\[
+H(X,Y)
+=1+h_2(\varepsilon).
+\]
+当 $\varepsilon=0$，$Y=X$，联合熵为 $1$ bit；当 $\varepsilon=1/2$，$Y$ 与 $X$ 独立，联合熵为 $2$ bit。
+
+\subsection{连续变量的条件微分熵}
+
+连续情形定义
+
+\[
+h(X,Y)
+=-\iint f(x,y)\log f(x,y)\,dx\,dy,
+\]
+\[
+h(X\mid Y)=h(X,Y)-h(Y)
+\]
+在相关量良好定义时成立。
+
+条件微分熵可以为负，这不矛盾；但互信息
+
+\[
+I(X;Y)=h(X)-h(X\mid Y)
+\]
+仍非负。连续情形中应更多依赖互信息和 KL，而不要把单个微分熵当作绝对 bit 数。
+
+\subsubsection{自己补完}
+
+设 $X$ 为公平硬币，$Y=X$ 以概率 $0.9$，以概率 $0.1$ 取反。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  求 $(H(X),H(Y))$；
+\item
+  求 $H(Y\mid X)$；
+\item
+  用链式法则求 $H(X,Y)$；
+\item
+  比较无噪声、当前噪声与完全随机噪声三种情形。
+\end{enumerate}

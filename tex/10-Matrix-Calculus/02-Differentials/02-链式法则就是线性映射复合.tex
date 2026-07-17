@@ -1,0 +1,121 @@
+\section{链式法则就是线性映射复合}
+
+若
+
+\[
+x\xrightarrow{f}y\xrightarrow{g}z,
+\]
+
+输入扰动先被 \(Df(x)\) 推到 \(y\) 空间，再被 \(Dg(y)\) 推到 \(z\) 空间：
+
+\[
+Dz(x) = Dg(y)\circ Df(x).
+\]
+在 Jacobian 表示下，
+
+\[
+J_{g\circ f}(x) = J_g(y)J_f(x).
+\]
+矩阵乘法顺序由映射复合决定：最先作用的 \(J_f\) 写在最右边。
+
+\subsection{JVP 是沿计算方向前推扰动}
+
+给定输入方向 \(v\)，
+
+\[
+J_{g\circ f}(x)v = J_g(y)\bigl(J_f(x)v\bigr).
+\]
+因此不必先形成两个 Jacobian 再相乘。可以先计算 \(dy=J_fv\)，再计算 \(dz=J_gdy\)。这就是正向模式自动微分。
+
+若输入维度很小、输出很多，少量输入方向就能得到完整导数。例如 \(f:\mathbb R\to\mathbb R^m\) 只有一个输入方向，一次正向传播便得到所有输出对该标量的导数。
+
+\subsection{VJP 是把输出敏感度反向拉回}
+
+设最终损失 \(\ell(z)\) 为标量。链式法则给
+
+\[
+\nabla_x\ell = J_f(x)^T J_g(y)^T\nabla_z\ell.
+\]
+计算顺序从右到左：先把 \(\nabla_z\ell\) 通过 \(J_g^T\) 拉回 \(y\)，再通过 \(J_f^T\) 拉回 \(x\)。这就是反向模式。
+
+当输入参数很多、输出只有一个标量损失时，一次反向传播就得到全部参数梯度；逐输入方向做正向传播则需要许多次。这一复杂度差异来自 Jacobian 形状，而不是神经网络的特殊魔法。
+
+\subsection{一个完整的两层计算}
+
+考虑
+
+\[
+u=Ax,\qquad
+v=\tanh u,\qquad
+\ell=\frac12\lVert v-y\rVert_2^2.
+\]
+
+正向先保存 \(u,v\)。反向从
+
+\[
+\bar v=\nabla_v\ell=v-y
+\]
+
+开始。逐元素 \(\tanh\) 的 Jacobian 是对角矩阵（对角元为 \(\tanh'(u_i)=1-\tanh^2(u_i)=1-v_i^2\)），但无需真的构造它：记 \(\bar u=\nabla_u\ell\)，则
+
+\[
+\bar u = \bar v\odot(1-v\odot v).
+\]
+最后
+
+\[
+\nabla_x\ell=A^T\bar u,
+\qquad
+\nabla_A\ell=\bar u x^T.
+\]
+
+为什么 \(\nabla_A\ell\) 是外积？扰动 \(dA\) 产生
+
+\[
+du=(dA)x,
+\]
+
+所以
+
+\[
+d\ell = \bar u^T(dA)x
+=\operatorname{tr}(\bar u^TdA\,x)
+=\operatorname{tr}\bigl((\bar u x^T)^TdA\bigr).
+\]
+先把标量写成迹，再整段循环移动。形状与微分同时决定了答案：把 \(d\ell\) 整理成 \(\operatorname{tr}\bigl(G^TdA\bigr)\) 后，系数 \(G=\bar ux^T\) 就是梯度——这正是上一节的读取规则。
+
+\subsection{分支处要相加，共享处要累积}
+
+若一个中间量 \(x\) 同时流向两条分支：
+
+\[
+y=f(x),\qquad z=g(x),\qquad \ell=h(y,z),
+\]
+
+则总微分包含两条路径：
+
+\[
+d\ell = \left(\frac{\partial\ell}{\partial y}Df(x)
++\frac{\partial\ell}{\partial z}Dg(x)\right)[dx].
+\]
+反向传播时，来自不同下游分支的伴随必须相加。忘记累积共享变量的梯度，是手写计算图中常见错误。
+
+广播和求和也遵循同一原则。前向广播把一个参数复制到多个位置，反向就要把这些位置的梯度按广播轴求和；前向求和把多项合并，反向则把上游标量复制回每项。
+
+\subsection{链式法则不保证每个节点都光滑}
+
+ReLU、max、排序和离散分支可能在某些点不可微。自动微分系统通常采用约定的次梯度或分支导数，但这不等于经典导数存在。随机采样、状态更新和停止梯度还会改变``所执行程序''与抽象数学模型之间的关系。
+
+因此反向传播正确性包含两层：链式组合是否实现正确，以及每个基本算子的局部求导规则是否符合预期语义。
+
+\subsubsection{留给读者}
+
+对
+
+\[
+u=Wx,\qquad
+s=u^Tu,\qquad
+\ell=\log(1+s),
+\]
+
+分别写一次正向 JVP 和反向 VJP。不要构造任何完整 Jacobian。比较：若 \(W\) 很大而 \(\ell\) 是标量，哪一种模式更适合求全部 \(W\) 的梯度？

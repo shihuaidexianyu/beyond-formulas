@@ -1,0 +1,200 @@
+\section{不变方向与特征值：寻找矩阵最自然的坐标轴}
+
+一般向量经过矩阵 \(A\) 后，长度和方向都会改变。连续作用 \(A\) 时，坐标分量不断混合，直接计算 \(A^2,A^3,\ldots\) 很快失去结构。
+
+但某些特殊方向不会被转向。若非零向量 \(v\) 满足
+
+\[
+Av=\lambda v,
+\]
+
+那么 \(A\) 只把它缩放 \(\lambda\) 倍。\(v\) 称为特征向量，\(\lambda\) 称为对应特征值。
+
+这里必须要求 \(v\ne0\)；零向量对任意 \(\lambda\) 都满足等式，无法提供方向信息。
+
+\subsection{特征值怎样从方程中产生}
+
+把定义移项：
+
+\[
+(A-\lambda I)v=0.
+\]
+
+我们需要这个齐次系统存在非零解，因此 \(A-\lambda I\) 不能可逆。利用行列式：
+
+\[
+\det(A-\lambda I)=0.
+\]
+
+左边是关于 \(\lambda\) 的 \(n\) 次多项式，称为特征多项式。它的根是特征值。对每个根，再解
+
+\[
+\mathcal N(A-\lambda I)
+\]
+
+得到对应特征空间。
+
+这条推导说明计算顺序为什么是``先特征值，后特征向量''：只有在 \(A-\lambda I\) 奇异时，非零方向才会出现。
+
+\subsection{一个能够直接看见的例子}
+
+取
+
+\[
+A=\begin{pmatrix}2&1\\1&2\end{pmatrix}.
+\]
+
+观察两个方向：
+
+\[
+A\begin{pmatrix}1\\1\end{pmatrix}
+=\begin{pmatrix}3\\3\end{pmatrix}
+=3\begin{pmatrix}1\\1\end{pmatrix},
+\]
+
+\[
+A\begin{pmatrix}1\\-1\end{pmatrix}
+=\begin{pmatrix}1\\-1\end{pmatrix}.
+\]
+
+沿 \((1,1)^{\mathsf T}\) 的方向放大 \(3\) 倍，沿 \((1,-1)^{\mathsf T}\) 的方向保持不变。普通标准坐标中两个分量彼此耦合；沿这两条斜轴看，变换只做独立缩放。
+
+从特征多项式也能得到同样结果：
+
+\[
+\begin{aligned}
+\det(A-\lambda I)
+&=\det\begin{pmatrix}2-\lambda&1\\1&2-\lambda\end{pmatrix}\\
+&=(2-\lambda)^2-1\\
+&=(\lambda-3)(\lambda-1).
+\end{aligned}
+\]
+
+所以特征值为 \(3\) 和 \(1\)。
+
+\subsection{缩放因子的不同含义}
+
+若 \(Av=\lambda v\)：
+
+\begin{itemize}
+\tightlist
+\item
+  \(\lambda>1\)：沿该方向放大；
+\item
+  \(0<\lambda<1\)：沿该方向缩小但不翻转；
+\item
+  \(\lambda<0\)：缩放同时翻转方向；
+\item
+  \(\lambda=0\)：该方向被压到零，因此 \(v\in\mathcal N(A)\)；
+\item
+  \(|\lambda|=1\)：沿该方向长度保持，但整体行为还要结合矩阵结构判断（``结构''指特征方向是否足够；第三节有 \(|\lambda|=1\) 却仍增长的例子）。
+\end{itemize}
+
+零是特征值当且仅当 \(A\) 不可逆，因为
+
+\[
+Av=0
+\]
+
+存在非零解当且仅当零空间非平凡，也等价于 \(\det A=0\)。
+
+\subsection{特征空间为什么是子空间}
+
+固定特征值 \(\lambda\)，对应的所有特征向量再加上零向量构成
+
+\[
+E_\lambda=\mathcal N(A-\lambda I).
+\]
+
+它是子空间。若 \(u,v\in E_\lambda\)，则
+
+\[
+A(\alpha u+\beta v)
+=\lambda(\alpha u+\beta v).
+\]
+
+同一特征值可能对应多个独立方向。\(E_\lambda\) 的维数称为几何重数；特征值作为特征多项式根出现的次数称为代数重数。总有
+
+\[
+1\le\dim E_\lambda\le\text{代数重数}.
+\]
+
+下界是直接的：特征值按定义至少带来一个特征向量。上界可取 \(E_\lambda\) 的一组基并扩充为全空间的基来看：在这组基下，矩阵的前 \(\dim E_\lambda\) 列都是 \(\lambda\) 倍的坐标向量，特征多项式因此含有因子 \((t-\lambda)^{\dim E_\lambda}\)，所以代数重数不会小于几何重数。
+
+两者是否相等，决定矩阵能否拥有足够多的独立特征向量。
+
+\subsection{不同特征值的特征向量为何独立}
+
+设 \(v_1,\ldots,v_k\) 分别对应互不相同的特征值 \(\lambda_1,\ldots,\lambda_k\)。这些向量必线性无关。
+
+以两个向量为例，若
+
+\[
+c_1v_1+c_2v_2=0,
+\]
+
+作用 \(A\) 得
+
+\[
+c_1\lambda_1v_1+c_2\lambda_2v_2=0.
+\]
+
+用第二式减去 \(\lambda_2\) 倍第一式：
+
+\[
+c_1(\lambda_1-\lambda_2)v_1=0.
+\]
+
+因为 \(v_1\ne0\) 且特征值不同，\(c_1=0\)，继而 \(c_2=0\)。一般情形可用同样思想归纳。
+
+因此，拥有 \(n\) 个不同特征值的 \(n\times n\) 矩阵一定有 \(n\) 个独立特征向量，从而可以对角化（即换到特征基后矩阵呈对角形；这是下一节的主题）。但不同特征值不是必要条件；重复特征值也可能拥有足够大的特征空间。
+
+\subsection{迹和行列式怎样汇总特征值}
+
+若在复数范围把特征值按代数重数计为 \(\lambda_1,\ldots,\lambda_n\)，则
+
+\[
+\operatorname{tr}(A)=\lambda_1+\cdots+\lambda_n,
+\]
+
+\[
+\det A=\lambda_1\cdots\lambda_n.
+\]
+
+行列式汇总各特征方向的缩放乘积，迹汇总缩放之和。这些关系可由特征多项式系数得到。它们也解释了为什么 \(A\) 与 \(S^{-1}AS\) 总有相同的特征值、迹和行列式：
+
+\[
+\det(S^{-1}AS-\lambda I)
+=\det\!\big(S^{-1}(A-\lambda I)S\big)
+=\det(A-\lambda I),
+\]
+
+即两者有相同的特征多项式。\(S^{-1}AS\) 形的矩阵称为与 \(A\) 相似，下一节会正式讨论。
+
+但仅知道迹和行列式通常不足以恢复全部特征值；它们只是两个聚合量。
+
+\subsection{实矩阵也可能没有实特征方向}
+
+平面旋转 \(90^\circ\) 的矩阵
+
+\[
+R=\begin{pmatrix}0&-1\\1&0\end{pmatrix}
+\]
+
+把每个非零实向量转到垂直方向，因此在 \(\mathbb R^2\) 中没有特征向量。其特征方程为
+
+\[
+\lambda^2+1=0,
+\]
+
+根为 \(\lambda=\pm i\)。
+
+这不是计算故障，而是实数空间中确实不存在保持方向的直线。扩展到复数空间后，特征方向才出现。后面的复矩阵单元会解释共轭转置和酉基如何处理这种情况。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06：Eigenvalues and Eigenvectors
+\end{itemize}

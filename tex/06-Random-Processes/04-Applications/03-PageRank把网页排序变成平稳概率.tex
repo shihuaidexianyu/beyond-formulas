@@ -1,0 +1,164 @@
+\section{PageRank：把网页排序变成平稳概率}
+
+网页链接形成有向图。一个自然想法是：让``随机浏览者''从当前网页均匀选择一个出链跳转，长期访问频率高的网页更重要。
+
+若网页 $i$ 有出度 $d_i$，朴素转移概率为
+
+\[
+P_{ij}=
+\begin{cases}
+1/d_i,&i\to j,\\
+0,&\text{否则}.
+\end{cases}
+\]
+PageRank 想用该链的平稳分布作为排名。
+
+\subsection{朴素随机游走会遇到什么问题}
+
+真实链接图常有：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{悬挂节点}：没有出链，转移矩阵该行无法规范化；
+\item
+  \textbf{蜘蛛陷阱}：某个网页集合内部互链却没有出边，浏览者进去后无法离开；
+\item
+  \textbf{多个闭类}：平稳分布不唯一；
+\item
+  \textbf{周期结构}：时刻分布振荡；
+\item
+  \textbf{不可达页面}：排名强烈依赖初始状态。
+\end{itemize}
+
+这些不是数值算法的小毛病，而是 Markov 链通信结构直接造成的。
+
+\subsection{Teleportation 修复可约性与周期}
+
+PageRank 引入阻尼参数
+
+\[
+0<\alpha<1
+\]
+和个性化分布 $v$。每一步：
+
+\begin{itemize}
+\tightlist
+\item
+  以概率 $\alpha$ 沿链接矩阵 $P$ 转移；
+\item
+  以概率 $1-\alpha$ 按 $v$ 随机跳转。
+\end{itemize}
+
+转移矩阵为
+
+\[
+G=\alpha P+(1-\alpha)\mathbf1v,
+\]
+其中 $\mathbf1$ 为全一列向量，故 $\mathbf1 v$ 的每一行都是 $v$；$G$ 常称 Google 矩阵。若 $v_j>0$ 对所有网页成立，则从任意页面都有正概率一步跳到任意页面，$G$ 不可约；同时 $G_{ii}=\alpha P_{ii}+(1-\alpha)v_i>0$，自跳概率为正，故非周期。
+
+因此存在唯一平稳分布 $\pi$，且从任意初始分布收敛：
+
+\[
+\pi=\pi G.
+\]
+悬挂节点常把其转移行替换为 $v$，再应用同一公式。
+
+\subsection{平稳方程怎样变成排名公式}
+
+展开（注意 $\pi\mathbf1=1$，因为 $\pi$ 是概率分布）
+
+\[
+\pi=\alpha\pi P+(1-\alpha)v.
+\]
+移项：
+
+\[
+\pi(I-\alpha P)=(1-\alpha)v.
+\]
+形式上
+
+\[
+\pi=(1-\alpha)v(I-\alpha P)^{-1}.
+\]
+大型网页图不直接求逆，而使用幂迭代：
+
+\[
+\pi_{k+1}=\alpha\pi_kP+(1-\alpha)v.
+\]
+每轮只需沿稀疏链接传播概率，适合大规模计算。
+
+\subsection{阻尼参数在权衡什么}
+
+$\alpha$ 越接近一：
+
+\begin{itemize}
+\tightlist
+\item
+  排名越忠于链接结构；
+\item
+  浏览者平均连续沿链接走的步数约为 $1/(1-\alpha)$（Geometric 等待的均值）；
+\item
+  对蜘蛛陷阱和近可约结构更敏感；
+\item
+  混合通常更慢。
+\end{itemize}
+
+$\alpha$ 较小：
+
+\begin{itemize}
+\tightlist
+\item
+  个性化分布 $v$ 影响更强；
+\item
+  收敛更快；
+\item
+  图结构区分度降低。
+\end{itemize}
+
+常见 $\alpha=0.85$ 是工程选择，不是数学常数。
+
+\subsection{PageRank 是重要性定义，不是真理}
+
+高 PageRank 表示在所选随机浏览模型中的长期访问概率高。它受以下设计影响：
+
+\begin{itemize}
+\tightlist
+\item
+  哪些边被纳入；
+\item
+  边是否加权；
+\item
+  teleportation 分布；
+\item
+  阻尼参数；
+\item
+  对垃圾链接和重复页面的处理。
+\end{itemize}
+
+它不自动等同于内容质量、可信度或用户价值。算法输出的含义由随机过程模型定义。
+
+\subsection{个性化 PageRank}
+
+把 $v$ 集中在某个主题或用户偏好页面上，得到个性化排名。由于平稳解对 $v$ 线性，可以组合不同个性化向量。
+
+这也展示了一个通用设计模式：为原始图动态加入少量随机重启，使链遍历并将稳定分布用于排序、推荐或中心性。
+
+\subsubsection{自己补完}
+
+三个网页中，A 只链向 B，B 只链向 A，C 没有出链。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  写出朴素链接矩阵中的问题；
+\item
+  把悬挂行替换为均匀分布；
+\item
+  取 $\alpha=0.8$、$v=(1/3,1/3,1/3)$，写出 Google 矩阵；
+\item
+  说明它为什么不可约且非周期；
+\item
+  进行两轮幂迭代，观察概率怎样传播。
+\end{enumerate}

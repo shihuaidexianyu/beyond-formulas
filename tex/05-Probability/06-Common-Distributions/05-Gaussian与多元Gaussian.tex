@@ -1,0 +1,198 @@
+\section{Gaussian 与多元 Gaussian}
+
+Gaussian 分布之所以无处不在，不是因为所有数据天然呈钟形，而是因为许多近似独立的小扰动相加后，标准化的和常趋近 Gaussian（这一直觉将在后面的极限定理部分严格化）。它还在线性变换、边缘化和条件化下保持封闭，使推导与计算格外方便。
+
+方便并不等于普适。明显偏斜、有边界、多峰或重尾的数据可能不适合 Gaussian 模型。
+
+\subsection{一维 Gaussian}
+
+若
+
+\[
+X\sim\mathcal N(\mu,\sigma^2),
+\qquad\sigma>0,
+\]
+密度为
+
+\[
+f_X(x)
+=\frac1{\sqrt{2\pi\sigma^2}}
+\exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right].
+\]
+$\mu$ 决定中心，$\sigma$ 决定水平尺度：
+
+\[
+\E[X]=\mu,\qquad
+\operatorname{Var}(X)=\sigma^2.
+\]
+标准化
+
+\[
+Z=\frac{X-\mu}{\sigma}
+\]
+得到 $Z\sim\mathcal N(0,1)$，因此
+
+\[
+P(a\le X\le b)
+=\Phi\left(\frac{b-\mu}{\sigma}\right)
+-\Phi\left(\frac{a-\mu}{\sigma}\right),
+\]
+其中 $\Phi$ 是标准 Gaussian CDF。
+
+密度关于 $\mu$ 对称，因此均值、中位数和众数相同。约 $68\%$、$95\%$、$99.7\%$ 的概率分别位于 $\mu$ 的一、二、三个标准差内，这只是常用近似记忆，不应替代精确 CDF 或在非 Gaussian 数据上滥用。
+
+\subsection{线性组合保持 Gaussian}
+
+若 $X_i$ 独立 Gaussian，则任意线性组合
+
+\[
+\sum_i a_iX_i
+\]
+仍为 Gaussian，其均值和方差为
+
+\[
+\sum_i a_i\mu_i,\qquad
+\sum_i a_i^2\sigma_i^2.
+\]
+更一般的``联合 Gaussian''定义是：随机向量 $X$ 的每个线性组合 $a^\mathsf TX$ 都是一维 Gaussian（允许退化为常数）。
+
+仅仅每个分量各自为 Gaussian，并不能保证联合 Gaussian。可以构造 $X\sim\mathcal N(0,1)$，再令 $Y=S X$，其中随机符号 $S$ 独立于 $X$ 且等概率为 $\pm1$。由标准 Gaussian 密度的对称性，$Y$ 也是标准 Gaussian；又 $\E[XY]=\E[S]\,\E[X^2]=0$，故二者不相关；但 $(X,Y)$ 集中在直线 $y=x$ 与 $y=-x$ 上，并非二维 Gaussian。
+
+\subsection{多元 Gaussian 的几何}
+
+若 $X\in\R^d$ 服从均值 $\mu$、正定协方差 $\Sigma$ 的多元 Gaussian，记为
+
+\[
+X\sim\mathcal N(\mu,\Sigma),
+\]
+密度为
+
+\[
+f_X(x)
+=\frac1{(2\pi)^{d/2}|\Sigma|^{1/2}}
+\exp\left[
+-\frac12(x-\mu)^\mathsf T
+\Sigma^{-1}(x-\mu)
+\right].
+\]
+二次型
+
+\[
+(x-\mu)^\mathsf T\Sigma^{-1}(x-\mu)
+\]
+是平方 Mahalanobis 距离。等密度面是椭球：
+
+\begin{itemize}
+\tightlist
+\item
+  协方差特征向量决定主轴方向；
+\item
+  特征值平方根决定各主轴尺度；
+\item
+  行列式 $|\Sigma|^{1/2}$ 控制总体积尺度。
+\end{itemize}
+
+若 $\Sigma$ 仅半正定而奇异，分布仍可定义，但集中在低维仿射子空间，没有相对于整个 $\R^d$ 的普通密度。
+
+\subsection{线性变换、边缘与条件仍为 Gaussian}
+
+若
+
+\[
+X\sim\mathcal N(\mu,\Sigma),
+\qquad Y=AX+b,
+\]
+则
+
+\[
+Y\sim\mathcal N(A\mu+b,A\Sigma A^\mathsf T).
+\]
+因此任意子向量的边缘分布仍为 Gaussian。
+
+把向量分块
+
+\[
+\begin{bmatrix}X_1\\  X_2\end{bmatrix}
+\sim
+\mathcal N\left(
+\begin{bmatrix}\mu_1\\mu_2\end{bmatrix},
+\begin{bmatrix}
+\Sigma_{11}&\Sigma_{12}\\
+\Sigma_{21}&\Sigma_{22}
+\end{bmatrix}
+\right).
+\]
+若 $\Sigma_{22}$ 可逆，则
+
+\[
+X_1\mid X_2=x_2
+\]
+仍为 Gaussian，条件均值为
+
+\[
+\mu_1+\Sigma_{12}\Sigma_{22}^{-1}(x_2-\mu_2),
+\]
+条件协方差为
+
+\[
+\Sigma_{11}
+-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}.
+\]
+条件均值是 $x_2$ 的仿射函数，条件协方差不依赖具体观测值。这解释了 Gaussian 模型中线性最小均方预测为何就是完整条件期望。
+
+\subsection{联合 Gaussian 中不相关才推出独立}
+
+一般变量协方差为零不能推出独立。但若 $X_1,X_2$ 联合 Gaussian 且
+
+\[
+\Sigma_{12}=0,
+\]
+联合密度会分解为两个边缘密度，于是二者独立。
+
+这里``联合''二字不能删。只知道每个边缘都是 Gaussian 不够，前面的随机符号反例正说明这一点。
+
+\subsection{什么时候应怀疑 Gaussian}
+
+以下迹象值得警惕：
+
+\begin{itemize}
+\tightlist
+\item
+  数据只允许非负或被严格限制在区间内；
+\item
+  右偏或左偏非常明显；
+\item
+  存在多个群体形成多峰；
+\item
+  极端值远多于 Gaussian 预测；
+\item
+  方差随均值或条件显著变化；
+\item
+  变量是离散计数且均值不大。
+\end{itemize}
+
+可以通过变换、混合模型、Gamma/Poisson/Student $t$ 等替代分布，或直接使用非参数方法。Gaussian 是有力基准，不是默认真理。
+
+\subsubsection{自己补完}
+
+设
+
+\[
+\begin{bmatrix}X\\  Y\end{bmatrix}
+\sim\mathcal N\left(
+\begin{bmatrix}1\\2\end{bmatrix},
+\begin{bmatrix}4&1\\1&9\end{bmatrix}
+\right).
+\]
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  求 $X+2Y$ 的分布；
+\item
+  求 $X$ 的边缘分布；
+\item
+  求 $\E[X\mid Y=y{]}$；
+\item
+  若协方差改为零，说明 $X,Y$ 能否判定独立，以及为什么必须使用联合 Gaussian 条件。
+\end{enumerate}

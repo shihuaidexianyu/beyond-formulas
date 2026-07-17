@@ -1,0 +1,90 @@
+\section{生成式分类从 Naive Bayes 到 GDA}
+
+Logistic 回归直接描述 \(P(Y\mid X)\)。生成式分类换一个方向：先描述每个类别多常见，以及该类别会产生怎样的特征，
+
+\[
+P(Y=k)=\pi_k,\qquad p(x\mid Y=k),
+\]
+
+再由 Bayes 公式得到
+
+\[
+P(Y=k\mid x)
+=\frac{\pi_kp(x\mid Y=k)}
+{\sum_j\pi_jp(x\mid Y=j)}.
+\]
+
+这条路线的认知代价是必须为特征分布作假设；回报则是能表达数据生成机制、利用类别先验，并在模型合理时以较少数据估计决策边界。
+
+\subsection{Naive Bayes 用条件独立拆开高维分布}
+
+文本包含上万个词。直接估计每个类别下所有词共同出现的分布几乎不可能，因为组合数随维度爆炸。Naive Bayes 做了一个强而透明的假设：
+
+\[
+p(x\mid Y=k)=\prod_{j=1}^dp(x_j\mid Y=k).
+\]
+
+注意这里是``给定类别后条件独立''，不是说词语在整体语料中边际独立。类别本身就能制造边际相关：即使``球场''和``比分''在体育文章类别内近似独立，它们仍会因为共同出现在体育文章中而在全部文本里相关。
+
+对于词频向量，multinomial Naive Bayes 用每类词概率描述文档；对于出现与否，Bernoulli 版本更自然；连续特征则可为每个类别和坐标配置一维 Gaussian。预测时在 log 域计算
+
+\[
+\log\pi_k+\sum_j\log p(x_j\mid Y=k),
+\]
+
+既把乘法变成加法，也避免大量小概率连乘下溢。
+
+假设训练语料中的``退款''从未出现在正常邮件。若直接用频率估计，测试邮件一旦含该词，正常类 likelihood 会变成零，其他所有证据都被一票否决。Dirichlet 或 Laplace 平滑相当于加入伪计数，使未见事件仍保留有限概率。
+
+Naive Bayes 即使独立性不准确，也可能有不错的分类边界，因为 argmax 有时对共同的概率误差并不敏感；但相关证据会被重复计算，posterior 往往过度自信。复制同一特征便是一个简单反例：信息没有增加，log-likelihood 贡献却被加了两次。
+
+\subsection{GDA 用椭球描述连续特征}
+
+对于连续测量，可以假设
+
+\[
+X\mid Y=k\sim\mathcal N(\mu_k,\Sigma_k).
+\]
+
+每个类别在特征空间中形成一个椭球云。分类不仅取决于点离均值多远，还取决于 covariance 所规定的方向尺度和类别先验。
+
+若各类共享同一个 covariance \(\Sigma\)，比较两类 log density 时，把二次型 \((x-\mu_k)^\top\Sigma^{-1}(x-\mu_k)\) 展开：其中 \(x\) 的二次项
+
+\[
+-\frac12x^\top\Sigma^{-1}x
+\]
+
+以及 \(-\frac12\log|\Sigma|\) 等与 \(k\) 无关的项都会抵消，剩下
+
+\[
+\delta_k(x)
+=x^\top\Sigma^{-1}\mu_k
+-\frac12\mu_k^\top\Sigma^{-1}\mu_k
++\log\pi_k.
+\]
+
+因此类别间边界是线性的。这通常称为 linear discriminant analysis；这里的 LDA 不要与 latent Dirichlet allocation 混淆。若每类有自己的 \(\Sigma_k\)，二次项不再抵消，边界成为 quadratic discriminant analysis。
+
+二分类共享 covariance 时，posterior log-odds 是 \(x\) 的仿射函数，所以 posterior 也能写成 sigmoid。GDA 与 Logistic 回归由此可能得到同形状的边界，但学习逻辑不同：前者估计联合分布 \(p(x,y)\)，后者只估计条件分布 \(p(y\mid x)\)。当 Gaussian 假设合适时，生成式模型可能样本效率更高；当类条件分布错设时，直接判别学习通常更稳健。
+
+\subsection{建模选择比公式更重要}
+
+高维小样本下，样本 covariance 可能奇异，不能直接求逆。共享、对角或收缩 covariance 都是在用结构换稳定性。选择哪一种，应结合样本量、相关结构和验证表现，而不是因为某个公式有闭式解。
+
+类别 prior 也会进入 posterior。如果训练数据人为平衡了类别，而部署环境中阳性率仅为 1\%，直接输出的训练 posterior 不再代表部署概率。需要恢复真实 prior，必要时重新校准。
+
+一个完整生成式分类流程应检查：
+
+\begin{itemize}
+\tightlist
+\item
+  特征表示与所选条件分布是否相容；
+\item
+  平滑或 covariance 收缩是否只在训练折估计；
+\item
+  posterior 是否归一、log-density 是否数值稳定；
+\item
+  分类排序、概率校准和阈值决策是否分别评估；
+\item
+  缺失模式、异常值与 prior shift 是否破坏生成假设。
+\end{itemize}

@@ -1,0 +1,177 @@
+\section{Poisson 计数、Exponential 等待与 Gamma 时间}
+
+一个稳定到达过程可以从两种角度观察：
+
+\begin{itemize}
+\tightlist
+\item
+  固定看一小时，来了多少个事件？
+\item
+  固定等若干个事件，需要多长时间？
+\end{itemize}
+
+Poisson、Exponential 与 Gamma 分布分别回答这些问题。把它们放在同一过程里理解，比把三个公式分开背更自然。
+
+\subsection{固定窗口内的事件数：Poisson}
+
+若事件在时间或空间中以平均速率 $\lambda$ 稀疏发生，不相交小区间的事件数近似独立，而且极短区间内发生两个以上事件的概率可以忽略，那么长度 $t$ 窗口中的计数 $N(t)$ 服从
+
+\[
+N(t)\sim\mathrm{Poisson}(\lambda t),
+\]
+即
+
+\[
+P(N(t)=k)
+=e^{-\lambda t}\frac{(\lambda t)^k}{k!},
+\qquad k=0,1,\ldots
+\]
+均值和方差都为
+
+\[
+\E[N(t){]}
+=\operatorname{Var}(N(t))
+=\lambda t.
+\]
+事实上，记 $\mu=\lambda t$，按定义把期望展开成级数，提出 $\mu$ 的幂后剩余级数求和为 $e^\mu$，得
+
+\[
+\E[N]=e^{-\mu}\sum_{k=1}^{\infty}\frac{\mu^k}{(k-1)!}=\mu,
+\qquad
+\E[N(N-1)]=e^{-\mu}\sum_{k=2}^{\infty}\frac{\mu^k}{(k-2)!}=\mu^2,
+\]
+于是 $\operatorname{Var}(N)=\E[N(N-1)]+\E[N]-(\E[N])^2=\mu$。
+``均值等于方差''是 Poisson 模型的诊断线索。实际计数若方差显著大于均值，可能存在速率随时间变化、事件聚集或个体异质性；若显著小于，可能存在容量限制或排斥。
+
+\subsection{从稀有 Binomial 到 Poisson}
+
+把时间窗分成 $n$ 个小格，每格事件发生概率约为 $p$，且 $np=\mu$ 固定。当 $n$ 很大、$p$ 很小时，
+
+\[
+\binom nkp^k(1-p)^{n-k}
+\longrightarrow
+e^{-\mu}\frac{\mu^k}{k!}.
+\]
+把 $p=\mu/n$ 代入并拆开因子即可看出极限来源：
+
+\[
+\binom nkp^k(1-p)^{n-k}
+=\frac{\mu^k}{k!}\cdot
+\frac{n(n-1)\cdots(n-k+1)}{n^k}\cdot
+\left(1-\frac\mu n\right)^{n}\cdot
+\left(1-\frac\mu n\right)^{-k}.
+\]
+固定 $k$ 令 $n\to\infty$：第二个因子趋于 $1$，第三个趋于 $e^{-\mu}$，第四个趋于 $1$，乘积正是 $e^{-\mu}\mu^k/k!$。
+这解释 Poisson 为什么适合``大量机会、单次概率很小、总平均数有限''的稀有事件计数。它不是因为事件``看起来随机''就自动成立，还需要机会近似独立且速率没有剧烈异质性。
+
+独立 Poisson 变量可相加：
+
+\[
+X\sim\mathrm{Poisson}(\lambda_1),\quad
+Y\sim\mathrm{Poisson}(\lambda_2)
+\]
+则
+
+\[
+X+Y\sim\mathrm{Poisson}(\lambda_1+\lambda_2).
+\]
+这对应把两个独立事件流叠加。
+
+\subsection{等待第一个事件：Exponential}
+
+设 $T_1$ 为第一个事件的等待时间。事件 $T_1> t$ 等价于前 $t$ 时间内没有事件：
+
+\[
+P(T_1> t)
+=P(N(t)=0)
+=e^{-\lambda t}.
+\]
+因此 CDF 与密度为
+
+\[
+F_{T_1}(t)=1-e^{-\lambda t},
+\qquad
+f_{T_1}(t)=\lambda e^{-\lambda t},
+\qquad t\ge0.
+\]
+这就是 Exponential($\lambda$) 分布，其中 $\lambda$ 是速率：
+
+\[
+\E[T_1{]}=\frac1\lambda,\qquad
+\operatorname{Var}(T_1)=\frac1{\lambda^2}.
+\]
+有些资料用尺度参数 $\theta=1/\lambda$，密度写为
+
+\[
+\frac1\theta e^{-t/\theta}.
+\]
+同一个符号参数若角色不同，均值公式也会不同，必须辨明 rate 还是 scale。
+
+Exponential 具有连续无记忆性：
+
+\[
+P(T> s+t\mid T> s)=P(T> t).
+\]
+它与前面 Geometric 分布的无记忆性同源，验证也同样只有一行：$P(T>s+t\mid T>s)=e^{-\lambda(s+t)}/e^{-\lambda s}=e^{-\lambda t}$。直觉上，已经等待多久不会改变剩余等待分布。设备寿命若会老化、顾客到达有高峰周期，就不应盲目采用 Exponential。
+
+\subsection{等待第 $r$ 个事件：Gamma}
+
+Poisson 过程中相邻到达间隔独立且服从 Exponential($\lambda$)。等待第 $r$ 个事件的总时间
+
+\[
+T_r=E_1+\cdots+E_r
+\]
+服从形状参数 $r$、速率参数 $\lambda$ 的 Gamma 分布：
+
+\[
+f_{T_r}(t)
+=\frac{\lambda^r}{\Gamma(r)}
+t^{r-1}e^{-\lambda t},
+\qquad t>0.
+\]
+当 $r$ 为正整数，
+
+\[
+\Gamma(r)=(r-1)!.
+\]
+均值与方差为
+
+\[
+\E[T_r{]}=\frac r\lambda,\qquad
+\operatorname{Var}(T_r)=\frac r{\lambda^2}.
+\]
+$r=1$ 时退化为 Exponential。对非整数形状参数，Gamma 仍然定义良好，可用于正值、右偏、可加的等待或强度模型。
+
+\subsection{计数与等待事件是同一句话}
+
+\[
+\{T_r\le t\}
+\]
+表示第 $r$ 个事件在时间 $t$ 前到达，这等价于
+
+\[
+\{N(t)\ge r\}.
+\]
+因此
+
+\[
+P(T_r\le t)=P(N(t)\ge r).
+\]
+这个等价关系可以在不积分 Gamma 密度时计算概率，也揭示计数分布与等待时间分布为何成对出现。
+
+\subsubsection{自己补完}
+
+呼叫以平均每小时 $6$ 次的稳定 Poisson 过程到达。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  半小时内恰有两次呼叫的概率；
+\item
+  等待下一次呼叫超过 $20$ 分钟的概率；
+\item
+  等到第三次呼叫不超过半小时的概率；
+\item
+  用 Poisson 计数和 Gamma 等待两种方式表达第三问，并说明它们为何相等。
+\end{enumerate}

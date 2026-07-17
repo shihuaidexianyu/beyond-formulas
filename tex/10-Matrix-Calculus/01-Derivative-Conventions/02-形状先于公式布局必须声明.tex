@@ -1,0 +1,172 @@
+\section{形状先于公式，布局必须声明}
+
+同一个表达式在两本资料中相差一个转置，未必有人算错。矩阵微积分存在两种常见布局：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{输出按行、输入按列}：\(J_{ij}=\partial y_i/\partial x_j\)；
+\item
+  \textbf{输入按行、输出按列}：\(J_{ij}=\partial y_j/\partial x_i\)，即第一种约定的整体转置。
+\end{itemize}
+
+本知识库采用第一种约定。若
+
+\[
+y=f(x),\qquad
+x\in\R^n,\ y\in\R^m,
+\]
+
+则
+
+\[
+dy=J_f(x)\,dx,
+\qquad
+J_f\in\R^{m\times n}.
+\]
+
+这与许多数值分析、机器学习和自动微分资料一致。阅读其他来源时，应先寻找作者的 Jacobian 定义，而不是直接复制公式。
+
+\subsection{四种输入输出决定基本形状}
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}{@{}lll@{}}
+\toprule\noalign{}
+映射 & 导数作为线性映射 & 本书常用表示 \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\(f:\mathbb R\to\mathbb R\) & 标量到标量 & \(f'(x)\) \\
+\(f:\mathbb R\to\mathbb R^m\) & 标量到向量 & \(dy/dx\in\mathbb R^m\) \\
+\(f:\mathbb R^n\to\mathbb R\) & 向量到标量 & 梯度 \(\nabla f\in\mathbb R^n\)，且 \(df=\nabla f^Tdx\) \\
+\(f:\mathbb R^n\to\mathbb R^m\) & 向量到向量 & Jacobian \(J_f\in\mathbb R^{m\times n}\) \\
+\end{longtable}
+}
+
+对标量输出，Jacobian 若按``输出行''严格写是一个 \(1\times n\) 行向量：
+
+\[
+J_f=\nabla f^T.
+\]
+
+但优化中通常把梯度保留为与输入同形的列向量。这不是矛盾，而是区分``导数映射的矩阵表示''与``由内积识别出的梯度''（见上一节``梯度来自内积，而不只是偏导排列''）。
+
+\subsection{维度检查能发现大多数转置错误}
+
+设
+
+\[
+y=Ax+b,
+\qquad
+A\in\R^{m\times n}.
+\]
+
+扰动满足
+
+\[
+dy=A\,dx.
+\]
+
+所以 Jacobian 必须是 \(A\)，形状 \(m\times n\)。若某公式给出 \(A^T\)，它要么使用了转置布局，要么确实错误。
+
+再设标量损失 \(\ell(y)\) 的梯度 \(\nabla_y\ell\in\mathbb R^m\)。把 \(dy=A\,dx\) 代入微分：
+
+\[
+d\ell=(\nabla_y\ell)^Tdy
+=(\nabla_y\ell)^TA\,dx
+=(A^T\nabla_y\ell)^Tdx,
+\]
+
+读出与 \(x\) 同形的梯度，即链式法则
+
+\[
+\nabla_x\ell = A^T\nabla_y\ell
+\in\R^n.
+\]
+\(A\) 把输入方向向前推到输出空间，\(A^T\) 把输出的敏感度向后拉回输入空间。转置不是为了凑形状，而是线性映射伴随的自然结果。
+
+\subsection{JVP 与 VJP 比完整 Jacobian 更接近实际需求}
+
+给定输入方向 \(v\in\mathbb R^n\)，
+
+\[
+J_f(x)v
+\]
+
+称为 Jacobian-vector product，简称 JVP。它回答``沿输入方向 \(v\) 轻微移动，所有输出怎样变化''。
+
+给定输出余向量（对输出作线性评价的行向量）\(u\in\mathbb R^m\)，
+
+\[
+u^TJ_f(x)
+\]
+
+称为 vector-Jacobian product，简称 VJP；以列向量表示梯度时常写成 \(J_f(x)^Tu\)。它回答``输出的某个线性评价怎样反传到输入''。
+
+很多应用只需要这两种作用，而不需要存储 \(mn\) 个 Jacobian 元素：
+
+\begin{itemize}
+\tightlist
+\item
+  正向自动微分传播 JVP；
+\item
+  反向自动微分传播 VJP；
+\item
+  标量损失的梯度是从输出种子 \(1\) 开始的一串 VJP；
+\item
+  Hessian-vector product 是对梯度再做一次 JVP。
+\end{itemize}
+
+面对矩阵到矩阵的映射，完整导数需要高阶数组表示，形状更容易混乱。保留算子写法 \(Df(X)[H]\) 或直接计算 JVP/VJP，通常更清楚也更高效。
+
+\subsection{逐元素记号何时有用}
+
+分量形式
+
+\[
+(J_f)_{ij} = \frac{\partial f_i}{\partial x_j}
+\]
+适合核对某个条目、处理复杂索引或广播。但它容易掩盖线性结构，并产生大量求和指标。推荐顺序是：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  先写输入与输出形状；
+\item
+  用微分、方向导数或计算图得到线性作用；
+\item
+  必要时再用分量核对；
+\item
+  最后确认结果能与所需向量或矩阵合法相乘。
+\end{enumerate}
+
+公式表只能在同一布局、同一定义域和同一形状下使用。只看符号名称而不看这些前提，是矩阵求导最常见的错误来源。
+
+\subsection{受约束矩阵还需要说明变量空间}
+
+若 \(X\) 被限制为对称矩阵，允许扰动 \(H\) 也必须对称。环境空间中的两个矩阵梯度，只要它们在所有对称 \(H\) 上给出相同 Frobenius 内积，就代表同一个受约束导数。通常取对称化
+
+\[
+\operatorname{sym}(G)=\frac12(G+G^T)
+\]
+
+作为代表元：它自身对称，且斜对称部分与任何对称矩阵的 Frobenius 内积为零，故对对称 \(H\) 有 \(\langle G,H\rangle_F=\langle\operatorname{sym}(G),H\rangle_F\)。
+
+同样，正交矩阵、概率单纯形或低秩流形上的变量，其可行扰动不再填满整个环境空间。普通欧氏梯度仍可计算，但真正的可行下降方向需要投影到切空间。布局正确并不等于已经处理约束几何。
+
+\subsubsection{留给读者}
+
+设
+
+\[
+y=\begin{bmatrix}
+x_1^2+x_2\\
+x_1x_2
+\end{bmatrix},
+\qquad
+\ell(y)=\frac12\lVert y\rVert_2^2.
+\]
+
+先写 \(J_y(x)\) 的形状，再用 \(\nabla_x\ell=J_y(x)^Ty\) 得到梯度（其中 \(\nabla_y\ell=y\)，正是上一节最小二乘例子取 \(A=I,b=0\) 的结论）。最后逐元素求导核对。若采用转置 Jacobian 约定，哪一处公式必须随之改变？

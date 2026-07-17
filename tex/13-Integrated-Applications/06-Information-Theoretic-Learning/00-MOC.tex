@@ -1,0 +1,16 @@
+信息论进入机器学习时，最容易出现两种误解：一是把 entropy、cross-entropy 和 KL 当成可互换的名称；二是只要目标里出现 mutual information，就认为泛化或鲁棒性已有保证。本单元从可严格推导的关系出发，再逐步讨论它们怎样参与建模。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  交叉熵训练其实在最小化 KL 差异：连接概率编码、最大似然、proper scoring rule 与稳定分类训练。
+\item
+  最大熵从约束中选择最少承诺的分布：研究只知道若干期望约束时，怎样避免凭空加入额外结构，并由此得到指数族。
+\item
+  MDL 把拟合与描述长度放在同一尺度：把模型自身与模型解释不了的数据都写成码长，重新理解复杂度惩罚。
+\item
+  信息瓶颈在压缩与预测之间权衡：讨论表示应忘掉多少输入细节、保留多少任务信息，以及 mutual information 估计的实际困难。
+\end{enumerate}
+
+这四节分别从概率预测、分布选择、模型选择和表示学习切入，但都遵守同一原则：先说明随机变量、分布和约束，再解释目标；先区分精确量与 variational bound，再讨论经验效果。

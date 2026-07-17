@@ -1,0 +1,258 @@
+\section{对角化与动力系统：把耦合演化变成独立缩放}
+
+找到一个特征向量，只能简化一个方向。若 \(n\times n\) 矩阵 \(A\) 拥有 \(n\) 个线性无关特征向量 \(v_1,\ldots,v_n\)，它们构成整个空间的一组基，任意状态都能分解到这些独立模式上。
+
+把特征向量作为列：
+
+\[
+S=\begin{pmatrix}v_1&\cdots&v_n\end{pmatrix},
+\]
+
+把特征值放在对角线上：
+
+\[
+\Lambda=\operatorname{diag}(\lambda_1,\ldots,\lambda_n).
+\]
+
+各列满足 \(Av_i=\lambda_i v_i\)，合在一起就是
+
+\[
+AS=S\Lambda.
+\]
+
+由于 \(S\) 可逆，
+
+\[
+A=S\Lambda S^{-1},
+\qquad
+S^{-1}AS=\Lambda.
+\]
+
+这叫作对角化。它的含义不是把原矩阵``变成另一个问题''，而是把同一线性变换改写到特征向量基下；在这组坐标中，各方向不再互相混合。
+
+\subsection{矩阵幂为什么突然简单}
+
+直接计算 \(A^k\) 会不断进行矩阵乘法。利用对角化：
+
+\[
+\begin{aligned}
+A^k
+&=(S\Lambda S^{-1})^k\\
+&=S\Lambda^kS^{-1},
+\end{aligned}
+\]
+
+因为相邻的 \(S^{-1}S\) 都抵消。对角矩阵的幂只需逐项取幂：
+
+\[
+\Lambda^k
+=\operatorname{diag}(\lambda_1^k,\ldots,\lambda_n^k).
+\]
+
+矩阵指数由幂级数定义：
+
+\[
+e^{At}=\sum_{k=0}^{\infty}\frac{t^k}{k!}A^k.
+\]
+
+代入 \(A^k=S\Lambda^kS^{-1}\)，每一项都带有同一对 \(S\) 与 \(S^{-1}\)，于是
+
+\[
+e^{At}=Se^{\Lambda t}S^{-1},
+\]
+
+其中
+
+\[
+e^{\Lambda t}
+=\operatorname{diag}(e^{\lambda_1t},\ldots,e^{\lambda_nt}).
+\]
+
+特征值因此直接控制重复作用和连续时间演化的增长速度。
+
+\subsection{回到二维例子}
+
+对
+
+\[
+A=\begin{pmatrix}2&1\\1&2\end{pmatrix},
+\]
+
+取
+
+\[
+v_1=\begin{pmatrix}1\\1\end{pmatrix},
+\quad \lambda_1=3,
+\qquad
+v_2=\begin{pmatrix}1\\-1\end{pmatrix},
+\quad \lambda_2=1.
+\]
+
+初始向量
+
+\[
+x_0=\begin{pmatrix}1\\0\end{pmatrix}
+\]
+
+可以写成
+
+\[
+x_0=\frac12v_1+\frac12v_2.
+\]
+
+连续作用 \(k\) 次：
+
+\[
+x_k=A^kx_0
+=\frac12 3^k v_1+\frac12 1^k v_2.
+\]
+
+当 \(k\) 很大时，第一项占主导，状态越来越接近 \((1,1)^{\mathsf T}\) 的方向。我们无需逐次相乘，就能看见长期行为。
+
+\subsection{离散动力系统}
+
+离散线性系统写成
+
+\[
+x_{k+1}=Ax_k,
+\]
+
+所以
+
+\[
+x_k=A^kx_0.
+\]
+
+若 \(A\) 可对角化，把初始状态展开为
+
+\[
+x_0=c_1v_1+\cdots+c_nv_n,
+\]
+
+则
+
+\[
+x_k=c_1\lambda_1^kv_1+\cdots+c_n\lambda_n^kv_n.
+\]
+
+每个特征方向都是一个独立演化模式：
+
+\begin{itemize}
+\tightlist
+\item
+  \(|\lambda_i|<1\)：该模式衰减；
+\item
+  \(|\lambda_i|>1\)：该模式增长；
+\item
+  \(\lambda_i<0\)：符号随步数交替；
+\item
+  \(|\lambda_i|=1\)：需要进一步分析是否保持、振荡或因缺陷结构产生增长（下一节给出最小例子）。
+\end{itemize}
+
+最大绝对值
+
+\[
+\rho(A)=\max_i|\lambda_i|
+\]
+
+称为谱半径。在适当条件下，它决定长期增长率。
+
+\subsection{连续动力系统}
+
+微分方程
+
+\[
+\frac{dx}{dt}=Ax
+\]
+
+的解为
+
+\[
+x(t)=e^{At}x(0).
+\]
+
+对幂级数逐项求导可得 \(\frac{d}{dt}e^{At}=Ae^{At}\)，所以它确实满足方程；代入 \(t=0\) 也给出正确初值。
+
+若 \(A\) 可对角化，
+
+\[
+x(t)=\sum_i c_i e^{\lambda_it}v_i.
+\]
+
+此时：
+
+\begin{itemize}
+\tightlist
+\item
+  \(\operatorname{Re}(\lambda_i)<0\) 的模式指数衰减；
+\item
+  \(\operatorname{Re}(\lambda_i)>0\) 的模式指数增长；
+\item
+  非零虚部产生振荡；
+\item
+  实部为零时，需要结合 Jordan 结构判断是否出现多项式增长。
+\end{itemize}
+
+离散系统看 \(|\lambda|\)，连续系统看 \(\operatorname{Re}(\lambda)\)。把两套稳定条件混用是常见错误。
+
+\subsection{相似矩阵表示同一个变换}
+
+若
+
+\[
+B=S^{-1}AS,
+\]
+
+则 \(A\) 与 \(B\) 相似。\(S\) 把新坐标翻译到旧坐标，\(A\) 执行真实变换，\(S^{-1}\) 再翻译回来。因此二者是同一线性变换在不同基下的矩阵。
+
+相似变换不会改变与坐标无关的性质：
+
+\begin{itemize}
+\tightlist
+\item
+  特征多项式和特征值；
+\item
+  行列式与迹；
+\item
+  秩；
+\item
+  是否可逆；
+\item
+  Jordan 块的结构。
+\end{itemize}
+
+对角化就是寻找一个特别好的相似矩阵：希望 \(B\) 恰好为对角矩阵。
+
+\subsection{什么时候可以对角化}
+
+\(A\) 可对角化当且仅当它拥有 \(n\) 个线性无关特征向量，也等价于所有特征空间维数之和为 \(n\)。
+
+足够但非必要的条件是有 \(n\) 个互不相同的特征值。若特征值重复，就必须检查对应特征空间是否足够大。
+
+例如单位矩阵只有一个特征值 \(1\)，代数重数为 \(n\)，但每个非零向量都是特征向量，所以当然可以对角化。重复根本身不是问题；问题是重复根是否提供了足够多的独立方向。
+
+\subsection{谱分解的两个含义需要区分}
+
+一般可对角化矩阵可以写成
+
+\[
+A=S\Lambda S^{-1}.
+\]
+
+有时这也被宽泛地称为 eigendecomposition。若 \(A\) 是实对称矩阵，会得到更强的形式
+
+\[
+A=Q\Lambda Q^{\mathsf T},
+\]
+
+其中 \(Q\) 正交。后者通常称为谱定理或正交谱分解，具有更好的几何和数值性质。
+
+不能把一般的 \(S^{-1}\) 随意替换成 \(S^{\mathsf T}\)。只有特征向量能够选成正交归一组时才成立，下一单元将专门解释为什么对称矩阵拥有这一优势。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06：Diagonalization and Powers of \(A\)
+\end{itemize}

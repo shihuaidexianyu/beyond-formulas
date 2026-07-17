@@ -1,0 +1,151 @@
+\section{微分熵为何不是离散熵的直接复制}
+
+对连续变量 $X$ 的密度 $f$，形式上把求和换成积分：
+
+\[
+h(X)
+=-\int f(x)\log f(x)\,dx.
+\]
+这个量称为微分熵。它在很多公式中像离散熵，却不能被理解为``连续变量平均自信息''的简单复制，因为单点概率为零，密度也带单位。
+
+\subsection{微分熵可以为负}
+
+若
+
+\[
+X\sim\mathrm{Unif}(0,a),
+\]
+则
+
+\[
+h(X)=\log a.
+\]
+当 $0<a<1$ 时，
+
+\[
+h(X)<0.
+\]
+这不矛盾，因为微分熵不是离散编码所需 bit 数的直接下界。密度可大于一，$-\log f(X)$ 也可以为负。
+
+\subsection{缩放会改变微分熵}
+
+若 $Y=aX+b$，$a\ne0$，则
+
+\[
+h(Y)=h(X)+\log|a|.
+\]
+把米改成厘米，相当于乘一百，微分熵增加 $\log100$。同一个物理量仅因单位改变便有不同微分熵，所以它不是坐标不变的绝对不确定度。
+
+更一般的可逆变换 $Y=g(X)$，由密度变换公式 $f_Y(y)=f_X(g^{-1}(y))\,\lvert\det J_{g^{-1}}(y)\rvert$ 代入积分即得
+
+\[
+h(Y)
+=h(X)+
+\E\left[
+\log\left|
+\det J_g(X)
+\right|
+\right].
+\]
+Jacobian 体积伸缩直接进入熵。
+
+\subsection{离散量化解释它的角色}
+
+把连续 $X$ 以步长 $\Delta$ 量化为 $X_\Delta$，即只记录它落在哪个长度为 $\Delta$ 的小区间。在正则条件下，第 $i$ 个小区间上的概率约为 $f(i\Delta)\Delta$，于是
+
+\[
+H(X_\Delta)
+\approx-\sum_i f(i\Delta)\Delta\,\log\bigl(f(i\Delta)\Delta\bigr)
+=-\sum_i f(i\Delta)\log f(i\Delta)\,\Delta+\log\frac1\Delta.
+\]
+这是近似等式；当 $\Delta\to0$，右端第一项是 $-\int f\log f$ 的 Riemann 和，趋于 $h(X)$，因此
+
+\[
+H(X_\Delta)
+\approx
+h(X)+\log\frac1\Delta.
+\]
+离散熵中发散的
+
+\[
+\log(1/\Delta)
+\]
+来自不断提高分辨率；微分熵是扣除这项分辨率成本后的有限部分。
+
+因此只有指定精度后，连续数据无失真表示所需位数才有实际意义。
+
+\subsection{哪些连续信息量更可靠}
+
+虽然单独微分熵依赖坐标，以下差值或组合具有更稳定意义：
+
+\begin{itemize}
+\item
+  互信息
+
+  \[
+  I(X;Y)=h(X)+h(Y)-h(X,Y);
+  \]
+\item
+  KL 散度；
+\item
+  条件互信息；
+\item
+  熵功率等适当组合。
+\end{itemize}
+
+在共同可逆坐标变换下，Jacobian 项会抵消，因此互信息保持不变。
+
+上面列举的 KL 散度定义为 $D(f\|g)=\int f\log(f/g)\,dx$，衡量两个分布的相对差异；下一节会用它的非负性证明 Gaussian 的最大熵地位，本部分后续单元再系统讨论。
+
+\subsection{Gaussian 微分熵}
+
+若
+
+\[
+X\sim\mathcal N(\mu,\sigma^2),
+\]
+则
+
+\[
+h(X)
+=\frac12\log(2\pi e\sigma^2).
+\]
+它不依赖均值，只随尺度 $\sigma$ 改变。
+
+多元 Gaussian
+
+\[
+X\sim\mathcal N(\mu,\Sigma)
+\]
+有
+
+\[
+h(X)
+=\frac12\log\left((2\pi e)^d|\Sigma|\right).
+\]
+协方差行列式刻画椭球总体积尺度。若 $\Sigma$ 奇异，分布集中在低维子空间，相对于整个空间没有普通密度，公式中的 $\log|\Sigma|$ 趋于负无穷。
+
+\subsection{最大熵结论必须区分离散与连续}
+
+固定有限支撑时，离散均匀分布最大熵；固定区间支撑时，连续均匀分布最大微分熵；固定方差时，Gaussian 最大微分熵。
+
+若没有支撑、尺度或矩约束，连续微分熵通常可以通过拉伸变量任意增大。下一节会把约束条件放在最大熵原则的中心，而不是只记住结论中的分布名称。
+
+\subsubsection{自己补完}
+
+设 $X\sim\mathrm{Unif}(0,1)$，令 $Y=10X+3$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  求 $h(X)$；
+\item
+  用缩放公式求 $h(Y)$；
+\item
+  直接从 $Y$ 的密度验证；
+\item
+  说明为什么平移不改变微分熵，而缩放会改变；
+\item
+  这是否意味着换单位真的创造了信息？
+\end{enumerate}

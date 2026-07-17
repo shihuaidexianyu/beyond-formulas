@@ -1,0 +1,290 @@
+\section{矩阵的四个基本子空间：输入、输出与丢失的信息}
+
+矩阵 \(A\in\R^{m\times n}\) 不只是一个数表，它把输入空间 \(\R^n\) 映到输出空间 \(\R^m\)。要理解这个变换，必须同时回答四个问题：
+
+\begin{itemize}
+\tightlist
+\item
+  输入中哪些方向真正影响输出？
+\item
+  哪些输入方向被完全压到零？
+\item
+  输出中哪些方向能够被产生？
+\item
+  哪些输出方向永远无法由 \(A\) 产生？
+\end{itemize}
+
+它们分别对应行空间、零空间、列空间和左零空间。把四个空间放回同一张输入---输出图景，比逐个记定义更容易看见它们之间的关系。
+
+\subsection{列空间：能够到达的输出}
+
+矩阵的列空间
+
+\[
+\operatorname{Col}(A)\subseteq\R^m
+\]
+
+由 \(A\) 的列张成。因为
+
+\[
+Ax=x_1a_1+\cdots+x_na_n,
+\]
+
+它正好是所有可能输出的集合，也称为 \(A\) 的像。
+
+因此
+
+\[
+Ax=b\text{ 有解}
+\quad\Longleftrightarrow\quad
+b\in\operatorname{Col}(A).
+\]
+
+列空间的维数称为矩阵的秩：
+
+\[
+\operatorname{rank}(A)=\dim\operatorname{Col}(A).
+\]
+
+消元中的主元列数正是秩。主元列要从原矩阵中选，因为行操作一般改变具体列空间。
+
+\subsection{零空间：被变换抹去的输入}
+
+零空间
+
+\[
+\mathcal N(A)=\{x\in\R^n:Ax=0\}
+\]
+
+位于输入空间。若 \(z\in\mathcal N(A)\)，那么对任意 \(x\)，
+
+\[
+A(x+z)=Ax.
+\]
+
+\(A\) 无法区分 \(x\) 与 \(x+z\)。零空间因此记录了所有丢失的信息方向。
+
+零空间的维数称为零度：
+
+\[
+\operatorname{nullity}(A)=\dim\mathcal N(A).
+\]
+
+每一个自由变量对应一个独立的零空间方向。于是输入空间中的自由度被分成两部分：有些方向能够影响输出，有些方向被压到零。
+
+\subsection{秩---零度定理}
+
+设 \(A\) 有 \(n\) 列，秩为 \(r\)。消元后有 \(r\) 个主元变量和 \(n-r\) 个自由变量，因此
+
+\[
+\dim\mathcal N(A)=n-r.
+\]
+
+也就是
+
+\[
+\operatorname{rank}(A)+\operatorname{nullity}(A)=n.
+\]
+
+这不是简单的列数计数。它说明一个线性变换如何分配输入空间的自由度：\(r\) 个独立方向能够在输出中留下痕迹，剩余 \(n-r\) 个方向被送到零。
+
+对一般线性变换 \(T:V\to W\)，相同结论写成
+
+\[
+\dim V=\dim\ker T+\dim\operatorname{im}T.
+\]
+
+\subsection{行空间：真正参与输出的输入方向}
+
+行空间
+
+\[
+\operatorname{Row}(A)\subseteq\R^n
+\]
+
+由 \(A\) 的行张成。它同样位于输入空间，并且维数也等于 \(r\)。
+
+为什么行秩与列秩总相等？消元把 \(A\) 化为阶梯形 \(R\)，行操作保持行空间（上一节），所以 \(\operatorname{Row}(A)=\operatorname{Row}(R)\)。而 \(R\) 的每个非零行都含有一个其他行全为零的主元位置，因此这些非零行线性无关，构成行空间的一组基，其个数正是主元数 \(r\)；同样的主元位置也指出原矩阵有 \(r\) 个线性无关列。于是行空间和列空间虽然处于不同环境空间，却拥有相同维数。
+
+更深的理解将在正交单元出现：
+
+\[
+\R^n=\operatorname{Row}(A)\oplus\mathcal N(A).
+\]
+
+其中 \(\oplus\) 是直和记号，表示每个输入向量都唯一地分解为两个子空间中各一个分量之和。也就是说，输入可以分成一个真正影响输出的行空间分量，以及一个被 \(A\) 完全忽略的零空间分量。
+
+\subsection{左零空间：输出空间中无法解释的方向}
+
+左零空间是
+
+\[
+\mathcal N(A^\trans)
+=\{y\in\R^m:A^\trans y=0\}.
+\]
+
+它位于输出空间。其维数为
+
+\[
+m-r.
+\]
+
+因为它与列空间互补（同样留待正交单元证明），
+
+\[
+\R^m
+=\operatorname{Col}(A)\oplus\mathcal N(A^\trans).
+\]
+
+若 \(b\) 含有左零空间方向的分量，这部分永远不能写成 \(Ax\)。正交单元中的最小二乘所做的正是保留 \(b\) 的列空间分量，把左零空间分量留作残差。
+
+\subsection{一个矩阵的四个空间}
+
+取
+
+\[
+A=
+\begin{pmatrix}
+1&2&3\\
+2&4&6
+\end{pmatrix}.
+\]
+
+第二行是第一行的两倍，三列也都位于同一方向上，所以秩为 \(1\)。
+
+\subsubsection{列空间}
+
+所有列都是 \((1,2)^\trans\) 的倍数：
+
+\[
+\operatorname{Col}(A)
+=\operatorname{span}\left\{
+\begin{pmatrix}1\\2\end{pmatrix}
+\right\}.
+\]
+
+它位于 \(\R^2\)，维数为 \(1\)。
+
+\subsubsection{行空间}
+
+\[
+\operatorname{Row}(A)
+=\operatorname{span}\left\{
+\begin{pmatrix}1\\2\\3\end{pmatrix}
+\right\}.
+\]
+
+它位于 \(\R^3\)，维数同样为 \(1\)。
+
+\subsubsection{零空间}
+
+\(Ax=0\) 等价于
+
+\[
+x_1+2x_2+3x_3=0.
+\]
+
+令 \(x_2=s,x_3=t\)，得到
+
+\[
+x=s\begin{pmatrix}-2\\1\\0\end{pmatrix}
++t\begin{pmatrix}-3\\0\\1\end{pmatrix}.
+\]
+
+所以零空间维数为 \(2=3-1\)。
+
+\subsubsection{左零空间}
+
+解 \(A^\trans y=0\)：
+
+\[
+y_1+2y_2=0.
+\]
+
+因此
+
+\[
+\mathcal N(A^\trans)
+=\operatorname{span}\left\{
+\begin{pmatrix}-2\\1\end{pmatrix}
+\right\},
+\]
+
+维数为 \(1=2-1\)。
+
+四个维数整齐地排列为：
+
+\[
+\begin{array}{c|c|c}
+&\text{空间}&\text{维数}\\ \hline
+\text{输入 }\R^3&\operatorname{Row}(A)&1\\
+&\mathcal N(A)&2\\ \hline
+\text{输出 }\R^2&\operatorname{Col}(A)&1\\
+&\mathcal N(A^\trans)&1
+\end{array}
+\]
+
+每个环境空间中的两个维数加起来恰好等于环境空间维数。
+
+\subsection{\texorpdfstring{\(A\) 真正做了什么}{A 真正做了什么}}
+
+对任意输入 \(x\in\R^n\)，可以把它想成``有效分量加无效分量''：
+
+\[
+x=x_{\text{row}}+x_{\text{null}}.
+\]
+
+于是
+
+\[
+Ax=Ax_{\text{row}}+Ax_{\text{null}}
+=Ax_{\text{row}}.
+\]
+
+零空间分量完全消失。\(A\) 在 \(r\) 维行空间与 \(r\) 维列空间之间建立一一对应，而把剩余输入方向压成零；严格论证依赖行空间与零空间只交于零向量，将随上面的直和分解在正交单元完成。
+
+这个图景会在 SVD 中变得更加精确：选取合适的正交基后，\(A\) 就像沿若干输入方向分别缩放，再把它们送到对应输出方向；零奇异值对应被完全消除的方向。
+
+\subsection{怎样从消元结果取基}
+
+设 \(R\) 是 \(A\) 的 RREF：
+
+\begin{itemize}
+\tightlist
+\item
+  \(R\) 的非零行构成原矩阵行空间的一组基；
+\item
+  主元位置对应的原矩阵列构成原矩阵列空间的一组基；
+\item
+  解 \(Rx=0\) 并令自由变量逐个取值，可构造零空间的一组基；
+\item
+  对 \(A^\trans\) 做同样工作，可构造左零空间的一组基。
+\end{itemize}
+
+不能直接取 \(R\) 的主元列作为 \(\operatorname{Col}(A)\) 的基，因为行操作改变了列空间中的具体向量；主元位置只告诉我们原矩阵中哪些列独立。
+
+\subsection{一次迁移：不计算也能判断维数}
+
+设 \(A\) 是 \(5\times8\) 矩阵，秩为 \(3\)。仅凭这些信息就能得到：
+
+\[
+\dim\operatorname{Col}(A)=3,
+\qquad
+\dim\operatorname{Row}(A)=3,
+\]
+
+\[
+\dim\mathcal N(A)=8-3=5,
+\qquad
+\dim\mathcal N(A^\trans)=5-3=2.
+\]
+
+接着思考：\(Ax=b\) 能否对每个 \(b\in\R^5\) 都有解？能否存在唯一解？列空间只有三维，所以不能覆盖整个 \(\R^5\)；零空间有五维，所以任何相容系统都不可能只有一个解。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06：The Four Fundamental Subspaces
+\end{itemize}

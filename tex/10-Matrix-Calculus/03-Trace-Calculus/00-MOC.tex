@@ -1,0 +1,22 @@
+Trace 方法不是一张公式表。它的核心任务只有一个：把标量微分整理成
+
+\[
+df=\operatorname{tr}(G^TdX),
+\]
+
+从而读出 \(\nabla_Xf=G\)（即以 Frobenius 内积 \(\langle G,H\rangle_F=\operatorname{tr}(G^TH)\) 定义梯度）。二次型、逆矩阵和 log-determinant 都可以从各自的基本恒等式推导，不需要凭记忆猜转置。
+
+本章分三节：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Trace 怎样整理二次型微分：练习循环移动、转置和矩阵二次型。
+\item
+  逆矩阵求导应写成线性求解：从 \(XX^{-1}=I\) 推出逆的微分，再把它改写为对线性求解的隐式微分与反向传播。
+\item
+  行列式与 log-determinant 的微分：用 Jacobi 公式连接体积、谱、Gaussian 模型与半正定障碍。
+\end{enumerate}
+
+每次应用公式前，都要检查矩阵是否可逆、是否对称正定、变量是否受对称约束，以及数值实现是否应复用分解而非显式求逆。

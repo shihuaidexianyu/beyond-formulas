@@ -1,0 +1,167 @@
+\section{成败试验中的 Bernoulli、二项与等待分布}
+
+许多随机过程都可以暂时抽象为成败试验：零件合格或不合格、用户点击或未点击、数据包到达或丢失。设每次成功概率为 $p$，失败概率为 $1-p$。
+
+同一串试验会产生不同分布，区别不在公式，而在我们何时停止、记录什么。
+
+\subsection{一次试验：Bernoulli}
+
+随机变量
+
+\[
+X=
+\begin{cases}
+1,&\text{成功},\\
+0,&\text{失败}
+\end{cases}
+\]
+服从 Bernoulli($p$) 分布：
+
+\[
+P(X=1)=p,\qquad P(X=0)=1-p.
+\]
+由指示变量性质，
+
+\[
+\E[X{]}=p,
+\]
+而 $X^2=X$，所以
+
+\[
+\operatorname{Var}(X)
+=p-p^2
+=p(1-p).
+\]
+Bernoulli 是许多计数分布的原子：成功总数就是若干 Bernoulli 指示变量之和。
+
+\subsection{固定做 $n$ 次：Binomial}
+
+若 $X_1,\ldots,X_n$ 独立且都服从 Bernoulli($p$)，成功总数
+
+\[
+S_n=X_1+\cdots+X_n
+\]
+服从 Binomial($n,p$) 分布：
+
+\[
+P(S_n=k)
+=\binom nk p^k(1-p)^{n-k},
+\qquad k=0,\ldots,n.
+\]
+这里三个条件都重要：
+
+\begin{itemize}
+\tightlist
+\item
+  试验次数固定为 $n$；
+\item
+  每次只有成功/失败；
+\item
+  各次独立且成功概率相同。
+\end{itemize}
+
+组合数选择成功位置，概率幂给任意指定模式的概率。由期望与独立变量方差可加，
+
+\[
+\E[S_n{]}=np,\qquad
+\operatorname{Var}(S_n)=np(1-p).
+\]
+若各次成功概率不同但仍独立，总数称为 Poisson-binomial 分布，不再是普通 Binomial。若不放回抽样，各次成功概率也会随历史改变，下一节会得到 Hypergeometric 分布。
+
+\subsection{等到第一次成功：Geometric}
+
+现在不固定试验次数，而是不断试验直到第一次成功。若 $T$ 记录成功出现的试验编号，则
+
+\[
+P(T=k)=(1-p)^{k-1}p,
+\qquad k=1,2,\ldots
+\]
+因为前 $k-1$ 次必须失败，第 $k$ 次成功。
+
+该参数化下
+
+\[
+\E[T{]}=\frac1p,\qquad
+\operatorname{Var}(T)=\frac{1-p}{p^2}.
+\]
+另一些资料令 $F=T-1$ 记录成功前失败次数，支撑从 $0$ 开始。两者都叫 Geometric，使用公式前必须先看变量究竟记录``试验次数''还是``失败次数''。
+
+Geometric 分布具有无记忆性：
+
+\[
+P(T> s+t\mid T> s)=P(T> t).
+\]
+可以直接验证：对几何级数求和得 $P(T>k)=(1-p)^k$，于是
+
+\[
+P(T>s+t\mid T>s)
+=\frac{P(T>s+t)}{P(T>s)}
+=\frac{(1-p)^{s+t}}{(1-p)^s}
+=(1-p)^t
+=P(T>t).
+\]
+直觉上，已经连续失败 $s$ 次不会改变还需再等多久的分布，因为后续独立试验仍有同样成功概率。现实等待若存在老化、学习或排队状态变化，就不应使用无记忆模型。
+
+\subsection{等到第 $r$ 次成功：Negative Binomial}
+
+令 $T_r$ 为第 $r$ 次成功出现的试验编号。要在第 $k$ 次达到第 $r$ 次成功：
+
+\begin{itemize}
+\tightlist
+\item
+  前 $k-1$ 次恰有 $r-1$ 次成功；
+\item
+  第 $k$ 次成功。
+\end{itemize}
+
+因此
+
+\[
+P(T_r=k)
+=\binom{k-1}{r-1}p^r(1-p)^{k-r},
+\qquad k=r,r+1,\ldots
+\]
+并有
+
+\[
+\E[T_r{]}=\frac r p,\qquad
+\operatorname{Var}(T_r)=\frac{r(1-p)}{p^2}.
+\]
+同样，有些文献令变量记录第 $r$ 次成功前的失败数 $F=T_r-r$，支撑从 $0$ 开始。Negative Binomial 的参数化差异尤其多，写答案时必须说明随机变量和参数含义。
+
+它也可以看成 $r$ 个独立 Geometric 等待时间之和：每次成功后，重新等待下一次成功。由期望线性与独立和的方差可加性，把 Geometric 的均值与方差各乘以 $r$，正给出上面的公式。
+
+\subsection{四个分布如何选择}
+
+面对成败试验时，先看问题的停止规则：
+
+\begin{itemize}
+\tightlist
+\item
+  只看一次结果：Bernoulli；
+\item
+  固定做 $n$ 次，数成功：Binomial；
+\item
+  做到第一次成功，数等待：Geometric；
+\item
+  做到第 $r$ 次成功，数等待：Negative Binomial。
+\end{itemize}
+
+它们共享同一个试验机制，却回答不同随机问题。把``有 $n$ 次试验''与``等到 $n$ 次成功''混淆，是套公式时最常见的根本错误。
+
+\subsubsection{自己补完}
+
+某独立请求成功概率为 $0.2$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  发出十次请求，恰有三次成功的概率对应哪个分布？
+\item
+  第一次成功恰在第四次请求的概率是多少？
+\item
+  第三次成功恰在第十次请求的概率是多少？
+\item
+  分别说明每问中试验何时停止、随机变量记录什么。
+\end{enumerate}

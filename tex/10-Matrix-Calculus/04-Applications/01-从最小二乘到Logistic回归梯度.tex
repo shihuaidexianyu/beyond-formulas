@@ -1,0 +1,212 @@
+\section{从最小二乘到 logistic 回归梯度}
+
+设有 \(n\) 个样本、\(d\) 个特征：
+
+\[
+X\in\R^{n\times d},
+\qquad
+w\in\R^d.
+\]
+
+线性预测是
+
+\[
+z=Xw\in\R^n.
+\]
+
+最小二乘与 logistic 回归共享这一步，区别在于怎样把预测 \(z_i\) 与标签比较。损失函数一变，反向传播到 \(z\) 的``残差信号''就会改变；线性层的伴随始终是乘以 \(X^T\)。
+
+\subsection{最小二乘：误差本身就是输出梯度}
+
+对连续标签 \(y\in\R^n\)，令
+
+\[
+L(w)=\frac{1}{2n}\lVert Xw-y\rVert_2^2.
+\]
+
+记残差
+
+\[
+r=Xw-y.
+\]
+
+微分为
+
+\[
+dL = \frac1n r^Tdr
+=\frac1n r^TX\,dw.
+\]
+因此
+
+\[
+\nabla_wL = \frac1nX^T(Xw-y).
+\]
+这条公式可以按两层理解：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  平方损失对预测 \(z\) 的梯度是平均残差 \(r/n\)；
+\item
+  线性映射 \(z=Xw\) 的反向伴随把它乘以 \(X^T\)。
+\end{enumerate}
+
+Hessian 为
+
+\[
+\nabla_w^2L = \frac1nX^TX\succeq0.
+\]
+它不依赖 \(w\)，因为目标本来就是二次函数。若加入 Ridge 项 \(\lambda\lVert w\rVert^2/2\)，
+
+\[
+\nabla_wL = \frac1nX^Tr+\lambda w,
+\]
+\[
+\nabla_w^2L = \frac1nX^TX+\lambda I.
+\]
+样本和、样本平均以及是否含 \(\frac12\) 都会改变常数因子。推导前必须先写清目标定义，不能把不同资料的梯度直接比较。
+
+\subsection{多输出最小二乘保持同一结构}
+
+若
+
+\[
+W\in\R^{d\times k},
+\qquad
+Y\in\R^{n\times k},
+\]
+
+预测为 \(XW\)，目标
+
+\[
+L(W)=\frac{1}{2n}\lVert XW-Y\rVert_F^2.
+\]
+
+沿用矩阵残差 \(R=XW-Y\)，微分为
+
+\[
+dL=\frac1n\operatorname{tr}(R^TdR)
+=\frac1n\operatorname{tr}\bigl((X^TR)^TdW\bigr),
+\]
+
+读出
+
+\[
+\nabla_WL=\frac1nX^TR.
+\]
+
+形状为 \(d\times k\)，与 \(W\) 相同。向量公式并不是另一个需要记忆的结论，而是矩阵公式在 \(k=1\) 时的特例。
+
+\subsection{Logistic 回归：残差信号变成概率减标签}
+
+令二分类标签 \(y_i\in\{0,1\}\)，并加入标量截距 \(b\)（\(\mathbf1\) 为全一向量），logit
+
+\[
+z=Xw+b\mathbf1,
+\]
+
+概率
+
+\[
+p=\sigma(z),
+\qquad
+\sigma(z_i)=\frac1{1+e^{-z_i}}.
+\]
+
+平均负对数似然为
+
+\[
+L = -\frac1n\sum_{i=1}^n
+\bigl[
+y_i\log p_i+(1-y_i)\log(1-p_i)
+\bigr].
+\]
+对单个样本，先对 \(p\) 求导：
+
+\[
+\frac{\partial\ell}{\partial p} = -\frac yp+\frac{1-y}{1-p}.
+\]
+而 sigmoid 的导数可直接算出：
+
+\[
+\frac{dp}{dz}=\frac{e^{-z}}{(1+e^{-z})^2}=p(1-p).
+\]
+
+相乘并化简：
+
+\[
+\frac{\partial\ell}{\partial z}
+=\left(-\frac yp+\frac{1-y}{1-p}\right)p(1-p)
+=-y(1-p)+(1-y)p
+=p-y.
+\]
+于是批量梯度为
+
+\[
+\nabla_wL = \frac1nX^T(p-y),
+\]
+\[
+\frac{\partial L}{\partial b} = \frac1n\mathbf1^T(p-y).
+\]
+与最小二乘相比，线性层的反向形式完全相同，只有预测空间中的残差从 \(z-y\) 变成 \(p-y\)。
+
+\subsection{直接从稳定 logits 损失推导}
+
+数值实现不应先算概率再取两个对数。代入 \(\log p=z-\log(1+e^z)\) 与 \(\log(1-p)=-\log(1+e^z)\)，单样本损失化简为
+
+\[
+\ell(z,y) = \log(1+e^z)-yz.
+\]
+用稳定 softplus 计算后，导数直接是
+
+\[
+\sigma(z)-y.
+\]
+
+这个表示避免 \(p\) 下溢为零后出现 \(\log0\)，也使凸性清楚：softplus 凸，减去线性项仍凸。
+
+Hessian 为
+
+\[
+\nabla_w^2L = \frac1nX^TDX,
+\]
+其中
+
+\[
+D=\operatorname{diag}(p_i(1-p_i))\succeq0.
+\]
+
+所以 logistic 目标凸。若加入 \(L_2\) 正则，Hessian 再加 \(\lambda I\)。
+
+\subsection{形状与缩放的实际检查}
+
+实现批量梯度时，至少检查：
+
+\begin{itemize}
+\tightlist
+\item
+  \(X^T(p-y)\) 的形状是否与 \(w\) 一致；
+\item
+  对 bias 是否沿 batch 轴求和，而不是保留样本维；
+\item
+  目标若取平均，所有数据项梯度是否也除以 \(n\)；
+\item
+  正则项是否应惩罚 bias；
+\item
+  样本权重与类别权重是否同时进入损失和梯度；
+\item
+  极端 logits 是否通过 stable softplus 仍返回有限损失。
+\end{itemize}
+
+有限差分或自动微分可以检查实现，但不能替代目标定义。若代码求的是样本和，而手推公式求的是样本平均，两者会稳定地相差 \(n\)，这不是浮点误差。
+
+\subsubsection{留给读者}
+
+给 logistic 回归加入每个样本权重 \(a_i\ge0\)：
+
+\[
+L=\frac{1}{\sum_i a_i}\sum_i a_i\ell_i.
+\]
+
+推导 \(w,b\) 的梯度，并写出向量化形式。若某个 \(a_i=0\)，该样本对 Hessian 有何贡献？

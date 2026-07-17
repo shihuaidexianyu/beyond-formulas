@@ -1,0 +1,78 @@
+\section{容斥原理与重复计数}
+
+\subsection{直接相加为何会多算交集}
+
+若对象可能同时属于 \(A,B\)，\(|A|+|B|\) 会把交集对象算两次，所以
+
+\[
+|A\cup B|
+=|A|+|B|-|A\cap B|.
+\]
+
+三个集合时，先加单集、减两两交集，却会把三重交集减得过多，因此再加回来：
+
+\[
+|A\cup B\cup C|
+=\sum|A_i|-\sum|A_i\cap A_j|+|A\cap B\cap C|.
+\]
+
+一般容斥在所有非空交集间交替加减。某个属于恰好 \(r\) 个集合的对象最终权重为
+
+\[
+\binom r1-\binom r2+\cdots+(-1)^{r+1}\binom rr=1,
+\]
+
+这一步由上一节二项式定理展开 \((1-1)^r=0\) 再移项得到；于是每个并集对象恰被计一次。
+
+\subsection{一个整除计数例子}
+
+1 到 100 中能被 2 或 3 整除的整数个数为
+
+\[
+\left\lfloor\frac{100}{2}\right\rfloor
++\left\lfloor\frac{100}{3}\right\rfloor
+-\left\lfloor\frac{100}{6}\right\rfloor
+=50+33-16=67.
+\]
+
+交集是同时被 2、3 整除，即被最小公倍数 6 整除。若题目问既不被 2 也不被 3 整除，用全集 100 减去并集，得到 33。
+
+补集法常把``至少一个''\,``没有任何''这类条件变简单；容斥则负责纠正多个坏事件的重叠。
+
+\subsection{错排问题}
+
+\(n\) 封信放入对应的 \(n\) 个信封，要求没有一封放对。令 \(A_i\) 表示第 \(i\) 封信放对。错排数是
+
+\[
+D_n=n!-|A_1\cup\cdots\cup A_n|.
+\]
+
+固定某 \(k\) 封信放对，有 \(\binom nk(n-k)!\) 个排列；容斥中所有 \(k\) 重交集合起来贡献 \((-1)^k\binom nk(n-k)!\)，而 \(\binom nk(n-k)!=n!/k!\)，所以
+
+\[
+D_n
+=n!+\sum_{k=1}^n(-1)^k\binom nk(n-k)!
+=n!\sum_{k=0}^n\frac{(-1)^k}{k!}.
+\]
+
+这个公式也说明 \(D_n\) 约为 \(n!/e\)：括号中的和是 \(e^{-1}\) 的泰勒部分和。此处引用了幂级数结论，不展开证明。容斥把``每个位置都禁止''的全局条件拆成若干指定位置固定的易计数条件。
+
+\subsection{截断容斥给上下界}
+
+集合很多时完整公式可能昂贵。只取前若干层会得到 Bonferroni 上下界：加单集给并集上界，加到两两交集给下界，继续交替。概率论中的 union bound 正是只保留第一层：
+
+\[
+\Prob\left(\bigcup_i A_i\right)\le\sum_i\Prob(A_i).
+\]
+
+简单上界虽然不精确，却常足以控制坏事件。
+
+\subsection{延伸与来源}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT Mathematics for Computer Science 的 Counting 章节。
+\item
+  UC Berkeley CS 70 的 Counting 讲义。
+\end{itemize}

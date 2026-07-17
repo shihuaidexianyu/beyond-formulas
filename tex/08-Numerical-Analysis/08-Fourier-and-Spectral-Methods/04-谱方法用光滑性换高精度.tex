@@ -1,0 +1,121 @@
+\section{谱方法：用光滑性换高精度}
+
+\subsection{从局部网格到全局模式}
+
+有限差分在每个点用附近少量节点构造低次近似；谱方法把整个未知函数展开到全局基：
+
+\[
+u_N(x)=\sum_{k=0}^Na_k\phi_k(x).
+\]
+
+周期问题常用 Fourier 基，有限非周期区间常用 Chebyshev 多项式。若解足够光滑，高阶系数迅速衰减，少量自由度就能达到高精度。
+
+``谱准确''通常指误差随 \(N\) 增大快于任意固定代数阶；解析函数常表现为几何收敛。它不是因为方法在计算``矩阵谱''，而是因为在函数的频率或多项式模态上离散。
+
+\subsection{三种常见施加方程的方式}
+
+\begin{itemize}
+\tightlist
+\item
+  Galerkin：让残差与所有试验基正交；
+\item
+  tau：用部分模态方程加边界条件替换最高阶条件；
+\item
+  collocation 或 pseudospectral：在选定节点上令微分方程残差为零。
+\end{itemize}
+
+modal 方法直接操作系数，collocation 方法在节点值与系数之间变换。FFT 或快速 cosine transform 使 Fourier/Chebyshev 方法高效。
+
+\subsection{微分在 Fourier 空间变成乘法}
+
+对周期展开
+
+\[
+u(x)=\sum_k\hat u_ke^{ikx},
+\]
+
+有
+
+\[
+u'(x)=\sum_k(ik)\hat u_ke^{ikx},
+\]
+
+\[
+u''(x)=\sum_k(-k^2)\hat u_ke^{ikx}.
+\]
+
+例如周期 Poisson 方程
+
+\[
+-u''=f
+\]
+
+在每个非零频率上变为
+
+\[
+k^2\hat u_k=\hat f_k,
+\]
+
+可逐模式求解。零频率对应常数零空间，需要兼容条件 \(\hat f_0=0\)，并额外固定 \(u\) 的均值。忽略零模会得到除零或非唯一问题。
+
+\subsection{Chebyshev 节点处理非周期区间}
+
+在 \([-1,1]\) 上，Chebyshev 节点向端点聚集，避免等距高次插值的 Runge 病态。collocation 可构造微分矩阵 \(D\)，用节点值向量近似导数。
+
+代价是高阶微分矩阵通常稠密且条件数快速增长，时间显式推进还可能受到严格的 CFL（Courant--Friedrichs--Lewy）步长限制——与 ODE 单元的稳定区域同理，显格式会被最快模态卡住。空间谱精度不意味着时间离散自动稳定。
+
+复杂几何、局部尖层和不规则系数可能更适合有限元、有限体积或域分解谱元方法。全局基的优势与局部性差是同一结构的两面。
+
+\subsection{非线性项会产生 alias}
+
+若 \(u\) 只保留到最高频率 \(K\)，乘积 \(u^2\) 会产生最高约 \(2K\) 的频率。有限网格无法表示这些模式，它们会折叠回低频，污染解——与第二节的采样混叠是同一折叠机制，只是这里由非线性而非采样产生。
+
+常见 dealiasing 方法包括：
+
+\begin{itemize}
+\tightlist
+\item
+  在更细网格上零填充系数、计算乘积后截回；
+\item
+  Fourier 方法的 2/3 rule；
+\item
+  使用适当过积分。
+\end{itemize}
+
+线性问题中没有这个频率卷积，不能把线性谱算法的干净表现直接推广到非线性 PDE。
+
+\subsection{光滑性决定能否兑现高阶承诺}
+
+第一节已经建立：解析周期函数的 Fourier 系数几何衰减；有限光滑函数只有代数衰减；跳跃产生 Gibbs 振荡。若系数尾部停止衰减，可能原因包括：
+
+\begin{itemize}
+\tightlist
+\item
+  解本身不光滑；
+\item
+  周期边界拼接不匹配；
+\item
+  网格不足或发生 aliasing；
+\item
+  数据噪声达到平台；
+\item
+  舍入误差开始主导。
+\end{itemize}
+
+因此谱系数图是很有价值的诊断，而``增加 N''不是无条件解决方案。
+
+\subsection{一套最低验证}
+
+\begin{itemize}
+\tightlist
+\item
+  用单一 Fourier/Chebyshev 模式检查微分是否精确到舍入尺度；
+\item
+  检查边界条件和零频兼容；
+\item
+  比较解析、有限光滑与跳跃测试函数的系数衰减；
+\item
+  非线性问题比较 dealias 前后守恒量与高频尾部；
+\item
+  空间加密与时间步长加密分开做，避免把时间误差误判为空间谱误差。
+\end{itemize}

@@ -1,0 +1,149 @@
+\section{Martingale：公平游戏与停时}
+
+设 $\mathcal F_n$ 表示到时刻 $n$ 已知的全部信息，即随 $n$ 递增的事件族（filtration）。适应于这组信息的过程 $M_n$（``适应''表示 $M_n$ 的值由时刻 $n$ 为止的信息决定）若满足
+
+\[
+\E[|M_n|]<\infty,
+\]
+以及
+
+\[
+\E[M_{n+1}\mid\mathcal F_n]=M_n,
+\]
+就称为 Martingale。
+
+这表示在掌握当前全部信息后，下一步的条件期望仍是当前值。它是``公平游戏''的数学形式，但实际路径仍可剧烈波动。
+
+\subsection{公平随机游走是 Martingale}
+
+令
+
+\[
+S_n=Z_1+\cdots+Z_n,
+\]
+其中 $Z_{n+1}$ 与过去独立且均值零。取
+
+\[
+\mathcal F_n=\sigma(Z_1,\ldots,Z_n),
+\]
+即只包含``由前 $n$ 步增量能回答''的那些事件的信息族，则
+
+\[
+\E[S_{n+1}\mid\mathcal F_n]
+=S_n+\E[Z_{n+1}\mid\mathcal F_n]
+=S_n.
+\]
+所以 $S_n$ 是 Martingale。
+
+若增量均值为正，则为 submartingale：
+
+\[
+\E[M_{n+1}\mid\mathcal F_n]\ge M_n.
+\]
+均值为负则为 supermartingale。
+
+\subsection{条件期望本身生成 Martingale}
+
+对可积随机变量 $X$，定义
+
+\[
+M_n=\E[X\mid\mathcal F_n].
+\]
+随着信息增加，这是对最终未知量 $X$ 的当前最佳预测。由塔式性质，
+
+\[
+\E[M_{n+1}\mid\mathcal F_n]
+=\E[\E[X\mid\mathcal F_{n+1}]
+\mid\mathcal F_n]
+=\E[X\mid\mathcal F_n]
+=M_n.
+\]
+所以``逐步揭示信息后的条件预测''天然是 Martingale。
+
+这比赌博直觉更本质：Martingale 是关于信息过滤与条件期望的一致性。
+
+\subsection{补偿可以消除漂移}
+
+若随机游走单步均值为 $\mu$，则 $S_n$ 本身有漂移，但
+
+\[
+M_n=S_n-n\mu
+\]
+满足 Martingale 性。对 Poisson 过程，
+
+\[
+N(t)-\lambda t
+\]
+也是连续时间 Martingale。
+
+``观测量减去可预测趋势''得到不可预测创新，是时间序列、计数过程和统计估计中的共同思想。
+
+\subsection{停止策略不能凭空创造期望收益}
+
+设 $\tau$ 是停时：在时刻 $n$ 是否停止，只能使用 $\mathcal F_n$ 中已有信息，不能偷看未来。
+
+可选停止定理在适当条件下给出
+
+\[
+\E[M_\tau]=\E[M_0].
+\]
+但``适当条件''不能省略。常见充分条件包括：
+
+\begin{itemize}
+\tightlist
+\item
+  $\tau$ 有界；
+\item
+  或 $M_n$ 增量有界且 $\E[\tau]<\infty$；
+\item
+  或停止后的变量族一致可积。
+\end{itemize}
+
+著名的加倍下注策略在无限信用与无限时间的理想化下试图保证最终赢一单位，却需要可能无界的下注和停止时间；可选停止条件失败，不能据此推翻公平性。
+
+\subsection{用停时求赌徒破产概率}
+
+公平游走在 $(0,N)$ 吸收，从 $i$ 出发。令
+
+\[
+\tau=\inf\{n:S_n\in\{0,N\}\}.
+\]
+在有限区间中 $\tau$ 几乎必然有限（上一单元由首步分析还得出 $\E_i[\tau]=i(N-i)<\infty$）；停止之前 $S_n$ 始终落在 $[0,N]$ 内，故停止过程 $S_{n\wedge\tau}$（$a\wedge b$ 表示两者取小）有界。可选停止的充分条件满足，因此
+
+\[
+\E[S_\tau]=\E[S_0]=i.
+\]
+若 $h=P_i(S_\tau=N)$（下标 $i$ 表示从 $i$ 出发），则
+
+\[
+\E[S_\tau]=Nh+0\cdot(1-h),
+\]
+所以
+
+\[
+h=\frac iN.
+\]
+这就是上一节引用的赌徒破产概率。同一个结果既可由首步差分方程得到，也可由 Martingale 停止得到。前者局部递推，后者利用全局守恒量。
+
+\subsection{Martingale 不代表独立或路径平稳}
+
+Martingale 增量只要求条件均值为零，可以有条件异方差和复杂依赖。$M_n$ 的分布也可能随时间扩散，绝非平稳过程。
+
+它控制的是``没有可预测平均漂移''，不是``没有风险''\,``未来独立于过去''或``每步大小相同''。
+
+\subsubsection{自己补完}
+
+设 $Z_i$ 独立，取 $\pm1$ 各概率 $1/2$，$S_n=\sum_{i=1}^nZ_i$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  证明 $S_n$ 是 Martingale；
+\item
+  证明 $S_n^2-n$ 也是 Martingale；
+\item
+  令 $\tau$ 为首次到达 $\{-a,b\}$ 的时刻，用第一条 Martingale 推导到达 $b$ 的概率；
+\item
+  说明使用可选停止时需要检查什么。
+\end{enumerate}

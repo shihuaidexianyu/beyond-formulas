@@ -1,0 +1,93 @@
+\section{三角函数与周期：用旋转描述重复变化}
+
+\subsection{从直角三角形走向单位圆}
+
+直角三角形能定义锐角的正弦与余弦，却难以处理负角、超过一周的角和连续旋转。单位圆给出统一定义：从点 \((1,0)\) 逆时针转过角 \(\theta\) 后到达
+
+\[
+(\cos\theta,\sin\theta).
+\]
+
+于是 \(\cos\theta\) 是横坐标，\(\sin\theta\) 是纵坐标。角度增加 \(2\pi\) 回到同一点，所以
+
+\[
+\sin(\theta+2\pi)=\sin\theta,\qquad
+\cos(\theta+2\pi)=\cos\theta.
+\]
+
+勾股定理立即给出
+
+\[
+\sin^2\theta+\cos^2\theta=1.
+\]
+
+这一定义把三角函数从三角形比例提升为旋转坐标，为周期运动、复数和 Fourier 分析做好准备。
+
+\subsection{弧度让角度成为长度比}
+
+弧度定义为圆弧长除以半径。单位圆上，角 \(\theta\) 对应弧长恰为 \(\theta\)。一整周是 \(2\pi\)，半周是 \(\pi\)。
+
+微积分公式之所以默认弧度，是因为只有弧度下
+
+\[
+\lim_{h\to0}\frac{\sin h}{h}=1,
+\]
+
+从而 \((\sin x)'=\cos x\) 不带额外常数。若以度数为变量，导数会多出 \(\pi/180\)。计算器角度模式错误不是小格式问题，而是输入单位改变了函数。
+
+\subsection{振幅、频率、相位与中线}
+
+周期模型常写成
+
+\[
+y(t)=A\cos(\omega t+\varphi)+D.
+\]
+
+\begin{itemize}
+\tightlist
+\item
+  \(|A|\) 是相对中线的振幅；
+\item
+  \(D\) 是中线位置；
+\item
+  \(\omega\) 是角频率，周期 \(T=2\pi/|\omega|\)；
+\item
+  \(\varphi\) 控制相位，水平位移为 \(-\varphi/\omega\)。
+\end{itemize}
+
+例如一天温度可粗略建模为
+
+\[
+T(t)=20+5\cos\!\left(\frac{2\pi}{24}(t-15)\right),
+\]
+
+这里把 \(\omega t+\varphi\) 提因子成 \(\omega(t-t_0)\)，余弦直接在 \(t=t_0\) 处取到峰值：上式表示中线 \(20^\circ\)、振幅 \(5^\circ\)、周期 24 小时，并在 \(t=15\) 附近达到峰值。真实气温不会严格正弦，这个模型只保留主要日周期。
+
+\subsection{正切与反三角函数的边界}
+
+\[
+\tan\theta=\frac{\sin\theta}{\cos\theta}
+\]
+
+在 \(\cos\theta=0\) 时无定义，周期为 \(\pi\)。图像的竖直渐近线来自分母趋近零，不是函数在该点取了``无穷大''这个值。
+
+周期函数在整个实数上不单射，所以反三角函数必须先限制定义域、选定主值区间——正是``反函数与可逆性''一节处理 \(x^2\) 的同一原理：
+
+\[
+\arcsin:[-1,1]\to[-\pi/2,\pi/2],
+\]
+
+\[
+\arccos:[-1,1]\to[0,\pi],\qquad
+\arctan:\R\to(-\pi/2,\pi/2).
+\]
+
+因此 \(\arcsin(\sin x)\) 不对所有 \(x\) 等于 \(x\)；它会把角度折回主值区间。反函数恒等式总要连同论域一起使用。
+
+\subsection{延伸与来源}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT OpenCourseWare 18.01SC Single Variable Calculus 的 Differentiation 预备内容。
+\end{itemize}

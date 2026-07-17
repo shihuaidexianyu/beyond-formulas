@@ -1,0 +1,215 @@
+\section{Trace 怎样整理二次型微分}
+
+矩阵求导常以标量目标结束。任何标量都等于自己的 trace，因此可以把内积和二次型统一放进 trace 中，再利用循环性质把微分移动到便于读取的位置。
+
+最基本的规则包括：
+
+\[
+\operatorname{tr}(A+B) = \operatorname{tr}(A)+\operatorname{tr}(B),
+\]
+\[
+\operatorname{tr}(A) = \operatorname{tr}(A^T),
+\]
+以及在形状相容时
+
+\[
+\operatorname{tr}(ABC) = \operatorname{tr}(BCA)
+=\operatorname{tr}(CAB).
+\]
+最后一条只允许循环移动，不能任意交换因子顺序。矩阵乘法一般不交换。
+
+\subsection{线性 trace 先建立读取习惯}
+
+令
+
+\[
+f(X)=\operatorname{tr}(A^TX).
+\]
+
+微分为
+
+\[
+df=\operatorname{tr}(A^TdX),
+\]
+
+直接与梯度定义比较，得到
+
+\[
+\nabla_Xf=A.
+\]
+
+若写成
+
+\[
+f(X)=\operatorname{tr}(AXB),
+\]
+
+则
+
+\[
+df=\operatorname{tr}(A\,dX\,B) = \operatorname{tr}(BA\,dX).
+\]
+为了匹配 \(\operatorname{tr}(G^TdX)\)，有
+
+\[
+G=(BA)^T=A^TB^T.
+\]
+
+这里最容易漏掉最后的转置。不要把``\(dX\) 左边的东西''未经匹配就直接叫梯度。
+
+\subsection{\texorpdfstring{向量二次型为何出现 \(A+A^T\)}{向量二次型为何出现 A+A^T}}
+
+考虑
+
+\[
+f(x)=x^TAx.
+\]
+
+微分同时作用到两个 \(x\)：
+
+\[
+df
+=(dx)^TAx+x^TA\,dx.
+\]
+
+第一项是标量，可以转置：
+
+\[
+(dx)^TAx = x^TA^Tdx.
+\]
+所以
+
+\[
+df = x^T(A^T+A)dx
+=\bigl[(A+A^T)x\bigr]^Tdx,
+\]
+从而
+
+\[
+\nabla_xf=(A+A^T)x.
+\]
+
+只有当 \(A\) 对称时，才简化为 \(2Ax\)。事实上
+
+\[
+x^TAx = x^T\left(\frac{A+A^T}{2}\right)x,
+\]
+反对称部分对二次型没有贡献：反对称矩阵 \(W\) 满足 \(x^TWx=(x^TWx)^T=-x^TWx\)，故只能为零。直接背``二次型梯度是 \(2Ax\)''而忽略对称性，是公式表常造成的错误。
+
+更一般地，
+
+\[
+f(x)=\frac12x^TAx+b^Tx+c
+\]
+
+的梯度为
+
+\[
+\frac12(A+A^T)x+b.
+\]
+
+若 \(A\) 是 Hessian 或协方差，通常本来就对称。
+
+\subsection{矩阵二次型需要保留两条路径}
+
+令
+
+\[
+f(X)=\operatorname{tr}(X^TAXB),
+\]
+
+其中 \(A,B\) 为常矩阵。微分为
+
+\[
+df = \operatorname{tr}\bigl((dX)^TAXB\bigr)
++\operatorname{tr}\bigl(X^TA(dX)B\bigr).
+\]
+第一项利用转置和循环可写成
+
+\[
+\operatorname{tr}\bigl((AXB)^TdX\bigr)
+\]
+
+对应梯度 \(AXB\)。第二项循环为
+
+\[
+\operatorname{tr}(BX^TA\,dX) = \operatorname{tr}\bigl((A^TXB^T)^TdX\bigr).
+\]
+因此
+
+\[
+\nabla_Xf = AXB+A^TXB^T.
+\]
+若 \(A,B\) 都对称，结果为 \(2AXB\)。再次可以看到，因变量 \(X\) 在表达式中出现两次，所以微分必须产生两条路径。
+
+\subsection{Frobenius 范数只是 trace 二次型}
+
+因为 Frobenius 范数平方即全部元素的平方和，
+
+\[
+\lVert X\rVert_F^2 = \operatorname{tr}(X^TX),
+\]
+有
+
+\[
+d\lVert X\rVert_F^2 = 2\operatorname{tr}(X^TdX),
+\]
+所以
+
+\[
+\nabla_X\frac12\lVert X\rVert_F^2=X.
+\]
+
+同理，对
+
+\[
+f(X)=\frac12\lVert AXB-C\rVert_F^2
+\]
+
+先对残差 \(R=AXB-C\) 求导得 \(df=\operatorname{tr}(R^TdR)\)，代入 \(dR=A\,dX\,B\) 并循环整理，
+
+\[
+df=\operatorname{tr}(R^TA\,dX\,B)
+=\operatorname{tr}\bigl((A^TRB^T)^TdX\bigr),
+\]
+
+得到
+
+\[
+\nabla_Xf=A^T(AXB-C)B^T.
+\]
+
+这也是链式法则中``伴随''的含义：前向 \(X\mapsto AXB\)，反向伴随 \(G\mapsto A^TGB^T\) 正是上面把残差两侧的因子转置后拉回的那一步。
+
+\subsection{Trace 技巧不能取代定义域与形状}
+
+以下检查应当先于代数操作：
+
+\begin{itemize}
+\tightlist
+\item
+  每个乘积和 trace 是否形状相容；
+\item
+  哪些矩阵是变量，哪些是常量；
+\item
+  变量是否对称、对角或正交；
+\item
+  表达式是否实值；
+\item
+  是否遗漏变量的多次出现；
+\item
+  循环移动是否被误写成任意交换。
+\end{itemize}
+
+对于复矩阵，还要区分转置与共轭转置，并可能使用 Wirtinger 导数；本章默认实矩阵。
+
+\subsubsection{留给读者}
+
+推导
+
+\[
+f(X)=\operatorname{tr}(X^TAXC)
++\operatorname{tr}(B^TX)
+\]
+
+关于 \(X\) 的梯度，不假设 \(A,C\) 对称。完成后再加入对称条件，看结果怎样简化。用标量 \(1\times1\) 情形检查因子。

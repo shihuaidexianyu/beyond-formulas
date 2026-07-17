@@ -1,0 +1,64 @@
+\section{交叉熵训练其实在最小化 KL 差异}
+
+设真实标签分布为 \(p(y)\)，模型预测为 \(q(y)\)。如果按照 \(q\) 设计理想概率码，却用它编码来自 \(p\) 的标签，平均码长为
+
+\[
+H(p,q)=-\sum_y p(y)\log q(y),
+\]
+
+这就是 cross-entropy。它不是 \(p\) 本身的不确定性，而是``用模型 \(q\) 描述真实来源 \(p\)''所付出的代价。
+
+在求和号内加入并减去 \(\log p(y)\)，逐项整理可得
+
+\[
+H(p,q)
+=H(p)+D_{\mathrm{KL}}(p\|q).
+\]
+
+对固定数据生成分布 \(p\)，\(H(p)\) 与模型无关，所以最小化期望 cross-entropy 等价于最小化 forward KL（即以真实分布 \(p\) 为第一参数的 \(D_{\mathrm{KL}}(p\|q)\)）。最佳可达值在 \(q=p\) 时取得，等于真实 entropy。
+
+\subsection{为什么分类训练只看到一个标签也能使用这个目标}
+
+监督数据每次只给出一个实现 \(y_i\)，并没有直接交付完整的 \(p(y\mid x_i)\)。one-hot 标签 \(\delta_{y_i}\) 与模型的 cross-entropy 为
+
+\[
+-\sum_k\mathbf1\{y_i=k\}\log q_\theta(k\mid x_i)
+=-\log q_\theta(y_i\mid x_i).
+\]
+
+对数据分布取期望，就回到真实条件分布与模型之间的 cross-entropy。因此经验平均
+
+\[
+-\frac1n\sum_i\log q_\theta(y_i\mid x_i)
+\]
+
+既是 categorical negative log-likelihood，也是对期望码长的样本估计。
+
+若模型给真类概率 0.9，单样本损失约为 \(0.105\)；若只给 0.09，损失约为 \(2.408\)。对数使``极有把握却错误''的预测付出很大代价。这正是 log loss 能鼓励诚实概率的原因，也是标签噪声下它可能被少数错误高置信样本强烈影响的原因。
+
+\subsection{Cross-entropy、entropy 与 KL 不能省略主语}
+
+常见说法``cross-entropy 就是 KL''少了一项 \(H(p)\)。优化同一个固定训练分布时，这一常数不影响最优参数；比较不同数据集、不同条件分布的绝对值时，它却不能消失。
+
+one-hot 单个标签的 entropy 为零，也不表示可达到的平均训练损失必为零。模型需要从有限样本推断 \(x\) 到标签的关系，类别可能含噪，函数族也未必能完全插值。单样本 target distribution 与总体条件分布是两个层次。
+
+对 \(K\) 类均匀预测，单样本损失为 \(\log K\)。log 的底决定单位：自然对数给 nat，以 2 为底给 bit；固定底数只把全部损失乘常数，不改变理论 minimizer，但会改变数值尺度与学习率感受。
+
+\subsection{数值稳定和目标修改要分开}
+
+softmax logits 为 \(z\) 时，应使用
+
+\[
+\log q(y=k\mid x)
+=z_k-\operatorname{LSE}(z),
+\]
+
+其中 log-sum-exp 以减最大值的稳定形式计算。直接 softmax 后再取 log，可能在极端 logits 上得到 0、无穷或 NaN。稳定实现保持数学目标不变；概率裁剪或人为加 \(\varepsilon\) 则改变了目标，需要明确说明。
+
+label smoothing 把 one-hot target 换成混合分布，class weighting 改变不同标签的相对风险，知识蒸馏使用教师的软分布。它们都仍可写成 cross-entropy，却不再以原始真实条件概率为同一个最优目标。若关心自然人群校准，必须在未被加权、未被重采样的验证分布上重新检查。
+
+\subsubsection{让三个概念各归其位}
+
+对三分类问题分别计算均匀预测、正确高置信预测和错误高置信预测的 entropy、cross-entropy 与 KL。然后把 target 从 one-hot 改成 label smoothing 分布，观察最优 \(q\) 怎样改变。最后验证给所有 logits 加常数不改变 loss，并解释这是数值稳定技巧而不是正则化。
+
+信息论中的编码基础见``信息与熵''。

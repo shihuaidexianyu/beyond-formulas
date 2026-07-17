@@ -1,0 +1,90 @@
+\section{HMM 把隐变量排列成时间链}
+
+GMM 假设各样本的隐类别彼此独立。设备状态、语音音素或天气阶段却会持续一段时间：今天处于某状态会影响明天更可能处于什么状态。Hidden Markov model 把隐变量排列成一条链：
+
+\[
+p(z_{1:T},x_{1:T})
+=p(z_1)
+\prod_{t=2}^Tp(z_t\mid z_{t-1})
+\prod_{t=1}^Tp(x_t\mid z_t).
+\]
+
+它作出两项核心简化：隐状态是一阶 Markov；给定当前状态后，当前观测与其他变量条件独立。这些假设使指数数量的状态路径可以由动态规划求和。
+
+\subsection{Forward 不是枚举，而是复用前缀}
+
+令初始分布为 \(\pi_j\)，从状态 \(i\) 转移到状态 \(j\) 的概率为 \(A_{ij}\)，状态 \(j\) 的 emission density 为 \(b_j(x)\)。定义
+
+\[
+\alpha_t(j)=p(x_{1:t},z_t=j).
+\]
+
+递推为
+
+\[
+\alpha_1(j)=\pi_jb_j(x_1),
+\]
+
+\[
+\alpha_t(j)
+=b_j(x_t)\sum_i\alpha_{t-1}(i)A_{ij}.
+\]
+
+最终
+
+\[
+p(x_{1:T})=\sum_j\alpha_T(j).
+\]
+
+暴力枚举有 \(K^T\) 条状态路径；forward 只保存每个时刻到达各状态的前缀总概率，复杂度降为 \(O(TK^2)\)。这正是动态规划的本质：未来只需要知道当前状态，不需要重新展开所有历史。
+
+定义 backward message
+
+\[
+\beta_t(i)=p(x_{t+1:T}\mid z_t=i),
+\]
+
+从 \(\beta_T(i)=1\) 出发反向递推：
+
+\[
+\beta_t(i)
+=\sum_j A_{ij}b_j(x_{t+1})\beta_{t+1}(j).
+\]
+
+给定 \(z_t\) 时，历史 \(x_{1:t}\) 与未来 \(x_{t+1:T}\) 条件独立，所以 \(\alpha_t(j)\beta_t(j)=p(z_t=j,x_{1:T})\)，对它归一化即得平滑 posterior：
+
+\[
+p(z_t=j\mid x_{1:T})
+=\frac{\alpha_t(j)\beta_t(j)}
+{\sum_{j'}\alpha_t(j')\beta_t(j')}.
+\]
+
+filtering 只使用 \(x_{1:t}\)，smoothing 使用整段 \(x_{1:T}\)；二者回答的时间信息集不同，不能混称。
+
+\subsection{最可能路径不是逐点最可能状态}
+
+Viterbi 把 forward 中的求和换成最大化，并保存回溯指针，求
+
+\[
+\argmax_{z_{1:T}}p(z_{1:T}\mid x_{1:T}).
+\]
+
+这是联合概率最大的完整路径。逐时选择最大 marginal posterior 则可能拼出一条转移概率极低、甚至不允许的路径。一个优化整体序列，一个逐点最优，两者不应互相替代。
+
+\subsection{参数未知时，Baum--Welch 是序列版 EM}
+
+若状态标签已知，转移矩阵可由转移次数估计，emission 参数可按状态分组估计。状态不可见时，forward--backward 在 E 步计算每时刻状态 posterior 以及相邻状态联合 posterior；M 步用这些期望计数更新初始、转移和 emission 参数。
+
+它继承 EM 的所有限制：likelihood 单调但非全局保证，状态标签可置换，差初值会产生不同解释。一个学出的``状态 2''不自动等于真实的``故障前兆''；需要用 emission、持续时间、外部标注和领域证据共同解释。
+
+\subsection{数值稳定与模型边界}
+
+长序列中许多小概率连乘会迅速下溢。可以在每个时刻缩放 \(\alpha_t\) 并累计缩放常数，也可以在 log 域用 log-sum-exp。一个小规模实现应先在很短序列上枚举全部路径，对照 forward likelihood、smoothing posterior 和 Viterbi 结果，再扩展到长序列。
+
+标准 HMM 隐含几何型状态持续时间，因为每一步都以固定概率离开当前状态。如果真实阶段有明显的最短或典型持续长度，需要 hidden semi-Markov model 等扩展；若转移随时间或协变量变化，也需要非齐次模型。增加状态数有时只是用多个状态拼接出非几何时长，并不代表发现了更多真实机制。
+
+\subsubsection{一个区分三种推断的任务}
+
+为两状态、三时刻 HMM 手算 filtering、smoothing 与 Viterbi 路径。然后寻找一个参数设置，使某时刻的 Viterbi 状态不是该时刻 marginal posterior 最大的状态。把序列复制到很长，观察普通概率域何时下溢，再验证缩放版与 log-domain 版的 log-likelihood 一致。
+
+随机过程层面的基础可回看``Hidden Markov Model：从观测反推状态''。

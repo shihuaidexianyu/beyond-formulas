@@ -1,0 +1,77 @@
+\section{梯度与方向导数}
+
+\subsection{沿任意方向测量变化}
+
+设 \(\mathbf u\) 是单位向量。方向导数定义为
+
+\[
+D_{\mathbf u}f(\mathbf a)
+=\lim_{t\to0}
+\frac{f(\mathbf a+t\mathbf u)-f(\mathbf a)}t.
+\]
+
+若 \(f\) 在 \(\mathbf a\) 可微，把 \(\mathbf h=t\mathbf u\) 代入上一节的可微定义：
+\(f(\mathbf a+t\mathbf u)-f(\mathbf a)=t\,\nabla f(\mathbf a)\cdot\mathbf u+\mathbf r(t\mathbf u)\)，
+而 \(\mathbf u\) 是单位向量，余项满足 \(\|\mathbf r(t\mathbf u)\|/t\to0\)。除以 \(t\) 取极限得
+
+\[
+D_{\mathbf u}f(\mathbf a)
+=\nabla f(\mathbf a)\cdot\mathbf u.
+\]
+
+这里
+
+\[
+\nabla f=
+\begin{bmatrix}
+f_{x_1}\\ \vdots\\ f_{x_n}
+\end{bmatrix}
+\]
+
+把各坐标偏导组织成一个向量。公式的前提是可微；仅仅某方向导数存在时，不能无条件用梯度点积代表。
+
+\subsection{梯度指向最陡上升}
+
+由 Cauchy--Schwarz 不等式，
+
+\[
+D_{\mathbf u}f
+=\nabla f\cdot\mathbf u
+\le\|\nabla f\|\,\|\mathbf u\|
+=\|\nabla f\|.
+\]
+
+单位方向中，最大增长率为 \(\|\nabla f\|\)，在 \(\mathbf u=\nabla f/\|\nabla f\|\) 时达到；最陡下降方向为负梯度。
+
+例如
+
+\[
+f(x,y)=x^2+2y^2
+\]
+
+在 \((1,1)\) 的梯度为 \((2,4)\)。最陡上升方向是 \((1,2)/\sqrt5\)，最大方向变化率为 \(2\sqrt5\)。沿单位方向 \((1,0)\) 的变化率只有 2，说明只看 \(x\) 偏导会漏掉更陡方向。
+
+若方向向量 \(\mathbf v\) 未归一化，\(\nabla f\cdot\mathbf v\) 同时包含方向和移动速度；题目问``每单位距离''的方向导数时必须先单位化。
+
+\subsection{梯度垂直于水平集}
+
+若曲线 \(\mathbf r(t)\) 始终位于水平集 \(f(\mathbf r(t))=c\)，对 \(t\) 求导（这里用到下一节的多元链式法则）：
+
+\[
+\nabla f(\mathbf r(t))\cdot\mathbf r'(t)=0.
+\]
+
+\(\mathbf r'(t)\) 是水平集切向量，所以梯度与水平集正交。地形图中梯度垂直等高线，指向海拔增长最快的方向；等高线越密，通常表示梯度越大。
+
+对隐式曲线 \(F(x,y)=c\)，在 \(\nabla F\ne0\) 处，梯度就是法向量，切线方程可写成
+
+\[
+\nabla F(a,b)\cdot
+\begin{bmatrix}x-a\\y-b\end{bmatrix}=0.
+\]
+
+这比先解出 \(y\) 更对称，也适用于局部竖直切线。
+
+\subsection{物理解释取决于函数含义}
+
+若 \(T(x,y)\) 是温度，\(\nabla T\) 给每单位距离的温度变化；若 \(V\) 是势能，力常为 \(-\nabla V\)，指向势能最快下降。梯度不是天然``力''，而是标量场的局部变化向量，具体物理角色由模型决定。

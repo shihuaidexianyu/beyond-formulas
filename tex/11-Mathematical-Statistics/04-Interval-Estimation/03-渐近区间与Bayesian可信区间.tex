@@ -1,0 +1,128 @@
+\section{渐近区间与 Bayesian 可信区间}
+
+许多模型没有精确枢轴量，只能利用大样本近似。若估计量满足
+
+\[
+\frac{\hat\theta-\theta}
+{\widehat{\operatorname{SE}}(\hat\theta)}
+\overset d\to N(0,1),
+\]
+
+就得到 Wald 区间
+
+\[
+\hat\theta
+\pm
+z_{1-\alpha/2}
+\widehat{\operatorname{SE}}(\hat\theta).
+\]
+
+它使用方便，却把抽样分布局部近似成对称正态。在参数边界、样本小、似然偏斜或识别弱时，这种近似可能很差；第一节的 Bernoulli Wald 区间正是 \(\theta\) 接近边界且样本小时的失败实例。
+
+\subsection{Delta method 传播参数变换的不确定性}
+
+若
+
+\[
+\sqrt n(\hat\theta-\theta)
+\overset d\to N(0,V),
+\]
+
+且 \(g\) 在 \(\theta\) 处可微，则
+
+\[
+\sqrt n
+\bigl(
+g(\hat\theta)-g(\theta)
+\bigr)
+\overset d\to
+N\bigl(0,[g'(\theta)]^2V\bigr).
+\]
+
+因此 \(g(\hat\theta)\) 的标准误近似为
+
+\[
+|g'(\hat\theta)|
+\widehat{\operatorname{SE}}(\hat\theta),
+\]
+
+其中渐近方差里的未知 \(\theta\) 已替换为 \(\hat\theta\)，这是 plug-in 近似。
+
+例如对正参数先在 log 尺度构造对称区间，再指数变换回原尺度，可以自动保持正性，并更适应乘法不确定性。
+
+若 \(g'(\theta)=0\) 或函数在参数点不可微，一阶 delta method 会退化，需要二阶或其他渐近理论。
+
+\subsection{Profile likelihood 区间尊重似然形状}
+
+对含多余参数（nuisance parameter）的模型，可对感兴趣参数 \(\psi\) 固定取值，并对其余参数最大化，得到 profile log-likelihood
+
+\[
+\ell_p(\psi).
+\]
+
+似然比统计量
+
+\[
+2\bigl[
+\ell_p(\hat\psi)-\ell_p(\psi)
+\bigr]
+\]
+
+在正则大样本下近似 \(\chi^2_1\)。收集未被拒绝的 \(\psi\)，按上一节的检验—区间对偶得到 profile likelihood 区间。
+
+它通常比 Wald 区间更能反映似然偏斜与参数变换，但仍依赖上述渐近卡方结论的正则条件——这一结论即 Wilks 定理，将在假设检验部分系统讨论；边界、混合模型和弱识别会改变极限分布。
+
+Bootstrap 区间则通过重采样近似估计量分布，重采样部分会讨论 percentile、basic 与 BCa 等方法。Bootstrap 也不是无假设替代品，尾部、依赖和非光滑统计量都可能使它失效。
+
+\subsection{Bayesian 可信区间回答另一种概率问题}
+
+给定先验与数据，Bayesian 后验区间 \(C(x)\) 满足
+
+\[
+\Pr\{\Theta\in C(x)\mid x\}
+=1-\alpha.
+\]
+
+这里数据固定，概率来自参数的后验分布，因此可以说``在该模型与先验下，参数落在区间内的后验概率为 95\%''。
+
+常见选择有：
+
+\begin{itemize}
+\tightlist
+\item
+  等尾区间：两侧各留下 \(\alpha/2\) 后验概率；
+\item
+  最高后验密度（highest posterior density, HPD）区间：在适当条件下取密度最高的 \(1-\alpha\) 区域；
+\item
+  单侧 credible bound。
+\end{itemize}
+
+不同可信区间可以有相同后验概率却不同形状。多峰后验的最高密度区域甚至可能是不连通集合，强行报告单一连续区间会填入低密度区域。
+
+\subsection{可信度与覆盖率不能互换}
+
+Bayesian 可信区间在给定先验下有后验概率解释，但不自动对每个固定参数具有 95\% 频率覆盖。频率置信区间有重复抽样覆盖保证，却不直接给这次固定参数的概率。
+
+在正则大样本下，Bernstein--von Mises 定理常使两类区间近似一致；小样本、强先验、边界和高维问题中差别可以很大。
+
+比较时应明确：
+
+\begin{itemize}
+\tightlist
+\item
+  概率是对数据重复还是对参数后验？
+\item
+  覆盖是逐参数、平均先验还是渐近？
+\item
+  先验是否经过数据选择？
+\item
+  区间是否在模型选择后构造？
+\item
+  参数化变化后区间怎样变换？
+\end{itemize}
+
+没有必要把两类区间说成互相排斥，但绝不能把解释混在同一句话里。
+
+\subsubsection{留给读者}
+
+对 Bernoulli 数据 \(S\) 成功、\(n-S\) 失败，使用 Beta\((1,1)\) 先验。写出后验分布和 95\% 等尾可信区间的分位数定义。它与频率学派精确二项区间可能数值接近，但概率解释分别是什么？

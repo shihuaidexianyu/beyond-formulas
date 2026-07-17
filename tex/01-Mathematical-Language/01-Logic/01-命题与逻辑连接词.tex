@@ -1,0 +1,121 @@
+\section{命题与逻辑连接词}
+
+\subsection{从一句``看起来懂了''的话开始}
+
+``这个算法很快''不是一个完整的数学命题：多快、相对于什么输入规模、在什么计算模型下，都没有说明。``整数 15 是偶数''虽然是错的，却是命题，因为它有明确真值。``\(x>3\)''则要等 \(x\) 的取值或论域确定后才有真假，通常称为谓词或开放命题。
+
+命题的第一要求不是正确，而是\textbf{可判定为真或假}。数学写作的许多问题，根源都不是不会推导，而是还没有把想说的话整理成命题。
+
+\subsection{连接简单命题}
+
+设 \(P,Q\) 是命题。几个基本连接词为：
+
+\begin{itemize}
+\tightlist
+\item
+  \(\neg P\)：``非 \(P\)''；
+\item
+  \(P\land Q\)：``\(P\) 且 \(Q\)''，两者都真时才真；
+\item
+  \(P\lor Q\)：``\(P\) 或 \(Q\)''，数学中通常是包含式``或''，至少一个真即可；
+\item
+  \(P\to Q\)：``若 \(P\)，则 \(Q\)''；
+\item
+  \(P\leftrightarrow Q\)：``\(P\) 当且仅当 \(Q\)''。
+\end{itemize}
+
+``或''最容易受到日常语言干扰。菜单上的``咖啡或茶''常暗示只能选一个；数学中的 \(P\lor Q\) 默认允许两者同时成立。若必须恰好一个成立，要明确说``异或''。
+
+De Morgan 律说明否定如何穿过``且、或''：
+
+\[
+\neg(P\land Q)\equiv(\neg P)\lor(\neg Q),
+\qquad
+\neg(P\lor Q)\equiv(\neg P)\land(\neg Q).
+\]
+
+例如，``并非同时满足年龄和成绩要求''表示至少有一项不满足；它不等于``两项都不满足''。
+
+\subsection{蕴含为什么只有一种失败方式}
+
+\(P\to Q\) 承诺的是：\textbf{不允许 \(P\) 已经发生而 \(Q\) 没发生。} 因此它只在 \(P\) 真、\(Q\) 假时为假。真值表为
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}{@{}lll@{}}
+\toprule\noalign{}
+\(P\) & \(Q\) & \(P\to Q\) \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+真 & 真 & 真 \\
+真 & 假 & 假 \\
+假 & 真 & 真 \\
+假 & 假 & 真 \\
+\end{longtable}
+}
+
+后两行常令人不适：前提为假时，为什么蕴含算真？因为这个命题只禁止一种反例------满足前提却违反结论的对象。一个不满足前提的对象不能推翻这项承诺。
+
+例如，``若整数 \(n\) 能被 4 整除，则 \(n\) 为偶数''。整数 3 既不能被 4 整除，也不是偶数，但它不是反例；真正的反例必须是``4 的倍数却不是偶数''。找不到这种对象，蕴含成立。
+
+这也解释了逻辑等价
+
+\[
+P\to Q\equiv \neg P\lor Q.
+\]
+
+只要前提不成立，或结论成立，承诺就没有被破坏。
+
+\subsection{真值表是语义调试器}
+
+两个复合命题若在每一组基本真值下结果都相同，就称为逻辑等价。真值表能机械检查有限个命题变量上的等价式。已知的等价式也可以当作改写规则：由上一小节的 \(P\to Q\equiv\neg P\lor Q\) 与 De Morgan 律可直接推出
+
+\[
+\neg(P\to Q)\equiv\neg(\neg P\lor Q)\equiv P\land\neg Q.
+\]
+
+否定一个蕴含，不是交换前后，也不是同时否定，而是明确断言``前提成立且结论失败''。这正是一条反例应有的形状。
+
+真值表非常适合检查逻辑连接词，却有边界。它把 \(P,Q\) 当作不可再拆的真假值，不能替代关于整数、函数或无限集合的数学论证。要证明``所有整数都具有某性质''，仍需研究整数本身的结构。
+
+\subsection{一个完整例子}
+
+命题：``若 \(n\) 是 6 的倍数，则 \(n\) 是 2 的倍数且是 3 的倍数。''令
+
+\[
+P(n):6\mid n,\quad Q(n):2\mid n,\quad R(n):3\mid n.
+\]
+
+原命题写成 \(P(n)\to(Q(n)\land R(n))\)。若要否定它，应得到
+
+\[
+P(n)\land\neg(Q(n)\land R(n))
+\equiv P(n)\land(\neg Q(n)\lor\neg R(n)).
+\]
+
+也就是说，反例必须是一个 6 的倍数，但至少不是 2 或 3 中某一个的倍数。把自然语言翻译到这里，证明方向已经很清楚：若 \(n=6k=2(3k)=3(2k)\)，两个结论同时成立。
+
+\subsection{容易越界的地方}
+
+\begin{itemize}
+\tightlist
+\item
+  命题``\(P\to Q\)''不表示 \(P\) 导致了 \(Q\)，逻辑蕴含不是因果关系。
+\item
+  从 \(P\to Q\) 与 \(Q\) 不能推出 \(P\)，这叫肯定后件。例如下雨会使地面湿，但地面湿也可能来自洒水。
+\item
+  从 \(P\to Q\) 与 \(\neg P\) 不能推出 \(\neg Q\)，这叫否定前件。
+\item
+  逻辑等价比``这两句话经常同时成立''更强，它要求所有真值情况都一致。
+\end{itemize}
+
+\subsection{延伸与来源}
+
+\begin{itemize}
+\tightlist
+\item
+  UC Berkeley CS 70 的 Logic and Proofs 单元。
+\item
+  MIT Mathematics for Computer Science 的 Propositions and Proofs 章节。
+\end{itemize}

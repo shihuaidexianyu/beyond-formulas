@@ -1,0 +1,118 @@
+\section{EM 用下界交替完成隐变量学习}
+
+隐变量模型的共同困难是：若隐变量已知，参数容易估计；若参数已知，隐变量后验容易计算；两者同时未知时，边缘 likelihood 却难直接优化。EM 把这个循环依赖变成两个可执行步骤。
+
+先对任意分布 \(q(z)\) 写出
+
+\[
+\log p(x\mid\theta)
+=\mathcal L(q,\theta)
++\KL
+\bigl(q(z)\|p(z\mid x,\theta)\bigr),
+\]
+
+其中
+
+\[
+\mathcal L(q,\theta)
+=\E_q[\log p(x,z\mid\theta)]
++H(q),
+\]
+
+\(H(q)=-\E_q[\log q(z)]\) 是 \(q\) 的熵。这个恒等式可以直接验证：把两项按定义展开，
+
+\[
+\mathcal L(q,\theta)
++\KL\bigl(q(z)\|p(z\mid x,\theta)\bigr)
+=\E_q\left[
+\log\frac{p(x,z\mid\theta)}{q(z)}
++\log\frac{q(z)}{p(z\mid x,\theta)}
+\right]
+=\log p(x\mid\theta),
+\]
+
+因为两个 \(\log q(z)\) 项抵消，联合密度与条件密度之比恰好留下 \(p(x\mid\theta)\)，而它对 \(z\) 是常数，期望不起作用。KL 散度非负，所以 \(\mathcal L\) 是 log-likelihood 的下界，也称 evidence lower bound（ELBO）。这个恒等式给 EM 两步以明确含义。
+
+\subsection{E 步把下界贴紧，M 步抬高下界}
+
+在第 \(t\) 轮，E 步令
+
+\[
+q^{(t)}(z)
+=p(z\mid x,\theta^{(t)}).
+\]
+
+此时 KL 为零，下界在当前参数处恰好等于真实 log-likelihood。随后 M 步选择
+
+\[
+\theta^{(t+1)}
+\in\argmax_\theta
+\E_{q^{(t)}}
+[\log p(x,z\mid\theta)].
+\]
+
+因为 E 步之后熵 \(H(q^{(t)})\) 对 \(\theta\) 是常数，这等价于提高同一个 ELBO。新参数处的真实 log-likelihood 又至少等于该下界，于是
+
+\[
+\ell(\theta^{(t+1)})
+\ge\mathcal L(q^{(t)},\theta^{(t+1)})
+\ge\mathcal L(q^{(t)},\theta^{(t)})
+=\ell(\theta^{(t)}),
+\]
+
+其中 \(\ell(\theta)=\log p(x\mid\theta)\)（多样本时为各样本对数似然之和）。三步依次是：KL 非负给出下界，M 步提高下界，E 步已让下界在旧参数处贴紧。
+
+这就是 EM 的单调性保证。它只保证似然不下降，不保证达到全局最大值，也不排除鞍点、退化解或极慢收敛。
+
+\subsection{GMM 让两步变得具体}
+
+对 Gaussian mixture，E 步计算上一节的 responsibility \(\gamma_{ik}\)。令
+
+\[
+N_k=\sum_i\gamma_{ik},
+\]
+
+M 步得到加权统计量：
+
+\[
+\pi_k^{\text{new}}=\frac{N_k}{n},
+\]
+
+\[
+\mu_k^{\text{new}}
+=\frac1{N_k}\sum_i\gamma_{ik}x_i,
+\]
+
+\[
+\Sigma_k^{\text{new}}
+=\frac1{N_k}
+\sum_i\gamma_{ik}
+(x_i-\mu_k^{\text{new}})
+(x_i-\mu_k^{\text{new}})^\top.
+\]
+
+若 \(\gamma_{ik}\) 只有 0 和 1，这些式子就是按已知类别分组的普通均值与 covariance。EM 的关键不是``猜一个硬标签再重训''，而是用 posterior 权重保留归属不确定性。
+
+\subsection{单调曲线仍可能通向坏答案}
+
+若初始均值都落在同一密集区域，EM 可能停在较差局部最优；若某个成分抓住单个样本，似然又可能朝上一节讨论过的 covariance 塌缩退化方向上升。单调性不能告诉我们模型选择对不对，也不能告诉我们最高似然解是否有科学意义。
+
+可靠实现通常需要：
+
+\begin{itemize}
+\tightlist
+\item
+  在 log 域或用 log-sum-exp 归一化 E 步；
+\item
+  对 covariance、权重等参数施加有效约束；
+\item
+  每轮记录真实 observed-data log-likelihood，而不只记录 complete-data 期望；
+\item
+  用多个有差异的初值拟合；
+\item
+  以相对似然增量、参数变化和最大轮数共同停止；
+\item
+  在独立数据上比较解，而不是按训练似然单独排名。
+\end{itemize}
+
+若精确 E 步不可计算，就不能再直接声称使用标准 EM。变分 EM 用受限的 \(q\) 近似后验，Monte Carlo EM 用样本近似期望；generalized EM 则不完全最大化 M 步，只要求足够提高目标。每种变体都需要重新说明单调性或近似误差的条件。

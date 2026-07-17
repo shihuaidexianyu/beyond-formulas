@@ -1,0 +1,199 @@
+\section{Monte Carlo：从随机样本到数值答案}
+
+许多积分和期望无法解析计算，却可以从相应分布中抽样。Monte Carlo 方法把数值问题改写成期望，再用样本平均估计：
+
+\[
+I=\E[g(X)]
+\approx
+\widehat I_n
+=\frac1n\sum_{i=1}^{n}g(X_i).
+\]
+这里 $X_i$ 是从目标分布独立抽取的样本。
+
+\subsection{大数定律提供一致性}
+
+若
+
+\[
+\E[|g(X)|]<\infty,
+\]
+则
+
+\[
+\widehat I_n\to I
+\]
+依概率，适当条件下几乎处处。因此样本越多，估计最终会稳定到目标期望。
+
+这解释了方法为什么成立，却没有给出有限样本误差。
+
+\subsection{中心极限定理给出标准误}
+
+若
+
+\[
+\sigma_g^2=\operatorname{Var}(g(X))<\infty,
+\]
+则
+
+\[
+\sqrt n(\widehat I_n-I)
+\xrightarrow{d}
+\mathcal N(0,\sigma_g^2).
+\]
+所以估计的标准误约为
+
+\[
+\frac{\sigma_g}{\sqrt n}.
+\]
+用样本方差
+
+\[
+s_g^2
+=\frac1{n-1}\sum_{i=1}^{n}
+\bigl(g(X_i)-\widehat I_n\bigr)^2
+\]
+估计 $\sigma_g^2$，便得到
+
+\[
+\operatorname{SE}(\widehat I_n)
+\approx\frac{s_g}{\sqrt n}.
+\]
+一个常用近似 (95%) 误差区间是
+
+\[
+\widehat I_n
+\pm1.96\frac{s_g}{\sqrt n}.
+\]
+要把标准误缩小一半，样本量要增加到四倍。这种 $1/\sqrt n$ 收敛较慢，却在维度上不像规则网格积分那样直接遭受 $m^d$ 个网格点的爆炸。
+
+\subsection{用随机点估计 $\pi$}
+
+在正方形 $[-1,1]^2$ 中均匀抽点 ($X_i,Y_i$)，定义
+
+\[
+Z_i=\mathbf1_{\{X_i^2+Y_i^2\le1\}}.
+\]
+圆面积占正方形面积比例为
+
+\[
+P(Z_i=1)=\frac{\pi}{4}.
+\]
+因此
+
+\[
+\widehat\pi_n
+=4\bar Z_n
+\]
+是 $\pi$ 的无偏估计。
+
+因为 $Z_i$ 是 Bernoulli，
+
+\[
+\operatorname{Var}(\widehat\pi_n)
+=\frac{16p(1-p)}n,
+\qquad p=\frac\pi4.
+\]
+这个例子直观，却不是计算 $\pi$ 的高效方法。它的教学价值在于展示怎样把几何面积变成事件概率；它也反向使用了``大数定律与长期平均''一节建立的同一联系：那里由模型概率 $p$ 预言长期频率，这里由长期频率反推未知的 $p$。
+
+\subsection{方差缩减比盲目加样本更聪明}
+
+Monte Carlo 误差常数由 $\operatorname{Var}(g(X))$ 决定。除了增大 $n$，还可以改变估计器而保持目标期望：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{控制变量}：利用一个期望已知且与目标相关的变量抵消波动；
+\item
+  \textbf{对偶变量}：让成对样本产生负相关误差；
+\item
+  \textbf{分层抽样}：保证重要子区域都得到样本；
+\item
+  \textbf{重要性抽样}：从更常访问重要区域的分布抽样，再用权重修正。
+\end{itemize}
+
+重要性抽样把
+
+\[
+I=\int g(x)p(x)\,dx
+\]
+写成
+
+\[
+I=\E_q\left[
+g(X)\frac{p(X)}{q(X)}
+\right],
+\]
+其中下标 $q$ 表示 $X$ 改从密度 $q$ 抽取，前提是 $q(x)>0$ 覆盖所有 $g(x)p(x)\ne0$ 的区域。若 $q$ 选得差，权重可能重尾，方差甚至无穷。
+
+\subsection{独立样本是假设，不是界面按钮}
+
+伪随机数生成器要有足够质量；马尔可夫链 Monte Carlo（MCMC）样本通常相关，不能把样本数 $n$ 当作 $n$ 个独立观察。相关性会降低有效样本量：
+
+\[
+n_{\mathrm{eff}}<n.
+\]
+此外还要区分：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Monte Carlo 随机误差}：可通过重复与标准误评估；
+\item
+  \textbf{离散化偏差}：例如数值求解近似模型带来的系统误差；
+\item
+  \textbf{模型偏差}：目标分布本身不代表现实；
+\item
+  \textbf{初始与收敛偏差}：MCMC 尚未进入平稳状态。
+\end{itemize}
+
+样本平均非常稳定地收敛到错误目标，仍然是错误答案——这与``大数定律与长期平均''一节列出的选择偏差、共同系统误差同源：重复只能缩小随机误差，不能修正抽样机制本身。
+
+\subsection{一份可报告的 Monte Carlo 结果}
+
+至少应说明：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  目标期望怎样定义；
+\item
+  样本从什么分布、用什么机制产生；
+\item
+  样本量与是否独立；
+\item
+  点估计；
+\item
+  标准误或可解释的误差界；
+\item
+  是否使用方差缩减；
+\item
+  可能存在的系统偏差。
+\end{enumerate}
+
+随机计算不是``多跑几次取平均''这么简单。它是一套把概率极限定理、抽样设计和误差报告接成闭环的方法。
+
+\subsubsection{自己补完}
+
+要估计
+
+\[
+I=\int_0^1 e^{-x^2}\,dx,
+\]
+令 $U_i\sim\mathrm{Unif}(0,1)$，并取
+
+\[
+\widehat I_n=\frac1n\sum_{i=1}^{n}e^{-U_i^2}.
+\]
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  证明估计目标确实是 $I$；
+\item
+  写出估计标准误的方法；
+\item
+  若希望标准误缩小到原来的三分之一，样本量需放大多少倍？
+\item
+  设计一个简单分层方案，把 $[0,1]$ 分成两段分别抽样。
+\end{enumerate}

@@ -1,0 +1,118 @@
+\section{近端与坐标方法利用可分结构}
+
+许多模型具有复合形式
+
+\[
+F(x)=f(x)+g(x),
+\]
+
+其中 \(f\) 光滑凸，\(g\) 凸但可能不可微。例如 Lasso 中
+
+\[
+f(w)=\frac12\lVert Xw-y\rVert_2^2,
+\qquad
+g(w)=\lambda\lVert w\rVert_1.
+\]
+
+普通次梯度法把两部分都压缩成一个粗糙方向，浪费了 \(f\) 的光滑性和 \(g\) 的特殊结构。近端方法选择分别对待它们。
+
+\subsection{近端算子做一次``带惯性的精确修正''}
+
+对凸函数 \(g\)，近端算子定义为
+
+\[
+\operatorname{prox}_{\alpha g}(v) = \argmin_x
+\left\{
+g(x)+\frac{1}{2\alpha}\lVert x-v\rVert_2^2
+\right\}.
+\]
+它在降低 \(g\) 与不离开 \(v\) 太远之间权衡。二次项是强凸的，因此在常见闭凸条件下近端点唯一。
+
+proximal gradient 先对光滑部分走一步梯度，再用近端算子处理 \(g\)：
+
+\[
+x_{k+1} = \operatorname{prox}_{\alpha g}
+\bigl(x_k-\alpha\nabla f(x_k)\bigr).
+\]
+把 prox 定义中的二次项展开、舍去与 \(x\) 无关的常数，可以看出这等价于最小化 \(f\) 在 \(x_k\) 的线性化、一个曲率控制二次项和完整的 \(g\)。也就是说，非光滑项没有被近似成一条可能很粗的支持线，而是被精确保留。
+
+\subsection{投影梯度是近端方法的特殊情形}
+
+若 \(g=I_C\) 是凸集 \(C\) 的指标函数，
+
+\[
+\operatorname{prox}_{\alpha I_C}(v) = \argmin_{x\in C}\lVert x-v\rVert^2
+=\Pi_C(v).
+\]
+因此
+
+\[
+x_{k+1} = \Pi_C(x_k-\alpha\nabla f(x_k))
+\]
+就是 projected gradient。盒子、球、单纯形和某些锥的投影可以高效计算；若投影本身需要求解一个困难优化问题，这个方法就未必合适。
+
+\subsection{\texorpdfstring{\(L_1\) 的近端算子为何产生精确零}{L_1 的近端算子为何产生精确零}}
+
+一维问题
+
+\[
+\min_x
+\lambda|x|
++\frac{1}{2\alpha}(x-v)^2
+\]
+
+在 \(x>0\)、\(x<0\) 和 \(x=0\) 三种情况分别使用一阶或次梯度条件，得到软阈值：
+
+\[
+\operatorname{prox}_{\alpha\lambda|\cdot|}(v) = \begin{cases}
+v-\alpha\lambda,&v>\alpha\lambda,\\
+0,&|v|\le\alpha\lambda,\\
+v+\alpha\lambda,&v<-\alpha\lambda.
+\end{cases}
+\]
+向量 \(L_1\) 范数的 prox 逐坐标应用这一规则。小于阈值的分量被精确压到零，这解释了近端迭代怎样在有限步骤中识别稀疏结构；普通光滑近似通常只会得到许多很小但非零的数。
+
+\subsection{收敛与加速}
+
+若 \(\nabla f\) 为 \(L\)-Lipschitz，取 \(\alpha\le1/L\)，proximal gradient 对一般凸复合问题具有典型 \(O(1/k)\) 函数值速率。加入与第一节同源的 Nesterov 型外推得到 FISTA，可达到 \(O(1/k^2)\)。
+
+加速不保证目标每步单调，也可能在强非光滑结构附近振荡。实践中常使用单调变体或自适应重启。理论阶数是重要参考，但每步成本、稀疏性保持和停止证据同样重要。
+
+\subsection{坐标下降只更新最便宜的方向}
+
+若变量很多，而沿单个坐标优化很便宜，可以固定其他分量，只更新 \(x_j\)。对 Lasso，单个坐标的子问题常有闭式软阈值解，因此一次 sweep 的成本可以利用稀疏设计矩阵大幅降低。
+
+坐标可以循环选择，也可随机选择。收敛依赖目标凸性、坐标 Lipschitz 常数和更新规则；对不可分、强耦合或病态问题，逐坐标移动可能很慢。变量缩放与分块选择会显著影响表现。
+
+近端与坐标方法的共同思想是：不要把问题全部交给一个通用方向。若非光滑项可分、约束投影简单、某些变量块有闭式解，就应让算法直接利用这些结构。
+
+\subsection{怎样选择}
+
+\begin{itemize}
+\tightlist
+\item
+  \(f\) 光滑且全梯度便宜：梯度或加速梯度是自然基线；
+\item
+  \(f+g\) 中 \(g\) 有简单 prox：优先考虑 proximal gradient；
+\item
+  变量高度可分、坐标更新闭式且数据稀疏：坐标下降很有吸引力；
+\item
+  只有次梯度 oracle，或 prox 同样困难：次梯度法仍有价值；
+\item
+  约束耦合强、需要高精度证书：可能更适合二阶或原始---对偶方法。
+\end{itemize}
+
+算法名称不是选择依据，计算原语才是。
+
+\subsubsection{留给读者}
+
+推导带非负约束的 \(L_1\) 近端算子：
+
+\[
+\argmin_{x\ge0}
+\left\{
+\lambda x+\frac{1}{2\alpha}(x-v)^2
+\right\}.
+\]
+
+结果与``先软阈值，再投影到非负半轴''是否相同？请分 \(v\) 的区间验证，而不是只凭直觉回答。

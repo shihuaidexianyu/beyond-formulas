@@ -1,0 +1,202 @@
+\section{导数是最佳线性映射}
+
+一元微积分把导数写成一个数 \(f'(x)\)。这个数真正做的事，是把输入扰动 \(h\) 映射为一阶输出变化：
+
+\[
+f(x+h)-f(x)\approx f'(x)h.
+\]
+
+高维中，输入和输出都可能是向量或矩阵，单个数不再足够。保留下来的本质是``最佳线性近似''。
+
+设
+
+\[
+f:\R^n\to\R^m.
+\]
+
+若存在线性映射 \(Df(x):\mathbb R^n\to\mathbb R^m\)，使
+
+\[
+f(x+h) = f(x)+Df(x)[h]+r(h),
+\]
+并且
+
+\[
+\frac{\lVert r(h)\rVert}{\lVert h\rVert}\to0
+\qquad(h\to0),
+\]
+
+那么 \(Df(x)\) 就是 \(f\) 在 \(x\) 处的 Fréchet 导数。
+
+括号 \(Df(x)[h]\) 强调导数首先是``作用在方向 \(h\) 上的映射''。只有选定坐标后，我们才把它表示为矩阵。
+
+\subsection{Jacobian 是线性映射的矩阵表示}
+
+在标准基下，\(Df(x)\) 对应矩阵 \(J_f(x)\in\mathbb R^{m\times n}\)，满足
+
+\[
+f(x+h)
+\approx
+f(x)+J_f(x)h.
+\]
+
+因此 Jacobian 的行数由输出维度决定，列数由输入维度决定。
+
+例如
+
+\[
+f(x_1,x_2) = \begin{bmatrix}
+x_1x_2\\
+\sin x_1
+\end{bmatrix}.
+\]
+令 \(h=(h_1,h_2)^T\)。一阶变化为
+
+\[
+Df(x)[h] = \begin{bmatrix}
+x_2h_1+x_1h_2\\
+\cos(x_1)h_1
+\end{bmatrix},
+\]
+
+第一分量由 \((x_1+h_1)(x_2+h_2)-x_1x_2=x_2h_1+x_1h_2+h_1h_2\) 舍去二阶项 \(h_1h_2\) 得到，第二分量由 \(\sin\) 在 \(x_1\) 处的一阶展开得到。所以
+
+\[
+J_f(x) = \begin{bmatrix}
+x_2&x_1\\
+\cos x_1&0
+\end{bmatrix}.
+\]
+形状是 \(2\times2\)，因为有两个输出、两个输入。若输出变成三维、输入仍二维，Jacobian 必须是 \(3\times2\)；这个判断不依赖任何求导公式。
+
+\subsection{梯度来自内积，而不只是偏导排列}
+
+若
+
+\[
+f:\R^n\to\R,
+\]
+
+导数 \(Df(x)\) 是把向量映成标量的线性泛函。欧氏内积允许把每个线性泛函唯一表示成某个向量（有限维的 Riesz 表示定理：线性泛函由它在标准基上的取值决定，把这些取值排成向量 \(g\)，泛函就是 \(h\mapsto g^Th\)）：
+
+\[
+Df(x)[h] = \nabla f(x)^Th.
+\]
+这个向量就是梯度。它与输入 \(x\) 形状相同。
+
+例如
+
+\[
+f(x)=\frac12\lVert Ax-b\rVert_2^2.
+\]
+
+完全展开
+
+\[
+f(x+h)=\frac12\lVert Ax-b\rVert_2^2
++(Ax-b)^TAh
++\frac12\lVert Ah\rVert_2^2,
+\]
+
+末项只含 \(h\) 的二阶量，正是定义中的余项 \(r(h)\)；沿方向 \(h\) 的一阶变化是
+
+\[
+Df(x)[h]
+=(Ax-b)^TAh = \bigl[A^T(Ax-b)\bigr]^Th,
+\]
+因此
+
+\[
+\nabla f(x)=A^T(Ax-b).
+\]
+
+梯度的方向意义也来自这个表示：在单位方向中，\(\nabla f/\lVert\nabla f\rVert\) 使内积最大（由 Cauchy--Schwarz 不等式，\(\nabla f^Th\le\lVert\nabla f\rVert\lVert h\rVert\)，等号在 \(h\) 与 \(\nabla f\) 同向时取得），所以是函数局部增长最快方向。
+
+若改变内积，表示同一个导数线性泛函的``梯度向量''也会改变。例如在正定矩阵 \(M\) 定义的内积
+
+\[
+\langle u,v\rangle_M=u^TMv
+\]
+
+下，对应梯度 \(g_M\) 须满足 \(\langle g_M,h\rangle_M=g_M^TMh=\nabla f^Th\) 对所有 \(h\) 成立，即 \(Mg_M=\nabla f\)，故 \(g_M=M^{-1}\nabla f\)。这正是自然梯度、预条件与 Riemannian 优化背后的一层原因：导数映射不变，但用什么几何把它表示成向量发生了变化。
+
+\subsection{矩阵输入仍然是一个线性空间}
+
+若
+
+\[
+f:\R^{m\times n}\to\R,
+\]
+
+输入扰动是矩阵 \(H\)，导数 \(Df(X)[H]\) 仍应对 \(H\) 线性。使用 Frobenius 内积
+
+\[
+\langle A,B\rangle_F = \operatorname{tr}(A^TB),
+\]
+定义矩阵梯度：
+
+\[
+Df(X)[H] = \langle\nabla_Xf,H\rangle_F
+=\operatorname{tr}\bigl((\nabla_Xf)^TH\bigr).
+\]
+因此 \(\nabla_Xf\) 与 \(X\) 具有相同形状。没有必要先把 \(X\) 拉平成长向量；Frobenius 内积已经给出自然坐标表示。
+
+例如
+
+\[
+f(X)=\frac12\lVert X\rVert_F^2.
+\]
+
+展开
+
+\[
+f(X+H) = \frac12\lVert X\rVert_F^2
++\langle X,H\rangle_F
++\frac12\lVert H\rVert_F^2,
+\]
+所以
+
+\[
+Df(X)[H]=\langle X,H\rangle_F,
+\qquad
+\nabla_Xf=X.
+\]
+
+\subsection{方向导数不一定拼成真正的导数}
+
+沿方向 \(h\) 的方向导数定义为
+
+\[
+D_hf(x) = \lim_{t\to0}
+\frac{f(x+th)-f(x)}{t}.
+\]
+若 Fréchet 导数存在，所有方向导数都存在且
+
+\[
+D_hf(x)=Df(x)[h].
+\]
+
+事实上，把 \(th\) 代入定义得 \(f(x+th)-f(x)=tDf(x)[h]+r(th)\)，除以 \(t\) 后 \(\lVert r(th)/t\rVert=\lVert r(th)\rVert/\lVert th\rVert\cdot\lVert h\rVert\to0\)，极限正是 \(Df(x)[h]\)。
+
+反过来不一定成立。各方向的极限可能存在，却不能由同一个连续线性映射统一近似所有方向。例如
+
+\[
+f(x,y)=\frac{x^2y}{x^2+y^2},
+\qquad
+f(0,0)=0
+\]
+
+在原点连续（\(\lvert x^2y/(x^2+y^2)\rvert\le\lvert y\rvert\)），且沿每个方向 \(h=(a,b)\) 的方向导数都存在：\(D_hf(0)=a^2b/(a^2+b^2)\)。但这个结果对 \(h\) 不是线性的：\(D_{(1,1)}f(0)=\tfrac12\)，而 \(D_{(1,0)}f(0)+D_{(0,1)}f(0)=0\)。既然 Fréchet 可微会迫使 \(h\mapsto D_hf(0)\) 是线性映射，\(f\) 在原点就不存在全导数。矩阵微积分中若只逐元素或逐方向计算，而不检查结果对扰动是否线性，就可能把一个并不存在的全导数拼出来。
+
+最熟悉的边界例子是 \(f(x)=\lVert x\rVert_2\) 在原点：沿 \(h\) 的单侧方向斜率存在且等于 \(\lVert h\rVert\)，但 \(\lVert h\rVert\) 不是 \(h\) 的线性函数，不存在一个线性泛函同时表示所有方向；函数在原点不可微。
+
+\subsubsection{留给读者}
+
+对映射
+
+\[
+f(X)=X^TX,
+\qquad X\in\R^{m\times n},
+\]
+
+直接展开 \(f(X+H)\)，找出关于 \(H\) 的一阶项，从而写出 \(Df(X)[H]\)。结果是矩阵到矩阵的线性映射，不要急着把它写成四阶张量。

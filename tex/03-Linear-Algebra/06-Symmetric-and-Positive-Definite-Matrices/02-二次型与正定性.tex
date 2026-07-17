@@ -1,0 +1,206 @@
+\section{二次型与正定性：每个方向上的能量是否为正}
+
+对称矩阵不仅作用在向量上，还自然地产生一个标量函数
+
+\[
+q(x)=x^{\mathsf T}Ax.
+\]
+
+它称为二次型。在力学中可以表示能量，在优化中表示二次曲率，在统计中表示经协方差加权的距离。正定性要回答的是：离开原点以后，这个量是否始终为正？
+
+\subsection{为什么只需研究对称部分}
+
+任意实方阵都能分解为
+
+\[
+A=\frac{A+A^{\mathsf T}}2+
+\frac{A-A^{\mathsf T}}2,
+\]
+
+即对称部分加反对称部分。若 \(K^{\mathsf T}=-K\)，则标量
+
+\[
+x^{\mathsf T}Kx
+\]
+
+转置后等于自身，又等于
+
+\[
+x^{\mathsf T}K^{\mathsf T}x=-x^{\mathsf T}Kx,
+\]
+
+所以只能为零。因此
+
+\[
+x^{\mathsf T}Ax
+=x^{\mathsf T}\left(\frac{A+A^{\mathsf T}}2\right)x.
+\]
+
+二次型只看见矩阵的对称部分。讨论正定性时假设矩阵对称，不会丢失任何二次型信息。
+
+\subsection{正定与半正定}
+
+实对称矩阵 \(A\) 称为正定，记作 \(A\succ0\)，若
+
+\[
+x^{\mathsf T}Ax>0
+\]
+
+对所有非零 \(x\) 成立。
+
+若只要求
+
+\[
+x^{\mathsf T}Ax\ge0,
+\]
+
+则称为半正定，记作 \(A\succeq0\)。
+
+二者的差别集中在是否允许某些非零方向能量为零。正定矩阵在每个方向都有严格曲率；半正定矩阵可能沿某些方向完全平坦。
+
+\subsection{特征值给出最直接的判据}
+
+利用谱分解
+
+\[
+A=Q\Lambda Q^{\mathsf T},
+\]
+
+令 \(y=Q^{\mathsf T}x\)。因为 \(Q\) 正交，\(x\ne0\) 当且仅当 \(y\ne0\)，并且
+
+\[
+x^{\mathsf T}Ax
+=y^{\mathsf T}\Lambda y
+=\lambda_1y_1^2+\cdots+\lambda_ny_n^2.
+\]
+
+于是：
+
+\[
+A\succ0
+\quad\Longleftrightarrow\quad
+\lambda_i>0\text{ 对所有 }i,
+\]
+
+\[
+A\succeq0
+\quad\Longleftrightarrow\quad
+\lambda_i\ge0\text{ 对所有 }i.
+\]
+
+正定性本质上就是所有特征方向的能量系数都为正。
+
+\subsection{椭圆等高线怎样产生}
+
+取
+
+\[
+A=\begin{pmatrix}2&-1\\-1&2\end{pmatrix}.
+\]
+
+其特征方向为 \((1,1)^{\mathsf T}\) 与 \((1,-1)^{\mathsf T}\)，特征值分别为 \(1\) 与 \(3\)。在特征坐标 \(y\) 中，等高线
+
+\[
+x^{\mathsf T}Ax=c
+\]
+
+变成
+
+\[
+y_1^2+3y_2^2=c.
+\]
+
+这是一族椭圆。特征向量决定椭圆主轴方向，特征值越大，对应方向上相同位移产生的能量越高，所以等高线半轴越短。
+
+若一个特征值为零，椭圆会沿对应方向张开成无限长的柱面；若一个特征值为负，等高线变成双曲型，原点不再是最小点。
+
+\subsection{正对角元远远不够}
+
+矩阵
+
+\[
+B=\begin{pmatrix}1&2\\2&1\end{pmatrix}
+\]
+
+对角元都为正，但特征值为 \(3\) 和 \(-1\)，所以不是正定矩阵。取 \(x=(1,-1)^{\mathsf T}\)：
+
+\[
+x^{\mathsf T}Bx=-2<0.
+\]
+
+正定性是关于所有方向的整体条件，不能只检查坐标轴方向。
+
+除特征值外，还可以使用 Sylvester 判据：实对称矩阵正定，当且仅当所有顺序主子式为正。消元视角下，这等价于无需换行即可得到全部为正的主元。
+
+半正定的主子式判据更细致，不能只把``顺序主子式大于零''机械改成``大于等于零''。
+
+\subsection{\texorpdfstring{\(A^{\mathsf T}A\) 为什么总半正定}{A^{\mathsf T}A 为什么总半正定}}
+
+对任意矩阵 \(A\)，
+
+\[
+x^{\mathsf T}A^{\mathsf T}Ax
+=\|Ax\|_2^2\ge0.
+\]
+
+所以 \(A^{\mathsf T}A\) 总是半正定。它何时正定？只有当
+
+\[
+Ax=0\Longrightarrow x=0,
+\]
+
+也就是 \(A\) 的列线性无关时。
+
+这重新解释了最小二乘中的事实：若设计矩阵满列秩，\(A^{\mathsf T}A\) 正定，二次目标具有唯一最小点；若列相关，只能保证半正定，目标沿零空间方向保持不变，参数解不唯一。
+
+\subsection{Hessian 与凸性}
+
+二次函数
+
+\[
+f(x)=\frac12x^{\mathsf T}Ax-b^{\mathsf T}x+c
+\]
+
+在 \(A\) 对称时满足
+
+\[
+\nabla f(x)=Ax-b,
+\qquad
+\nabla^2f(x)=A.
+\]
+
+若 \(A\succeq0\)，函数凸；若 \(A\succ0\)，函数严格凸并拥有唯一极小点
+
+\[
+x^*=A^{-1}b.
+\]
+
+在更一般的二阶可微函数中，Hessian 在某点的特征值描述局部各主方向的曲率。正定 Hessian 意味着所有方向向上弯，半正定意味着没有向下弯的方向，但可能存在平坦方向。
+
+\subsection{协方差为何半正定}
+
+随机向量 \(X\) 的协方差矩阵为
+
+\[
+\Sigma=\E[(X-\mu)(X-\mu)^{\mathsf T}],
+\]
+
+其中 \(\mu=\E X\) 是均值向量。对任意 \(a\)，把常数向量移入期望得
+
+\[
+a^{\mathsf T}\Sigma a
+=\E\bigl[\bigl(a^{\mathsf T}(X-\mu)\bigr)^2\bigr]
+=\Var(a^{\mathsf T}X)\ge0.
+\]
+
+所以协方差矩阵必半正定。若某个非零 \(a\) 使 \(a^{\mathsf T}X\) 几乎处处为常数，对应方向方差为零，\(\Sigma\) 就不是正定。
+
+这把抽象二次型翻译成了统计意义：\(a^{\mathsf T}\Sigma a\) 是沿方向 \(a\) 观察数据时的方差。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06：Positive Definite Matrices and Minima
+\end{itemize}

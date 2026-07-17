@@ -1,0 +1,132 @@
+\section{连续时间平稳分布与流量平衡}
+
+行分布 $\pi$ 若满足对所有 $t\ge0$
+
+\[
+\pi P(t)=\pi,
+\]
+就是 CTMC 的平稳分布。对 $t=0$ 求导：
+
+\[
+\boxed{\pi Q=0},
+\qquad
+\sum_i\pi_i=1.
+\]
+它是离散时间 $\pi P=\pi$ 的连续时间对应：平稳分布是生成矩阵零特征值的左特征向量。
+
+\subsection{全局平衡是流入等于流出}
+
+对状态 $j$，方程 $\pi Q=0$ 写成
+
+\[
+\sum_{i\ne j}\pi_iq_{ij}
+=\pi_j\sum_{k\ne j}q_{jk}.
+\]
+左边是长期从其他状态流入 $j$ 的总速率，右边是从 $j$ 流出的总速率。
+
+平稳不要求每对状态流量逐一相等，只要求每个状态总流入等于总流出。
+
+\subsection{细致平衡与可逆性}
+
+更强的条件是
+
+\[
+\pi_iq_{ij}
+=\pi_jq_{ji}
+\]
+对所有 $i\ne j$ 成立。它逐边抵消概率流，推出全局平衡。
+
+满足细致平衡的 CTMC 可逆：在平稳状态下倒放时间，有限维分布不变。
+
+生灭过程只允许相邻状态间跳跃，没有形成有向环流的空间，因此正常返时常可通过相邻细致平衡递推求 $\pi$。更直接地看：把状态分成 $\{0,\ldots,n\}$ 与 $\{n+1,n+2,\ldots\}$ 两组，跨越分组的边只有 $n\leftrightarrow n+1$ 一条；全局平衡要求两组间总流量相等，而这正好就是该边上的细致平衡。
+
+\subsection{生灭过程的平稳递推}
+
+状态 $n=0,1,\ldots$，从 $n$ 到 $n+1$ 的出生率为 $\lambda_n$，从 $n\ge1$ 到 $n-1$ 的死亡率为 $\mu_n$。
+
+局部平衡：
+
+\[
+\pi_n\lambda_n
+=\pi_{n+1}\mu_{n+1}.
+\]
+所以
+
+\[
+\pi_{n+1}
+=\pi_n\frac{\lambda_n}{\mu_{n+1}},
+\]
+递推得到
+
+\[
+\pi_n
+=\pi_0
+\prod_{k=0}^{n-1}
+\frac{\lambda_k}{\mu_{k+1}}.
+\]
+最后必须检查能否规范化：
+
+\[
+\sum_{n=0}^{\infty}\pi_n<\infty.
+\]
+形式解若总和发散，就不存在概率平稳分布。无限状态模型中，规范化是稳定性的核心检查。
+
+\subsection{故障---修复模型}
+
+再看前两节使用的两状态故障---修复模型，生成矩阵
+
+\[
+Q=
+\begin{bmatrix}
+-\lambda&\lambda\\
+\mu&-\mu
+\end{bmatrix}.
+\]
+细致平衡为
+
+\[
+\pi_0\lambda=\pi_1\mu,
+\qquad
+\pi_0+\pi_1=1.
+\]
+所以
+
+\[
+\pi_0=\frac{\mu}{\lambda+\mu},
+\qquad
+\pi_1=\frac{\lambda}{\lambda+\mu}.
+\]
+正常可用率为修复速率占总速率的比例，故障占比则相反。也可从平均正常周期 $1/\lambda$ 与故障周期 $1/\mu$ 的时间比例得到同样结果，还与上一节瞬态解的极限 $p(t)\to\lambda/(\lambda+\mu)=\pi_1$ 一致：长期行为忘掉了初始状态。
+
+\subsection{平稳分布与嵌入跳链再次区别}
+
+两状态跳链总是 $0,1,0,1,\ldots$ 交替，跳跃次数占比各一半；但若 $\lambda\ll\mu$，系统在正常状态停留远久于故障状态，连续时间占比 $\pi_0$ 接近一。
+
+这正好具体验证了第一节的一般关系 $\pi_i\propto\widetilde\pi_i/q_i$：跳链平稳分布是 $\widetilde\pi_0=\widetilde\pi_1=1/2$，分别除以离开速率 $\lambda,\mu$ 再归一化，$(1/\lambda)/(1/\lambda+1/\mu)=\mu/(\lambda+\mu)$，正是 $\pi_0$。
+
+因此不能直接用跳链的平稳分布当作 CTMC 的时间平稳分布。
+
+\subsection{存在与收敛}
+
+有限不可约 CTMC 存在唯一平稳分布，并在常规非爆炸条件下从任意初始分布收敛。连续随机驻留通常消除了离散链的周期振荡。
+
+可约链仍可能有多个闭类和平稳分布；无限链还需正常返与可规范化。稳定性不是解出一组非负方程后自动成立。
+
+下一节把生灭过程用于排队。到达率与服务率的比值会决定平稳概率能否规范化。
+
+\subsubsection{自己补完}
+
+三状态生灭链 $0\leftrightarrow1\leftrightarrow2$，出生率均为 $\lambda$，死亡率均为 $\mu$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  用局部平衡写出 $\pi_1,\pi_2$ 关于 $\pi_0$ 的表达；
+\item
+  规范化求平稳分布；
+\item
+  当 $\lambda=\mu$ 时结果是什么？
+\item
+  与无限状态生灭链比较：为什么有限链不需要 $\lambda<\mu$ 才能规范化？
+\end{enumerate}

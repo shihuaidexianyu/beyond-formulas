@@ -1,0 +1,139 @@
+\section{矩估计让样本特征匹配总体特征}
+
+如果模型告诉我们参数与总体均值、方差或更高阶矩之间的关系，一个自然办法是把未知总体矩换成样本矩，再解出参数。这就是矩估计。
+
+设参数 \(\theta\in\mathbb R^k\)，理论矩满足
+
+\[
+m_j(\theta) = \mathbb E_\theta[X^j],
+\qquad j=1,\ldots,k.
+\]
+样本矩为
+
+\[
+\hat m_j = \frac1n\sum_{i=1}^nX_i^j.
+\]
+矩估计通过方程
+
+\[
+m_j(\hat\theta)=\hat m_j
+\]
+
+求出 \(\hat\theta\)。
+
+\subsection{Bernoulli 与均匀分布}
+
+对 Bernoulli\((\theta)\)，
+
+\[
+\E[X]=\theta,
+\]
+
+所以矩估计为
+
+\[
+\hat\theta=\bar X.
+\]
+
+对 \(X_i\sim\operatorname{Uniform}(0,\theta)\)，
+
+\[
+\E[X]=\frac\theta2,
+\]
+
+所以
+
+\[
+\hat\theta_{\mathrm{MM}}=2\bar X.
+\]
+
+这个估计利用平均值，却没有利用模型支持集要求
+
+\[
+\theta\ge\max_iX_i.
+\]
+
+有限样本中 \(2\bar X\) 可能小于样本最大值，从而给出一个认为已观测数据``不可能出现''的参数。矩估计方程简单，不代表它自动尊重参数空间和全部分布信息。下一节将在同一模型上求最大似然估计，那里的答案 \(\max_iX_i\) 恰好由支持集约束决定。
+
+\subsection{正态均值与方差的矩估计}
+
+若
+
+\[
+X\sim N(\mu,\sigma^2),
+\]
+
+则
+
+\[
+\E[X]=\mu,
+\]
+
+\[
+\E[X^2]=\mu^2+\sigma^2.
+\]
+
+匹配前两阶原点矩得到
+
+\[
+\hat\mu=\bar X,
+\]
+
+\[
+\hat\sigma^2 = \frac1n\sum_iX_i^2-\bar X^2
+=\frac1n\sum_i(X_i-\bar X)^2.
+\]
+它与正态 MLE 的方差估计相同（将在下一节推导），分母为 \(n\)，因此有限样本有向下偏差。若目标是无偏估计，需使用 \(n-1\)；构造方法与评价标准不能混为一谈。
+
+\subsection{为什么矩估计常常一致}
+
+若样本矩由大数定律收敛到理论矩，
+
+\[
+\hat m\overset{P}{\to}m(\theta),
+\]
+
+且从矩到参数的逆映射连续、参数可识别，那么连续映射定理通常给出
+
+\[
+\hat\theta_{\mathrm{MM}}
+\overset{P}{\to}\theta.
+\]
+
+这里每个条件都有作用。若所选矩不存在、映射不唯一或在某点不连续，一致性可能失败。重尾分布的高阶矩尤其不稳定，样本矩会被极端值主导。
+
+\subsection{矩方程多于参数时怎么办}
+
+若有比参数更多的矩条件，可以选择一部分，也可以用广义矩估计 GMM：
+
+\[
+\hat\theta = \argmin_\theta
+\hat g(\theta)^T
+W
+\hat g(\theta),
+\]
+其中 \(\hat g\) 汇总样本矩条件，\(W\succeq0\) 是权重矩阵。
+
+不同矩条件的尺度和相关性不同，权重会影响效率；最优权重与矩条件协方差有关，需要估计。额外矩还允许做 overidentification 检查，但这些检验同样依赖模型条件。
+
+\subsection{何时矩估计有吸引力}
+
+\begin{itemize}
+\tightlist
+\item
+  理论矩与参数关系简单；
+\item
+  似然难写或计算昂贵；
+\item
+  只愿意依赖有限个矩条件；
+\item
+  需要快速初值给 MLE 或迭代算法；
+\item
+  模型以经济学或物理矩条件自然表达。
+\end{itemize}
+
+代价是可能丢弃似然中的其他信息、效率较低、参数约束被破坏，且高阶矩对尾部敏感。它是一种建模选择，不是 MLE 的粗糙前置步骤。
+
+\subsubsection{留给读者}
+
+设 \(X_i\sim\operatorname{Exponential}(\lambda)\)，密度为 \(\lambda e^{-\lambda x}\)。用一阶矩求 \(\lambda\) 的矩估计。再计算二阶矩给出的候选估计，并说明两者在有限样本中一般不会完全相同；若做 GMM，应怎样把两个条件同时使用？

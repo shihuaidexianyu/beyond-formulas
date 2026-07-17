@@ -1,0 +1,130 @@
+\section{量词与否定}
+
+\subsection{从开放命题到真正的断言}
+
+``\(x^2\ge0\)''在没有说明 \(x\) 时只是一个谓词 \(P(x)\)，即第一节所说的开放命题。把变量限制在实数并加上量词，才得到完整命题：
+
+\[
+\forall x\in\R,\quad x^2\ge0.
+\]
+
+\(\forall\) 表示``对论域中的每一个''，\(\exists\) 表示``至少存在一个''。论域是命题的一部分。同一句 \(x^2=2\)，在整数中没有解，在实数中有两个解，在正实数中恰有一个解。
+
+因此写量词时要同时问三件事：变量是谁、允许从哪里取值、后面的性质是什么。
+
+\subsection{证明与推翻的最小动作}
+
+全称命题
+
+\[
+\forall x\in D, P(x)
+\]
+
+要求任取一个符合条件的 \(x\) 都能推出 \(P(x)\)。要推翻它，只需给出一个反例：
+
+\[
+\exists x\in D, \neg P(x).
+\]
+
+存在命题
+
+\[
+\exists x\in D, P(x)
+\]
+
+只需一个见证就能证明；要推翻它，却必须说明每一个候选都失败：
+
+\[
+\forall x\in D, \neg P(x).
+\]
+
+这组对偶关系直接给出量词否定律：
+
+\[
+\neg\forall x,P(x)\equiv\exists x,\neg P(x),
+\qquad
+\neg\exists x,P(x)\equiv\forall x,\neg P(x).
+\]
+
+否定量词时，量词要翻转，性质也要否定。只做其中一步是不完整的。
+
+例如，``并非每个连续函数都可微''应写成``存在一个连续函数不可微''，\(|x|\) 就是见证；上一节说明``可微 \(\to\) 连续''的反向不成立时，用的也是这个函数。它不等于``每个连续函数都不可微''。
+
+\subsection{多重量词的顺序会改变世界}
+
+比较：
+
+\[
+\forall x\in\R, \exists y\in\R, y>x,
+\]
+
+与
+
+\[
+\exists y\in\R, \forall x\in\R, y>x.
+\]
+
+第一句为每个 \(x\) 允许重新选择 \(y\)，取 \(y=x+1\) 即可；第二句要求同一个 \(y\) 大于所有实数，不可能成立。
+
+更一般地，\(\forall x\exists y\) 中的 \(y\) 可以依赖 \(x\)，而 \(\exists y\forall x\) 要先固定一个统一见证。证明时最好把依赖写出来，例如``给定 \(x\)，取 \(y=x+1\)''，而不要只写``显然存在 \(y\)''。
+
+同类量词通常可以交换：\(\forall x\forall y\) 与 \(\forall y\forall x\) 等价，因为两句要求的都是``每一对 \(x,y\) 都满足性质''，与先写哪个变量无关；\(\exists x\exists y\) 同理，同一对见证换了称呼仍是见证。异类量词一般不能交换。
+
+\subsection{条件式中的量词与空真}
+
+``每个偶数的平方都是偶数''可写成
+
+\[
+\forall n\in\Z,\quad n\text{ 偶}\to n^2\text{ 偶}.
+\]
+
+奇数 \(n\) 不会造成问题，因为前提为假。等价地，也可把论域限制为偶数集合再写全称命题。
+
+若论域中根本没有满足前提的对象，全称条件句会因没有反例而成立，称为空真。例如``所有大于 10 的一位正整数都是蓝色''在形式逻辑上为真，因为不存在大于 10 的一位正整数。这种真没有提供关于颜色的知识，只说明被量化的候选集合为空。
+
+空真在数学中不可避免。集合包含 \(A\subseteq B\) 意味着 \(\forall x(x\in A\to x\in B)\)，所以空集自动是任何集合的子集；若拒绝空真，这条最基本的结构就会充满例外。
+
+\subsection{唯一存在要拆成两件事}
+
+\(\exists!x,P(x)\) 表示``存在唯一一个 \(x\) 使 \(P(x)\) 成立''。证明它通常分两步：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  存在性：构造或证明至少有一个候选；
+\item
+  唯一性：若 \(x_1,x_2\) 都满足性质，则证明 \(x_1=x_2\)。
+\end{enumerate}
+
+例如对每个实数 \(a\)，方程 \(x+a=0\) 有唯一实解。存在性由 \(x=-a\) 给出；唯一性则从 \(x_1+a=x_2+a=0\) 推出 \(x_1=x_2\)。只写出一个解并不能排除还有别的解。
+
+\subsection{否定复杂命题：从外向内翻转}
+
+考虑一致连续的定义：
+
+\[
+\forall\varepsilon>0, \exists\delta>0, 
+\forall x,y\in D,\quad
+|x-y|<\delta\to|f(x)-f(y)|<\varepsilon.
+\]
+
+否定时从最外层依次翻转：
+
+\[
+\exists\varepsilon_0>0, \forall\delta>0,
+\exists x,y\in D,\quad
+|x-y|<\delta\land |f(x)-f(y)|\ge\varepsilon_0.
+\]
+
+注意蕴含的否定变成``前件成立且后件失败''，用的正是第一节的 \(\neg(P\to Q)\equiv P\land\neg Q\)。即使暂时不学习一致连续，这个例子也展示了复杂否定的可靠流程：一次只处理最外层结构，不凭语感一口气改写。
+
+\subsection{延伸与来源}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT Mathematics for Computer Science 的 Predicates and Quantifiers 相关章节。
+\item
+  Discrete Mathematics: An Open Introduction 的 Logic and Proofs 部分。
+\end{itemize}

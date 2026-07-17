@@ -1,0 +1,20 @@
+矩阵重复作用时，普通坐标中的各分量会不断混合。特征向量寻找那些经过变换后方向不变、只发生缩放的特殊方向；若这些方向足够多，就可以换到特征基，使复杂矩阵变成对角矩阵，矩阵幂、指数和长期动力学随之简化。
+
+\subsection{阅读顺序}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  不变方向与特征值
+\item
+  对角化与动力系统
+\item
+  对角化失败与 Jordan 形
+\item
+  矩阵函数从多项式到指数
+\end{enumerate}
+
+第一节产生特征方程；第二节说明一组完整特征向量如何形成最合适的坐标；第三节研究特征方向不足时的结构，并为复特征值和更稳定的 SVD 观点留下接口；第四节把多项式、指数与更一般的标量函数作用到矩阵上，说明对角化时只需作用于特征值，而 Jordan 块还会读取函数的导数。
+
+主要参考 MIT 18.06 关于 eigenvalues、diagonalization、matrix powers、differential equations 与 Jordan form 的讲授。

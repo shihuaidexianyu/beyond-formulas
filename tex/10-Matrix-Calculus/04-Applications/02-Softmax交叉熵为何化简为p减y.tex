@@ -1,0 +1,212 @@
+\section{\texorpdfstring{Softmax 交叉熵为何化简为 \(p-y\)}{Softmax 交叉熵为何化简为 p-y}}
+
+多分类模型对每个样本输出 logits
+
+\[
+z\in\R^K.
+\]
+
+softmax 把它归一化为概率：
+
+\[
+p_i = \frac{e^{z_i}}{\sum_j e^{z_j}}.
+\]
+若正确类别用 one-hot 向量 \(y\) 表示，交叉熵为
+
+\[
+\ell(z,y) = -\sum_i y_i\log p_i.
+\]
+最终梯度极其简洁：
+
+\[
+\nabla_z\ell=p-y.
+\]
+
+简洁不应成为死记理由。它来自 log-sum-exp 的梯度与 one-hot 标签的线性项。
+
+\subsection{先把损失写成 logits 形式}
+
+由于
+
+\[
+\log p_i = z_i-\log\sum_j e^{z_j},
+\]
+并且 \(\sum_i y_i=1\)，
+
+\[
+\begin{aligned}
+\ell
+&=
+-\sum_i y_i z_i
++\left(\sum_i y_i\right)
+\log\sum_j e^{z_j}\\
+&=
+-y^Tz+\operatorname{LSE}(z).
+\end{aligned}
+\]
+
+而逐分量求导给出
+
+\[
+\frac{\partial}{\partial z_i}\operatorname{LSE}(z)
+=\frac{e^{z_i}}{\sum_j e^{z_j}}
+=p_i,
+\]
+
+即
+
+\[
+\nabla_z\operatorname{LSE}(z)=p,
+\]
+
+所以
+
+\[
+\nabla_z\ell=p-y.
+\]
+
+若标签不是归一化分布而总和为 \(c\)，梯度会变成 \(cp-y\)；因此化简依赖 \(\sum_i y_i=1\)。
+
+\subsection{从 softmax Jacobian 也能得到同一结果}
+
+softmax 的偏导为（\(\delta_{ij}\) 为 Kronecker 记号：\(i=j\) 时取 1，否则取 0）
+
+\[
+\frac{\partial p_i}{\partial z_j} = p_i(\delta_{ij}-p_j).
+\]
+矩阵形式是
+
+\[
+J_{\mathrm{softmax}} = \operatorname{diag}(p)-pp^T.
+\]
+对交叉熵，\(\partial\ell/\partial p_i=-y_i/p_i\)，乘上这个（对称的）Jacobian 验证：
+
+\[
+\sum_i p_i(\delta_{ij}-p_j)\left(-\frac{y_i}{p_i}\right)
+=-y_j+p_j\sum_i y_i
+=p_j-y_j,
+\]
+
+确实与 log-sum-exp 路线一致。先对概率做损失、再乘 Jacobian 的路线对任意损失都适用；但对交叉熵，直接合并 log-softmax 与 NLL（负对数似然）可以消去中间 Jacobian，并且数值更稳定。
+
+Hessian 正是
+
+\[
+\nabla_z^2\ell = \operatorname{diag}(p)-pp^T\succeq0.
+\]
+对任意 \(v\)，
+
+\[
+v^THv = \sum_i p_i v_i^2
+-\left(\sum_i p_i v_i\right)^2
+=\operatorname{Var}_p(v_i)\ge0.
+\]
+沿全一向量 \(\mathbf1\)，方差为零。这对应 softmax 的平移不变性：给所有 logits 加相同常数，概率不变，损失也不变。
+
+\subsection{批量线性分类器的梯度}
+
+设
+
+\[
+X\in\R^{n\times d},
+\quad
+W\in\R^{d\times K},
+\quad
+b\in\R^K.
+\]
+
+logits 矩阵为
+
+\[
+Z=XW+\mathbf1b^T
+\in\R^{n\times K}.
+\]
+
+令 \(P\) 为逐行 softmax，\(Y\) 为逐行标签分布。记 \(\bar Z\) 为平均交叉熵对 logits 的梯度：本部分用加横线的字母表示标量损失对某中间量的梯度，形状与该量一致。逐行代入单样本结果 \(\nabla_z\ell=p-y\) 并除以 \(n\)，得
+
+\[
+\bar Z = \frac1n(P-Y).
+\]
+由
+\[
+dL=\operatorname{tr}(\bar Z^TdZ)
+=\operatorname{tr}\bigl(\bar Z^T(X\,dW+\mathbf1\,db^T)\bigr)
+\]
+读出线性层反向：
+
+\[
+\nabla_WL = X^T\bar Z
+=\frac1nX^T(P-Y),
+\]
+\[
+\nabla_bL = \bar Z^T\mathbf1
+=\frac1n(P-Y)^T\mathbf1.
+\]
+这些形状提供直接核对：
+
+\[
+(d\times n)(n\times K)=d\times K,
+\]
+
+与 \(W\) 相同；bias 梯度沿样本轴求和后为 \(K\) 维。
+
+\subsection{数值稳定性属于公式的一部分}
+
+计算
+
+\[
+\operatorname{LSE}(z) = m+\log\sum_j e^{z_j-m},
+\qquad
+m=\max_jz_j
+\]
+（从求和中提出 \(e^m\) 即得此恒等式）可避免指数上溢：平移后最大的指数项仅为 \(e^0=1\)。log-softmax 应直接计算
+
+\[
+z_i-\operatorname{LSE}(z),
+\]
+
+不应先得到可能下溢为零的 \(p_i\) 再取对数。
+
+在有 mask 的注意力或序列模型中，无效位置常设为 \(-\infty\)。每行至少有一个有效位置时可正常归一化；整行全被 mask 时不存在合法分布，必须由接口明确处理。
+
+低精度训练中，max 和 sum 归约可能使用较高精度。减最大值防止溢出，却不能恢复低精度已经舍弃的细小差异。
+
+\subsection{标签平滑与温度怎样改变梯度}
+
+标签平滑把 one-hot \(y\) 改为
+
+\[
+\tilde y=(1-\varepsilon)y+\varepsilon q,
+\]
+
+其中 \(q\) 常为均匀分布。上面的推导只用到标签分量之和为 1，\(\tilde y\) 仍满足，故梯度仍是
+
+\[
+p-\tilde y.
+\]
+
+它不再要求正确类别概率趋于一，改变了最优预测和校准。
+
+若 softmax 使用温度 \(T>0\)：
+
+\[
+p=\operatorname{softmax}(z/T),
+\]
+
+链式法则产生
+
+\[
+\nabla_z\ell=\frac1T(p-y).
+\]
+
+忘记 \(1/T\) 会使梯度尺度错误。任何看似相同的公式都必须先核对实际计算图。
+
+\subsubsection{留给读者}
+
+证明 softmax Jacobian 满足
+
+\[
+J\mathbf1=0
+\]
+
+且为半正定。然后解释：为什么从概率 \(p\) 无法唯一恢复 logits \(z\)，却可以恢复任意两个 logits 的差？

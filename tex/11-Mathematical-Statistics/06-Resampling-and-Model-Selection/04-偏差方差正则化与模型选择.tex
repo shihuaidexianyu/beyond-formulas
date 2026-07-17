@@ -1,0 +1,121 @@
+\section{偏差---方差、正则化与模型选择}
+
+复杂模型能降低训练偏差，却更容易追随样本噪声；简单模型稳定，却可能无法表达真实结构。偏差---方差分解把这种张力写成预测误差。
+
+设
+
+\[
+Y=f(X)+\varepsilon,
+\qquad
+\E[\varepsilon\mid X]=0,
+\quad
+\Var(\varepsilon\mid X=x_0)=\sigma^2.
+\]
+
+训练数据随机变化会产生不同预测器 \(\hat f\)。在固定新点 \(x_0\)，记新响应 \(Y_0=f(x_0)+\varepsilon_0\)，
+
+\[
+\begin{aligned}
+\E
+\left[
+(Y_0-\hat f(x_0))^2
+\right]
+=&
+\sigma^2\\
+&+
+\left(
+\E[\hat f(x_0)]-f(x_0)
+\right)^2\\
+&+
+\Var
+\bigl(
+\hat f(x_0)
+\bigr).
+\end{aligned}
+\]
+
+三项分别是不可约噪声、平方偏差和估计方差。推导只需把 \(Y_0-\hat f(x_0)\) 拆成 \((Y_0-f(x_0))+(f(x_0)-\E[\hat f(x_0)])+(\E[\hat f(x_0)]-\hat f(x_0))\) 再展开平方：\(\varepsilon_0\) 条件均值为零使含它的交叉项消失，最后一项与其均值的交叉项按方差定义为零。
+
+\subsection{复杂度改变两种误差}
+
+低阶模型可能有高偏差、低方差；高自由度模型可降低偏差，却对训练样本更敏感。测试误差常呈 U 形，但这只是典型图景，不是所有现代高维模型的普遍定律。
+
+Ridge、Lasso、早停、数据增强和 Bayesian 先验都可看作控制有效复杂度的方法。它们不一定减少参数数量，却限制模型对数据波动的响应。
+
+偏差---方差分解中的期望是对训练数据和新响应重复抽样。对一份固定数据无法直接观察两个分量，只能通过模型、重采样或模拟近似。
+
+\subsection{AIC 目标是预测性的 KL 风险}
+
+对具有 \(k\) 个自由参数的正则似然模型，
+
+\[
+\operatorname{AIC} = -2\ell(\hat\theta)+2k.
+\]
+第一项奖励拟合，第二项修正用同一数据拟合与评价造成的乐观偏差。AIC 在特定正则大样本条件下近似选择具有较小期望 out-of-sample KL discrepancy 的模型。
+
+比较 AIC 只能在相同数据与可比 likelihood 上进行。把不同响应、不同常数处理或 penalized likelihood 直接混在一起可能无意义。小样本还有 AICc 修正。
+
+对正则化与平滑模型，复杂度不一定等于原始参数个数，需要 effective degrees of freedom；机械数非零系数并不总能替代。
+
+\subsection{BIC 面向另一种目标}
+
+\[
+\operatorname{BIC} = -2\ell(\hat\theta)+k\log n.
+\]
+它的惩罚随样本量增长，比 AIC 更强。在固定维、候选模型中含真实模型、先验与正则条件合适时，BIC 可由 marginal likelihood 的 Laplace 近似导出，并具有模型选择一致性。
+
+AIC 更偏向预测效率，BIC 更偏向从有限候选中识别一个真模型。若所有候选都错、维度高、模型奇异或目标纯粹是预测，两者的经典解释会改变。不能只因 BIC 数字更小或惩罚更重，就称它更``严格''或更``正确''。
+
+\subsection{交叉验证直接模拟预测任务}
+
+CV 对任意可重训 pipeline 都可使用，不要求显式 likelihood；它能针对实际损失选择超参数。代价是计算更高、估计有方差，并对切分机制敏感。
+
+在某些正则模型和损失下，leave-one-out CV 与 AIC 有渐近联系；这不表示它们普遍等价。BIC 也不是``另一种 CV''。
+
+选择方法应由目标决定：
+
+\begin{itemize}
+\tightlist
+\item
+  预测新数据：优先使用与部署一致的 CV 或外部验证；
+\item
+  似然模型的快速预测比较：AIC/AICc 可能合适；
+\item
+  固定候选中的 Bayesian evidence 或真模型识别：在条件满足时考虑 BIC/marginal likelihood；
+\item
+  推断某个参数：模型选择后还要处理选择不确定性。
+\end{itemize}
+
+\subsection{最小 CV 误差不是唯一合理选择}
+
+多个超参数的 CV 差异可能小于估计噪声。one-standard-error rule 选择误差在最优值一个标准误内的最简单模型，主动用微小预测差换取稳定与可解释性。
+
+但``标准误''必须合理估计，折分数相关（同上一节指出的折间不独立）会使朴素公式失真。还应查看整个性能曲线、不同切分的稳定性、模型大小与业务成本。
+
+\subsection{选择后不能忘记选择过程}
+
+从许多模型中挑出表现最好者后，其训练系数、普通标准误和 \(p\) 值往往过于乐观。选择过程本身利用了随机噪声。
+
+可采用独立验证数据、sample splitting、selective inference、模型平均或 bootstrap 整个选择 pipeline。只对最终模型重新拟合，再把它当成预先指定，会低估不确定性。
+
+最终报告应区分：
+
+\begin{itemize}
+\tightlist
+\item
+  候选模型如何产生；
+\item
+  超参数怎样选择；
+\item
+  性能在哪些数据上评估；
+\item
+  最终模型是否在全训练集重训；
+\item
+  测试集是否真正只使用一次；
+\item
+  选择不确定性是否进入区间与结论。
+\end{itemize}
+
+\subsubsection{留给读者}
+
+两个模型的 10 折 CV 平均误差分别为 0.210 和 0.208，后者复杂度高十倍。仅凭均值能否断言后者更好？列出还需要的折间配对差异、重复切分稳定性、训练成本和部署目标信息，并说明 one-standard-error rule 可能怎样选择。

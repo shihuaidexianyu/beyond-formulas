@@ -1,0 +1,160 @@
+\section{Lagrangian 怎样制造全局下界}
+
+考虑原始问题
+
+\[
+\begin{aligned}
+\text{minimize}\quad&f_0(x)\\
+\text{subject to}\quad&
+f_i(x)\le0,\quad i=1,\ldots,m,\\
+&h_j(x)=0,\quad j=1,\ldots,p.
+\end{aligned}
+\]
+
+假设我们还不知道最优解，却想构造一个对所有可行点都成立的目标下界。约束本身提供了材料：对可行点，\(f_i(x)\le0\)。若乘上非负数 \(\lambda_i\) 并加到目标上，只会让数值变小或不变；等式约束乘任意实数 \(\nu_j\) 后仍为零。
+
+于是定义 Lagrangian
+
+\[
+L(x,\lambda,\nu) = f_0(x)
++\sum_{i=1}^m\lambda_i f_i(x)
++\sum_{j=1}^p\nu_j h_j(x),
+\qquad \lambda\ge0.
+\]
+对任何可行 \(x\)，
+
+\[
+L(x,\lambda,\nu)\le f_0(x).
+\]
+
+再对所有 \(x\) 取下确界，
+
+\[
+g(\lambda,\nu) = \inf_x L(x,\lambda,\nu),
+\]
+就得到
+
+\[
+g(\lambda,\nu)
+\le L(x,\lambda,\nu)
+\le f_0(x)
+\]
+
+对每个可行 \(x\) 成立。记原问题最优值（即可行目标值的下确界）为 \(p^\star\)；一个不超过每个可行目标值的数，也不会超过它们的下确界，因此
+
+\[
+g(\lambda,\nu)\le p^\star.
+\]
+
+这就是对偶函数的意义：每组选定的合法乘子都产生一个原问题最优值的下界。
+
+\subsection{\texorpdfstring{为什么要对所有 \(x\) 取下确界}{为什么要对所有 x 取下确界}}
+
+只在某个任意点计算 \(L\)，并不能保证它低于所有可行目标。取
+
+\[
+\inf_x L(x,\lambda,\nu)
+\]
+
+相当于让最不利的 \(x\) 来检验这组乘子能保证多高的下界。若 Lagrangian 沿某个方向无界下降，对偶函数就是 \(-\infty\)，这组乘子没有提供有用信息。
+
+对偶函数是 \(\lambda,\nu\) 的凹函数，即使原始问题非凸。原因是：对固定 \(x\)，\(L\) 关于乘子是仿射函数，而任意族仿射函数的逐点下确界是凹函数。这一点可以直接验证：对 \(t\in[0,1]\) 与两组乘子 \((\lambda,\nu),(\lambda',\nu')\)，
+
+\[
+g\big(t(\lambda,\nu)+(1-t)(\lambda',\nu')\big)
+=\inf_x\Big(t\,L(x,\lambda,\nu)+(1-t)\,L(x,\lambda',\nu')\Big)
+\ge t\,g(\lambda,\nu)+(1-t)\,g(\lambda',\nu'),
+\]
+
+最后一步因为``和的下确界不小于各自下确界之和''。
+
+既然每组乘子都给下界，自然希望寻找最高的一个：
+
+\[
+\begin{aligned}
+\text{maximize}\quad&g(\lambda,\nu)\\
+\text{subject to}\quad&\lambda\ge0.
+\end{aligned}
+\]
+
+这就是 Lagrange 对偶问题。其最优值记作 \(d^\star\)。
+
+\subsection{一个一维例子看清全部符号}
+
+考虑
+
+\[
+\begin{aligned}
+\text{minimize}\quad&x^2\\
+\text{subject to}\quad&x\ge1.
+\end{aligned}
+\]
+
+把约束写成
+
+\[
+1-x\le0.
+\]
+
+Lagrangian 为
+
+\[
+L(x,\lambda)=x^2+\lambda(1-x),
+\qquad\lambda\ge0.
+\]
+
+对 \(x\) 求下确界。配方或令导数为零可得最小点 \(x=\lambda/2\)，所以
+
+\[
+g(\lambda) = \lambda-\frac{\lambda^2}{4}.
+\]
+这是开口向下的抛物线。对 \(\lambda\ge0\) 最大化，最优乘子为 \(\lambda^\star=2\)，得到
+
+\[
+d^\star=g(2)=1.
+\]
+
+原问题显然在 \(x^\star=1\) 处取得 \(p^\star=1\)。这里最好的下界恰好碰到原最优值。
+
+若误把乘子取成负数，可行点上的 \(\lambda(1-x)\) 变为非负，不再保证 Lagrangian 低于原目标。乘子符号不是记忆细节，而是下界推导成立的原因。
+
+\subsection{弱对偶永远成立}
+
+把所有合法下界取最大，仍不可能超过原最优值：
+
+\[
+d^\star\le p^\star.
+\]
+
+这称为弱对偶。它不要求原问题凸，也不要求最优解存在；只要 Lagrangian 的符号约定正确，结论就成立。
+
+弱对偶立即提供两个用途：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  若找到原始可行点 \(\hat x\) 和对偶可行乘子 \((\hat\lambda,\hat\nu)\)，则
+
+  \[
+  g(\hat\lambda,\hat\nu)
+  \le p^\star
+  \le f_0(\hat x).
+  \]
+
+  上下界之间的距离限制了候选解还能改善多少。
+\item
+  若某个对偶可行序列的目标趋于 \(+\infty\)，则``原问题有有限可行值''的假设立即矛盾：这是弱对偶给出的原问题不可行证书，而不仅是数值上的旁证。
+\end{enumerate}
+
+对偶不是凭空创造另一个问题，而是把``约束对目标下界的贡献''参数化。下一节要问：最高下界是否一定能碰到真实最优值？
+
+\subsubsection{留给读者}
+
+为问题
+
+\[
+\min_x (x-2)^2
+\quad\text{subject to}\quad x\le1
+\]
+
+写出 Lagrangian、对偶函数和对偶问题。先不用 KKT 条件，直接对 \(x\) 求下确界并最大化 \(g(\lambda)\)。最终乘子为什么是正数，它与活跃约束有何联系？

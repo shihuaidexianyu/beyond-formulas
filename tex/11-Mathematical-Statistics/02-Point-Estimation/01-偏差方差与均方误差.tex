@@ -1,0 +1,154 @@
+\section{偏差、方差与均方误差}
+
+估计量 \(\hat\theta\) 在重复抽样中会变化。评价它时至少要区分两个问题：平均而言是否瞄准真值，以及每次抽样会波动多大。
+
+偏差定义为
+
+\[
+\operatorname{Bias}_\theta(\hat\theta) = \mathbb E_\theta[\hat\theta]-\theta.
+\]
+方差为
+
+\[
+\operatorname{Var}_\theta(\hat\theta).
+\]
+
+在平方误差损失下，均方误差
+
+\[
+\operatorname{MSE}_\theta(\hat\theta) = \mathbb E_\theta[(\hat\theta-\theta)^2]
+\]
+分解为
+
+\[
+\operatorname{MSE} = \operatorname{Var}(\hat\theta)
++\operatorname{Bias}(\hat\theta)^2.
+\]
+证明只需写
+
+\[
+\hat\theta-\theta = \bigl(\hat\theta-\mathbb E\hat\theta\bigr)
++\bigl(\mathbb E\hat\theta-\theta\bigr)
+\]
+并展开平方。交叉项期望为零：给定 \(\theta\) 时 \(\mathbb E\hat\theta-\theta\) 是常数，提出后剩下 \(\mathbb E[\hat\theta-\mathbb E\hat\theta]=0\)。
+
+\subsection{无偏不等于更准确}
+
+无偏估计量满足
+
+\[
+\mathbb E_\theta[\hat\theta]=\theta
+\]
+
+对所有参数成立。它消除了系统性中心偏移，却没有限制方差。一个无偏估计量可能波动巨大，MSE 反而高于稍有偏差但稳定的估计量。
+
+设
+
+\[
+X_1,\ldots,X_n\sim N(\mu,\sigma^2),
+\]
+
+\(\sigma^2\) 已知，考虑收缩估计
+
+\[
+\hat\mu_a=a\bar X,
+\qquad0\le a\le1.
+\]
+
+由 \(\mathbb E\bar X=\mu\) 与 \(\operatorname{Var}(\bar X)=\sigma^2/n\)，其偏差为
+
+\[
+(a-1)\mu,
+\]
+
+方差为
+
+\[
+\frac{a^2\sigma^2}{n},
+\]
+
+所以
+
+\[
+\operatorname{MSE}(\hat\mu_a) = (1-a)^2\mu^2
++\frac{a^2\sigma^2}{n}.
+\]
+对 \(a\) 求导令零，得最优收缩系数
+
+\[
+a^*=\frac{\mu^2}{\mu^2+\sigma^2/n},
+\]
+
+\(|\mu|\) 越小，收缩越强。适当 \(a<1\) 可以用一点偏差换取方差下降，尤其当 \(\mu\) 接近零时。但 \(a^*\) 依赖未知 \(\mu\)，只是 oracle 参照而非可用估计量；先验、层次模型、交叉验证或 minimax 原则会给出不同选择方式。
+
+这正是正则化的统计本质之一：有意收缩，减少估计波动。
+
+\subsection{一致性讨论样本量增长后的行为}
+
+估计量序列 \(\hat\theta_n\) 若满足
+
+\[
+\hat\theta_n
+\overset{P}{\longrightarrow}\theta,
+\]
+
+称为一致估计。即对任意 \(\varepsilon>0\)，
+
+\[
+\Pr_\theta
+\bigl(
+|\hat\theta_n-\theta|>\varepsilon
+\bigr)
+\to0.
+\]
+
+Bernoulli 样本均值由大数定律一致。
+
+一致性与无偏性互不等价：
+
+\begin{itemize}
+\tightlist
+\item
+  \(\bar X_n\) 加上 \(1/n\) 是有偏的，但偏差趋零且仍一致；
+\item
+  只用第一项 \(\hat\mu_n=X_1\) 估计正态均值，对所有 \(n\) 都无偏；但 \(\hat\mu_n-\mu\sim N(0,\sigma^2)\) 不随 \(n\) 收缩，偏离 \(\mu\) 超过任意 \(\varepsilon\) 的概率是固定的正数，因此不一致。
+\end{itemize}
+
+有限样本中，一致估计量仍可能很差；渐近结论没有给出``多大 \(n\) 已经足够''。反过来，一个有限样本 MSE 很好的规则也可能在某些增长方式下不一致。
+
+\subsection{风险函数把损失写进评价}
+
+更一般地，给定损失 \(L(\theta,a)\)，估计量 \(\delta(X)\) 的风险为
+
+\[
+R(\theta,\delta) = \mathbb E_\theta
+\bigl[
+L(\theta,\delta(X))
+\bigr].
+\]
+平方损失产生 MSE；绝对误差更关注中位表现；非对称损失可表达低估与高估代价不同；预测任务应评价新样本上的预测损失。
+
+一个估计量可能在某些 \(\theta\) 上更好、另一些上更差。若没有先验、参数范围或 minimax 等额外准则，往往不存在对所有参数、所有损失都最佳的单一规则。
+
+\subsection{标准误是方差的估计，不是总误差}
+
+估计量标准差
+
+\[
+\operatorname{SE}_\theta(\hat\theta) = \sqrt{\operatorname{Var}_\theta(\hat\theta)}
+\]
+通常依赖未知参数，需要从数据估计。它量化抽样波动，不包含偏差平方、模型错设和选择偏差。
+
+报告``估计值 \(\pm\) 标准误''不能自动成为置信区间；还需要抽样分布形状或渐近近似。对偏斜、边界或选择后的估计，正态对称误差条可能严重误导。
+
+\subsubsection{留给读者}
+
+设 \(X_i\sim\operatorname{Bernoulli}(\theta)\)，记 \(S=\sum_iX_i\)，比较
+
+\[
+\hat\theta_1=\bar X,
+\qquad
+\hat\theta_2=\frac{S+1}{n+2}.
+\]
+
+分别求偏差、方差和 MSE。第二个估计量有偏，但在哪些 \(\theta\) 与 \(n\) 下可能具有更小 MSE？不要只比较偏差。（\(\hat\theta_2\) 并非凭空而来：MAP 一节将看到，它是均匀先验下的后验均值。）

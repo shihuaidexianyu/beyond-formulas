@@ -1,0 +1,26 @@
+离散时间 Markov 链每一步都在统一时钟上更新。连续时间系统则在随机时刻跳变：设备随时可能故障或修复，顾客随时到达或离开。
+
+连续时间 Markov 链（CTMC）把两类随机性结合：
+
+\begin{itemize}
+\tightlist
+\item
+  当前状态会停留多久；
+\item
+  离开后跳到哪个状态。
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  连续时间 Markov 链与生成矩阵：从 Exponential 驻留时间和跳链构造过程。
+\item
+  Kolmogorov 方程与矩阵指数：局部速率怎样生成有限时间转移概率。
+\item
+  连续时间平稳分布与流量平衡：用 $\pi Q=0$ 和局部流量理解长期占比。
+\item
+  排队系统与 M/M/1 模型：把 Poisson 到达和 Exponential 服务组合成生灭链，并解释负载接近一时延为何爆炸。
+\end{enumerate}
+
+连续时间不再有离散链那种纯粹的周期振荡问题，因为随机 Exponential 驻留打散了统一节拍；但稳定性、正常返和非爆炸性仍必须检查。

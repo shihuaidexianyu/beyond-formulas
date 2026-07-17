@@ -1,0 +1,148 @@
+\section{Bootstrap 近似估计量的抽样波动}
+
+设观测到 iid 样本
+
+\[
+x_1,\ldots,x_n\sim F,
+\]
+
+想了解统计量
+
+\[
+\hat\theta=T(x_1,\ldots,x_n)
+\]
+
+的抽样波动，但真实分布 \(F\) 未知。除样本均值等少数简单统计量外，\(\hat\theta\) 的抽样分布通常没有可用的解析形式，标准误和区间也就无从直接计算。非参数 bootstrap 用经验分布
+
+\[
+\hat F_n = \frac1n\sum_{i=1}^n\delta_{x_i}
+\]
+
+（\(\delta_{x}\) 表示全部概率集中在点 \(x\) 上的点质量分布，即每个观测各分得概率 \(1/n\)）替代 \(F\)，再从 \(\hat F_n\) 独立抽取大小仍为 \(n\) 的样本。
+
+每个 bootstrap 样本
+
+\[
+x_1^\star,\ldots,x_n^\star
+\]
+
+是从原数据中\textbf{有放回}抽取，计算
+
+\[
+\hat\theta^\star = T(x_1^\star,\ldots,x_n^\star).
+\]
+重复 \(B\) 次，\(\hat\theta^{\star1},\ldots,\hat\theta^{\star B}\) 的条件分布用来近似 \(\hat\theta\) 的抽样分布。
+
+\subsection{为什么必须有放回且样本量不变}
+
+经验分布把每个观测值赋予概率 \(1/n\)。从它 iid 抽样自然允许重复和遗漏；若无放回抽取 \(n\) 个点，每次只会得到原样本的排列，许多对顺序不敏感的统计量完全不变，无法模拟抽样波动。
+
+保持样本量 \(n\) 是为了近似原估计问题的尺度。若改变样本量，标准误也会改变；\(m\)-out-of-\(n\) bootstrap 是一种专门的非规则修正，不应与普通 bootstrap 混用。
+
+\subsection{标准误与偏差估计}
+
+bootstrap 标准误为
+
+\[
+\widehat{\operatorname{SE}}_{\mathrm{boot}} = \sqrt{
+\frac{1}{B-1}
+\sum_{b=1}^B
+\left(
+\hat\theta^{\star b}
+-\bar{\hat\theta^\star}
+\right)^2
+}.
+\]
+bootstrap 偏差估计为
+
+\[
+\widehat{\operatorname{Bias}}_{\mathrm{boot}} = \bar{\hat\theta^\star}-\hat\theta.
+\]
+这里的概率条件于已观测数据。Bootstrap 假设经验分布已经足够接近真实分布，使从 \(\hat F_n\) 重抽样能够复现从 \(F\) 抽样的主要波动。
+
+对样本均值，这一方法通常表现很好；事实上 bootstrap 方差与熟悉的 \(s^2/n\) 密切相关：条件于数据，\(x_i^\star\) 从 \(\hat F_n\) iid 抽取，故
+\(\Var^\star(\bar x^\star)=\frac1n\cdot\frac1n\sum_{i=1}^n(x_i-\bar x)^2=\frac{n-1}{n}\cdot\frac{s^2}{n}\)，
+即 bootstrap 自动给出 \(s^2/n\) 的 \(\frac{n-1}{n}\) 倍。对复杂光滑统计量，它可省去繁琐解析推导。
+
+\subsection{几种区间并不等价}
+
+最简单的 normal interval 是
+
+\[
+\hat\theta
+\pm
+z_{1-\alpha/2}
+\widehat{\operatorname{SE}}_{\mathrm{boot}}.
+\]
+
+它仍假设近似对称正态。
+
+Percentile interval 直接取 bootstrap 统计量分位数：
+
+\[
+\left[
+q^\star_{\alpha/2},
+q^\star_{1-\alpha/2}
+\right].
+\]
+
+Basic interval 则反射 bootstrap 误差：
+
+\[
+\left[
+2\hat\theta-q^\star_{1-\alpha/2},
+2\hat\theta-q^\star_{\alpha/2}
+\right].
+\]
+
+它把 \(\hat\theta^\star-\hat\theta\) 的分布当作 \(\hat\theta-\theta\) 分布的镜像：既然 \(q^\star_{1-\alpha/2}-\hat\theta\) 是 bootstrap 误差的上界，\(\theta\) 的下界就取 \(\hat\theta-(q^\star_{1-\alpha/2}-\hat\theta)\)。这是直觉构造，合理性依赖镜像近似成立，并非恒等式。
+
+BCa interval 进一步修正偏差和加速度（标准误随参数真值变化的速率），常有更高阶覆盖性质，但实现与条件更复杂。
+
+不能只因``用了 bootstrap''就宣称区间覆盖正确。不同区间对偏斜、参数变换和边界的表现不同，仍需模型或模拟研究。
+
+\subsection{Bootstrap 会在哪里失败}
+
+经验分布不能生成样本范围之外的新值。对 Uniform\((0,\theta)\) 的样本最大值，所有 bootstrap 最大值都不超过已观测最大值，无法正确模拟真抽样中未来最大值可能更大的右侧波动。这是非光滑边界统计量的典型失败。
+
+其他困难包括：
+
+\begin{itemize}
+\tightlist
+\item
+  样本极小，经验分布过于离散；
+\item
+  重尾导致均值或方差不稳定；
+\item
+  参数位于边界；
+\item
+  统计量在分布处不光滑；
+\item
+  模型选择后再做普通 bootstrap，选择步骤却不在重抽样循环内（见最后一节）；
+\item
+  时间序列、空间或聚类数据却逐行 iid 重抽。
+\end{itemize}
+
+有依赖时可用 block bootstrap、cluster bootstrap 或设计特定重抽样；它们保留的依赖单位必须与数据生成机制一致。
+
+参数 bootstrap 则先拟合 \(F_{\hat\theta}\)，再从该参数模型生成数据。若参数模型正确，它可能更高效；若模型错设，则会精确重现错误模型。
+
+\subsection{\texorpdfstring{\(B\) 只控制 Monte Carlo 误差}{B 只控制 Monte Carlo 误差}}
+
+增加 bootstrap 重复数 \(B\) 能减少重采样模拟噪声，却不能修复原样本太小或 bootstrap 理论不适用。应区分：
+
+\begin{itemize}
+\tightlist
+\item
+  原数据抽样误差；
+\item
+  用经验分布近似真实分布的误差；
+\item
+  有限 \(B\) 带来的 Monte Carlo 误差。
+\end{itemize}
+
+报告随机种子、\(B\)、重抽单位和区间类型，才能让结果可复核。
+
+\subsubsection{留给读者}
+
+对数据 \((1,2,4)\) 考虑所有大小为 3 的有放回 bootstrap 样本。样本均值不必逐项穷举，但说明每次抽样中原观测可能出现几次。若改成无放回，样本均值的 bootstrap 分布会变成什么？

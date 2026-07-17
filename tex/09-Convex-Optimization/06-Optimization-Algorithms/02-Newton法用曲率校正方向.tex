@@ -1,0 +1,111 @@
+\section{Newton 法用曲率校正方向}
+
+梯度下降把局部目标近似成一个倾斜平面，只知道往哪边下降，却不知道每个方向有多陡。Newton 法保留二阶曲率，在当前点 \(x\) 附近使用二次模型
+
+\[
+f(x+p)
+\approx
+f(x)+\nabla f(x)^Tp
++\frac12p^T\nabla^2f(x)p.
+\]
+
+若 Hessian 正定，这个模型的最小点满足
+
+\[
+\nabla^2f(x)p=-\nabla f(x).
+\]
+
+解得方向 \(p_{\mathrm N}\) 后，更新
+
+\[
+x_+=x+\alpha p_{\mathrm N}.
+\]
+
+Newton 步不是``梯度除以二阶导数''的高维机械推广，而是先用 Hessian 把不同方向的尺度校正，再在局部二次模型中走到最小点。
+
+\subsection{二次函数为什么一步到达}
+
+对
+
+\[
+f(x)=\frac12x^TQx+b^Tx+c,
+\qquad Q\succ0,
+\]
+
+梯度为 \(Qx+b\)，Hessian 恒为 \(Q\)。Newton 方程给
+
+\[
+Qp=-(Qx+b),
+\]
+
+所以
+
+\[
+x+p=-Q^{-1}b=x^\star.
+\]
+
+二次模型在这里就是原函数本身，因此精确算术中一步到达最优点。上一节让梯度下降反复折返的狭长二次碗正是这种情形：Hessian 把各方向的曲率差异一并吸收，条件数不再拖慢迭代。一般光滑函数只有在足够靠近最优点时才近似二次，这解释了 Newton 法强大的局部速度和较脆弱的远距离行为。
+
+\subsection{局部二次收敛需要条件}
+
+若最优点附近 Hessian 正定且变化足够平滑，完整 Newton 步进入局部区域后常满足
+
+\[
+\lVert x_{k+1}-x^\star\rVert
+\le
+C\lVert x_k-x^\star\rVert^2.
+\]
+
+误差大致平方，正确数字位数会迅速增加。这比梯度下降的几何收敛快得多。该界是可以严格证明的局部定理（由带余项的 Taylor 展开和 Hessian 的连续性得到），而不是对所有初始点成立的保证。
+
+但离最优点较远时，二次模型可能不可靠；即使原问题凸，Hessian 也可能奇异或条件很差。非凸问题中 Hessian 还可能不定，此时 Newton 方向甚至不是下降方向。
+
+因此实际算法通常使用阻尼 Newton 法：先解出方向，再通过回溯线搜索选择 \(\alpha\le1\)。远处小步保证全局进展，进入局部区域后线搜索开始接受 \(\alpha=1\)，恢复二次收敛。
+
+\subsection{不要求逆，而是解线性系统}
+
+Newton 方向应通过
+
+\[
+H p=-g
+\]
+
+求解，绝不需要显式形成 \(H^{-1}\)。若 Hessian 稠密，分解成本约为立方量级；若稀疏或有块结构，可使用稀疏分解、共轭梯度或 Hessian-vector product。
+
+在大型机器学习问题中，完整 Hessian 存储本身就不可行。截断 Newton 与 Hessian-free 方法只近似求解 Newton 方程；拟 Newton 方法如 BFGS、L-BFGS 则从梯度变化构造曲率近似，以较少存储换取超越普通梯度下降的方向。
+
+``二阶方法每步更快''没有意义；它每步通常更贵。应比较达到所需精度的总时间、线性代数结构和内存。
+
+\subsection{Newton decrement 衡量局部模型还剩多少}
+
+当 Hessian 正定时，Newton decrement 定义为
+
+\[
+\lambda(x)^2 = \nabla f(x)^T \nabla^2f(x)^{-1} \nabla f(x)
+= -\nabla f(x)^Tp_{\mathrm N}.
+\]
+\(\lambda(x)^2/2\) 是当前二次模型预测的目标下降。对自协调凸函数（三阶导数被 Hessian 自身控制、使 Newton 分析不依赖坐标选择的一类函数），它还能严格控制次优度，并成为后面内点法一节的停止准则。
+
+计算时仍不应求逆：解出 \(p_{\mathrm N}\) 后用 \(-\nabla f^Tp_{\mathrm N}\) 得到 decrement。
+
+\subsection{正则化与信赖域}
+
+若 Hessian 不定或近奇异，可以使用
+
+\[
+(H+\mu I)p=-g
+\]
+
+提高正定性，或限制步长在信赖域 \(\lVert p\rVert\le\Delta\) 中，只在局部模型可信范围内优化。Levenberg--Marquardt、信赖域 Newton 和许多二阶机器学习算法都体现这一思想。
+
+在严格的凸优化主线中，Hessian 半正定使问题较温和；但数值误差、边界和弱曲率仍会要求正则化。理论曲率与计算矩阵的条件数需要同时检查。
+
+\subsubsection{留给读者}
+
+对一元函数
+
+\[
+f(x)=-\log x+x,\qquad x>0,
+\]
+
+推导 Newton 步。分别从 \(x_0=0.1\) 和 \(x_0=10\) 尝试完整步，检查新点是否仍在定义域、目标是否下降。这个例子为什么需要阻尼或保持定义域的线搜索？

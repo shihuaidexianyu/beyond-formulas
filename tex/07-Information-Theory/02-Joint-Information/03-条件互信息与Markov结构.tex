@@ -1,0 +1,141 @@
+\section{条件互信息与 Markov 结构}
+
+两个变量的依赖可能由第三个变量解释，也可能在给定第三个变量后才出现。条件互信息把互信息放到每个 $Z=z$ 条件层内再平均：
+
+\[
+I(X;Y\mid Z)
+=H(X\mid Z)-H(X\mid Y,Z).
+\]
+它衡量已知 $Z$ 后，$Y$ 还能提供多少关于 $X$ 的额外信息。
+
+\subsection{KL 表达与条件独立}
+
+条件互信息也可写成
+
+\[
+I(X;Y\mid Z) = \E_Z
+\left[
+D\bigl(
+p_{XY\mid Z}
+\| p_{X\mid Z}p_{Y\mid Z}
+\bigr)
+\right].
+\]
+因此
+
+\[
+I(X;Y\mid Z)\ge0,
+\]
+且在常规条件下
+
+\[
+I(X;Y\mid Z)=0
+\]
+当且仅当
+
+\[
+X\perp Y\mid Z.
+\]
+这把概率论中的条件独立变成一个信息量等式。
+
+\subsection{共同原因可让条件互信息消失}
+
+设天气 $Z$ 同时影响撑伞 $X$ 与道路湿 $Y$。总体上 $(X,Y)$ 相关，因此
+
+\[
+I(X;Y)>0.
+\]
+若给定天气后两种机制独立，则
+
+\[
+I(X;Y\mid Z)=0.
+\]
+观察撑伞之所以能告诉我们道路湿，是因为它透露了天气；天气已知后，这条间接信息不再新增。
+
+\subsection{共同结果会产生条件依赖}
+
+令 $(X,Y)$ 为独立公平硬币，$Z=X\oplus Y$——与上两节信道例子同款的模二加结构，只是现在把它当作共同结果来条件化。无条件下
+
+\[
+I(X;Y)=0.
+\]
+但给定 $Z$ 后，知道 $X$ 就完全确定 $Y$，所以
+
+\[
+I(X;Y\mid Z)=1\ \text{bit}.
+\]
+条件信息可以增加依赖。不能把``给定更多信息总会降低互信息''当成普遍规律。
+
+\subsection{互信息链式法则}
+
+\[
+I(X;Y,Z)
+=I(X;Z)+I(X;Y\mid Z).
+\]
+由定义展开即望远镜相消：$[H(X)-H(X\mid Z)]+[H(X\mid Z)-H(X\mid Y,Z)]=H(X)-H(X\mid Y,Z)=I(X;Y,Z)$。它把 $(Y,Z)$ 关于 $X$ 的总信息分成：
+
+\begin{itemize}
+\tightlist
+\item
+  $Z$ 先提供的信息；
+\item
+  已知 $Z$ 后 $Y$ 新增的信息。
+\end{itemize}
+
+对序列：
+
+\[
+I(X;Y_1,\ldots,Y_n)
+=\sum_{i=1}^{n}
+I(X;Y_i\mid Y_1,\ldots,Y_{i-1}).
+\]
+这可用于分析逐步观测、主动学习和反馈通信中每条新证据的增量价值。
+
+\subsection{Markov 链的信息表述}
+
+若
+
+\[
+X\to Y\to Z
+\]
+构成 Markov 链，含义是给定 $Y$ 后，$Z$ 与 $X$ 条件独立：
+
+\[
+p(z\mid x,y)=p(z\mid y).
+\]
+等价地，
+
+\[
+I(X;Z\mid Y)=0.
+\]
+这里箭头表示概率分解
+
+\[
+p(x,y,z)=p(x)p(y\mid x)p(z\mid y),
+\]
+不自动表示因果方向。作为通信或处理流水线时常有因果解释，但单从联合分布不能保证。
+
+\subsection{条件互信息也依赖条件集}
+
+加入或删除条件变量可能打开或关闭依赖路径。统计建模时不应机械地``控制所有可用变量''：控制共同原因可能消除混杂，控制共同结果却会制造选择偏差。
+
+条件互信息提供量化工具，因果选择仍需结构假设。
+
+\subsubsection{自己补完}
+
+令 $(X,Y)$ 独立公平 bit，$Z=X\oplus Y$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  求 $I(X;Y)$；
+\item
+  给定 $Z=0$ 时，列出 $(X,Y)$ 的可能值；
+\item
+  求 $H(Y\mid Z)$ 与 $H(Y\mid X,Z)$；
+\item
+  得到 $I(X;Y\mid Z)$；
+\item
+  解释共同结果为何打开依赖。
+\end{enumerate}

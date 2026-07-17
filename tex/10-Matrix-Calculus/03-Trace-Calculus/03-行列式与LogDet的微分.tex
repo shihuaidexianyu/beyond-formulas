@@ -1,0 +1,141 @@
+\section{行列式与 log-determinant 的微分}
+
+行列式描述线性映射对有向体积的缩放。它也是全部特征值的乘积，因此很容易在高维中上溢、下溢或因接近奇异而变得极端。理论推导中常出现 \(\det X\)，数值与统计计算中更常使用 \(\log\det X\)。
+
+\subsection{Jacobi 公式}
+
+若 \(X\) 可逆，Jacobi 公式给出
+
+\[
+d\det X = \det X\cdot
+\operatorname{tr}(X^{-1}dX).
+\]
+它来自 \(\det(X+tH)=\det X\cdot\det(I+tX^{-1}H)\) 与展开式 \(\det(I+tM)=1+t\operatorname{tr}M+O(t^2)\)：把行列式写成特征值之积并保留一阶项即得后者。因此
+
+\[
+d\log\det X = \frac{1}{\det X}d\det X
+=\operatorname{tr}(X^{-1}dX).
+\]
+与梯度定义比较：
+
+\[
+\operatorname{tr}(X^{-1}dX) = \operatorname{tr}\bigl((X^{-T})^TdX\bigr),
+\]
+所以
+
+\[
+\nabla_X\log\det X=X^{-T},
+\]
+
+并且
+
+\[
+\nabla_X\det X = \det X\cdot X^{-T}.
+\]
+一元情形退化为
+
+\[
+\frac{d}{dx}\log x=\frac1x,
+\]
+
+是很好的转置与符号检查。
+
+\subsection{为什么 log-det 在正定锥上是凹的}
+
+令 \(X\succ0\)，沿对称方向 \(H\)（使 \(X+tH\) 保持对称的扰动）考察
+
+\[
+\phi(t)=\log\det(X+tH).
+\]
+
+一阶导数为
+
+\[
+\phi'(0)=\operatorname{tr}(X^{-1}H).
+\]
+
+利用上一节逆的微分 \(d(X^{-1})=-X^{-1}(dX)X^{-1}\)，
+
+\[
+\phi''(0) = -\operatorname{tr}(X^{-1}HX^{-1}H).
+\]
+写
+
+\[
+S=X^{-1/2}HX^{-1/2},
+\]
+
+便有
+
+\[
+\phi''(0) = -\operatorname{tr}(S^2)
+=-\lVert S\rVert_F^2
+\le0.
+\]
+中间一步用到 \(S\) 对称：\(\operatorname{tr}(S^2)=\operatorname{tr}(S^TS)=\lVert S\rVert_F^2\)，这正是要求扰动方向 \(H\) 对称的原因。
+所以 \(\log\det X\) 在正定锥上凹，\(-\log\det X\) 凸。后者在矩阵接近奇异边界时趋于 \(+\infty\)，因此可作为半正定锥内部的障碍函数。
+
+\subsection{复合矩阵函数的参数导数}
+
+若 \(X=X(\theta)\)，链式法则给
+
+\[
+\frac{d}{d\theta}\log\det X(\theta) = \operatorname{tr}
+\left(
+X(\theta)^{-1}
+\frac{dX}{d\theta}
+\right).
+\]
+同上一节，计算时不应显式求逆：若需要 trace 的精确值，可对多个右端分别求解；若矩阵巨大、只需要随机 trace 估计，还可用
+
+\[
+\operatorname{tr}(M) = \E[z^TMz]
+\]
+对满足 \(\E[zz^T]=I\) 的随机向量 \(z\) 估计，但这会引入采样误差。
+
+Gaussian 对数似然常含
+
+\[
+\frac12\log\det\Sigma
++\frac12(x-\mu)^T\Sigma^{-1}(x-\mu).
+\]
+
+前一项惩罚总体体积，后一项衡量 Mahalanobis 距离；二者的导数都可通过 Cholesky 分解和线性求解计算。
+
+\subsection{数值上怎样计算 log-determinant}
+
+对对称正定矩阵
+
+\[
+X=LL^T,
+\]
+
+有
+
+\[
+\log\det X = 2\sum_i\log L_{ii}.
+\]
+这里用了 \(\det X=(\det L)^2\)，而三角矩阵的行列式即对角元之积。这避免先把大量特征值或对角乘积相乘，也复用了计算二次型和求解所需的 Cholesky 分解。
+
+一般可逆矩阵的行列式可能为负，\(\log\det X\) 在实数中未定义。软件常返回符号与 log-absolute-determinant：
+
+\[
+\det X=s\,e^\ell,
+\qquad s\in\{-1,1\},
+\quad \ell=\log|\det X|.
+\]
+
+不能把 \(\log|\det X|\) 与 \(\log\det X\) 混为一谈；它们的定义域、几何解释和某些导数边界不同。
+
+当矩阵奇异时，\(\det X=0\)，log-determinant 趋于 \(-\infty\)，普通逆导数不存在。接近奇异时梯度 \(X^{-T}\) 可能巨大，真实反映了体积对小特征值的敏感性。
+
+\subsubsection{留给读者}
+
+令
+
+\[
+f(X)=\log\det X-\operatorname{tr}(SX),
+\qquad X\succ0,
+\]
+
+其中 \(S\succ0\)。求梯度并解出驻点。再用凹性说明该驻点是全局最大点。数值实现时应该怎样利用 \(S\) 的分解而不显式求逆？

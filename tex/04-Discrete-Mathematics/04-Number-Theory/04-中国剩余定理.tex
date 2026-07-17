@@ -1,0 +1,80 @@
+\section{中国剩余定理}
+
+\subsection{多个时钟读数能否确定同一个整数}
+
+考虑
+
+\[
+x\equiv a_1\pmod{n_1},\qquad
+x\equiv a_2\pmod{n_2}.
+\]
+
+若 \(n_1,n_2\) 互素，中国剩余定理保证存在解，并且解模 \(n_1n_2\) 唯一。多个两两互素模数时同样成立。
+
+直觉上，模 \(n_1n_2\) 的每个整数都对应一对余数；两边集合大小相同，而映射没有碰撞，因此是双射。没有碰撞的原因：若两个整数的余数对相同，其差同时被 \(n_1,n_2\) 整除，互素时即被 \(n_1n_2\) 整除，在模 \(n_1n_2\) 下就是同一个数。
+
+\subsection{构造解}
+
+设
+
+\[
+N=n_1\cdots n_k,\qquad N_i=N/n_i.
+\]
+
+因 \(N_i\) 与 \(n_i\) 互素，求 \(M_i\) 满足
+
+\[
+N_iM_i\equiv1\pmod{n_i}.
+\]
+
+则
+
+\[
+x=\sum_{i=1}^k a_iN_iM_i
+\]
+
+同时满足全部同余，因为第 \(i\) 项在模 \(n_i\) 下等于 \(a_i\)，其余项都含因子 \(n_i\)。
+
+例如
+
+\[
+x\equiv2\pmod3,\qquad x\equiv3\pmod5.
+\]
+
+\(N=15\)。\(5^{-1}\equiv2\pmod3\)，\(3^{-1}\equiv2\pmod5\)，所以
+
+\[
+x\equiv2\cdot5\cdot2+3\cdot3\cdot2=38\equiv8\pmod{15}.
+\]
+
+\subsection{模数不互素时}
+
+若 \(d=\gcd(n_1,n_2)>1\)，系统有解当且仅当
+
+\[
+a_1\equiv a_2\pmod d.
+\]
+
+必要方向很直接：\(d\mid n_1\) 且 \(d\mid n_2\)，故 \(x\) 模 \(d\) 的余数被两式分别锁定为 \(a_1\) 与 \(a_2\)，二者必须同余。若可解，解在模 \(\operatorname{lcm}(n_1,n_2)\) 意义下唯一。比如 \(x\equiv0\pmod2\) 与 \(x\equiv1\pmod4\) 不相容，因为第二式要求奇数；不能不检查就套乘积模数公式。
+
+\subsection{分解计算的意义}
+
+CRT 建立环同构
+
+\[
+\Z/(n_1\cdots n_k)\Z
+\cong
+\prod_i\Z/n_i\Z
+\]
+
+（模数两两互素）。大模数上的运算可拆成多个小模数并行计算，再重构。它用于密码、快速整数运算和纠错结构；上一节 RSA 的正确性证明与工程实现，正是先把运算拆到模 \(p\)、模 \(q\) 下，再用 CRT 拼回。
+
+\subsection{延伸与来源}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT Mathematics for Computer Science 的 Number Theory 章节。
+\item
+  UC Berkeley CS 70 的 Modular Arithmetic and RSA 讲义。
+\end{itemize}

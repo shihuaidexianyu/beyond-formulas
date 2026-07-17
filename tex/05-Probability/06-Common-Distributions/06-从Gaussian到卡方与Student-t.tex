@@ -1,0 +1,154 @@
+\section{从 Gaussian 到卡方与 Student $t$}
+
+若总体均值和方差都已知，Gaussian 计算很直接。但统计推断中恰恰常常不知道它们。我们用样本估计均值，同时还要用同一批样本估计噪声尺度。标准化时分母不再是固定 $\sigma$，而是随机样本标准差，于是普通 Gaussian 不再准确，Student $t$ 分布自然出现。
+
+理解这条来源链，比记住两条新密度公式更重要。
+
+\subsection{标准 Gaussian 平方和：卡方}
+
+若
+
+\[
+Z_1,\ldots,Z_\nu
+\overset{\text{iid}}{\sim}\mathcal N(0,1),
+\]
+则平方和
+
+\[
+Q=\sum_{i=1}^{\nu}Z_i^2
+\]
+服从自由度为 $\nu$ 的卡方分布：
+
+\[
+Q\sim\chi^2_\nu.
+\]
+它是 Gamma 分布的特例：
+
+\[
+\chi^2_\nu
+=\mathrm{Gamma}\left(\frac\nu2,\text{rate } \frac12\right).
+\]
+所以
+
+\[
+\E[Q{]}=\nu,\qquad
+\operatorname{Var}(Q)=2\nu.
+\]
+自由度可以理解为平方和中独立标准 Gaussian 方向的数量。若线性约束消耗了一个方向，可用自由度也会少一个。
+
+\subsection{为什么样本方差有 $n-1$ 个自由度}
+
+设
+
+\[
+X_1,\ldots,X_n
+\overset{\text{iid}}{\sim}\mathcal N(\mu,\sigma^2),
+\]
+样本均值与无偏样本方差为
+
+\[
+\bar X=\frac1n\sum_iX_i,
+\qquad
+S^2=\frac1{n-1}\sum_i(X_i-\bar X)^2.
+\]
+残差满足约束
+
+\[
+\sum_i(X_i-\bar X)=0,
+\]
+所以 $n$ 个残差实际只张成 $n-1$ 个方向——这是自由度的直觉解释。严格结论是可以证明的（例如用正交投影或 Cochran 定理，证明超出本单元范围）：
+
+\[
+\frac{(n-1)S^2}{\sigma^2}
+\sim\chi^2_{n-1}.
+\]
+在 Gaussian 样本中还有一个非常特殊而关键的事实：
+
+\[
+\bar X\perp S^2.
+\]
+这使关于均值和方差的精确有限样本推断成为可能。
+
+\subsection{未知方差时的标准化：Student $t$}
+
+若 $Z\sim\mathcal N(0,1)$，$V\sim\chi^2_\nu$，且二者独立，则
+
+\[
+T=\frac{Z}{\sqrt{V/\nu}}
+\]
+服从自由度 $\nu$ 的 Student-$t$ 分布。
+
+对 Gaussian 样本，
+
+\[
+T
+=\frac{\bar X-\mu}{S/\sqrt n}
+\sim t_{n-1}.
+\]
+与标准 Gaussian 相比，$t$ 分布中心仍在零且对称，但尾部更厚。原因是分母 $S$ 本身随机：偶尔低估真实尺度会产生较大的标准化值，因此极端值比固定分母时更常见。
+
+随着自由度增加，$S$ 对 $\sigma$ 的估计更稳定，$t_\nu$ 的分布也越来越接近 $\mathcal N(0,1)$（严格的收敛含义见后面的极限定理部分）。小样本时直接把 $t$ 替换为标准 Gaussian，会低估尾部不确定性。
+
+\subsection{Student-$t$ 的矩也有存在条件}
+
+$t_\nu$ 分布尾部较重：
+
+\begin{itemize}
+\item
+  $\nu\le1$ 时均值不存在；
+\item
+  $1<\nu\le2$ 时均值存在但方差无穷；
+\item
+  $\nu>2$ 时
+
+  \[
+  \operatorname{Var}(T)=\frac{\nu}{\nu-2}.
+  \]
+\end{itemize}
+
+这再次提醒我们：写得出密度不等于所有常用矩都存在。
+
+\subsection{统计应用与模型边界}
+
+卡方分布用于 Gaussian 方差推断、拟合优度检验与二次型；Student-$t$ 用于未知方差下的均值区间和回归系数检验。多个方差比还会导出 $F$ 分布。
+
+这些精确结论依赖独立同分布 Gaussian 样本。大样本时某些方法对轻微偏离较稳健，但重尾、强偏斜、依赖或异方差会破坏小样本精确性。统计软件给出的 $t$ 检验结果背后始终有模型条件。
+
+\subsection{分布族不是一张孤立清单}
+
+回看本单元，可以看到常见分布之间的生成关系：
+
+\begin{itemize}
+\tightlist
+\item
+  Bernoulli 的和产生 Binomial；
+\item
+  稀有 Binomial 极限产生 Poisson；
+\item
+  Poisson 首次等待产生 Exponential，多次等待产生 Gamma；
+\item
+  标准 Gaussian 平方和产生卡方；
+\item
+  Gaussian 除以独立卡方尺度产生 Student $t$；
+\item
+  独立 Gamma 归一化产生 Beta 或 Dirichlet。
+\end{itemize}
+
+这些联系让参数、均值、方差和适用场景相互印证。真正掌握一个分布，是能从机制重新把它推出来，而不是只认得名字。
+
+\subsubsection{自己补完}
+
+设 $X_1,\ldots,X_{10}$ 独立同分布于 $\mathcal N(\mu,\sigma^2)$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  写出 $9S^2/\sigma^2$ 的分布；
+\item
+  写出 $(\bar X-\mu)/(S/\sqrt{10})$ 的分布；
+\item
+  解释两个统计量中的自由度为何是 $9$；
+\item
+  若 $\sigma$ 已知，分母改为 $\sigma/\sqrt{10}$ 后应使用什么分布？
+\end{enumerate}

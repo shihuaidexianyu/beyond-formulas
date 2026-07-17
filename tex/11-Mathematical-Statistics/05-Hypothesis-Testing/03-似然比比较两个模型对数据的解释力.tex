@@ -1,0 +1,122 @@
+\section{似然比比较两个模型对数据的解释力}
+
+若两个简单假设完全指定了分布，
+
+\[
+H_0:X\sim p_0,
+\qquad
+H_1:X\sim p_1,
+\]
+
+数据对两者的相对支持自然由似然比衡量：
+
+\[
+\frac{p_1(X)}{p_0(X)}.
+\]
+
+比值很大，说明这份数据在 \(H_1\) 下比在 \(H_0\) 下更可能出现。注意此处的 \(p_0,p_1\) 是两个完全指定的密度，与上一节``\(p\) 值''的含义不同。
+
+\subsection{Neyman--Pearson 引理}
+
+在所有 size 不超过 \(\alpha\) 的检验中，拒绝域取为
+
+\[
+\frac{p_1(X)}{p_0(X)}>c
+\]
+
+并适当处理边界随机化，能对指定简单备择 \(H_1\) 获得最大功效。这就是 Neyman--Pearson 引理。
+
+它是一个最优化结论：在固定第一类错误预算下，把拒绝概率优先分配给``\(H_1\) 相对 \(H_0\) 最占优势''的样本区域。
+
+最强结论只针对简单对简单。复合备择中，对一个方向最有力的检验未必对另一个方向也最有力；uniformly most powerful 检验只在特定单调似然比结构中存在。
+
+\subsection{正态均值例子}
+
+设单个观测
+
+\[
+X\sim N(\mu,\sigma^2),
+\]
+
+检验 \(\mu=\mu_0\) 对 \(\mu=\mu_1>\mu_0\)。log-likelihood ratio 为
+
+\[
+\log\frac{p_{\mu_1}(X)}{p_{\mu_0}(X)} = \frac{\mu_1-\mu_0}{\sigma^2}X
++\text{与 }X\text{ 无关的常数}.
+\]
+它随 \(X\) 单调增加，因此最有力检验拒绝``大 \(X\)''，正是``两类错误与功效共同定义检验''一节中单侧 \(z\) 检验的结构。尾部方向不是凭直觉选择，而是由似然比单调性导出。
+
+\subsection{广义似然比处理复合假设}
+
+若 \(H_0\) 与完整参数空间都含多个参数，定义
+
+\[
+\Lambda(X) = \frac{
+\sup_{\theta\in\Theta_0}L(\theta;X)
+}{
+\sup_{\theta\in\Theta}L(\theta;X)
+}.
+\]
+\(0\le\Lambda\le1\)。若限制在 \(H_0\) 下的最佳拟合远差于完整模型，\(\Lambda\) 很小，应拒绝 \(H_0\)。
+
+通常使用统计量
+
+\[
+-2\log\Lambda.
+\]
+
+在真参数位于内部、模型可识别、维度固定且似然光滑等正则条件下，Wilks 定理给
+
+\[
+-2\log\Lambda
+\overset d\longrightarrow
+\chi^2_r,
+\]
+
+其中 \(r\) 是完整模型与原假设约束之间的维度差。
+
+这让复杂模型的 likelihood-ratio test 可以用统一卡方近似校准。
+
+\subsection{Wald、Score 与 LR 的关系}
+
+三种经典大样本检验从不同位置近似同一似然几何：
+
+\begin{itemize}
+\tightlist
+\item
+  Wald 检查无约束估计 \(\hat\theta\) 离 \(H_0\) 多远；
+\item
+  Score 只在 \(H_0\) 拟合点检查似然斜率；
+\item
+  Likelihood ratio 比较受限与不受限模型的最佳 log-likelihood。
+\end{itemize}
+
+在正则大样本下它们渐近等价，有限样本、参数化和边界附近可能差别显著。Wald 依赖参数尺度且可能产生不合理区域；LR 往往更尊重似然形状，但要拟合两个模型；Score 只需拟合原假设模型。
+
+\subsection{Wilks 定理会在哪里失败}
+
+若真参数在边界，例如检验方差分量为零，极限分布常是卡方混合而非普通 \(\chi^2\)。混合模型中的成分数检验还涉及不可识别与奇异信息矩阵，标准自由度规则失效。
+
+参数维度随样本量增长、模型错设、离散 nuisance parameter 和弱识别也会破坏普通近似。此时可以使用参数 bootstrap、精确分布或问题特定理论，但必须重新验证。
+
+\subsection{似然比不是后验赔率}
+
+似然比比较数据在两个参数值下的相对可能性。Bayesian 后验 odds 还需要先验 odds：
+
+\[
+\frac{\Pr(H_1\mid x)}{\Pr(H_0\mid x)} = \frac{p(x\mid H_1)}{p(x\mid H_0)}
+\frac{\Pr(H_1)}{\Pr(H_0)}.
+\]
+复合模型中的 Bayes factor 需要对参数先验积分，而不是使用最大似然。广义似然比、Bayes factor 和后验概率回答不同问题。
+
+\subsubsection{留给读者}
+
+对 \(n\) 个 \(N(\mu,\sigma^2)\) 样本、\(\sigma\) 已知，推导检验
+
+\[
+H_0:\mu=\mu_0
+\quad\text{vs}\quad
+H_1:\mu\ne\mu_0
+\]
+
+的广义似然比统计量，并说明它为什么等价于 \(z^2\)。根据 Wilks 定理，\(z^2\) 渐近服从哪个卡方分布？

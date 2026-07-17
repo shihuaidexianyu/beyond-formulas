@@ -1,0 +1,134 @@
+\section{Jacobian 与多元链式法则}
+
+\subsection{向量值函数的导数必须是矩阵}
+
+设
+
+\[
+F:\R^n\to\R^m,\qquad
+F=(F_1,\ldots,F_m).
+\]
+
+输入小变化 \(\mathbf h\) 经过局部线性化变成
+
+\[
+F(\mathbf a+\mathbf h)
+\approx F(\mathbf a)+J_F(\mathbf a)\mathbf h,
+\]
+
+其中 Jacobian
+
+\[
+J_F=
+\begin{bmatrix}
+\partial F_1/\partial x_1&\cdots&\partial F_1/\partial x_n\\
+\vdots&&\vdots\\
+\partial F_m/\partial x_1&\cdots&\partial F_m/\partial x_n
+\end{bmatrix}
+\]
+
+是 \(m\times n\) 矩阵。每一列表示改变一个输入坐标对全部输出的影响，每一行是一个输出分量的梯度转置。
+
+例如极坐标到平面坐标
+
+\[
+F(r,\theta)=(r\cos\theta,r\sin\theta)
+\]
+
+有
+
+\[
+J_F=
+\begin{bmatrix}
+\cos\theta&-r\sin\theta\\
+\sin\theta&r\cos\theta
+\end{bmatrix}.
+\]
+
+第一列是半径方向的小变化，第二列是角度变化形成的切向位移。角度改变同样大小时，离原点越远，实际位移越大，因子 \(r\) 正好记录这一点。这个矩阵会在``多重积分与变量替换''一节再次出现：那里取它的行列式，得到极坐标的面积伸缩因子 \(r\)。
+
+\subsection{链式法则是局部线性映射的复合}
+
+若 \(F:\R^n\to\R^m\)、\(G:\R^m\to\R^p\)，则
+
+\[
+J_{G\circ F}(\mathbf x)
+=J_G(F(\mathbf x))\,J_F(\mathbf x).
+\]
+
+矩阵顺序从信息流看非常自然：输入变化先乘 \(J_F\)，再乘 \(J_G\)。反过来通常尺寸不合，也表示错误的处理顺序。
+
+设 \(z=g(u,v)\)，而 \(u=u(x,y),v=v(x,y)\)，则
+
+\[
+\frac{\partial z}{\partial x}
+=g_u\,u_x+g_v\,v_x,
+\]
+
+\[
+\frac{\partial z}{\partial y}
+=g_u\,u_y+g_v\,v_y.
+\]
+
+每个输出变化由所有可能中间路径的贡献相加。神经网络中的反向传播、坐标变换和复合动力系统都在使用同一个 Jacobian 链式法则。
+
+\subsection{一个完整例子}
+
+令
+
+\[
+F(x,y)=(u,v)=(x+y,xy),
+\qquad
+g(u,v)=u^2+e^v.
+\]
+
+则
+
+\[
+J_F=
+\begin{bmatrix}
+1&1\\y&x
+\end{bmatrix},
+\qquad
+J_g=
+\begin{bmatrix}
+2u&e^v
+\end{bmatrix}.
+\]
+
+所以
+
+\[
+J_{g\circ F} = \begin{bmatrix}
+2(x+y)&e^{xy}
+\end{bmatrix}
+\begin{bmatrix}
+1&1\\  y&x
+\end{bmatrix},
+\]
+得到
+
+\[
+\nabla(g\circ F) = \begin{bmatrix}
+2(x+y)+ye^{xy}\\
+2(x+y)+xe^{xy}
+\end{bmatrix}.
+\]
+直接展开求偏导会得到同一结果，但矩阵形式更清楚地保留了中间变量结构。
+
+\subsection{记号约定必须提前说明}
+
+有的资料把梯度写成列向量，有的把标量函数的 Jacobian 写成行向量。两种约定都可用，关键是尺寸一致。本笔记用梯度列向量、Jacobian 的输出分量按行排列，因此标量函数满足 \(J_f=\nabla f^\top\)。
+
+面对外部资料时，先检查向量是行还是列、分子布局还是分母布局，不要把看似相同的公式直接拼接。
+
+\subsection{局部可逆性}
+
+若 \(F:\R^n\to\R^n\) 且 \(\det J_F(\mathbf a)\ne0\)，逆函数定理保证在 \(\mathbf a\) 附近存在可微局部逆，并且
+
+\[
+J_{F^{-1}}(F(\mathbf a))
+=J_F(\mathbf a)^{-1}.
+\]
+
+非零行列式表示局部线性化没有把某个方向压扁。它是局部条件，不自动保证全局一一对应；极坐标映射就具有周期重复和原点退化。

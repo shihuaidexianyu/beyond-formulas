@@ -1,0 +1,122 @@
+\section{通量、散度、旋度与边界定理}
+
+\subsection{曲面上的通量测量穿过多少}
+
+若定向曲面由 \(\mathbf r(u,v)\) 参数化，法向面积向量为
+
+\[
+\mathbf r_u\times\mathbf r_v\,du\,dv.
+\]
+
+向量场穿过曲面的通量为
+
+\[
+\iint_S\mathbf F\cdot\mathbf n\,dS
+=\iint_D
+\mathbf F(\mathbf r(u,v))
+\cdot(\mathbf r_u\times\mathbf r_v)\,du\,dv.
+\]
+
+点积取场的法向分量，叉积大小给局部面积、方向给定向。交换参数顺序会翻转法向和通量符号。闭曲面默认常取外法向，但必须明确。
+
+\subsection{散度描述局部净流出，旋度描述局部环流}
+
+对 \(\mathbf F=(P,Q,R)\)，
+
+\[
+\nabla\cdot\mathbf F=P_x+Q_y+R_z
+\]
+
+是散度。它是一个标量，刻画小体积净流出率相对于体积的极限：正值像局部源，负值像汇。
+
+旋度
+
+\[
+\nabla\times\mathbf F = \begin{bmatrix}
+R_y-Q_z\\
+P_z-R_x\\
+Q_x-P_y
+\end{bmatrix}
+\]
+是向量，方向给局部环流轴，大小与单位面积环流相关。流线弯曲不自动等于旋度非零，旋度也不是单个粒子轨迹的曲率；它是场在一点附近的反对称变化。
+
+\subsection{Gauss 散度定理：内部源等于边界净流出}
+
+若 \(V\) 是适当光滑体积，边界 \(\partial V\) 取外法向，则
+
+\[
+\iiint_V\nabla\cdot\mathbf F\,dV
+=\iint_{\partial V}\mathbf F\cdot\mathbf n\,dS.
+\]
+
+把区域分成许多小盒子时，相邻盒子共享面的通量方向相反，内部贡献相消，只剩外边界；每个小盒子的净流出又由散度近似。这给出定理的第一性直觉。
+
+例如 \(\mathbf F=(x,y,z)\) 在半径 \(R\) 的球内散度为 3，因此总通量
+
+\[
+\iiint_V3\,dV
+=3\cdot\frac43\pi R^3
+=4\pi R^3.
+\]
+
+直接在球面上，\(\mathbf n=\mathbf F/R\)，故 \(\mathbf F\cdot\mathbf n=R\)，乘球面积 \(4\pi R^2\) 得同样结果。
+
+\subsection{Stokes 定理：内部旋转等于边界环流}
+
+若定向曲面 \(S\) 的边界为 \(\partial S\)，方向按右手规则匹配，则
+
+\[
+\iint_S(\nabla\times\mathbf F)\cdot\mathbf n\,dS
+=\oint_{\partial S}\mathbf F\cdot d\mathbf r.
+\]
+
+将曲面切成小片时，内部公共边上的环流反向抵消，只剩外边界。局部小环流由旋度法向分量描述。
+
+平面上的 Green 定理是二维版本：
+
+\[
+\oint_{\partial D}P\,dx+Q\,dy
+=\iint_D(Q_x-P_y)\,dA,
+\]
+
+边界取正向（区域在行进方向左侧）。Green 定理也有通量形式，与二维散度对应。
+
+\subsection{三条定理是同一个``边界---内部''原则}
+
+\begin{itemize}
+\tightlist
+\item
+  一维基本定理：
+  \[\int_a^b f'(x)\,dx=f(b)-f(a);\]
+\item
+  线积分基本定理：梯度沿路径积分等于端点势差；
+\item
+  Green/Stokes：旋度在面内累积等于边界环流；
+\item
+  Gauss：散度在体内累积等于边界通量。
+\end{itemize}
+
+它们都表达``导数在内部累积，只留下边界效应''。常用语言是广义 Stokes 定理。
+
+``边界的边界为空''也解释恒等式
+
+\[
+\nabla\times(\nabla\phi)=0,\qquad
+\nabla\cdot(\nabla\times\mathbf F)=0.
+\]
+
+局部算子连续作用后，下一层边界贡献相互抵消。
+
+\subsection{条件、奇点与方向}
+
+这些定理要求场在包含区域及边界的适当邻域内足够光滑。若区域内部有奇点，不能直接套用；应挖去奇点、增加内边界，或使用分布意义的扩展。
+
+方向错误只会差一个负号，却反映几何对象定义不完整：曲线方向、曲面法向和边界定向必须成套选择。
+
+\subsection{延伸与来源}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT OpenCourseWare 18.02SC Multivariable Calculus
+\end{itemize}

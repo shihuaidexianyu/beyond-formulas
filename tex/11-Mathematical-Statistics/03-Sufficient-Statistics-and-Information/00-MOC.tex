@@ -1,0 +1,16 @@
+完整样本可能很大，但关于参数的有效信息未必同样复杂。Bernoulli 序列的成功位置不同，却只通过成功总数影响似然；另一方面，即使保留全部数据，有限噪声也会限制估计精度。
+
+本单元从``能否无损压缩''走向``精度能有多高''：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  充分统计量保留了哪些参数信息用条件分布和因子分解定理说明何时摘要不会丢失参数信息，并通过 Rao--Blackwell 化解释其用途。
+\item
+  Score 与 Fisher 信息衡量局部可辨认性把 log-likelihood 的随机斜率和曲率转化为样本携带的信息。
+\item
+  Cramér--Rao 界给无偏估计设下限从 Cauchy--Schwarz 推出方差下界，并明确效率结论依赖的正则条件。
+\end{enumerate}
+
+Fisher 信息不是 Shannon 熵的另一个名字。它描述参数微小改变时分布有多容易被区分，是局部、参数化相关的几何量。

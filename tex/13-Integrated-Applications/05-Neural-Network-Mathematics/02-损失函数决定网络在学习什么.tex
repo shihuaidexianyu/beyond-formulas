@@ -1,0 +1,98 @@
+\section{损失函数决定网络在学习什么}
+
+网络架构只规定``能够表示哪些函数''。真正告诉优化器哪些预测更好的，是损失函数。若目标定义错了，再精确的反向传播也只会更高效地优化错误问题。
+
+对样本 \((x_i,y_i)\)，经验风险通常写成
+
+\[
+\widehat R(\theta)
+=\frac1n\sum_{i=1}^n
+\ell(f_\theta(x_i),y_i).
+\]
+
+不同 \(\ell\) 不只是数值曲线形状不同，它们往往对应不同条件统计量或概率模型。
+
+\subsection{回归损失选择了要预测的中心}
+
+给定 \(X=x\)，平方损失的条件风险可按条件均值展开：
+
+\[
+\E[(Y-a)^2\mid X=x]
+=\Var(Y\mid X=x)
++\bigl(a-\E[Y\mid X=x]\bigr)^2.
+\]
+
+第一项不依赖 \(a\)，第二项非负且仅在 \(a=\E[Y\mid X=x]\) 时为零，所以平方损失的最优预测是条件均值。绝对损失
+
+\[
+\E[|Y-a|\mid X=x]
+\]
+
+对 \(a\) 的次导数为 \(\Prob(Y<a\mid X=x)-\Prob(Y>a\mid X=x)\)，零点要求小于与大于 \(a\) 的概率各占一半，所以最优预测是条件中位数。二者在偏斜或重尾分布下会给出不同预测。Huber loss 在小残差附近二次、大残差附近线性，是对效率与抗离群性的折中，但其阈值也在定义什么误差算``大''。
+
+如果业务关心完整条件分布或多个分位数，单一 MSE 网络无法凭空表达这些信息；需要分位数损失、显式概率分布或其他适合的 scoring rule。
+
+\subsection{分类交叉熵来自概率模型}
+
+对真实阳性概率 \(p=\Prob(Y=1\mid x)\) 和预测 \(q\)，binary log loss 的条件风险为
+
+\[
+-p\log q-(1-p)\log(1-q).
+\]
+
+它可写成
+
+\[
+H(p)+\KL
+\bigl(\operatorname{Bern}(p)\|
+\operatorname{Bern}(q)\bigr),
+\]
+
+其中 \(H(p)\) 是真实分布的 Bernoulli 熵，不依赖 \(q\)。KL 非负且等号仅在 \(q=p\) 时成立，所以风险在 \(q=p\) 处唯一最小。log loss 因而是严格 proper scoring rule：诚实报告真实概率在期望上最好。
+
+互斥多分类时，softmax 与 categorical negative log-likelihood 给出 cross-entropy。实现中应直接把 logits 交给融合的稳定损失，而不是先算可能下溢的概率再取对数（稳定公式见``训练动力学与数值稳定''一节）。对于 logits \(z\) 与 one-hot 标签 \(y\)，梯度为
+
+\[
+\frac{\partial\ell}{\partial z}=p-y.
+\]
+
+这个简单信号会成为下一节反向传播的起点。
+
+\subsection{训练目标、评估指标和行动成本不是同一个东西}
+
+准确率含有不可微的 argmax，常用交叉熵作可优化 surrogate；但最低交叉熵模型未必在某个固定阈值下有最高准确率。更重要的是，业务可能关心漏诊成本、排序、容量或公平约束，最终行动应在验证数据上结合成本选择阈值。
+
+类别不平衡时使用 class weights 会让少数类错误在训练中更昂贵，但也改变了最优概率所对应的目标分布。模型输出可能不再是自然人群中的 calibrated probability，需要在真实 prior 下重新校准。过采样、focal loss 和代价敏感学习也都改变训练目标，不能只看``少数类召回上升''而忽略概率含义。
+
+总损失常还包含正则项：
+
+\[
+L_{\mathrm{total}}
+=L_{\mathrm{data}}+\lambda\Omega(\theta).
+\]
+
+报告训练过程时最好分别记录 data loss 与 penalty。否则总损失下降可能来自权重收缩，而预测拟合反而变差；不同 batch reduction 也会改变 data loss 与 weight decay 的相对尺度。
+
+\subsection{用极端情形检查语义与实现}
+
+一个可信损失应先在小例子中回答：
+
+\begin{itemize}
+\tightlist
+\item
+  完全正确且极有把握时，损失是否接近预期；
+\item
+  错误且极有把握时，是否有限且足够大；
+\item
+  batch 使用 sum 还是 mean，mask 与 sample weights 的分母是什么；
+\item
+  标签范围、输出 shape 和概率假设是否匹配；
+\item
+  解析梯度能否与自动微分或有限差分一致。
+\end{itemize}
+
+标签噪声、删失、ranking、structured output 与不对称决策都可能需要专门目标。不要因框架内置某个 loss 就把任务压进它的假设。
+
+\subsubsection{从统计目标推回损失}
+
+为同一偏斜回归数据分别训练 MSE、absolute 和 0.9 分位数损失模型，比较输出对应的条件均值、中位数和高分位数。再为二分类数据加入正类权重，观察排序、校准和 0.5 阈值准确率怎样变化。最后用一句话分别说明：训练 surrogate、验证 metric 与部署 cost 在这个任务中是什么。

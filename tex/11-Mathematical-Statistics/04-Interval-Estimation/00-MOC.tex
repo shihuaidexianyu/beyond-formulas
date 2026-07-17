@@ -1,0 +1,16 @@
+点估计给出一个中心，却没有说明抽样波动。区间估计把推断输出从一个数扩展为一个集合，但``95\% 区间''的概率解释取决于采用频率学派还是 Bayesian 框架。
+
+本单元按构造逻辑推进：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  置信度属于程序，而非这次参数从重复抽样定义 coverage，并用 Bernoulli Wald 区间的失败说明近似不能只看公式。
+\item
+  枢轴量把未知参数隔离出来推导正态均值的 \(z\) 与 \(t\) 区间，说明精确性来自分布不含未知参数。
+\item
+  渐近区间与 Bayesian 可信区间比较 Wald、profile likelihood、delta method 和后验区间的不同概率对象。
+\end{enumerate}
+
+区间宽度只是结果的一部分。覆盖率、假设稳健性、选择过程和多重推断共同决定区间能否被正确解释。

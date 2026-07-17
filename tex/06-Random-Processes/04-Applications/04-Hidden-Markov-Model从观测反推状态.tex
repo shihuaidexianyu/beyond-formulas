@@ -1,0 +1,202 @@
+\section{Hidden Markov Model：从观测反推状态}
+
+Markov 链假设状态 $Z_t$ 可以直接观察。很多系统只暴露带噪信号：
+
+\begin{itemize}
+\tightlist
+\item
+  隐藏天气产生不同观测活动；
+\item
+  隐藏语音音素产生声学特征；
+\item
+  隐藏生物状态产生测量序列。
+\end{itemize}
+
+Hidden Markov Model（HMM）加入观测变量 $Y_t$：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  隐状态 $Z_t$ 构成 Markov 链；
+\item
+  给定当前隐状态 $Z_t$，观测 $Y_t$ 与其他变量条件独立；
+\item
+  观测分布只由当前状态决定。
+\end{enumerate}
+
+\subsection{联合分布如何分解}
+
+设初始分布为 $\pi_i$，转移概率
+
+\[
+A_{ij}=P(Z_t=j\mid Z_{t-1}=i),
+\]
+发射概率或密度
+
+\[
+B_j(y)=P(Y_t=y\mid Z_t=j).
+\]
+则一条隐状态与观测路径的联合概率由链式法则配合两条条件独立假设逐步展开，为
+
+\[
+P(z_{1:T},y_{1:T})
+=\pi_{z_1}B_{z_1}(y_1)
+\prod_{t=2}^{T}
+A_{z_{t-1}z_t}B_{z_t}(y_t).
+\]
+如果枚举所有 $K^T$ 条隐藏路径（$K$ 为隐状态个数），计算量指数增长。HMM 的价值在于 Markov 与条件独立结构允许动态规划。
+
+\subsection{前向算法：观测序列有多可能}
+
+定义前向量
+
+\[
+\alpha_t(j)
+=P(Y_{1:t}=y_{1:t},Z_t=j).
+\]
+初始化：
+
+\[
+\alpha_1(j)=\pi_jB_j(y_1).
+\]
+递推：
+
+\[
+\alpha_t(j)
+=B_j(y_t)\sum_i\alpha_{t-1}(i)A_{ij}.
+\]
+最终观测似然为
+
+\[
+P(y_{1:T})=\sum_j\alpha_T(j).
+\]
+每一步先预测状态分布，再乘当前观测似然。复杂度从指数降为 $O(TK^2)$：每个时刻对 $K$ 个状态各做一次 $K$ 项求和。
+
+\subsection{过滤、预测与平滑}
+
+\begin{itemize}
+\item
+  \textbf{过滤}：
+
+  \[
+  P(Z_t\mid Y_{1:t}),
+  \]
+
+  只用到当前为止的观测；
+\item
+  \textbf{预测}：
+
+  \[
+  P(Z_{t+h}\mid Y_{1:t}),
+  \]
+
+  把过滤分布沿转移矩阵向前推进；
+\item
+  \textbf{平滑}：
+
+  \[
+  P(Z_t\mid Y_{1:T}),
+  \]
+
+  还使用未来观测重新判断过去状态。
+\end{itemize}
+
+后向消息
+
+\[
+\beta_t(i)=P(Y_{t+1:T}=y_{t+1:T}\mid Z_t=i)
+\]
+满足从末端向前的递推
+
+\[
+\beta_T(i)=1,\qquad
+\beta_t(i)=\sum_j A_{ij}B_j(y_{t+1})\,\beta_{t+1}(j).
+\]
+前向与后向相乘并规范化，得到平滑边缘：
+
+\[
+P(Z_t=i\mid y_{1:T})
+\propto\alpha_t(i)\,\beta_t(i),
+\]
+因为给定 $Z_t$ 时，过去观测与未来观测条件独立，两式相乘正好合出 $P(Z_t=i,y_{1:T})$。
+
+平滑通常比过滤准确，但不能在线实时完成，因为它需要未来数据。
+
+\subsection{Viterbi 与逐点最可能状态不同}
+
+Viterbi 算法寻找整条最可能路径：
+
+\[
+\argmax_{z_{1:T}}P(z_{1:T}\mid y_{1:T}).
+\]
+它把前向求和换成最大值，并记录回溯指针。
+
+逐时刻选择
+
+\[
+\argmax_jP(Z_t=j\mid y_{1:T})
+\]
+得到的是各时刻边缘最优标签，组合起来的路径可能不是联合概率最大的路径，甚至可能包含模型不允许的转移。两种目标不能混用。
+
+\subsection{数值下溢与缩放}
+
+长序列概率是许多小于一的数相乘，直接计算会下溢为零。常用方法：
+
+\begin{itemize}
+\tightlist
+\item
+  每个时刻对前向量归一化并记录缩放因子；
+\item
+  在对数域使用 log-sum-exp；
+\item
+  Viterbi 全程在对数域计算。
+\end{itemize}
+
+这是算法实现的一部分，不是可选美化。
+
+\subsection{HMM 的模型边界}
+
+标准 HMM 假设：
+
+\begin{itemize}
+\tightlist
+\item
+  一阶 Markov 隐状态；
+\item
+  给定状态后观测条件独立；
+\item
+  状态驻留时间隐含为 Geometric（驻留 $k$ 步的概率为 $A_{ii}^{k-1}(1-A_{ii})$）；
+\item
+  参数通常不随时间变。
+\end{itemize}
+
+若状态持续时间有明显非 Geometric 结构，可用 hidden semi-Markov model；若观测依赖长历史或状态空间连续，可转向状态空间模型、Kalman filter、particle filter 或更一般序列模型。
+
+HMM 的可解释性来自明确的状态、转移和发射机制，但隐藏标签也可能存在置换不可识别性：交换所有状态名称不会改变观测分布。
+
+\subsubsection{自己补完}
+
+两状态 HMM 的状态为晴 $S$、雨 $R$，初始分布 $(0.6,0.4)$，转移矩阵
+
+\[
+A=
+\begin{bmatrix}
+0.8&0.2\\
+0.3&0.7
+\end{bmatrix}.
+\]
+观测``带伞''在晴、雨下的概率分别为 $0.1,0.9$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  观察第一天带伞后，求未规范化前向量；
+\item
+  规范化得到第一天过滤分布；
+\item
+  先预测第二天状态，再结合第二天未带伞更新；
+\item
+  说明为何两天逐点最可能状态未必组成最可能整条路径。
+\end{enumerate}

@@ -1,0 +1,132 @@
+\section{MAP 把先验与似然合在一个点上}
+
+Bayesian 模型把参数也纳入概率系统：
+
+\[
+\Theta\sim\pi(\theta),
+\]
+
+观测数据后，后验分布为
+
+\[
+\pi(\theta\mid x)
+\propto
+L(\theta;x)\pi(\theta).
+\]
+
+最大后验估计 MAP 选择后验密度的众数：
+
+\[
+\hat\theta_{\mathrm{MAP}}
+\in
+\argmax_\theta
+\pi(\theta\mid x).
+\]
+
+等价地最大化
+
+\[
+\log L(\theta;x)+\log\pi(\theta).
+\]
+
+MLE 只看似然，MAP 还加入先验偏好。先验不是凭空增加样本信息，而是显式表达数据之外的结构或知识。
+
+\subsection{Beta--Bernoulli 例子}
+
+对 Bernoulli 数据，令 \(S=\sum_iX_i\)，先验
+
+\[
+\theta\sim\operatorname{Beta}(\alpha,\beta).
+\]
+
+后验为
+
+\[
+\theta\mid x
+\sim
+\operatorname{Beta}(\alpha+S,\beta+n-S).
+\]
+
+后验对数密度与
+
+\[
+(\alpha+S-1)\log\theta+(\beta+n-S-1)\log(1-\theta)
+\]
+
+只差一个不依赖 \(\theta\) 的常数。当两个后验形状参数都大于一时，对上式求导令零，得内部 MAP
+
+\[
+\hat\theta_{\mathrm{MAP}} = \frac{S+\alpha-1}
+{n+\alpha+\beta-2}.
+\]
+后验均值则是
+
+\[
+\E[\theta\mid x] = \frac{S+\alpha}
+{n+\alpha+\beta}.
+\]
+两者不同。MAP 是密度最高点；后验均值是平方损失下最优的 Bayes 点估计（后验风险 \(\E[(\theta-a)^2\mid x]\) 对 \(a\) 求导令零即得）；后验中位数对应绝对误差（一阶条件为后验分布函数在该点等于 \(1/2\)）。选择哪个摘要取决于决策损失，而不是``Bayesian 估计只有 MAP''。
+
+特别地，取 \(\alpha=\beta=1\)（均匀先验），后验均值为 \((S+1)/(n+2)\)，正是第一节中的第二个估计量。
+
+若形状参数不大于一，众数可能在边界，甚至不唯一。套用内部公式会得到错误答案。
+
+\subsection{先验怎样变成正则化}
+
+在线性模型中，Gaussian 先验
+
+\[
+w\sim N(0,\tau^2I)
+\]
+
+贡献
+
+\[
+-\log\pi(w) = \frac{1}{2\tau^2}\lVert w\rVert_2^2+\text{常数},
+\]
+而 Gaussian 似然贡献残差平方和，所以 Gaussian 似然下的 MAP 等价于 Ridge。
+
+独立 Laplace 先验贡献与
+
+\[
+\lVert w\rVert_1
+\]
+
+成正比，对应 Lasso 型 MAP。这个联系解释了正则项的一种概率来源，也明确了正则强度与噪声、先验尺度的关系。
+
+但每个惩罚项不必都被解释成真实先验；优化正则、Bayesian 先验和频率学派复杂度控制可以产生相同目标，却给出不同的不确定性解释。
+
+\subsection{MAP 不具有一般参数化不变性}
+
+设 \(\eta=g(\theta)\) 是非线性一一变换。后验密度变换时会乘 Jacobian：
+
+\[
+\pi_\eta(\eta\mid x) = \pi_\theta(\theta\mid x)
+\left|\frac{d\theta}{d\eta}\right|.
+\]
+密度最高点因此不一定满足
+
+\[
+\hat\eta_{\mathrm{MAP}} = g(\hat\theta_{\mathrm{MAP}}).
+\]
+MAP 依赖选择什么参数坐标和基准测度。相比之下，MLE 对一一重参数化保持分布排序，具有不变性。
+
+这不是说 MAP 无用，而是说``后验众数''并非一个完全坐标自由的 Bayesian 摘要。后验概率、期望和完整决策问题通常更稳健地表达不确定性。
+
+\subsection{先验信息与数据重复使用}
+
+若先用同一数据选择先验超参数，再把该先验当作独立信息进行普通后验计算，可能低估不确定性。经验 Bayes 可以有严格方法，但应把超参数估计层纳入分析或说明近似。
+
+在大样本、固定维且正则条件下，似然常逐渐压过温和先验，MAP 与 MLE 接近；在小样本、弱可识别或高维问题中，先验可以主导结果。这时敏感性分析尤为重要：改变合理先验后，结论是否稳定？
+
+\subsubsection{留给读者}
+
+对正态均值模型
+
+\[
+X_i\sim N(\mu,\sigma^2),
+\qquad
+\mu\sim N(0,\tau^2),
+\]
+
+其中 \(\sigma^2,\tau^2\) 已知，推导 \(\mu\) 的 MAP。把结果写成样本均值与先验均值零的加权平均，并解释样本量、噪声和先验尺度怎样决定收缩强度。所得估计量同样把 \(\bar X\) 向零收缩，可与第一节的收缩估计 \(\hat\mu_a=a\bar X\) 对照：那里的最优系数依赖未知 \(\mu\)，这里的收缩系数由 \(\sigma^2,\tau^2,n\) 显式给出。

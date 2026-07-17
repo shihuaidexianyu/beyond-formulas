@@ -1,0 +1,103 @@
+\section{Hessian 与无约束极值}
+
+\subsection{二阶局部模型是一张二次曲面}
+
+对二次可微标量函数，Hessian 为
+
+\[
+H_f(\mathbf x) = \begin{bmatrix}
+\partial^2f/\partial x_i\partial x_j
+\end{bmatrix}_{ij}.
+\]
+若混合偏导在附近连续，Clairaut 定理给 \(f_{x_ix_j}=f_{x_jx_i}\)，所以 Hessian 对称。多元 Taylor 展开为
+
+\[
+f(\mathbf a+\mathbf h)
+=f(\mathbf a)
++\nabla f(\mathbf a)^\top\mathbf h
++\frac12\mathbf h^\top H_f(\mathbf a)\mathbf h
++o(\|\mathbf h\|^2).
+\]
+
+梯度给局部倾斜，Hessian 二次型描述不同方向上的曲率。因为 Hessian 对称，可以沿正交特征方向把二次项拆成独立平方。
+
+\subsection{内部极值先要求梯度为零}
+
+若可微函数在开集内部点 \(\mathbf a\) 取得局部极值，则任意方向导数都为零，因此
+
+\[
+\nabla f(\mathbf a)=0.
+\]
+
+这样的点称为驻点。它只是候选：平面、鞍点和极值都可能梯度为零。
+
+在驻点处，若 Hessian：
+
+\begin{itemize}
+\tightlist
+\item
+  正定：严格局部极小；
+\item
+  负定：严格局部极大；
+\item
+  不定：鞍点；
+\item
+  半正定或半负定但不定号未决：二阶检验没有结论。
+\end{itemize}
+
+对二元对称矩阵，可用特征值或主子式判断。记住结论背后的几何比背 \(D=f_{xx}f_{yy}-f_{xy}^2\) 更可靠。
+
+\subsection{鞍点为何在每条坐标轴上都可能看不出来}
+
+\[
+f(x,y)=x^2-y^2
+\]
+
+在原点梯度为零，Hessian
+
+\[
+\begin{bmatrix}2&0\\0&-2\end{bmatrix}
+\]
+
+一正一负。沿 \(x\) 轴函数为正，沿 \(y\) 轴为负，原点既非最大也非最小，而是鞍点。
+
+更隐蔽的例子 \(f(x,y)=x^2-2xy+y^2=(x-y)^2\) 的 Hessian 半正定；原点确为非严格最小，但整条 \(x=y\) 都取同样最小值。二阶项退化时，可能需要观察高阶项或原函数。
+
+\(f(x,y)=x^4+y^4\) 在原点 Hessian 为零矩阵，二阶检验完全无信息，但原函数显然非负且只在原点为零，所以仍有严格极小。
+
+\subsection{一个无约束优化例子}
+
+设
+
+\[
+f(x,y)=x^2+xy+y^2-3x.
+\]
+
+梯度
+
+\[
+\nabla f=
+\begin{bmatrix}
+2x+y-3\\x+2y
+\end{bmatrix}
+\]
+
+为零时解得 \((x,y)=(2,-1)\)。Hessian
+
+\[
+H=\begin{bmatrix}2&1\\1&2\end{bmatrix}
+\]
+
+特征值为 1、3，正定，因此该点是严格局部极小。由于函数是正定二次型加线性项，它还会向无穷远增长，所以该点也是全局极小。
+
+局部二阶检验一般只给局部结论。要升级为全局最优，需要凸性、紧致可行域或其他整体结构。
+
+\subsection{Newton 步把二次模型最小化}
+
+在 Hessian 可逆时，把 Taylor 展开截到二阶作为局部二次模型，它对 \(\mathbf h\) 的梯度为 \(\nabla f(\mathbf x)+H_f(\mathbf x)\mathbf h\)；令其为零，得到
+
+\[
+\mathbf h=-H_f(\mathbf x)^{-1}\nabla f(\mathbf x).
+\]
+
+更新 \(\mathbf x+\mathbf h\) 就是多元 Newton 法的核心。它在靠近非退化解时很快，但 Hessian 不定或离目标太远时可能走向错误方向。公式来自局部模型，不是全局安全保证。

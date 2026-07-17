@@ -1,0 +1,162 @@
+\section{最大似然选择最能解释数据的参数}
+
+给定观测 \(x=(x_1,\ldots,x_n)\)，似然函数把联合密度（离散情形为联合概率质量）视为参数的函数：
+
+\[
+L(\theta;x) = p_\theta(x).
+\]
+数据在这里固定，\(\theta\) 变化。最大似然估计选择
+
+\[
+\hat\theta_{\mathrm{MLE}}
+\in
+\argmax_{\theta\in\Theta}L(\theta;x).
+\]
+
+它寻找的是``在候选模型中，哪个参数让已观测数据最不意外''。似然不是参数的概率分布；没有先验时，\(L(\theta;x)\) 也不需要对 \(\theta\) 积分为一。
+
+\subsection{为什么总是转到对数似然}
+
+iid 样本的似然是乘积：
+
+\[
+L(\theta;x) = \prod_{i=1}^np_\theta(x_i).
+\]
+取对数后变成和：
+
+\[
+\ell(\theta;x) = \sum_{i=1}^n\log p_\theta(x_i).
+\]
+对数严格递增，因此最大点不变。数值上，概率乘积很容易下溢，而 log-likelihood 的和更稳定；求导也把乘积化为求和。
+
+\subsection{Bernoulli MLE}
+
+若 \(X_i\sim\operatorname{Bernoulli}(\theta)\)，令 \(S=\sum_iX_i\)，则
+
+\[
+L(\theta) = \theta^S(1-\theta)^{n-S}.
+\]
+对 \(0<\theta<1\)，
+
+\[
+\ell(\theta) = S\log\theta+(n-S)\log(1-\theta).
+\]
+score 为
+
+\[
+\ell'(\theta) = \frac S\theta-\frac{n-S}{1-\theta}.
+\]
+令其为零得
+
+\[
+\hat\theta=\frac Sn=\bar X.
+\]
+
+结果与上一节的矩估计相同：在 Bernoulli 模型上，两条构造路径汇合到同一估计量。
+
+二阶导数为负，因此内部驻点是最大点。若 \(S=0\) 或 \(S=n\)，MLE 位于参数空间边界 \(0\) 或 \(1\)，不能通过只在开区间求 score 零点得到。边界是完整优化问题的一部分。
+
+\subsection{\texorpdfstring{正态 MLE 与``分母为什么是 \(n\)''}{正态 MLE 与``分母为什么是 n''}}
+
+对 \(N(\mu,\sigma^2)\) iid 样本，
+
+\[
+\ell(\mu,\sigma^2) = -\frac n2\log(2\pi\sigma^2)
+-\frac{1}{2\sigma^2}
+\sum_i(x_i-\mu)^2.
+\]
+对 \(\mu\) 的 score 为
+
+\[
+\frac{\partial\ell}{\partial\mu}
+=\frac{1}{\sigma^2}\sum_i(x_i-\mu),
+\]
+
+令其为零得
+
+\[
+\hat\mu=\bar x.
+\]
+
+代入后再对 \(\sigma^2\) 求导：
+
+\[
+\frac{\partial\ell}{\partial\sigma^2}
+=-\frac{n}{2\sigma^2}
++\frac{1}{2\sigma^4}\sum_i(x_i-\bar x)^2,
+\]
+
+令其为零得
+
+\[
+\hat\sigma^2_{\mathrm{MLE}} = \frac1n\sum_i(x_i-\bar x)^2.
+\]
+它的分母是 \(n\)，因为 MLE 优化的是似然，而不是要求无偏。由恒等式
+
+\[
+\sum_i(X_i-\bar X)^2=\sum_i(X_i-\mu)^2-n(\bar X-\mu)^2
+\]
+
+取期望得 \(n\sigma^2-\sigma^2=(n-1)\sigma^2\)，即 \(\mathbb E\hat\sigma^2_{\mathrm{MLE}}=(n-1)\sigma^2/n\)，有限样本略向下偏；使用 \(n-1\) 得无偏估计，但不再是原似然的最大点。
+
+``MLE''和``无偏''是不同评价原则，不能用一个术语替另一个。
+
+\subsection{Score、曲率与信息}
+
+score 定义为
+
+\[
+U(\theta) = \nabla_\theta\ell(\theta).
+\]
+内部 MLE 通常满足 \(U(\hat\theta)=0\)。负 Hessian
+
+\[
+-\nabla_\theta^2\ell(\theta)
+\]
+
+描述观测 log-likelihood 在该点的曲率；峰越尖，参数在局部越容易被数据区分。它将引向 Fisher 信息与渐近标准误。
+
+一一参数变换 \(\eta=g(\theta)\) 下，MLE 具有不变性：\(\hat\eta=g(\hat\theta)\)。这是因为同一个分布只被重新标记，似然排序不变。MAP 的后验密度众数则一般不具有这种性质（见下一节）。
+
+\subsection{大样本优良性质有前提}
+
+在可识别、真参数位于内部、模型光滑、信息有限且非奇异等正则条件下，MLE 通常一致并渐近正态：
+
+\[
+\sqrt n
+(\hat\theta-\theta_0)
+\overset d\longrightarrow
+N(0,I(\theta_0)^{-1}),
+\]
+
+其中 \(I(\theta_0)\) 为上文提到的 Fisher 信息，将在下一单元正式定义。
+
+这些条件在边界参数、混合模型、不可识别模型、参数维度随样本增长和重尾问题中会失败。不能把``MLE 渐近正态''当作定义。
+
+似然也可能无界。例如 Gaussian mixture 的某个分量方差趋零并对准一个样本时，密度可以无限增大；优化器发散并不一定是代码错误，而可能是 MLE 根本不存在。
+
+\subsection{模型错设与数值优化}
+
+若真实分布不在模型族中，MLE 往往收敛到使 Kullback--Leibler divergence 最小的伪真参数。普通 Fisher 信息逆不一定给出正确方差，需要 sandwich variance 等稳健修正。
+
+复杂模型的 log-likelihood 可能非凸，有多个局部极大。算法停止在一个驻点，不自动等于全局 MLE；初始化、边界、梯度检查和 profile likelihood 都可能重要。
+
+数值实现应：
+
+\begin{itemize}
+\tightlist
+\item
+  计算 log-likelihood 而非概率乘积；
+\item
+  对概率和协方差使用稳定参数化；
+\item
+  检查参数空间边界与约束；
+\item
+  同时报告优化状态、梯度和 Hessian 条件；
+\item
+  区分算法误差与模型不确定性。
+\end{itemize}
+
+\subsubsection{留给读者}
+
+设 \(X_i\sim\operatorname{Uniform}(0,\theta)\)。写出完整似然，包括支持集指示条件，并求 MLE。为什么只对 \(\log(1/\theta^n)\) 求导会把答案推向零，却忽略``\(\theta\) 必须至少等于样本最大值''的关键约束？将结果与矩估计 \(2\bar X\) 比较。

@@ -1,0 +1,197 @@
+\section{Kolmogorov 方程与矩阵指数}
+
+生成矩阵 $Q$ 只描述极短时间内的变化。要得到有限时间 $t$ 的转移矩阵 $P(t)$，使用半群性质和小时间展开：
+
+\[
+P(h)=I+hQ+o(h).
+\]
+这正是上一节逐元素小时间展开的矩阵写法。
+根据把小时间接在末端还是开端，会得到前向与后向两种 Kolmogorov 方程。
+
+\subsection{前向方程：按到达状态汇总流入}
+
+由
+
+\[
+P(t+h)=P(t)P(h)
+\]
+得
+
+\[
+\frac{P(t+h)-P(t)}h
+=P(t)Q+o(1).
+\]
+令 $h\downarrow0$：
+
+\[
+\boxed{P'(t)=P(t)Q}.
+\]
+分量形式
+
+\[
+\frac{d}{dt}P_{ij}(t)
+=\sum_kP_{ik}(t)q_{kj}.
+\]
+它固定初始状态 $i$，按当前可能状态 $k$ 流向终点 $j$。
+
+若行分布 $\mu(t)=\mu(0)P(t)$，则
+
+\[
+\mu'(t)=\mu(t)Q.
+\]
+这就是主方程：每个状态概率的变化率等于流入减流出。
+
+\subsection{后向方程：按第一跳分解}
+
+由
+
+\[
+P(t+h)=P(h)P(t)
+\]
+同理得到
+
+\[
+\boxed{P'(t)=QP(t)}.
+\]
+分量形式
+
+\[
+\frac{d}{dt}P_{ij}(t)
+=\sum_kq_{ik}P_{kj}(t).
+\]
+它固定终点 $j$，按从初始状态 $i$ 的第一段极短转移分解。
+
+在有限、时间齐次、常规条件下，$Q$ 与其矩阵指数可交换（矩阵总与自身的幂级数可交换），因此前向与后向都成立。非齐次过程 $Q(t)$ 在不同时刻未必可交换，简单指数公式会失效。
+
+\subsection{矩阵指数是连续时间的矩阵幂}
+
+初值
+
+\[
+P(0)=I
+\]
+下，方程解为
+
+\[
+P(t)=e^{tQ}
+=I+tQ+\frac{t^2Q^2}{2!}+\cdots.
+\]
+离散链用 $P^n$ 推进 $n$ 步，CTMC 用 $e^{tQ}$ 推进时间 $t$。二者都来自线性演化半群。
+
+但不能逐元素取指数：
+
+\[
+e^{tQ}\ne(e^{tq_{ij}})_{ij}.
+\]
+必须使用矩阵指数。
+
+\subsection{两状态模型可以直接求解}
+
+故障---修复生成矩阵（沿用上一节的两状态模型）
+
+\[
+Q=
+\begin{bmatrix}
+-\lambda&\lambda\\
+\mu&-\mu
+\end{bmatrix}.
+\]
+从正常状态出发，令
+
+\[
+p(t)=P(X(t)=1\mid X(0)=0)
+\]
+为故障概率。主方程为
+
+\[
+p'(t)=\lambda(1-p(t))-\mu p(t)
+=\lambda-(\lambda+\mu)p(t),
+\]
+\[
+p(0)=0.
+\]
+解为
+
+\[
+p(t)
+=\frac{\lambda}{\lambda+\mu}
++\left(
+0-\frac{\lambda}{\lambda+\mu}
+\right)e^{-(\lambda+\mu)t}.
+\]
+第一项是长期故障概率，指数项是初始条件影响的衰减。下一节将从平稳分布的角度重新得到这个长期项。
+
+\subsection{Uniformization 把 CTMC 化为离散链}
+
+若有限状态 CTMC 总离开速率有上界，选
+
+\[
+\nu\ge\max_i q_i.
+\]
+定义矩阵
+
+\[
+R=I+\frac Q\nu.
+\]
+条件 $\nu\ge\max_i q_i$ 保证对角元 $1-q_i/\nu\ge0$，非对角元本非负，故 $R$ 确是（带自环的）离散转移矩阵。注意它不是上一节嵌入跳链的转移矩阵：那里的跳链不允许留在原地，这里的 $R$ 刻意保留了自环。由 $Q=\nu(R-I)$，且 $\nu tI$ 与 $\nu tR$ 可交换，
+
+\[
+P(t)
+=e^{tQ}
+=e^{\nu t(R-I)}
+=e^{-\nu t}e^{\nu tR}
+=e^{-\nu t}
+\sum_{n=0}^{\infty}
+\frac{(\nu t)^n}{n!}R^n.
+\]
+解释是：用速率 $\nu$ 的 Poisson 时钟产生潜在跳跃，每次按 $R$ 更新；其中自环代表虚拟跳跃。
+
+Uniformization 既给出数值计算方法，也清楚连接 Poisson 计数与离散 Markov 链。
+
+\subsection{方程方向与向量约定}
+
+本节使用行分布，所以
+
+\[
+\mu'(t)=\mu(t)Q.
+\]
+若使用列分布，则写
+
+\[
+\mu'(t)=Q^\trans\mu(t).
+\]
+前向/后向名称在不同约定下容易混乱。比记名称更可靠的是重新从
+
+\[
+P(t+h)=P(t)P(h)
+\]
+或
+
+\[
+P(t+h)=P(h)P(t)
+\]
+推导。
+
+\subsubsection{自己补完}
+
+两状态链生成矩阵为
+
+\[
+Q=
+\begin{bmatrix}
+-2&2\\
+1&-1
+\end{bmatrix}.
+\]
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  写出从状态一出发、处于状态二的概率 $p(t)$ 的微分方程；
+\item
+  求解并检查 $p(0)$；
+\item
+  求 $t\to\infty$ 的极限；
+\item
+  用 $\pi Q=0$ 预先验证该极限。
+\end{enumerate}

@@ -1,0 +1,195 @@
+\section{排队系统与 M/M/1 模型}
+
+排队不是``顾客太多''的同义词，而是到达、服务能力和调度规则共同作用的随机系统。建模至少要说明：
+
+\begin{itemize}
+\tightlist
+\item
+  到达过程；
+\item
+  服务时间分布；
+\item
+  服务台数量；
+\item
+  队列容量；
+\item
+  服务纪律，如先到先服务；
+\item
+  顾客是否会放弃或被拒绝。
+\end{itemize}
+
+Kendall 记号中，M/M/1 表示：
+
+\begin{itemize}
+\tightlist
+\item
+  第一个 M：Poisson 到达，等价于 Exponential 到达间隔；
+\item
+  第二个 M：服务时间独立 Exponential；
+\item
+  1：一个服务台。
+\end{itemize}
+
+``M''来自 Markovian/memoryless。
+
+\subsection{队列长度是生灭过程}
+
+令 $N(t)$ 为系统内顾客数，包括正在服务者。到达率为 $\lambda$，服务率为 $\mu$。
+
+从任意 $n\ge0$：
+
+\[
+n\to n+1
+\quad\text{速率 }\lambda.
+\]
+从 $n\ge1$：
+
+\[
+n\to n-1
+\quad\text{速率 }\mu.
+\]
+当系统为空时没有服务完成，因此没有从 $0$ 到 $-1$ 的转移。
+
+Exponential 无记忆性使 $N(t)$ 本身成为 CTMC；若服务时间一般分布，仅知道人数不足以预测下一次离开，还要记录剩余服务时间。
+
+\subsection{稳定条件来自可规范化}
+
+上一节生灭过程的局部平衡给出
+
+\[
+\pi_n\lambda
+=\pi_{n+1}\mu,
+\]
+所以
+
+\[
+\pi_n=\rho^n\pi_0,
+\qquad
+\rho=\frac\lambda\mu.
+\]
+要使概率总和有限，必须
+
+\[
+\rho<1.
+\]
+此时
+
+\[
+\pi_0=1-\rho,
+\qquad
+\pi_n=(1-\rho)\rho^n.
+\]
+若 $\lambda\ge\mu$，平均到达能力不低于服务能力，队列没有有限平稳分布。临界 $\lambda=\mu$ 也不稳定；``平均刚好够用''没有为随机波动留下余量。
+
+\subsection{系统中的平均人数}
+
+对几何平稳分布求和，
+
+\[
+L=\E[N]
+=\sum_{n=0}^{\infty}n(1-\rho)\rho^n
+=\frac{\rho}{1-\rho}.
+\]
+队列中等待但未服务的人数 $N_q=(N-1)^+$（$x^+=\max\{x,0\}$ 表示正部）。等待人数等于系统人数减去正在接受服务的一人，而服务台忙的概率为
+
+\[
+P(N>0)=1-\pi_0=\rho,
+\]
+
+故其平均为
+
+\[
+L_q=L-P(N>0)
+=\frac{\rho}{1-\rho}-\rho
+=\frac{\rho^2}{1-\rho}.
+\]
+这些量在 $\rho\uparrow1$ 时爆炸。负载从 $80\%$ 增到 $90\%$ 并不是延迟只增加 $12.5\%$；随机排队具有强非线性：$L=\rho/(1-\rho)$ 从 $\rho=0.8$ 时的 $4$ 跳到 $\rho=0.9$ 时的 $9$，利用率只提高约一成，平均队长却不止翻倍。
+
+\subsection{Little 定律连接人数与时间}
+
+对广泛稳定系统，
+
+\[
+L=\lambda_{\text{eff}}W,
+\]
+其中：
+
+\begin{itemize}
+\tightlist
+\item
+  $L$：系统内长期平均人数；
+\item
+  $\lambda_{\text{eff}}$：实际进入系统的长期到达率；
+\item
+  $W$：每位顾客在系统中的平均停留时间。
+\end{itemize}
+
+M/M/1 无拒绝时 $\lambda_{\text{eff}}=\lambda$，所以
+
+\[
+W=\frac{L}{\lambda}
+=\frac1{\mu-\lambda}.
+\]
+平均排队等待时间
+
+\[
+W_q=W-\frac1\mu
+=\frac{\rho}{\mu-\lambda}.
+\]
+Little 定律不要求 Poisson 或 Exponential，但要求长期稳定并正确匹配同一系统边界下的人数、流率和停留时间。
+
+\subsection{为什么 $\rho$ 接近一如此危险}
+
+服务时间有随机波动。即使长期平均服务能力略高于到达率，短时间仍可能连续到达或服务异常缓慢，积累队列。空闲期用来消化波动；当 $\rho$ 接近一，空闲余量太少，队列消散极慢。
+
+这解释了高利用率与低延迟之间的根本张力。资源规划不能只要求
+
+\[
+\lambda<\mu,
+\]
+还要根据可接受尾延迟留出足够裕量。
+
+\subsection{M/M/1 的边界}
+
+现实系统可能：
+
+\begin{itemize}
+\tightlist
+\item
+  多服务台（M/M/c）；
+\item
+  有限容量（M/M/1/K）；
+\item
+  一般服务时间（M/G/1）；
+\item
+  批量到达；
+\item
+  优先级或抢占；
+\item
+  顾客放弃；
+\item
+  到达率随时间变化；
+\item
+  服务速率依赖队列长度。
+\end{itemize}
+
+M/M/1 的价值是提供可解析基准和稳定性直觉。若数据的服务时间明显不 Exponential，尤其方差差异很大，延迟预测可能严重偏差。
+
+\subsubsection{自己补完}
+
+某 M/M/1 系统每分钟平均到达 $4$ 个请求，平均服务能力为每分钟 $5$ 个。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  求负载 $\rho$ 与空系统概率；
+\item
+  求系统内平均请求数；
+\item
+  求平均系统停留时间与平均排队等待时间；
+\item
+  若到达率增到 $4.5$，比较等待时间变化；
+\item
+  若到达率达到 $5$，说明为什么不能代入公式得到有限结果。
+\end{enumerate}

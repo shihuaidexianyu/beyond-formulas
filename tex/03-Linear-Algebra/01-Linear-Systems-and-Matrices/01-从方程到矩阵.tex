@@ -1,0 +1,223 @@
+\section{\texorpdfstring{从方程到矩阵：\(Ax=b\) 的三种读法}{从方程到矩阵：Ax=b 的三种读法}}
+
+考虑方程组
+
+\[
+\begin{aligned}
+x+2y&=5,\\
+3x-y&=4.
+\end{aligned}
+\]
+
+中学代数告诉我们可以消去一个未知量并求出答案，但线性代数关心更一般的问题：如果有成百上千个未知量，怎样统一表示？方程什么时候有解？改变右端以后，哪些计算可以复用？
+
+把系数排成矩阵，把未知量和右端排成向量：
+
+\[
+\underbrace{\begin{pmatrix}1&2\\3&-1\end{pmatrix}}_{A}
+\underbrace{\begin{pmatrix}x\\ y\end{pmatrix}}_{x} = \underbrace{\begin{pmatrix}5\\4\end{pmatrix}}_{b}.
+\]
+于是整个系统缩写为
+
+\[
+Ax=b.
+\]
+
+这不是把许多符号压缩到一起而已。同一个等式包含三种互相补充的理解方式。
+
+\subsection{行视角：寻找几何对象的交点}
+
+\(A\) 的每一行对应一个方程。在二维中，每个方程是一条直线，解是两条直线的交点；在三维中，每个方程通常是一个平面；在更高维中，它们是超平面。
+
+因此，一个系统可能出现三种基本情形：
+
+\begin{itemize}
+\tightlist
+\item
+  几何对象相交于一点，对应唯一解；
+\item
+  它们沿一条线或更高维集合重合，对应无穷多解；
+\item
+  它们互相矛盾，没有共同交点，对应无解。
+\end{itemize}
+
+仅比较``方程数''和``未知量数''不能判断属于哪一种。两个方程可能实际上表达同一条约束，十个方程也可能彼此一致；真正重要的是其中有多少独立信息。
+
+\subsection{列视角：能否用给定方向合成目标}
+
+按列展开同一个等式：
+
+\[
+x\begin{pmatrix}1\\3\end{pmatrix}
++y\begin{pmatrix}2\\-1\end{pmatrix}
+=\begin{pmatrix}5\\4\end{pmatrix}.
+\]
+
+现在问题变成：能否用 \(A\) 的两列线性组合出 \(b\)？矩阵向量乘法的列形式正是
+
+\[
+Ax
+=x_1a_1+\cdots+x_na_n,
+\]
+
+其中 \(a_j\) 是 \(A\) 的第 \(j\) 列。
+
+所有可能的 \(Ax\) 构成的集合称为 \(A\) 的列空间。因此
+
+\[
+Ax=b\text{ 有解}
+\quad\Longleftrightarrow\quad
+b\in\operatorname{Col}(A).
+\]
+
+这个观察会贯穿整门线性代数。后面处理无解系统时，我们不会放弃，而是把 \(b\) 投影到列空间中最接近的点。
+
+在当前例子中，两列不是彼此倍数，能够张成整个 \(\R^2\)，所以任意二维右端都有唯一表示。实际解为
+
+\[
+x=\frac{13}{7},
+\qquad
+y=\frac{11}{7}.
+\]
+
+代入列组合，可以看到两列如何共同合成目标向量 \((5,4)^{\trans}\)。
+
+\subsection{变换视角：矩阵把输入送到输出}
+
+矩阵 \(A\in\R^{m\times n}\) 还定义了映射
+
+\[
+T_A:\R^n\to\R^m,
+\qquad
+T_A(x)=Ax.
+\]
+
+它满足
+
+\[
+A(\alpha x+\beta y)=\alpha Ax+\beta Ay,
+\]
+
+所以是线性变换。输入空间的第 \(j\) 个标准基向量 \(e_j\) 经过 \(A\) 后，恰好变成 \(A\) 的第 \(j\) 列：
+
+\[
+Ae_j=a_j.
+\]
+
+这说明一个线性变换只要知道所有标准基向量去了哪里，就完全确定了：任意 \(x=\sum_j x_je_j\) 经线性性被送到 \(Ax=\sum_j x_j(Ae_j)=\sum_j x_ja_j\)，结果确实只由各列决定。矩阵的列不是随意摆放的数字，而是在记录变换对基本方向的作用。
+
+例如
+
+\[
+A=
+\begin{pmatrix}
+1&2\\
+0&-1\\
+3&1
+\end{pmatrix}
+\]
+
+把 \((x,y)^{\trans}\) 送到
+
+\[
+Ax=
+\begin{pmatrix}
+x+2y\\-y\\3x+y
+\end{pmatrix}.
+\]
+
+输入有两个自由方向，输出有三个坐标，所以 \(A\) 是 \(3\times2\) 矩阵。尺寸中的列数对应输入维数，行数对应输出维数。
+
+\subsection{为什么矩阵乘法是``行乘列''}
+
+设 \(B:\R^p\to\R^n\)，\(A:\R^n\to\R^m\)。先做 \(B\)，再做 \(A\)：
+
+\[
+x\longmapsto Bx\longmapsto A(Bx).
+\]
+
+复合结果仍是线性变换，因此也应由一个矩阵表示。我们把这个矩阵定义为 \(AB\)，使
+
+\[
+(AB)x=A(Bx)
+\]
+
+对所有 \(x\) 成立。
+
+若 \(B\) 的第 \(j\) 列为 \(b_j\)，那么 \(AB\) 的第 \(j\) 列必须是 \(Ab_j\)：
+
+\[
+AB=\begin{pmatrix}Ab_1&\cdots&Ab_p\end{pmatrix}.
+\]
+
+逐元素写出，就得到熟悉的公式
+
+\[
+(AB)_{ij}=\sum_{k=1}^n a_{ik}b_{kj}.
+\]
+
+求和指标 \(k\) 对应中间空间 \(\R^n\)，所以只有 \(A\) 的列数与 \(B\) 的行数相等时乘法才有定义：
+
+\[
+(m\times n)(n\times p)=(m\times p).
+\]
+
+``行乘列''因而不是任意规定，而是线性变换复合在坐标中的必然结果。
+
+\subsection{顺序不能交换}
+
+\(AB\) 表示先做 \(B\)，后做 \(A\)。交换顺序通常会改变结果，甚至可能因为尺寸不匹配而没有定义。
+
+取
+
+\[
+B=\begin{pmatrix}1&1\\0&1\end{pmatrix}
+\]
+
+表示水平方向剪切，
+
+\[
+A=\begin{pmatrix}2&0\\0&1\end{pmatrix}
+\]
+
+表示把水平方向放大两倍。计算得
+
+\[
+AB=\begin{pmatrix}2&2\\0&1\end{pmatrix},
+\qquad
+BA=\begin{pmatrix}2&1\\0&1\end{pmatrix}.
+\]
+
+先剪切再缩放，会把剪切产生的水平位移也放大；先缩放再剪切则不会。操作顺序不同，几何效果自然不同。
+
+矩阵乘法满足结合律
+
+\[
+(AB)C=A(BC),
+\]
+
+因为两边都表示按同一顺序复合三个变换；它也对加法满足分配律，但一般不满足交换律。没有可逆性保证时，也不能从 \(AB=AC\) 随意约去左边的 \(A\)；什么时候允许这样约去，要到后面讨论逆矩阵时才能回答。
+
+\subsection{转置在做什么}
+
+矩阵的转置 \(A^{\trans}\) 把行与列互换。若 \(A\) 是 \(m\times n\)，则 \(A^{\trans}\) 是 \(n\times m\)。一个重要关系是
+
+\[
+(AB)^{\trans}=B^{\trans}A^{\trans}.
+\]
+
+直觉上，\(AB\) 先做 \(B\) 后做 \(A\)，转置会把输入输出的配对关系反向传递，次序因此反转，这与函数复合求逆时类似。逐元素验证只需一行：
+
+\[
+\bigl((AB)^{\trans}\bigr)_{ij}=(AB)_{ji}=\sum_{k}a_{jk}b_{ki}=\sum_{k}(B^{\trans})_{ik}(A^{\trans})_{kj}=(B^{\trans}A^{\trans})_{ij}.
+\]
+
+后面正交性、最小二乘和对称矩阵都会大量使用转置。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06：The Geometry of Linear Equations
+\end{itemize}

@@ -1,0 +1,138 @@
+\section{Cramér--Rao 界给无偏估计设下限}
+
+Fisher 信息不仅描述似然曲率，还能限制无偏估计量的方差。若 \(T(X)\) 无偏估计标量函数 \(g(\theta)\)，
+
+\[
+\mathbb E_\theta[T]=g(\theta),
+\]
+
+在正则条件下，
+
+\[
+\operatorname{Var}_\theta(T)
+\ge
+\frac{[g'(\theta)]^2}{I_n(\theta)}.
+\]
+
+这就是 Cramér--Rao lower bound。信息越大，无偏估计可能达到的方差下限越小。
+
+\subsection{下界来自一个协方差恒等式}
+
+令样本 score 为
+
+\[
+U_\theta(X) = \frac{\partial}{\partial\theta}
+\log p_\theta(X).
+\]
+因为 \(\mathbb E[U]=0\)（上一节已证），
+
+\[
+\operatorname{Cov}(T,U) = \E[TU].
+\]
+在可交换求导与积分的条件下，
+
+\[
+\begin{aligned}
+g'(\theta)
+&=
+\frac{\partial}{\partial\theta}
+\mathbb E_\theta[T]\\
+&=
+\int T(x)
+\frac{\partial p_\theta(x)}{\partial\theta}
+dx\\
+&=
+\int T(x)\,U_\theta(x)\,p_\theta(x)\,dx\\
+&=
+\mathbb E_\theta[TU].
+\end{aligned}
+\]
+
+第三步把密度导数写成 \(\partial p_\theta/\partial\theta=U_\theta\,p_\theta\)，正是 score 的定义。所以
+
+\[
+\operatorname{Cov}(T,U)=g'(\theta).
+\]
+
+Cauchy--Schwarz 给
+
+\[
+\operatorname{Cov}(T,U)^2
+\le
+\operatorname{Var}(T)\operatorname{Var}(U).
+\]
+
+而 \(\operatorname{Var}(U)=I_n(\theta)\)，整理即得下界。
+
+这个证明清楚显示所有关键条件：无偏性、score 均值为零、求导积分可交换和有限方差。
+
+\subsection{Bernoulli 样本均值达到下界}
+
+对 \(n\) 个 Bernoulli\((\theta)\) 样本，上一节已算出单个观测 \(I_1(\theta)=1/(\theta(1-\theta))\)，独立样本信息相加，
+
+\[
+I_n(\theta) = \frac{n}{\theta(1-\theta)}.
+\]
+估计 \(g(\theta)=\theta\) 时，
+
+\[
+\operatorname{Var}(T)
+\ge
+\frac{\theta(1-\theta)}n.
+\]
+
+样本均值满足
+
+\[
+\operatorname{Var}(\bar X) = \frac{\theta(1-\theta)}n,
+\]
+恰好达到下界，所以在正则内部参数下是有效无偏估计量。
+
+达到等号要求 \(T-g(\theta)\) 与 score 线性相关（Cauchy--Schwarz 的取等条件）。并非每个模型都存在能对所有 \(\theta\) 同时达到下界的估计量。
+
+\subsection{下界不是对所有估计规则的禁令}
+
+Cramér--Rao 的经典形式限制无偏估计量。带偏估计量可以有更小方差甚至更小 MSE；收缩估计正是例子。
+
+若偏差为
+
+\[
+b(\theta)=\mathbb E_\theta[T]-g(\theta),
+\]
+
+可推导带偏版本：
+
+\[
+\operatorname{Var}(T)
+\ge
+\frac{[g'(\theta)+b'(\theta)]^2}
+{I_n(\theta)}.
+\]
+
+但评价带偏估计更自然地看完整 MSE，而不是只比较方差下界。
+
+此外，下界可能不紧。它告诉我们不能低于某个数，却不保证有估计量达到；离散参数、有限支持、边界和非正则模型还需要 Chapman--Robbins、van Trees 等其他界。
+
+\subsection{正则条件失败的典型例子}
+
+Uniform\((0,\theta)\) 的支持随 \(\theta\) 变化——第一节已用同一模型说明支持条件如何携带参数信息。样本最大值能以 \(1/n\) 量级而非常见 \(1/\sqrt n\) 量级逼近边界参数（\(\mathbb E_\theta[\max_i X_i]=n\theta/(n+1)\)，误差为 \(1/n\) 量级），经典 score 期望与 Cramér--Rao 推导不能直接套用。
+
+混合模型、截断分布和参数边界也常破坏正则渐近。看到一个``低于 CRLB''的估计器时，应先检查它是否有偏、模型是否非正则、信息是否按同一参数化计算，而不是立即断言定理被违反。
+
+\subsection{渐近效率与有限样本效率不同}
+
+在正则模型中，MLE 常满足
+
+\[
+\sqrt n(\hat\theta-\theta)
+\overset d\to
+N(0,I_1(\theta)^{-1}),
+\]
+
+称为渐近有效。它的方差在大样本极限接近信息下界。
+
+这不表示 MLE 在每个有限样本中无偏或达到 CRLB。正态方差 MLE 就有有限样本偏差，却具有良好渐近性质。报告效率时必须说明是有限样本还是渐近概念。
+
+\subsubsection{留给读者}
+
+对 \(X_i\sim N(\mu,\sigma^2)\)，\(\sigma^2\) 已知，使用 Cramér--Rao 界证明任何无偏 \(\mu\) 估计量的方差至少为 \(\sigma^2/n\)。样本均值是否达到？若估计 \(g(\mu)=\mu^2\)，下界如何改变？

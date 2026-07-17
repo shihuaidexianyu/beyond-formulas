@@ -1,0 +1,163 @@
+\section{KKT 把最优性写成一组方程}
+
+当强对偶成立且原始、对偶最优点取得时，最优点不仅目标值相等，还必须让 Lagrangian 推导中的每一步不等式都取等号。这些等号条件组合起来，就是 Karush--Kuhn--Tucker 条件。
+
+对可微问题
+
+\[
+\begin{aligned}
+\min_x\quad&f_0(x)\\
+\text{s.t.}\quad&f_i(x)\le0,\quad i=1,\ldots,m,\\
+&h_j(x)=0,\quad j=1,\ldots,p,
+\end{aligned}
+\]
+
+KKT 条件为：
+
+\textbf{原始可行性}
+
+\[
+f_i(x^\star)\le0,\qquad
+h_j(x^\star)=0.
+\]
+
+\textbf{对偶可行性}
+
+\[
+\lambda_i^\star\ge0.
+\]
+
+\textbf{互补松弛}
+
+\[
+\lambda_i^\star f_i(x^\star)=0
+\qquad\text{对每个 }i.
+\]
+
+\textbf{驻点条件}
+
+\[
+\nabla f_0(x^\star)
++\sum_i\lambda_i^\star\nabla f_i(x^\star)
++\sum_j\nu_j^\star\nabla h_j(x^\star)
+=0.
+\]
+
+四组条件各自承担不同角色，缺一不可。
+
+\subsection{互补松弛连接了活跃约束与价格}
+
+若约束在最优点严格松弛，
+
+\[
+f_i(x^\star)<0,
+\]
+
+互补松弛迫使 \(\lambda_i^\star=0\)。还有余量的约束不会在一阶上限制最优点，其边际价格为零（``价格''的严格含义在下一节给出）。
+
+若 \(\lambda_i^\star>0\)，则必须有
+
+\[
+f_i(x^\star)=0,
+\]
+
+约束处于活跃状态。但反向不必成立：一个约束可以恰好取等号，却仍有零乘子，例如它与其他约束重复或在该点不影响目标。
+
+因此``活跃''与``有正价格''相关但不完全等价。互补松弛说的是乘积为零，而不是机械地在两者间作双向推断。
+
+\subsection{一维例子}
+
+再次考虑
+
+\[
+\min_x x^2
+\quad\text{subject to}\quad1-x\le0.
+\]
+
+KKT 条件为
+
+\[
+1-x\le0,\qquad
+\lambda\ge0,\qquad
+\lambda(1-x)=0,\qquad
+2x-\lambda=0.
+\]
+
+若约束不活跃，则 \(\lambda=0\)，驻点给 \(x=0\)，却违反 \(x\ge1\)；因此约束必须活跃，\(x^\star=1\)，进而 \(\lambda^\star=2\)。
+
+这个解同时解释了几何与对偶：无约束目标希望向零移动，边界阻挡了它；乘子提供大小为 2 的法向力，恰好抵消目标梯度。
+
+\subsection{为什么 KKT 在凸问题中如此强}
+
+若 \(f_0,f_i\) 凸、等式仿射，那么任何满足 KKT 的点都是全局最优。证明只需把第一节的下界链条在最优点处收紧，工具是凸函数的一阶下界。
+
+固定最优乘子，\(L(\cdot,\lambda^\star,\nu^\star)\) 是 \(x\) 的凸函数（凸函数的非负组合加仿射项仍凸）。驻点条件正是它关于 \(x\) 的梯度为零：
+
+\[
+\nabla_x L(x^\star,\lambda^\star,\nu^\star)
+=\nabla f_0(x^\star)
++\sum_i\lambda_i^\star\nabla f_i(x^\star)
++A^T\nu^\star=0.
+\]
+
+可微凸函数的一阶下界给出
+\(L(y,\lambda^\star,\nu^\star)\ge L(x^\star,\lambda^\star,\nu^\star)+\nabla_x L(x^\star,\lambda^\star,\nu^\star)^T(y-x^\star)\)，故梯度为零处即全局最小：\(x^\star\) 最小化了最优乘子对应的 Lagrangian。于是对任意原始可行 \(y\)，
+
+\[
+f_0(x^\star)
+=L(x^\star,\lambda^\star,\nu^\star)
+\le L(y,\lambda^\star,\nu^\star)
+\le f_0(y).
+\]
+
+第一个等号来自互补松弛与 \(h_j(x^\star)=0\)，最后一步用到 \(\lambda_i^\star\ge0\)、\(f_i(y)\le0\)、\(h_j(y)=0\)。也就是说，互补松弛保证 Lagrangian 在该点与原目标相等，第一节的 \(g\le L\le f_0\) 在这里全部收紧为等号。
+
+若凸问题再满足上一节的 Slater 条件（或更一般的约束资格），KKT 还是最优性的必要条件。因此可以把最优问题转化为求解一组方程与不等式。
+
+\subsection{非凸问题中只能把 KKT 当作候选条件}
+
+非凸问题的 KKT 点可能是局部最大、鞍点或较差的局部最小。约束资格失败时，局部最优点甚至可能没有普通 KKT 乘子。
+
+例如无约束函数 \(f(x)=-x^2\) 在 \(x=0\) 满足驻点条件，却是全局最大。KKT 没有自动注入凸性；它的充分性来自目标、约束和 Lagrangian 的凸结构。
+
+不可微凸问题中，驻点条件可改写为
+
+\[
+0\in
+\partial f_0(x^\star)
++\sum_i\lambda_i^\star\partial f_i(x^\star)
++A^T\nu^\star,
+\]
+
+但次微分和的等式需要适当正则条件。实际使用时应遵守相应定理，而不是把所有梯度简单替换成任意次梯度。
+
+\subsection{KKT 也是数值求解后的检查表}
+
+求解器返回候选 \((\hat x,\hat\lambda,\hat\nu)\) 后，可以分别计算：
+
+\begin{itemize}
+\tightlist
+\item
+  不等式与等式的原始残差；
+\item
+  乘子负部的对偶可行性残差；
+\item
+  \(\lambda_i f_i(x)\) 的互补残差；
+\item
+  Lagrangian 梯度的驻点残差；
+\item
+  原始目标与对偶目标之间的间隙。
+\end{itemize}
+
+这些残差必须结合问题尺度解释。绝对残差 \(10^{-6}\) 对单位为微米和单位为亿元的模型意义不同；变量、约束和目标缩放会直接影响数值判定。
+
+\subsubsection{留给读者}
+
+求解
+
+\[
+\min_x (x-3)^2
+\quad\text{subject to}\quad0\le x\le2
+\]
+
+的 KKT 系统。为两个不等式分别设置乘子，判断哪些约束活跃，并验证互补松弛。随后把目标改成 \((x-1)^2\)，比较活跃集合和乘子如何变化。

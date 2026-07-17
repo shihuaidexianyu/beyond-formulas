@@ -1,0 +1,16 @@
+一旦把导数看作线性映射，微分法就不再是一套神秘技巧。它只是给每个中间量加入一个扰动，保留一阶项，并通过代数规则把输入扰动传播到输出。
+
+本单元依次建立：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  用微分与 Frobenius 内积读取梯度：怎样从 \(df\) 中把 \(dX\) 移到最后，并读出与 \(X\) 同形的梯度。
+\item
+  链式法则就是线性映射复合：Jacobian 乘积、JVP、VJP 与反向传播为何是同一条规则的不同计算顺序。
+\item
+  Hessian 是二阶线性算子：怎样用二阶微分和 Hessian-vector product 讨论曲率，而不必构造高阶张量。
+\end{enumerate}
+
+学习时应反复检查两件事：每个微分项是否对扰动线性，最终内积中的系数是否与被求导变量形状一致。

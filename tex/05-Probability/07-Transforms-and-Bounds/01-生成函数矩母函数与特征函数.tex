@@ -1,0 +1,175 @@
+\section{生成函数、矩母函数与特征函数}
+
+若 $S=X_1+\cdots+X_n$，直接求分布需要反复卷积。变换的共同策略是：把分布映射成一个函数，使随机变量相加对应函数相乘。先在函数世界完成代数运算，再识别或反演回分布。
+
+三种常见变换彼此相似，却有不同适用边界。
+
+\subsection{概率母函数：非负整数计数}
+
+若 $X\in\{0,1,2,\ldots\}$，概率母函数（PGF）定义为
+
+\[
+G_X(z)=\E[z^X{]}
+=\sum_{k=0}^{\infty}P(X=k)z^k.
+\]
+它把 PMF 作为幂级数系数储存起来：
+
+\[
+P(X=k)=[z^k]G_X(z).
+\]
+在可求导条件下，
+
+\[
+G_X'(1)=\E[X{]},
+\]
+\[
+G_X''(1)=\E[X(X-1){]}.
+\]
+因此
+
+\[
+\operatorname{Var}(X)
+=G_X''(1)+G_X'(1)-\bigl(G_X'(1)\bigr)^2.
+\]
+对 Bernoulli($p$)，
+
+\[
+G_X(z)=1-p+pz.
+\]
+若 $X_1,\ldots,X_n$ 独立，
+
+\[
+G_{\sum_iX_i}(z)
+=\prod_iG_{X_i}(z).
+\]
+于是 $n$ 个 Bernoulli 和的 PGF 为
+
+\[
+(1-p+pz)^n,
+\]
+二项式展开的 $z^k$ 系数正是 Binomial PMF。
+
+PGF 也特别适合随机计数、分枝过程和递推分布，但它主要针对非负整数变量。
+
+\subsection{矩母函数：指数加权}
+
+矩母函数（MGF）定义为
+
+\[
+M_X(t)=\E[e^{tX}{]}.
+\]
+若它在 $t=0$ 的某个邻域内有限，则可通过求导得到矩：
+
+\[
+M_X^{(k)}(0)=\E[X^k{]}.
+\]
+机制是求导把 $X$ 乘进期望：$M_X'(t)=\E[Xe^{tX}{]}$，代入 $t=0$ 得 $\E[X]$，逐阶求导同理。
+对独立变量，
+
+\[
+M_{X+Y}(t)
+=M_X(t)M_Y(t).
+\]
+例如
+
+\[
+X\sim\mathcal N(\mu,\sigma^2)
+\]
+的 MGF 为
+
+\[
+M_X(t)=
+\exp\left(\mu t+\frac12\sigma^2t^2\right).
+\]
+独立 Gaussian 之和的 MGF 仍有同样形式，只是 $\mu$ 与 $\sigma^2$ 分别相加；由下文所说的唯一性（MGF 确定分布），和仍为 Gaussian。
+
+MGF 若在零附近存在，通常能唯一确定分布。但它不总存在。重尾分布可能对任何 $t>0$ 都有
+
+\[
+\E[e^{tX}]=\infty.
+\]
+经典例子是 Lognormal（对数正态分布，即 $\log X$ 服从 Gaussian）：所有正整数矩都有限，MGF 却在正 $t$ 处发散。直观地看（这是直觉论证）：写 $X=e^{Y}$，$Y$ 为 Gaussian，则 $\E[e^{tX}]=\E[e^{te^{Y}}{]}$，其中 $te^{y}$ 随 $y$ 指数增长，Gaussian 密度的 $e^{-y^{2}/2\sigma^{2}}$ 衰减追不上它，积分发散。不能见到``矩母函数''这个名字就假定它存在。
+
+\subsection{特征函数：总是存在}
+
+特征函数定义为
+
+\[
+\varphi_X(t)
+=\E[e^{itX}],
+\]
+其中 $i^2=-1$。因为
+
+\[
+|e^{itX}|=1,
+\]
+期望对所有实数 $t$ 都存在。
+
+它仍然满足独立和变乘积：
+
+\[
+\varphi_{X+Y}(t)
+=\varphi_X(t)\varphi_Y(t).
+\]
+特征函数总能唯一确定分布，并具有反演定理。它是 Fourier 变换在概率论中的形式，也是证明中心极限定理和分布收敛的核心工具。
+
+若相应矩存在，可以由零点附近导数恢复矩：
+
+\[
+\varphi_X^{(k)}(0)=i^k\E[X^k{]}.
+\]
+但特征函数处处存在，不代表它处处可导；可导性仍需矩条件。
+
+\subsection{累积量让乘法变加法}
+
+若 MGF 存在，定义累积量生成函数
+
+\[
+K_X(t)=\log M_X(t).
+\]
+独立和满足
+
+\[
+K_{X+Y}(t)=K_X(t)+K_Y(t).
+\]
+前两阶累积量分别是均值和方差：由 $M_X(0)=1$，$K_X'(0)=M_X'(0)=\E[X]$，$K_X''(0)=M_X''(0)-\bigl(M_X'(0)\bigr)^2=\operatorname{Var}(X)$。更高阶累积量描述偏斜、尾形等。Gaussian 的三阶及以上累积量全为零（其 $K_X(t)=\mu t+\frac12\sigma^2t^2$ 只是二次多项式），这是它在线性组合下保持 Gaussian 的另一种代数表达。
+
+\subsection{怎样选择}
+
+\begin{itemize}
+\tightlist
+\item
+  非负整数计数、需要读系数或递推：PGF；
+\item
+  需要矩、指数尾界，且零附近 MGF 存在：MGF；
+\item
+  一般分布、Fourier 分析、分布收敛：特征函数。
+\end{itemize}
+
+三者不是三套互不相干的公式。对非负整数 $X$，有
+
+\[
+M_X(t)=G_X(e^t),
+\qquad
+\varphi_X(t)=G_X(e^{it}),
+\]
+只要相应表达有意义。
+
+下一节暂时不求完整分布。我们会问：只知道某些低阶信息，能否控制一个坏事件的概率？
+
+\subsubsection{自己补完}
+
+设 $X\sim\mathrm{Poisson}(\lambda)$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  从 PMF 求 PGF；
+\item
+  由 $M_X(t)=G_X(e^t)$ 得到 MGF；
+\item
+  用 MGF 求均值与方差；
+\item
+  若 $(X,Y)$ 独立且参数分别为 $\lambda_1,\lambda_2$，用 PGF 证明 $X+Y$ 仍属同一分布族。
+\end{enumerate}

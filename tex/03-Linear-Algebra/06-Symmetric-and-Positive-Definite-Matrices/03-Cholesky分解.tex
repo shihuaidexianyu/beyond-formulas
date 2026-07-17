@@ -1,0 +1,210 @@
+\section{Cholesky 分解：把正能量写成平方和}
+
+正定矩阵不仅拥有正特征值，还允许一种比一般 LU 更紧凑的分解：
+
+\[
+A=LL^{\mathsf T},
+\]
+
+其中 \(L\) 是对角元为正的下三角矩阵。这称为 Cholesky 分解。
+
+它把对称性和正定性同时编码进分解。代入二次型：
+
+\[
+x^{\mathsf T}Ax
+=x^{\mathsf T}LL^{\mathsf T}x
+=\|L^{\mathsf T}x\|_2^2.
+\]
+
+正定二次型因此成为若干线性表达式的平方和。
+
+\subsection{\texorpdfstring{从一个 \(2\times2\) 矩阵推导}{从一个 2\times2 矩阵推导}}
+
+设
+
+\[
+A=\begin{pmatrix}a&b\\b&c\end{pmatrix},
+\qquad
+L=\begin{pmatrix}\ell_{11}&0\\\ell_{21}&\ell_{22}\end{pmatrix}.
+\]
+
+比较
+
+\[
+LL^{\mathsf T}
+=\begin{pmatrix}
+\ell_{11}^2&\ell_{11}\ell_{21}\\
+\ell_{11}\ell_{21}&\ell_{21}^2+\ell_{22}^2
+\end{pmatrix}
+\]
+
+与 \(A\) 的元素，依次得到
+
+\[
+\ell_{11}=\sqrt a,
+\]
+
+\[
+\ell_{21}=\frac b{\ell_{11}},
+\]
+
+\[
+\ell_{22}=\sqrt{c-\ell_{21}^2}.
+\]
+
+正定性保证根号里的量严格为正。对 \(2\times2\) 情形，这与
+
+\[
+a>0,
+\qquad
+ac-b^2>0
+\]
+
+完全对应——这正是上一节 Sylvester 判据的两个条件：一阶顺序主子式 \(a\) 与二阶顺序主子式（即行列式）都为正。
+
+\subsection{一个完整例子}
+
+取与上一节相同的矩阵（用 Sylvester 判据可判断其正定：\(4>0\)，且 \(4\cdot3-2^2=8>0\)）
+
+\[
+A=\begin{pmatrix}4&2\\2&3\end{pmatrix}.
+\]
+
+首先
+
+\[
+\ell_{11}=2,
+\qquad
+\ell_{21}=1,
+\qquad
+\ell_{22}=\sqrt{3-1}=\sqrt2.
+\]
+
+所以
+
+\[
+A=
+\begin{pmatrix}2&0\\1&\sqrt2\end{pmatrix}
+\begin{pmatrix}2&1\\0&\sqrt2\end{pmatrix}.
+\]
+
+相应二次型变成
+
+\[
+x^{\mathsf T}Ax
+=(2x_1+x_2)^2+2x_2^2,
+\]
+
+从平方和形式可以立即看出，只要 \(x\ne0\)，结果严格为正。这也正是``配平方''路线应得到的答案：两个平方项里的线性表达式正是 \(L^{\mathsf T}x\) 的两个分量。
+
+\subsection{与消元的关系}
+
+对称正定矩阵做 Gaussian 消元时不需要行交换，所有主元都为正。若写成
+
+\[
+A=LDL^{\mathsf T},
+\]
+
+其中 \(L\) 为单位下三角、\(D\) 为正对角矩阵，再把 \(D^{1/2}\) 吸收到 \(L\) 中，就得到 Cholesky 分解。
+
+因此 Cholesky 可以看成利用对称性压缩后的 LU：不必分别存储两个无关三角矩阵，上三角部分只是下三角部分的转置。
+
+\subsection{怎样用它求解系统}
+
+对
+
+\[
+Ax=b,
+\qquad A=LL^{\mathsf T},
+\]
+
+先解
+
+\[
+Ly=b,
+\]
+
+再解
+
+\[
+L^{\mathsf T}x=y.
+\]
+
+两步都是三角求解。与一般 LU 相比，Cholesky 大约只需一半存储和一半主要运算，并且无需选主元，是对称正定系统的首选直接方法。
+
+常见来源包括最小二乘的正规矩阵、核方法、Gaussian process、协方差模型和有限元刚度矩阵。需要注意：形成 \(A^{\mathsf T}A\) 仍会平方条件数；不能因为它正定，就忽略 QR 或 SVD 在最小二乘中的稳定性优势。
+
+\subsection{行列式和概率计算}
+
+由于
+
+\[
+\det A=\det L\det L^{\mathsf T}
+=\left(\prod_i\ell_{ii}\right)^2,
+\]
+
+可以稳定地计算
+
+\[
+\log\det A=2\sum_i\log\ell_{ii}.
+\]
+
+在多元 Gaussian 密度和 Gaussian process 中，既需要解 \(A^{-1}b\) 的作用，又需要 \(\log\det A\)；Cholesky 一次分解便同时支持这两项计算。
+
+若 \(z\sim\mathcal N(0,I)\)，则
+
+\[
+x=\mu+Lz
+\]
+
+具有协方差
+
+\[
+\Cov(x)=LL^{\mathsf T}=A.
+\]
+
+因此 \(L\) 还能把独立标准噪声变成具有指定相关结构的 Gaussian 向量。
+
+\subsection{半正定时发生什么}
+
+半正定矩阵允许零特征值。标准 Cholesky 过程中可能出现零主元，甚至因为浮点误差出现轻微负数，不能再使用要求正对角元的普通算法。
+
+此时可以根据任务选择：
+
+\begin{itemize}
+\tightlist
+\item
+  带主元或秩揭示的 Cholesky；
+\item
+  \(LDL^{\mathsf T}\) 分解；
+\item
+  特征分解或 SVD；
+\item
+  加入小的对角正则项 \(A+\varepsilon I\)。
+\end{itemize}
+
+加入正则项会把所有特征值提高 \(\varepsilon\)，既改变模型，也改善数值条件。它不是纯粹的计算技巧，应当明确其统计或优化含义。
+
+\subsection{Cholesky 也是一次结构检查}
+
+如果输入矩阵理论上应正定，而分解中出现非正主元，可能有三种原因：
+
+\begin{itemize}
+\tightlist
+\item
+  模型或推导确实没有保证正定；
+\item
+  数据使矩阵退化为半正定；
+\item
+  舍入误差与病态性导致数值失败。
+\end{itemize}
+
+因此，Cholesky 失败不仅是程序错误信息，也是在提醒我们重新检查假设。
+
+\subsection{延伸阅读}
+
+\begin{itemize}
+\tightlist
+\item
+  MIT 18.06：Positive Definite Matrices and Minima
+\end{itemize}

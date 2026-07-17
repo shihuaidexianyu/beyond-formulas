@@ -1,0 +1,167 @@
+\section{互信息是依赖，也是对不确定性的减少}
+
+观察 $Y$ 前，对 $X$ 的不确定性是 $H(X)$；观察后平均剩余 $H(X\mid Y)$。二者之差定义互信息：
+
+\[
+I(X;Y)
+=H(X)-H(X\mid Y).
+\]
+它表示 $Y$ 平均减少了多少关于 $X$ 的不确定性。
+
+\subsection{为什么它是对称的}
+
+利用熵链式法则：
+
+\[
+H(X,Y)=H(X)+H(Y\mid X)
+\]
+\[
+=H(Y)+H(X\mid Y).
+\]
+整理得到
+
+\[
+I(X;Y)
+=H(X)+H(Y)-H(X,Y)
+\]
+\[
+=H(Y)-H(Y\mid X).
+\]
+因此
+
+\[
+I(X;Y)=I(Y;X).
+\]
+虽然``$Y$ 告诉 $X$''的语言有方向感，统计共享信息本身对称。
+
+\subsection{它也是联合分布与独立模型的距离}
+
+展开定义：
+
+\[
+I(X;Y)
+=\sum_{x,y}p(x,y)
+\log\frac{p(x,y)}{p(x)p(y)}.
+\]
+这正是联合分布与``假装独立''乘积分布之间的 KL 散度
+
+\[
+\boxed{
+I(X;Y)
+=D\bigl(p_{XY}\| p_Xp_Y\bigr)
+},
+\]
+其中 $D(p\| q)=\sum_x p(x)\log\frac{p(x)}{q(x)}$ 称为 KL 散度（相对熵），衡量两个分布有多不同。下一章将系统讨论它；这里只需用到它非负、且为零当且仅当两分布相同：
+
+\[
+I(X;Y)\ge0,
+\]
+且
+
+\[
+I(X;Y)=0
+\]
+当且仅当 $X,Y$ 独立，即联合分布等于边缘分布的乘积。
+
+相关系数为零只排除线性关系，互信息为零则等价于完全独立，因此能检测一般非线性依赖。
+
+\subsection{互信息的上界与确定关系}
+
+因为条件熵非负（离散情形）：
+
+\[
+I(X;Y)\le H(X),
+\qquad
+I(X;Y)\le H(Y).
+\]
+所以
+
+\[
+I(X;Y)\le\min\{H(X),H(Y)\}.
+\]
+若 $Y=g(X)$ 是确定函数，
+
+\[
+H(Y\mid X)=0,
+\]
+于是
+
+\[
+I(X;Y)=H(Y).
+\]
+若 $g$ 还是一一对应，$H(Y)=H(X)$，全部信息被保留；若多对一，则只保留 $g(X)$ 可区分的部分。
+
+\subsection{二元对称信道例子}
+
+继续令公平输入 $X$，输出
+
+\[
+Y=X\oplus N,
+\qquad
+N\sim\mathrm{Bernoulli}(\varepsilon).
+\]
+上一节得到
+
+\[
+H(Y)=1,\qquad
+H(Y\mid X)=h_2(\varepsilon).
+\]
+所以
+
+\[
+I(X;Y)
+=1-h_2(\varepsilon).
+\]
+\begin{itemize}
+\tightlist
+\item
+  $\varepsilon=0$：无噪声，互信息一 bit；
+\item
+  $\varepsilon=1/2$：输出与输入独立，互信息零；
+\item
+  $\varepsilon=1$：输出总是取反，但可完全反演，互信息又是一 bit。
+\end{itemize}
+
+错误率高不一定信息少。确定性翻转虽然``每位都错''，却不丢信息；不可预测噪声才丢信息。
+
+\subsection{连续互信息坐标不变}
+
+连续变量可定义
+
+\[
+I(X;Y)
+=\iint f(x,y)
+\log\frac{f(x,y)}{f_X(x)f_Y(y)}
+\,dx\,dy.
+\]
+虽然微分熵会随可逆坐标变换改变，互信息中的 Jacobian 因子相消。具体地，上一章给出 $h\bigl(g(X)\bigr)=h(X)+\E\log|\det J_g|$；分别变换时 $h(U)+h(V)$ 增加的两项 Jacobian 对数，恰好等于 $h(U,V)$ 相对 $h(X,Y)$ 增加的两项，差值不变。因此对分别可逆的变换 $U=g(X),V=h(Y)$，
+
+\[
+I(U;V)=I(X;Y).
+\]
+这使互信息比单独微分熵更适合作为连续依赖度量。
+
+\subsection{估计互信息并不容易}
+
+离散小表可直接估计；高维连续数据中，需要估计密度比或使用变分界、kNN 等方法。有限样本估计常有偏，神经估计器也可能因优化与模型容量产生严重误差。
+
+把一个训练目标命名为``互信息下界''，不表示数值就等于真实互信息。估计方法和假设必须单独验证。
+
+\subsubsection{自己补完}
+
+令 $X$ 在 $\{0,1,2,3\}$ 上均匀，$Y=X\bmod2$。
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  求 $H(X),H(Y)$；
+\item
+  求 $H(Y\mid X)$；
+\item
+  求 $I(X;Y)$；
+\item
+  解释为什么 $Y$ 丢失了一 bit，却仍与 $X$ 有一 bit 互信息；
+\item
+  若再令 $Z=\ind_{\{Y=0\}}$，比较 $I(X;Z)$。
+\end{enumerate}
