@@ -10,6 +10,8 @@
 /main.xdv
 
 # Local reference library, backups, and working artifacts
+AGENTS.md
+TODO.md
 /_demo/
 /tex.backup.*/
 /基础数学部分/
