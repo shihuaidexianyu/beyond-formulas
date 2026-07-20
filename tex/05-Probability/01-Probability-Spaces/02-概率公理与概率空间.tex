@@ -153,15 +153,3 @@ A_1,\ A_2\setminus A_1,\ A_3\setminus A_2,\ldots
 拆成互斥事件，再应用可数可加性：这些增量的并恰是 $\bigcup_n A_n$，而前 $n$ 个增量的概率之和逐项相消后等于 $P(A_n)$，令 $n\to\infty$ 即得上式。
 
 这条连续性让我们能用有限近似处理无限事件，也是后续极限定理的基础。
-
-\subsubsection{自己补完}
-
-只使用三条公理和集合分解，证明：
-
-\[
-P(A\cup B\cup C)
-=P(A)+P(B)+P(C)
--P(A\cap B)-P(A\cap C)-P(B\cap C)
-+P(A\cap B\cap C).
-\]
-先画出三个集合的重叠区域，逐项检查每个区域最终被计数几次。

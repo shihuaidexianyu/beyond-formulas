@@ -120,22 +120,3 @@ p(x,y,z)=p(x)p(y\mid x)p(z\mid y),
 加入或删除条件变量可能打开或关闭依赖路径。统计建模时不应机械地``控制所有可用变量''：控制共同原因可能消除混杂，控制共同结果却会制造选择偏差。
 
 条件互信息提供量化工具，因果选择仍需结构假设。
-
-\subsubsection{自己补完}
-
-令 $(X,Y)$ 独立公平 bit，$Z=X\oplus Y$。
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  求 $I(X;Y)$；
-\item
-  给定 $Z=0$ 时，列出 $(X,Y)$ 的可能值；
-\item
-  求 $H(Y\mid Z)$ 与 $H(Y\mid X,Z)$；
-\item
-  得到 $I(X;Y\mid Z)$；
-\item
-  解释共同结果为何打开依赖。
-\end{enumerate}

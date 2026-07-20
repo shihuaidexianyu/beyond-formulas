@@ -138,39 +138,3 @@ W=\Sigma^{-1/2}.
 两个多维分布可以拥有同样 $\mu,\Sigma$，形状却完全不同：一个椭圆单峰，另一个可能是多峰或环形。协方差矩阵适合描述线性尺度和方向，但不能替代联合分布。
 
 下一节会研究一般非线性坐标变换。线性变换只需更新矩与协方差；要得到完整密度，则必须用 Jacobian 补偿局部体积变化。
-
-\subsubsection{自己补完}
-
-设
-
-\[
-\Sigma=
-\begin{bmatrix}
-4&2\\
-2&3
-\end{bmatrix},
-\qquad
-a=
-\begin{bmatrix}
-1\\
--1
-\end{bmatrix}.
-\]
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  求 $X_1-X_2$ 的方差；
-\item
-  解释答案中协方差项为什么带负号；
-\item
-  令 $Y=AX$，其中
-  \[
-  A=
-  \begin{bmatrix}
-  1&1\\
-  1&-1
-  \end{bmatrix},
-  \]
-  计算 $\operatorname{Cov}(Y)$。
-\end{enumerate}

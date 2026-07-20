@@ -142,22 +142,3 @@ X-\E[X\mid Y]
 $\E[X\mid Y]$ 一般是 $Y$ 的非线性函数。若只允许 $aY+b$ 形式，得到的是最佳线性预测，不一定等于真正条件期望。联合 Gaussian 情形是重要例外：条件期望对条件变量为仿射函数。
 
 下一单元会系统研究多个随机变量的联合分布，使条件密度、协方差矩阵和变量组合都有统一计算基础。
-
-\subsubsection{自己补完}
-
-先等概率选择一枚公平硬币或一枚正面概率 $3/4$ 的硬币，再抛一次。令 $Y$ 为所选硬币类型，$X$ 为正面指示变量。
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  求 $\E[X\mid Y]$；
-\item
-  用全期望公式求 $\E[X]$；
-\item
-  计算 $\E[\operatorname{Var}(X\mid Y)]$；
-\item
-  计算 $\operatorname{Var}(\E[X\mid Y])$；
-\item
-  检查两项之和是否等于 $\operatorname{Var}(X)$。
-\end{enumerate}

@@ -146,22 +146,3 @@ I(U;V)=I(X;Y).
 离散小表可直接估计；高维连续数据中，需要估计密度比或使用变分界、kNN 等方法。有限样本估计常有偏，神经估计器也可能因优化与模型容量产生严重误差。
 
 把一个训练目标命名为``互信息下界''，不表示数值就等于真实互信息。估计方法和假设必须单独验证。
-
-\subsubsection{自己补完}
-
-令 $X$ 在 $\{0,1,2,3\}$ 上均匀，$Y=X\bmod2$。
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  求 $H(X),H(Y)$；
-\item
-  求 $H(Y\mid X)$；
-\item
-  求 $I(X;Y)$；
-\item
-  解释为什么 $Y$ 丢失了一 bit，却仍与 $X$ 有一 bit 互信息；
-\item
-  若再令 $Z=\ind_{\{Y=0\}}$，比较 $I(X;Z)$。
-\end{enumerate}

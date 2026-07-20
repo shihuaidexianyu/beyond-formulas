@@ -127,23 +127,3 @@ N(t)-N(s)\sim\mathrm{Poisson}(\lambda(t-s))
 这些结构假设的价值在于，用少量局部规则生成庞大的联合概率体系。
 
 下一节会从完整分布退一步，只保留均值、协方差和时间平移不变性。对信号与时间序列，二阶结构往往已经能回答许多问题。
-
-\subsubsection{自己补完}
-
-令 $Z_1,Z_2,\ldots$ 独立同分布，均值零、方差一，并定义随机游走
-
-\[
-S_n=\sum_{k=1}^{n}Z_k,\qquad S_0=0.
-\]
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  求 $\E[S_n]$；
-\item
-  求 $\operatorname{Cov}(S_m,S_n)$；
-\item
-  证明不重叠时间段的增量独立；
-\item
-  判断 $S_n$ 本身是否平稳，并说明原因。
-\end{enumerate}

@@ -172,27 +172,3 @@ X_1\mid X_2=x_2
 \end{itemize}
 
 可以通过变换、混合模型、Gamma/Poisson/Student $t$ 等替代分布，或直接使用非参数方法。Gaussian 是有力基准，不是默认真理。
-
-\subsubsection{自己补完}
-
-设
-
-\[
-\begin{bmatrix}X\\  Y\end{bmatrix}
-\sim\mathcal N\left(
-\begin{bmatrix}1\\2\end{bmatrix},
-\begin{bmatrix}4&1\\1&9\end{bmatrix}
-\right).
-\]
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  求 $X+2Y$ 的分布；
-\item
-  求 $X$ 的边缘分布；
-\item
-  求 $\E[X\mid Y=y{]}$；
-\item
-  若协方差改为零，说明 $X,Y$ 能否判定独立，以及为什么必须使用联合 Gaussian 条件。
-\end{enumerate}

@@ -172,28 +172,3 @@ n_{\mathrm{eff}}<n.
 \end{enumerate}
 
 随机计算不是``多跑几次取平均''这么简单。它是一套把概率极限定理、抽样设计和误差报告接成闭环的方法。
-
-\subsubsection{自己补完}
-
-要估计
-
-\[
-I=\int_0^1 e^{-x^2}\,dx,
-\]
-令 $U_i\sim\mathrm{Unif}(0,1)$，并取
-
-\[
-\widehat I_n=\frac1n\sum_{i=1}^{n}e^{-U_i^2}.
-\]
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  证明估计目标确实是 $I$；
-\item
-  写出估计标准误的方法；
-\item
-  若希望标准误缩小到原来的三分之一，样本量需放大多少倍？
-\item
-  设计一个简单分层方案，把 $[0,1]$ 分成两段分别抽样。
-\end{enumerate}

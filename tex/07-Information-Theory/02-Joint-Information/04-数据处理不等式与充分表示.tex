@@ -137,20 +137,3 @@ I(X;H_{k+1})\le I(X;H_k)
 I(X;Z)< I(X;Y),
 \]
 不能仅凭此确定数据经过了 $Y\to Z$ 的因果处理。数据处理不等式需要先有 Markov 结构假设，互信息大小只是其后果之一。
-
-\subsubsection{自己补完}
-
-令 $X$ 在 $\{0,1,2,3\}$ 上均匀，$Y=X$，$Z=X\bmod2$（正是上一节中的那个映射）。
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  求 $I(X;Y)$ 与 $I(X;Z)$；
-\item
-  验证数据处理不等式；
-\item
-  若任务只关心 $L=X\bmod2$，比较 $I(L;Y)$ 与 $I(L;Z)$；
-\item
-  解释 $Z$ 如何对原始 $X$ 有损，却对任务 $L$ 充分。
-\end{enumerate}

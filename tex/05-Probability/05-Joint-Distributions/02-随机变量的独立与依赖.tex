@@ -124,28 +124,3 @@ X=1&0.3&0.2
 若把右下格从 $0.2$ 改为 $0.3$，为了总和仍为一必须同时改动其他格。不能只拿一个格子的变化谈依赖而忽略边缘也随之改变；判断始终要基于完整规范化表。
 
 下一节研究 $S=X+Y$。即使 $(X,Y)$ 独立，求和后的分布也不是把两个密度逐点相乘，而要汇总所有满足 $x+y=s$ 的取值对，这会自然导出卷积。
-
-\subsubsection{自己补完}
-
-联合 PMF 为
-
-\[
-\begin{array}{c|cc}
-&Y=0&Y=1\\
-\hline
-X=0&1/6&1/3\\
-X=1&1/6&1/3
-\end{array}
-\]
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  求边缘分布；
-\item
-  检查 $(X,Y)$ 是否独立；
-\item
-  求 $P(X=1\mid Y=0)$；
-\item
-  令 $U=1-X,\ V=2Y+1$，不重列完整表，说明 $(U,V)$ 是否独立。
-\end{enumerate}
