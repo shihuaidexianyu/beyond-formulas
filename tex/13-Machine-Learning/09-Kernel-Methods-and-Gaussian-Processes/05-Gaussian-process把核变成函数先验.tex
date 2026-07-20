@@ -1,0 +1,135 @@
+\section{Gaussian process 把核变成函数先验}
+
+核岭回归把核当作相似度与函数范数的来源。Gaussian process 使用同一个正定核做另一件事：它不先选一个固定函数，而是规定任意有限输入点上的函数值服从怎样的联合 Gaussian 分布。核由此成为函数先验的协方差。
+
+\subsection{随机函数通过所有有限边缘分布定义}
+
+记
+
+\[
+f\sim\mathcal{GP}(m,k),
+\]
+
+其含义是：对任意有限输入 \(x_1,\ldots,x_n\)，向量
+
+\[
+\bigl(f(x_1),\ldots,f(x_n)\bigr)^{\trans}
+\]
+
+服从多元 Gaussian 分布
+
+\[
+\mathcal N(m_X,K_{XX}),
+\]
+
+其中
+
+\[
+(m_X)_i=m(x_i),
+\qquad
+(K_{XX})_{ij}=k(x_i,x_j).
+\]
+
+核必须保证任意有限 Gram 矩阵半正定，否则无法成为协方差矩阵。它不仅描述两个点像不像，还决定先验样本函数的尺度、平滑性、周期性与相关长度。
+
+例如平方指数核
+
+\[
+k(x,x')=\sigma_f^2
+\exp\left(-\frac{\norm{x-x'}^2}{2\ell^2}\right)
+\]
+
+使距离远小于 \(\ell\) 的函数值高度相关。较大的 \(\ell\) 偏好缓慢变化，较小的 \(\ell\) 允许快速起伏。这个解释是先验偏好，不是数据中客观存在的唯一平滑尺度。
+
+\subsection{加上观测噪声后使用 Gaussian 条件分布}
+
+设回归观测满足
+
+\[
+y_i=f(x_i)+\varepsilon_i,
+\qquad
+\varepsilon_i\overset{\mathrm{iid}}{\sim}\mathcal N(0,\sigma_n^2).
+\]
+
+为简化记号取零均值先验。训练输入记为 \(X\)，测试输入记为 \(X_*\)。联合分布为
+
+\[
+\begin{bmatrix}
+y\\ f_*
+\end{bmatrix}
+\sim
+\mathcal N\left(
+0,
+\begin{bmatrix}
+K_{XX}+\sigma_n^2I & K_{X*}\\
+K_{*X} & K_{**}
+\end{bmatrix}
+\right).
+\]
+
+应用多元 Gaussian 条件公式，得到 posterior predictive：
+
+\[
+\E[f_*\mid X,y,X_*]
+=K_{*X}(K_{XX}+\sigma_n^2I)^{-1}y,
+\]
+
+\[
+\Cov(f_*\mid X,y,X_*)
+=K_{**}
+-K_{*X}(K_{XX}+\sigma_n^2I)^{-1}K_{X*}.
+\]
+
+均值是训练响应的核加权组合；协方差则从先验不确定性中减去训练数据能够解释的部分。若要预测带噪新观测 \(y_*\)，还需在对角线上加回 \(\sigma_n^2I\)。潜在函数的不确定性和新测量噪声不能混为一个数。
+
+\subsection{posterior 均值与核岭回归共享代数形式}
+
+核岭回归的预测写成
+
+\[
+\widehat f(x_*)
+=k_{*X}(K_{XX}+n\lambda I)^{-1}y.
+\]
+
+它与 Gaussian process posterior 均值同形，对应 \(n\lambda=\sigma_n^2\) 的尺度关系。两者仍不是完全相同的陈述：核岭回归从正则化经验风险得到一个点估计，Gaussian process 从函数先验和噪声模型得到完整条件分布。
+
+同一个公式可以同时拥有优化解释和概率解释，但解释成立所需的对象不同。把核岭回归的正则参数直接称为噪声方差，只有在相应 Gaussian 模型与尺度约定下才合法。
+
+\subsection{边缘似然同时奖励拟合与控制复杂度}
+
+核参数和噪声参数可通过 log marginal likelihood 选择：
+
+\[
+\log p(y\mid X)
+=-\frac12y^{\trans}K_y^{-1}y
+-\frac12\log\det K_y
+-\frac n2\log(2\pi),
+\]
+
+其中 \(K_y=K_{XX}+\sigma_n^2I\)。第一项惩罚数据在当前协方差下难以解释，第二项为可容纳数据的函数体积定价。只追求第一项会偏好过度灵活的核；log determinant 提供了与模型容量相关的代价。
+
+边缘似然也可能有多个局部最优，并受均值函数、核族和参数先验影响。把它最大化不等于核结构已经由数据唯一识别。
+
+\subsection{计算时不要形成逆矩阵}
+
+令
+
+\[
+K_y=LL^{\trans}
+\]
+
+为 Cholesky 分解。先解 \(Lz=y\)，再解 \(L^{\trans}\alpha=z\)，即可得到 \(\alpha=K_y^{-1}y\) 的作用；预测均值为 \(K_{*X}\alpha\)。同时
+
+\[
+\log\det K_y=2\sum_i\log L_{ii}.
+\]
+
+这比显式求逆稳定，也能复用同一次分解。若核矩阵因重复点、极端长度尺度或舍入误差接近奇异，常在对角线加入小 jitter；jitter 是数值稳定装置，应与统计噪声参数区分。
+
+朴素分解需要 \(O(n^3)\) 时间和 \(O(n^2)\) 存储。诱导点、随机特征和结构化核方法都用额外近似换取规模，但同时改变 posterior 或函数空间，不能只按运行时间比较。
+
+\subsection{不确定性只在模型内部有意义}
+
+Gaussian process 的 predictive variance 会在远离训练点时通常回到先验水平，这比单个点预测提供更多信息。但它仍以核、均值、噪声和同分布假设为条件。若部署输入来自训练支持之外，而核错误地认为两处高度相似，posterior 可能自信地外推错误。
+
+因此 predictive variance 不是现实错误的自动上界。它量化的是给定模型后的函数不确定性，不包含核族选错、数据选择偏差、标签机制改变和超参数选择的不确定性。概率输出的形式完整，不等于关于现实世界的假设完整。

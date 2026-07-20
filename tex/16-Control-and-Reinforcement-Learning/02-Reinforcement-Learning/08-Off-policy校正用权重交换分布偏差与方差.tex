@@ -1,0 +1,151 @@
+\section{Off-policy 校正用权重交换分布偏差与方差}
+
+目标策略 \(\pi\) 是希望评价或改进的策略，行为策略 \(\mu\) 是实际生成数据的策略。On-policy 令二者相同；off-policy 允许它们不同。这个区分与数据是否实时收集无关：可以在线运行一个探索行为策略而学习另一个目标策略，也可以在固定日志上做 on-policy evaluation。
+
+\subsection{轨迹概率比中环境动力学会抵消}
+
+给定初始状态，一段轨迹的动作与状态概率在目标策略下为
+
+\[
+p_\pi(\tau)
+=\prod_{k=t}^{T-1}
+\pi(A_k\mid S_k)
+P(S_{k+1}\mid S_k,A_k),
+\]
+
+在行为策略下只需把 \(\pi\) 换成 \(\mu\)。若环境动力学相同，轨迹比率为
+
+\[
+W_{t:T-1}
+=\frac{p_\pi(\tau)}{p_\mu(\tau)}
+=\prod_{k=t}^{T-1}\rho_k,
+\qquad
+\rho_k
+=\frac{\pi(A_k\mid S_k)}
+{\mu(A_k\mid S_k)}.
+\]
+
+因此
+
+\[
+V^\pi(s)
+=\E_\mu
+\left[
+W_{t:T-1}G_t
+\mid S_t=s
+\right]
+\]
+
+在相应可积条件下成立。我们不必知道转移概率，却必须知道或估计行为策略对已执行动作的概率。
+
+最基本的支持条件是
+
+\[
+\pi(a\mid s)>0
+\quad\Longrightarrow\quad
+\mu(a\mid s)>0
+\]
+
+对所有相关状态动作成立。行为策略从未执行的动作没有反事实结果；任何权重都不能从零样本恢复它。若日志系统只保存动作而没有记录当时的 propensity，事后重建 \(\mu(a\mid s)\) 还会引入额外模型误差。
+
+\subsection{乘积权重为什么会爆炸}
+
+即使单步比率并不极端，长轨迹乘积也会迅速集中。若 \(\rho_k\) 有时大于 1、有时接近 0，多数轨迹权重几乎为 0，少数轨迹承担绝大部分估计。普通 importance-sampling estimator
+
+\[
+\widehat V_{\mathrm{IS}}
+=\frac1n\sum_{i=1}^{n}
+W_iG_i
+\]
+
+在正确支持与矩条件下可无偏，却可能具有巨大甚至无穷方差。无偏只描述无限次重复的平均，不保证当前数据含有可用信息。
+
+Self-normalized estimator
+
+\[
+\widehat V_{\mathrm{SN}}
+=\frac{\sum_iW_iG_i}
+{\sum_iW_i}
+\]
+
+通常更稳定，且对共同权重尺度不敏感，但有限样本有偏。只要相应大数定律成立，它仍可一致。两者的选择是明确的偏差---方差交换，不应把归一化后的权重仍称为严格无偏。
+
+常用集中度诊断
+
+\[
+N_{\mathrm{eff}}
+=\frac{(\sum_iW_i)^2}
+{\sum_iW_i^2}
+\]
+
+只刻画权重是否由少数样本支配。它不是轨迹独立性、模型正确性或覆盖充分性的证明；若所有样本都漏掉目标策略的重要区域，ESS 也可能看起来很好。
+
+\subsection{Per-decision 权重只校正影响相应奖励的动作}
+
+完整回报乘上整条未来动作比率，会让很晚的动作随机性影响很早已经发生的奖励。利用因果顺序，可写成 per-decision importance sampling：
+
+\[
+V^\pi(s)
+=\E_\mu
+\left[
+\sum_{k=t}^{T-1}
+\gamma^{k-t}
+\left(
+\prod_{j=t}^{k}\rho_j
+\right)
+R_{k+1}
+\middle|S_t=s
+\right].
+\]
+
+奖励 \(R_{k+1}\) 只乘到产生它之前的动作比率，不再承担更晚动作的无关方差。这与策略梯度中用 reward-to-go 删除过去奖励属于同一种因果化简。
+
+对一步 TD，动作修正常以单个 \(\rho_t\) 出现：
+
+\[
+w_{t+1}
+=w_t+\alpha_t
+\rho_t\delta_t
+\nabla_w\widehat V(S_t;w_t).
+\]
+
+但单步动作比率只把给定状态下的动作分布从 \(\mu\) 改成 \(\pi\)，样本状态仍主要来自 \(d^\mu\)。在线性函数逼近下，这种状态加权差异仍可能触发上一节的投影不稳定；importance sampling 并没有自动拆掉 Deadly Triad。
+
+Q-learning 的表格更新通常不显式乘 \(\pi/\mu\)：它对实际访问的 \((s,a)\) 更新，并用 max operator 直接逼近最优 Bellman 方程。但这依赖所有关键状态动作被充分访问。进入函数逼近或离线数据后，缺失覆盖仍会以外推误差形式回来。
+
+\subsection{截断权重把不可控方差换成可控偏差}
+
+实践中常用
+
+\[
+\bar\rho_t=\min(c,\rho_t)
+\]
+
+限制单步权重，或限制累积乘积。这样能阻止单条轨迹产生任意大更新，却一般改变目标期望。阈值 \(c\) 小时稳定但偏差大；\(c\) 大时更接近原目标但方差重新上升。
+
+Retrace、V-trace 等方法不是简单“把权重裁掉就结束”，而是配合 bootstrap 与校正项设计新的多步 operator，使截断后的估计仍具有明确固定点或误差性质。使用这些方法时应报告比率分布、截断比例和阈值敏感性，而不只报告最终回报。
+
+策略优化中的 ratio clipping 也有相似外形，但目标可能不同：它常限制新旧策略单次更新幅度，避免当前策略离生成 batch 的策略太远。不要仅凭出现 \(\pi/\mu\) 就把 policy constraint、off-policy evaluation 和 variance reduction 视为同一算法。
+
+\subsection{Online、offline 与 on-policy 是两条轴}
+
+\begin{longtable}{p{0.21\textwidth}p{0.32\textwidth}p{0.35\textwidth}}
+\toprule
+数据方式 & On-policy & Off-policy \\
+\midrule
+Online &
+当前 \(\pi\) 交互并立即更新；数据新鲜，但每次更新后旧样本很快变成 off-policy &
+用探索策略、旧策略或多智能体持续收集数据，同时学习目标 \(\pi\) \\
+Offline &
+固定数据恰好来自待评价的固定 \(\pi\)，可做策略评价但不能继续探索 &
+固定日志来自 \(\mu\)，希望评价或改进另一 \(\pi\)；覆盖和行为概率成为核心限制 \\
+\bottomrule
+\end{longtable}
+
+Replay buffer 让在线 DQN 同时使用旧策略数据，所以它在“交互仍在线”的同时是 off-policy。纯离线强化学习则不能通过新探索修补支持缺口，通常还需约束新策略接近行为数据，或对分布外动作施加悲观惩罚。
+
+\subsection{什么时候应放弃做精确校正}
+
+如果最大权重随样本量持续增大、ESS 长期接近 1、行为 propensity 不可信，或目标策略在日志支持外选择动作，那么“再调一个裁剪阈值”不能创造缺失证据。更合理的选择可能是缩小目标策略变化、只评价被数据充分覆盖的策略、收集新数据，或明确改做有偏但保守的决策。
+
+可靠报告至少包括：行为与目标策略定义、支持条件、权重分位数和最大值、ESS、裁剪规则、普通与 self-normalized 估计的差异，以及结果对策略偏移程度的敏感性。Off-policy 方法的价值是复用数据；它的代价是必须把“这些数据凭什么代表另一个策略”变成一个可检查的问题。

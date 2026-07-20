@@ -1,0 +1,85 @@
+\section{Actor--Critic 在偏差与方差之间搭桥}
+
+REINFORCE 等到未来回报实现后再更新策略，目标无须依赖当前价值估计，却有很大方差。价值方法能用 Bellman bootstrap 快速传播信息，却只间接产生策略。Actor--Critic 同时维护两者：Actor 表示策略，Critic 估计当前策略下的价值并为 Actor 提供低方差方向。
+
+\subsection{Critic 近似策略梯度中的动作价值}
+
+策略梯度可写成
+
+\[
+\nabla_\theta J(\theta)
+=\E_\pi\left[
+Q^\pi(S_t,A_t)
+\nabla_\theta\log\pi_\theta(A_t\mid S_t)
+\right].
+\]
+
+减去状态 baseline 后得到 advantage
+
+\[
+A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s).
+\]
+
+实际算法用参数 \(\phi\) 的 Critic 近似 \(V^\pi\) 或 \(Q^\pi\)。最简单的一步 TD 误差为
+
+\[
+\delta_t
+=R_{t+1}+\gamma V_\phi(S_{t+1})-V_\phi(S_t).
+\]
+
+给定 \(S_t,A_t\)，若 \(V_\phi=V^\pi\)，则 \(\delta_t\) 的条件期望等于 \(A^\pi(S_t,A_t)\)。因此可用
+
+\[
+\theta\leftarrow
+\theta+\alpha_\theta
+\delta_t\nabla_\theta
+\log\pi_\theta(A_t\mid S_t)
+\]
+
+更新 Actor，同时用 TD 规则训练 Critic。
+
+\subsection{Critic 用偏差换取更早、更稳定的信号}
+
+若 Critic 不准确，\(\delta_t\) 不是精确 advantage，Actor 梯度会带偏；但它只使用一步随机奖励和一个 bootstrap 值，通常比完整回报方差小。Actor--Critic 的核心不是同时训练两个网络这一表面结构，而是选择在何处用价值近似替换 Monte Carlo。
+
+多步回报连接两端。\(n\)-step 目标为
+
+\[
+G_t^{(n)}
+=\sum_{k=0}^{n-1}\gamma^kR_{t+k+1}
++\gamma^nV_\phi(S_{t+n}).
+\]
+
+\(n=1\) 强 bootstrap、方差低而偏差依赖 Critic；\(n\) 增大时更多使用真实奖励，偏差通常减少、方差增加。Generalized advantage estimation 进一步对不同 \(n\)-step advantage 作指数加权，用参数 \(\lambda\) 连续调节这项交换。
+
+\subsection{Actor 与 Critic 的目标在训练中同时移动}
+
+Critic 希望评估当前策略，但 Actor 每次更新都改变当前策略及其状态访问分布。若 Actor 改得过快，Critic 总在追逐已经过时的目标；若 Critic 训练不足，Actor 又会沿噪声或系统性偏差方向移动。
+
+理论分析常要求两个时间尺度：Critic 相对更快接近当前策略的价值，Actor 更慢改变策略。深度实现不一定严格满足渐近条件，但这个视角仍解释了为何更新次数比、学习率、target network 或延迟策略更新会影响稳定性。
+
+\subsection{离策略数据需要修正分布}
+
+前文“Off-policy 校正用权重交换分布偏差与方差”已经推导了轨迹权重、per-decision 权重和支持条件；这里仅说明它们怎样进入 Actor--Critic。若数据由行为策略 \(\mu\) 产生，却想优化 \(\pi_\theta\)，动作概率不再来自目标策略。重要性比率
+
+\[
+\rho_t=
+\frac{\pi_\theta(A_t\mid S_t)}
+{\mu(A_t\mid S_t)}
+\]
+
+可以修正某些期望，但多个时间步比率相乘会产生巨大方差；若 \(\mu(a\mid s)=0\) 而目标策略给该动作正概率，则缺失支持无法通过加权修复。
+
+实际算法常裁剪比率、限制策略更新或使用专门的离策略价值校正。裁剪降低方差，却改变原始无偏估计；稳定性来自有意识地接受偏差，而不是数学上仍在精确计算同一个量。
+
+\subsection{共享表示会让两个目标相互干扰}
+
+Actor 与 Critic 可以共享前部网络以降低计算并交换表示，但它们的梯度目标不同。Critic 希望准确拟合价值，Actor 希望改变策略；共享参数上的两个方向可能相助，也可能冲突。若没有明确停止哪些梯度，Actor loss 可能意外更新 Critic target，或 Critic 通过 advantage 的计算路径改变策略。
+
+实现时应写清每个 loss 对哪些参数求导，哪些量被视为固定 target。数值结果能运行不代表梯度边界与推导一致。
+
+\subsection{Actor--Critic 没有消除强化学习的困难}
+
+它降低了纯 Monte Carlo 策略梯度的方差，却引入 Critic 近似误差、bootstrap 与双重非平稳性；离策略版本还会叠加分布修正问题。奖励设计、探索、部分可观测和部署安全也没有因两个网络的出现而消失。
+
+可靠诊断应分别观察策略 entropy、回报分布、value error、TD error、advantage 尺度、重要性比率和不同随机种子的变化。只看平均回报上升，无法判断 Critic 是否准确，也无法排除策略利用了奖励定义中的漏洞。

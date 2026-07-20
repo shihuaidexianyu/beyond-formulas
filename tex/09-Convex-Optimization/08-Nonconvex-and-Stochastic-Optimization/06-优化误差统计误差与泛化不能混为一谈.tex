@@ -1,0 +1,102 @@
+\section{优化误差、统计误差与泛化不能混为一谈}
+
+训练算法直接看到的是有限样本经验风险
+
+\[
+\widehat R_n(\theta)
+=\frac1n\sum_{i=1}^n\ell(\theta;Z_i),
+\]
+
+部署真正关心的通常是总体风险
+
+\[
+R(\theta)=\E_{Z\sim P}[\ell(\theta;Z)].
+\]
+
+SGD、momentum 或 Adam 降低的是前者的某个实现版本；数据增强、weight decay 和 batch normalization 还可能让实际更新目标与纸面经验风险略有不同。即使经验目标被精确最小化，也没有自动控制总体风险。
+
+\subsection{一个分解暴露三类责任}
+
+在给定模型类 $\Theta$ 中，令
+
+\[
+\theta^\star\in\argmin_{\theta\in\Theta}R(\theta),
+\qquad
+\widehat\theta\in\argmin_{\theta\in\Theta}\widehat R_n(\theta),
+\]
+
+训练算法在有限预算后输出 $\theta_T$。插入经验风险可得
+
+\[
+\begin{aligned}
+R(\theta_T)-R(\theta^\star)
+={}&R(\theta_T)-\widehat R_n(\theta_T)\\
+&+\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta)\\
+&+\widehat R_n(\widehat\theta)-\widehat R_n(\theta^\star)\\
+&+\widehat R_n(\theta^\star)-R(\theta^\star).
+\end{aligned}
+\]
+
+第三项不大于零，所以
+
+\[
+R(\theta_T)-R(\theta^\star)
+\le
+2\sup_{\theta\in\Theta}
+\abs{R(\theta)-\widehat R_n(\theta)}
++
+\bigl[
+\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta)
+\bigr].
+\]
+
+右侧最后一项是\textbf{优化误差}：算法距离经验全局最优还有多远。上确界项是\textbf{统计或估计误差}：有限样本上的风险能否代表总体风险。若再把 $\Theta$ 中最优风险与所有可测预测规则的 Bayes 风险比较，还会出现\textbf{近似误差}：模型类本身能否表达所需规则。
+
+增加迭代主要作用于优化误差；增加独立且代表性良好的数据主要作用于统计误差；改变表示或模型类主要作用于近似误差。三者可能相互影响，却不能用同一条 loss 曲线诊断。
+
+\subsection{非凸驻点界不能直接代替优化误差}
+
+非凸理论常给出
+
+\[
+\norm{\nabla\widehat R_n(\theta_T)}\le\varepsilon.
+\]
+
+若没有凸性、PL 条件或其他误差界，这并不能控制
+
+\[
+\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta).
+\]
+
+小梯度是一阶局部证据，而上面的风险分解需要函数值相对于经验全局最优的证据。把两者直接替换，会在推理中悄悄恢复已经失去的凸性。
+
+反过来，经验优化误差很小也可能伴随较大总体风险。模型可以插值训练数据，甚至把随机标签拟合到零损失；这说明模型和算法容量足够，不说明部署分布上的规律已经被识别。
+
+\subsection{算法会在多个经验解之间作选择}
+
+过参数化模型常有许多训练损失近乎相同的参数。初始化、batch 顺序、学习率、动量和停止时间会决定落到哪一个解，这称为优化算法的 implicit bias。此时算法不只是``更快找到同一个经验最优点''，而是在经验等价解中实施了额外选择。
+
+这种选择可能改善泛化，但必须通过理论结构或独立数据验证。不能因为某种隐式偏置在一个任务上有效，就把它当作跨分布的普遍正则化定理。
+
+early stopping 也同时影响两个层次：它保留一定优化误差，却可能阻止模型继续拟合高方差方向。停止轮数因此是由验证过程选择的超参数，不是只看训练梯度达到阈值的数值容差。
+
+\subsection{报告“收敛”时明确对象}
+
+一次可信训练报告应区分：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{数值收敛：}更新、梯度或残差是否达到给定尺度；
+\item
+  \textbf{经验优化：}训练目标相对于可达到基线下降了多少；
+\item
+  \textbf{统计泛化：}独立样本上的风险及不确定性如何；
+\item
+  \textbf{分布有效性：}验证与部署数据是否来自足够接近的机制；
+\item
+  \textbf{决策有效性：}损失和指标是否真正对应现实后果。
+\end{itemize}
+
+优化器只能直接回答前两项的一部分。后三项需要数据划分、统计推断、分布偏移检查和决策目标共同提供证据。这正是为什么``训练成功''不能由一条下降曲线单独定义。
+

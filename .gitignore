@@ -10,10 +10,9 @@
 /main.xdv
 
 # Local reference library, backups, and working artifacts
+/reference-materials/
 AGENTS.md
 TODO.md
 /_demo/
 /tex.backup.*/
-/基础数学部分/
-/额外的清单.txt
 filelist.txt

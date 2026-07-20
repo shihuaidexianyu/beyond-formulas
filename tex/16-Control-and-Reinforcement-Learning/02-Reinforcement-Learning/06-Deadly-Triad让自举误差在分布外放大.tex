@@ -1,0 +1,128 @@
+\section{Deadly Triad 让自举误差在分布外放大}
+
+函数逼近、bootstrap 与 off-policy 数据各自解决一个真实困难：参数共享让大状态空间可表示，bootstrap 让奖励信息无需等到回合结束，off-policy 学习允许复用历史策略或他人产生的数据。三者同时出现时，价值估计却可能不只是有偏，而是数值发散。这一组合称为 Deadly Triad。
+
+\subsection{表格 Bellman 压缩性为什么不再够用}
+
+对固定策略，Bellman 算子
+
+\[
+T_\pi v=r_\pi+\gamma P_\pi v
+\]
+
+在 sup norm 下满足
+
+\[
+\norm{T_\pi v-T_\pi u}_\infty
+\le\gamma\norm{v-u}_\infty.
+\]
+
+所以精确值迭代会把任意两次估计的距离缩小。函数逼近却实际反复作用
+
+\[
+\Pi_D T_\pi,
+\]
+
+其中投影 \(\Pi_D\) 由采样分布 \(D\) 决定。正交投影只保证在自己的 \(D\)-范数下不扩张，Bellman 算子的已知压缩性却在另一种范数中成立。若 \(D\) 来自行为策略 \(\mu\) 而不是目标策略 \(\pi\)，两种几何不再自然配合，复合算子可能把误差放大。
+
+这说明“Bellman 算子本来是压缩映射”不能直接推出“任意函数逼近 TD 都稳定”。压缩性必须和表示空间、投影范数及数据分布一起检查。
+
+\subsection{一个二维例子已经足以发散}
+
+考虑两个状态、零奖励与折扣率 \(\gamma=0.9\)。目标策略的转移矩阵为
+
+\[
+P_\pi=
+\begin{bmatrix}
+0&1\\
+0&1
+\end{bmatrix},
+\]
+
+即无论当前在哪个状态，下一步都到状态 2。只用一个特征
+
+\[
+\phi=
+\begin{bmatrix}
+1\\2
+\end{bmatrix},
+\qquad
+\widehat v(w)=\phi w.
+\]
+
+假设数据由另一行为策略产生，其长期采样权重为
+
+\[
+D_\mu=\operatorname{diag}(0.99,0.01).
+\]
+
+沿该权重把 \(T_\pi(\phi w)\) 投影回特征直线，参数映射的线性系数是
+
+\[
+c
+=\gamma
+\frac{
+\phi^{\trans}D_\mu P_\pi\phi
+}{
+\phi^{\trans}D_\mu\phi
+}
+=0.9\times
+\frac{2.02}{1.03}
+\approx1.765.
+\]
+
+于是投影 Bellman 迭代近似为
+
+\[
+w_{k+1}=1.765w_k.
+\]
+
+真实价值和唯一固定点都是 \(0\)，但除非恰好从 \(w_0=0\) 开始，误差都会指数放大。相应的期望 TD 矩阵为
+
+\[
+A
+=\phi^{\trans}D_\mu
+(I-\gamma P_\pi)\phi
+=1.03-1.818
+=-0.788,
+\]
+
+平均更新 \(w\leftarrow w+\alpha(0-Aw)\) 反而沿远离零的方向移动。
+
+这个例子没有深度网络、随机奖励或复杂优化。发散来自目标转移、行为分布、特征几何和 bootstrap 的组合，所以把问题归因于“神经网络太难训练”会错过根因。
+
+\subsection{三个角分别贡献了什么}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{函数逼近}使一个状态的误差通过共享参数外溢到其他状态；
+\item
+  \textbf{bootstrap}把下一状态的当前估计重新放入监督目标，让外溢误差可以自我复制；
+\item
+  \textbf{off-policy}让投影重视行为策略常见的状态，却要求结果满足另一目标策略的 Bellman 关系。
+\end{itemize}
+
+去掉任意一角，经典情形往往更温和：Monte Carlo 不把当前估计塞回目标；表格表示没有跨状态参数干扰；on-policy 线性 TD 的投影权重与目标链相匹配。但“往往更温和”不表示剩余方法自动高效，非线性优化、重尾回报与覆盖不足仍可造成别的失败。
+
+\subsection{发散、过估计和训练波动要分开}
+
+Q 值偶尔变大不一定是 Deadly Triad。最大化含噪动作估计会造成 overestimation bias；固定步长会让参数在稳定点附近波动；奖励尺度过大或网络初始化不当会产生普通数值不稳定。Deadly Triad 指的是期望更新本身可能没有吸引稳定点，减小采样噪声也不能修复方向。
+
+可用下列信号区分：
+
+\begin{itemize}
+\tightlist
+\item 增大 batch 后方差下降，均值轨迹仍持续远离合理范围，说明问题可能在平均动力学；
+\item Q 值远大于实际 Monte Carlo 回报且 TD target 同步上升，说明 bootstrap 正在自我抬升；
+\item 换成 on-policy 数据或停止 bootstrap 后恢复稳定，说明分布错配或自举是关键；
+\item 只有少数随机种子崩溃，则还需检查优化、探索和数据覆盖，不能只贴上理论标签。
+\end{itemize}
+
+\subsection{稳定化方法改变的是不同环节}
+
+目标网络减慢 bootstrap 目标的移动；经验回放改变样本相关性和训练分布；Double Q 方法减少选择与评价使用同一噪声造成的乐观偏差；梯度裁剪只限制单步数值幅度。这些机制对深度 Q 学习很重要，却都不是一般离策略函数逼近的收敛证明。
+
+若目标是可靠的 off-policy policy evaluation，可以使用 Gradient-TD、TDC、GTD2 或 emphatic TD 等专门算法；它们通过真正的梯度目标、辅助权重或重加权占用分布处理不稳定来源。Residual-gradient 方法也可获得更直接的目标语义，但可能方差大、收敛慢。
+
+因此不能问“哪一个技巧解决了 Deadly Triad”，而应问：当前方法如何处理投影分布，如何限制自举目标变化，如何修正目标与行为策略之差，以及它实际上对哪个目标具有稳定保证。下一节中的 DQN 是一组有用的工程回答，不是对这些问题的统一定理。

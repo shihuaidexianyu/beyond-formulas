@@ -1,0 +1,70 @@
+\section{四类序列模型回答不同问题}
+
+HMM、线性状态空间模型、CRF 和 self-attention 都接收序列，但“输入是什么、随机变量是什么、需要归一化什么”并不相同。把它们按网络结构或年代排列，容易掩盖真正的建模选择。
+
+\subsection{先问是生成、滤波、标注还是表示}
+
+\begin{longtable}{p{0.15\textwidth}p{0.21\textwidth}p{0.25\textwidth}p{0.27\textwidth}}
+\toprule
+模型 & 主要分布或映射 & 结构假设 & 典型问题 \\
+\midrule
+HMM &
+\(p(x_{1:T},z_{1:T})\) &
+离散一阶 Markov 状态；给定状态后局部观测独立 &
+离散状态解释、生成、filtering 与 smoothing \\
+线性 Gaussian 状态空间模型 &
+\(p(x_{1:T},z_{1:T})\) &
+连续线性动力学与 Gaussian 噪声 &
+跟踪、预测和带不确定性的状态估计 \\
+线性链 CRF &
+\(p(y_{1:T}\mid x_{1:T})\) &
+给定整段输入后，标签图为链 &
+结构化标注与全局一致解码 \\
+self-attention &
+\(h_{1:T}=F_\theta(x_{1:T})\) &
+内容相关的两两信息读取；概率语义由损失另行规定 &
+上下文表示、预测器或生成模型的参数化组件 \\
+\bottomrule
+\end{longtable}
+
+表中最重要的一列是“主要分布或映射”。HMM 与状态空间模型为观测和状态写联合分布，所以能够讨论缺失观测、未来生成和状态 posterior。CRF 只比较同一个输入下的标签序列，避免为复杂输入建立生成模型。self-attention 本身只是一个确定性可微映射；只有接上 softmax likelihood、自回归分解或潜变量模型后，才获得相应概率解释。
+
+\subsection{同叫“状态”，语义也可能不同}
+
+HMM 的 \(Z_t\) 和 Kalman filter 的 \(X_t\) 是随机潜状态，观察数据后仍有 posterior uncertainty。循环网络或 attention 的 hidden representation 通常是输入和参数的确定性函数。把 hidden vector 称为“隐状态”不等于已经定义
+
+\[
+p(z_t\mid x_{1:t})
+\]
+
+这样的 posterior，也不能直接把向量范数解释成置信度。
+
+反过来，概率状态空间模型也不因状态可解释就一定预测更好。若真实动力学高度非线性、长程依赖强或状态维度设错，简单 Markov 模型会产生系统性偏差。模型的概率语义使不确定性问题可被明确提出，却不会自动保证假设正确。
+
+\subsection{计算方法由因子结构决定}
+
+四类模型看似使用不同算法，其实都在利用可复用结构。
+
+\begin{itemize}
+\tightlist
+\item HMM 的 sum-product 在有限状态链上合并相同前缀；
+\item Kalman filter 借助 Gaussian 族在线性条件化下闭合，只传播均值和协方差；
+\item CRF 在标签链上用前向---后向计算条件配分函数，用 Viterbi 找最高分路径；
+\item attention 直接形成内容相关的加权和，标准实现的两两交互通常需要 \(O(T^2)\) 时间和存储。
+\end{itemize}
+
+“能处理长序列”因此不是单一性质。链式动态规划对 \(T\) 线性，但表达的是局部 Markov 因子；attention 能一步连接远距离位置，却付出二次交互代价，也不自动提供 filtering posterior。
+
+\subsection{混合模型时要保留清楚的接口}
+
+现代系统常把这些组件组合起来。例如上下文网络先产生位置得分，CRF 再保证标签转移一致；神经网络参数化非线性状态转移，再用粒子滤波近似 posterior；attention 产生控制策略的输入表示，再由策略分布决定动作。组合并不消除原有问题，只是把问题分到不同接口：
+
+\[
+\text{表示能力}
+\quad+\quad
+\text{概率目标}
+\quad+\quad
+\text{推断算法}.
+\]
+
+排查失败时也应沿这三层检查。训练损失差可能是表示不足或优化失败；似然正常而滤波漂移，可能是状态转移错设或近似退化；token 得分合理而标签序列非法，可能是输出结构没有被建模。知道一个方法属于哪一层，比记住它“适合序列”更能指导选择。

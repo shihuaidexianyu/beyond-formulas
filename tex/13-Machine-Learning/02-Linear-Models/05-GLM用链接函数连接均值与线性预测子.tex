@@ -1,0 +1,103 @@
+\section{GLM 用链接函数连接均值与线性预测子}
+
+\subsection{线性不必意味着直接预测响应值}
+
+预测家庭每月用电量时，Gaussian 线性回归可能合适；预测一天收到多少个包裹时，输出必须是非负整数；预测是否迟到时，输出是 \(0/1\)。若仍令 \(x^\trans\beta\) 直接等于这些响应，可能得到负计数或超出 \([0,1]\) 的概率。
+
+广义线性模型保留特征的线性组合
+
+\[
+\eta=x^\trans\beta,
+\]
+
+但让它通过链接函数连接条件均值
+
+\[
+g(\mu)=\eta,
+\qquad
+\mu=\E[Y\mid X=x].
+\]
+
+“广义”改变的是响应分布与均值尺度，不是把 \(x^\trans\beta\) 换成任意非线性黑箱。
+
+\subsection{指数族提供统一的似然骨架}
+
+一参数指数族可写为
+
+\[
+p(y\mid\theta,\phi)
+=\exp\left\{
+\frac{y\theta-b(\theta)}{a(\phi)}+c(y,\phi)
+\right\}.
+\]
+
+由 log-partition 的导数，
+
+\[
+\E[Y\mid x]=b'(\theta),
+\qquad
+\Var(Y\mid x)=a(\phi)b''(\theta).
+\]
+
+若选择 canonical link，使 \(\theta=x^\trans\beta\)，log-likelihood 对 \(\beta\) 的梯度统一为
+
+\[
+\nabla_\beta\ell(\beta)
+=\frac{1}{a(\phi)}X^\trans(y-\mu),
+\]
+
+其中 \(a(\phi)\) 是指数族的离散尺度；若不采用 canonical link，还会出现由均值方差关系和链接函数导数组成的权重。常见对应关系是：
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+响应机制 & 条件均值 & 常用链接 \\
+\midrule
+Gaussian & \(\mu\in\R\) & \(g(\mu)=\mu\) \\
+Bernoulli & \(0<\mu<1\) & \(g(\mu)=\log\frac{\mu}{1-\mu}\) \\
+Poisson & \(\mu>0\) & \(g(\mu)=\log\mu\) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+因此普通线性回归、logistic 回归和 Poisson 回归不是三套偶然相似的公式，而是同一建模接口的三个实例。
+
+\subsection{Poisson 回归把相对变化写成加法}
+
+设 \(Y\) 是一天收到的订单数，\(x_1\) 表示是否周末。采用 log link 时
+
+\[
+\log\E[Y\mid x]=\beta_0+\beta_1x_1,
+\]
+
+所以
+
+\[
+\frac{\E[Y\mid x_1=1]}{\E[Y\mid x_1=0]}
+=e^{\beta_1}.
+\]
+
+线性预测子里的加法，在原始均值尺度上变成乘法比例。若每个观察窗口暴露时间 \(t_i\) 不同，应使用 offset：
+
+\[
+\log\mu_i=\log t_i+x_i^\trans\beta.
+\]
+
+这里 \(\log t_i\) 的系数固定为 \(1\)，因为模型比较的是单位时间发生率，而不是把观察更久误当成特征效应。
+
+\subsection{IRLS 是 Newton 法在均值方差结构下的样子}
+
+GLM 的 score 方程通常没有闭式解。Newton 法把当前 log-likelihood 作二阶近似，可整理为迭代重加权最小二乘：
+
+\[
+\beta^{\text{new}}
+=(X^\trans W X)^{-1}X^\trans Wz.
+\]
+
+工作响应 \(z\) 与权重 \(W\) 随当前均值改变。它不是把原数据随意改成一份回归数据，而是在当前点求解 likelihood 的局部二次模型。完全分离的 logistic 数据会让有限 MLE 不存在；Poisson 中极端计数也可能产生高杠杆。收敛报告必须连同梯度、步长和参数尺度一起看。
+
+\subsection{分布选择必须接受数据反驳}
+
+Poisson 假设条件方差等于条件均值，现实计数常因未建模异质性出现 overdispersion；大量结构性零值又可能需要 hurdle 或 zero-inflated 模型。Bernoulli likelihood 只规定给定特征后的二元随机性，不保证概率已经校准，更不保证特征与结果的关系是因果的。
+
+GLM 的价值是把响应支持集、均值、方差和线性预测子写进一套可检查模型。若残差、离散程度或部署分布否定这些假设，应改变模型或不确定性估计，而不是因为链接函数保证了输出范围就宣布问题已经解决。

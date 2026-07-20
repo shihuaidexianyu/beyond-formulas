@@ -1,0 +1,116 @@
+\section{策略梯度直接优化动作分布}
+
+价值方法先估计每个动作的长期价值，再选择价值最大的动作。连续动作中逐点取最大可能昂贵，随机策略本身也可能是问题所需的对象。策略梯度改为参数化
+
+\[
+\pi_\theta(a\mid s)
+\]
+
+并直接调整 \(\theta\)，使高回报轨迹变得更可能。
+
+\subsection{目标分布本身依赖策略参数}
+
+设一条有限轨迹为
+
+\[
+\tau=(s_0,a_0,r_1,\ldots,s_T).
+\]
+
+在初始分布 \(\rho_0\) 与环境转移 \(P\) 下，轨迹概率为
+
+\[
+p_\theta(\tau)
+=\rho_0(s_0)
+\prod_{t=0}^{T-1}
+\pi_\theta(a_t\mid s_t)
+P(s_{t+1}\mid s_t,a_t).
+\]
+
+目标取期望回报
+
+\[
+J(\theta)=\E_{\tau\sim p_\theta}[G(\tau)].
+\]
+
+参数不仅改变给定样本上的函数值，还改变未来会采到哪些状态与动作。不能把轨迹当作与 \(\theta\) 无关的固定监督数据直接求导。
+
+\subsection{log-derivative 把分布导数变成样本平均}
+
+利用恒等式
+
+\[
+\nabla_\theta p_\theta(\tau)
+=p_\theta(\tau)\nabla_\theta\log p_\theta(\tau),
+\]
+
+可得
+
+\[
+\nabla_\theta J(\theta)
+=\E_{\tau\sim p_\theta}
+\left[
+G(\tau)\nabla_\theta\log p_\theta(\tau)
+\right].
+\]
+
+环境转移和初始分布不依赖 \(\theta\)，所以
+
+\[
+\nabla_\theta\log p_\theta(\tau)
+=\sum_{t=0}^{T-1}
+\nabla_\theta\log\pi_\theta(a_t\mid s_t).
+\]
+
+于是一次轨迹就给出无偏 Monte Carlo 估计。直觉很直接：回报高的轨迹增加其中动作的 log-probability，回报低的轨迹减少它们。
+
+\subsection{过去奖励不应评价未来动作}
+
+在完整 \(G(\tau)\) 乘每个时刻 score function 的写法中，动作 \(A_t\) 之前已经发生的奖励也进入权重，但当前动作不可能改变过去。利用条件期望可把它们去掉，得到 reward-to-go：
+
+\[
+\nabla_\theta J(\theta)
+=\E_\pi\left[
+\sum_t
+G_t\nabla_\theta\log\pi_\theta(A_t\mid S_t)
+\right].
+\]
+
+这不改变期望，却减少与当前动作无关的随机波动。REINFORCE 使用样本 \(G_t\) 执行更新
+
+\[
+\theta\leftarrow
+\theta+\alpha
+G_t\nabla_\theta\log\pi_\theta(A_t\mid S_t).
+\]
+
+回报尺度会直接缩放梯度，因此奖励缩放、episode 长度和 discount 约定都会改变有效学习率。
+
+\subsection{与动作无关的 baseline 不改变期望}
+
+对任意只依赖状态的 \(b(s)\)，
+
+\[
+\E_{A\sim\pi_\theta(\cdot\mid s)}
+\left[
+b(s)\nabla_\theta\log\pi_\theta(A\mid s)
+\right]
+=b(s)\nabla_\theta\sum_a\pi_\theta(a\mid s)=0.
+\]
+
+因此可以把 \(G_t\) 换成 \(G_t-b(S_t)\) 而不改变期望。若 \(b(S_t)\) 接近状态价值，差值衡量动作相对该状态平均水平好多少，方差通常显著下降。
+
+baseline 若依赖当前动作，上述消去一般不再成立，除非加入相应修正。减去 batch 平均回报常作为经验 baseline，但它与每个样本之间存在有限 batch 相关；理解其作用时仍应回到条件期望，而不是把任何中心化都称为无偏。
+
+\subsection{策略参数化决定可探索的动作}
+
+离散动作常用 softmax：
+
+\[
+\pi_\theta(a\mid s)
+=\frac{\exp z_\theta(s,a)}
+{\sum_{a'}\exp z_\theta(s,a')}.
+\]
+
+连续动作可使用 Gaussian 策略，由网络输出均值与尺度。若尺度过早塌缩，策略接近确定性，未尝试区域几乎没有梯度证据；尺度过大则回报方差高。Entropy bonus 常用来延缓过早集中，但它在目标中加入了新的偏好，不是免费改进原问题。
+
+策略梯度定理提供的是局部方向，不提供全局最优或样本效率保证。长时域 credit assignment、稀疏奖励与高方差仍可能让无偏估计几乎不可用。Actor--Critic 的出发点正是用学习到的价值函数替代完整 Monte Carlo 回报。

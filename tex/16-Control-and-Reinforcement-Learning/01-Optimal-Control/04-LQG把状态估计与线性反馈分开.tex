@@ -1,0 +1,66 @@
+\section{LQG：看不全状态时怎样继续反馈}
+
+\subsection{控制器常看见读数，却看不见完整状态}
+
+家中恒温器只测到某处空气温度，墙体蓄热、室外扰动和传感器噪声都藏在读数背后。LQR 假设控制器知道完整状态 \(x_t\)；现实中更常见的是
+
+\[
+x_{t+1}=Ax_t+Bu_t+w_t,
+\qquad
+y_t=Cx_t+v_t,
+\]
+
+其中 \(w_t\sim\mathcal N(0,W)\) 是过程噪声，\(v_t\sim\mathcal N(0,V)\) 是测量噪声。控制器必须先由历史读数估计状态，再决定动作。
+
+\subsection{Kalman filter 给出当前状态的条件均值}
+
+给定过去观测和控制，Kalman filter 递推 posterior mean \(\widehat x_t\) 与 covariance \(P_t\)。预测步为
+
+\[
+\widehat x_{t|t-1}=A\widehat x_{t-1|t-1}+Bu_{t-1},
+\qquad
+P_{t|t-1}=AP_{t-1|t-1}A^\trans+W.
+\]
+
+看到 \(y_t\) 后，innovation 与增益为
+
+\[
+r_t=y_t-C\widehat x_{t|t-1},
+\qquad
+K_t=P_{t|t-1}C^\trans
+(CP_{t|t-1}C^\trans+V)^{-1},
+\]
+
+再更新
+
+\[
+\widehat x_{t|t}
+=\widehat x_{t|t-1}+K_tr_t.
+\]
+
+innovation covariance 决定新读数应被信任多少。传感器噪声大时增益缩小，模型预测占比增加；过程噪声大时估计器更愿意跟随观测。
+
+\subsection{分离原理把估计与控制接起来}
+
+考虑二次代价
+
+\[
+\E\sum_t
+\left(x_t^\trans Qx_t+u_t^\trans Ru_t\right).
+\]
+
+在线性、Gaussian、已知模型和标准可控可观条件下，最优输出反馈控制具有 certainty-equivalent 形式
+
+\[
+u_t=-L_t\widehat x_{t|t}.
+\]
+
+\(L_t\) 正是完整状态 LQR 的反馈增益，状态估计则由 Kalman filter 独立递推。控制 Riccati 方程和估计 Riccati 方程可以分别求解，这就是 separation principle。
+
+“分开设计”不表示估计误差对控制表现无关。\(W,V\) 影响估计质量，动作仍通过系统改变未来状态；它只说明在这组特殊假设下，不必联合搜索一个更复杂的非线性输出反馈策略。
+
+\subsection{certainty equivalence 不是一般控制定律}
+
+若噪声非 Gaussian 但只关心二次期望，线性估计和控制有时仍保持部分结构；若动力学非线性、控制影响未来可观测性、约束会激活，或者模型参数未知，最优动作可能主动“试探”系统以改善未来估计。此时把未知状态直接换成估计值会忽略 dual effect。
+
+恒温器模型错估墙体蓄热时，Kalman covariance 可能看起来很小，房间却持续超调；创新序列若有偏、相关或方差错误，说明模型与噪声设定需要修正。LQG 提供的是一条可完整推导的基准线：估计、反馈与不确定性怎样严密接合。它不是给任意部分可观控制问题贴上的通用答案。

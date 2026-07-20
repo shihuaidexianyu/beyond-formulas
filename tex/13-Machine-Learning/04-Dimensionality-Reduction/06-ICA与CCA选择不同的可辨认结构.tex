@@ -1,0 +1,55 @@
+\section{ICA 与 CCA：选择不同的可辨认结构}
+
+\subsection{PCA 去相关，ICA 追求独立}
+
+房间里两个人同时说话，两支麦克风各自录到两种声音的不同混合。把源信号写成 \(s\)，录音写成
+
+\[
+x=As.
+\]
+
+blind source separation 希望只由许多时刻的 \(x\) 恢复 \(s\) 与混合矩阵 \(A\)。仅看 covariance 通常不够：白化后，任意正交旋转仍保持单位 covariance。PCA 能去相关，却无法从这些旋转中选出原声方向。
+
+ICA 增加假设：源分量彼此独立，且至多一个是 Gaussian。非 Gaussian 分布的高阶结构会随错误混合而改变，从而帮助确定旋转。常见目标最大化 non-Gaussianity，或最小化分量间 mutual information。
+
+\subsection{ICA 的可辨认性仍留下排列与尺度}
+
+若交换两个源的顺序，同时交换 \(A\) 的两列，观测不变；若把某个源乘常数并把对应混合列除以同一常数，观测也不变。因此 ICA 最多恢复到 permutation 与 scaling ambiguity。实际算法常先中心化、白化，再固定每个分量方差和符号约定。
+
+若两个以上源都是 Gaussian，任何正交混合仍为独立 Gaussian，原方向无法由分布识别。若源存在时间依赖或不独立，也需要利用 temporal structure、非平稳性或其他模型。把一个分离出的波形命名为某个人之前，还应检查跨样本稳定性与重构残差。
+
+\subsection{CCA 不分解一个视图，而是对齐两个视图}
+
+典型相关分析面对成对观测 \(X\in\R^p,Y\in\R^q\)，例如同一天的消费记录与出行记录。它寻找投影 \(a,b\)，使
+
+\[
+\operatorname{corr}(a^\trans X,b^\trans Y)
+\]
+
+最大。中心化后，第一对方向解
+
+\[
+\max_{a,b}\quad a^\trans\Sigma_{XY}b
+\]
+
+subject to
+
+\[
+a^\trans\Sigma_{XX}a=1,
+\qquad
+b^\trans\Sigma_{YY}b=1.
+\]
+
+约束移除了任意缩放。将两个视图分别 whitening 后，CCA 等价于对
+
+\[
+\Sigma_{XX}^{-1/2}\Sigma_{XY}\Sigma_{YY}^{-1/2}
+\]
+
+做 SVD；奇异值就是 canonical correlations。
+
+\subsection{高维时逆协方差会暴露不稳定性}
+
+若 \(p\) 或 \(q\) 接近样本数，样本 covariance 可能奇异，CCA 会找到几乎完美却不可复现的相关方向。正则化 CCA 用 \(\Sigma_{XX}+\lambda_xI\)、\(\Sigma_{YY}+\lambda_yI\) 稳定 whitening；参数必须在训练数据内选择，并在独立样本上评价相关性。
+
+CCA 找到的是两个表示间最强线性共同变化，不是两边共享的因果因素。若日期、季节或采样设备同时影响两个视图，canonical correlation 会忠实捕捉这种混杂。ICA 依赖独立与非 Gaussian 性来选择单个视图的方向，CCA 依赖跨视图相关来选择成对方向；它们并不是“比 PCA 更高级”的统一替代品，而是在回答不同可辨认问题。

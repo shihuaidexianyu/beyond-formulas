@@ -1,0 +1,160 @@
+\section{Kalman filter 是动态系统上的 Gaussian 条件化}
+
+HMM 让隐状态取有限类别。许多跟踪问题的状态却是连续向量：位置、速度、温度或经济因子随时间演化，传感器只给出带噪的局部观察。线性 Gaussian 状态空间模型把动力系统和观测模型写成
+
+\[
+X_t=AX_{t-1}+Bu_t+W_t,
+\qquad
+W_t\sim\mathcal N(0,Q),
+\]
+
+\[
+Y_t=CX_t+V_t,
+\qquad
+V_t\sim\mathcal N(0,R),
+\]
+
+并假设过程噪声、观测噪声与初始状态适当独立。在线性与 Gaussian 条件下，所有 filtering posterior 都仍是 Gaussian，因此只需递推均值和协方差。
+
+冷库控制器面对的正是这种区分。热平衡方程离散化后给出温度状态的转移，墙体蓄热、开门和货物进入中没有解释的部分进入过程噪声；传感器读数则可能满足
+
+\[
+Z_t=T_t+b_t+\varepsilon_t,
+\]
+
+其中 $b_t$ 是缓慢漂移的传感器偏置，$\varepsilon_t$ 是短时测量噪声。若模型把 $b_t$ 固定为零，更多读数只会让 filter 对错误温度越来越自信。可以把偏置加入状态并写成 $b_t=b_{t-1}+\zeta_t$，但温度与偏置能否由现有输入和观测分开，仍取决于后文的可观测性，而不是取决于递推次数够不够多。
+
+\subsection{预测步骤把上一时刻 posterior 推过动力学}
+
+假设已有
+
+\[
+X_{t-1}\mid y_{1:t-1}
+\sim
+\mathcal N(m_{t-1},P_{t-1}).
+\]
+
+线性变换和独立 Gaussian 噪声给出一步预测
+
+\[
+m_t^-=Am_{t-1}+Bu_t,
+\]
+
+\[
+P_t^-=AP_{t-1}A^{\trans}+Q.
+\]
+
+上标 \(-\) 表示尚未看见 \(y_t\)。即使均值按确定性动力学演化，过程噪声 \(Q\) 仍会增加不确定性；若漏掉它，filter 会越来越自信并最终拒绝真实观测。
+
+\subsection{更新步骤是联合 Gaussian 条件公式}
+
+给定过去观测，预测状态与新观测的联合分布为
+
+\[
+\begin{bmatrix}
+X_t\\Y_t
+\end{bmatrix}
+\sim
+\mathcal N\left(
+\begin{bmatrix}
+m_t^-\\Cm_t^-
+\end{bmatrix},
+\begin{bmatrix}
+P_t^- & P_t^-C^{\trans}\\
+CP_t^- & CP_t^-C^{\trans}+R
+\end{bmatrix}
+\right).
+\]
+
+记 innovation
+
+\[
+e_t=y_t-Cm_t^-,
+\]
+
+innovation covariance
+
+\[
+S_t=CP_t^-C^{\trans}+R.
+\]
+
+应用多元 Gaussian 条件公式，Kalman gain 为
+
+\[
+K_t=P_t^-C^{\trans}S_t^{-1},
+\]
+
+posterior 更新为
+
+\[
+m_t=m_t^-+K_te_t,
+\]
+
+\[
+P_t=P_t^--K_tCP_t^-.
+\]
+
+这不是凭经验混合预测与观测。\(K_t\) 来自预测状态与观测的协方差乘以观测方差的逆作用：观测噪声 \(R\) 大时更新较小，预测不确定性 \(P_t^-\) 大且观测能看见相应方向时更新较大。
+
+\subsection{不可观测方向不会被数据凭空修复}
+
+若某个状态方向长期不影响 \(CX_t\)，观测无法直接识别它；动力学 \(A\) 可能把该方向逐步耦合到可观测方向，也可能永远隐藏。线性系统的 observability 矩阵
+
+\[
+\mathcal O=
+\begin{bmatrix}
+C\\CA\\ \vdots\\ CA^{d-1}
+\end{bmatrix}
+\]
+
+若满列秩，理想无噪条件下有限时间观测可区分状态。若不满秩，再小的 \(R\) 也不能从数据恢复不可观测分量。
+
+这说明 posterior covariance 不只是噪声大小，也反映模型结构允许观测约束哪些方向。
+
+\subsection{filtering、prediction 与 smoothing 回答不同问题}
+
+Filtering 计算
+
+\[
+p(x_t\mid y_{1:t}),
+\]
+
+只使用当前及过去观测；prediction 计算未来
+
+\[
+p(x_{t+h}\mid y_{1:t});
+\]
+
+smoothing 则在整段数据到达后计算
+
+\[
+p(x_t\mid y_{1:T}),\qquad T>t,
+\]
+
+允许未来观测修正过去状态。离线轨迹重建可以 smoothing，实时控制不能在时刻 \(t\) 使用尚未发生的 \(y_{t+1:T}\)。若评价时误用平滑状态作为在线特征，就发生时间泄漏。
+
+\subsection{数值实现应解线性系统而不是求逆}
+
+公式写 \(S_t^{-1}\) 是为了表达线性算子，计算时应解
+
+\[
+S_tZ=C P_t^-
+\]
+
+等线性系统。协方差更新的简式在舍入误差下可能失去对称或半正定，更稳定的 Joseph form 为
+
+\[
+P_t
+=(I-K_tC)P_t^-(I-K_tC)^{\trans}
++K_tRK_t^{\trans}.
+\]
+
+平方根 filter 直接传播 Cholesky 因子，可进一步改善病态问题。数值稳定不是模型之外的附属问题：负方差或非对称协方差会破坏下一次概率更新。
+
+\subsection{非线性与非 Gaussian 会打破闭式递推}
+
+若动力学或观测是非线性的，Gaussian 经过变换后通常不再 Gaussian。Extended Kalman filter 在当前均值处线性化，误差依赖局部 Jacobian 和不确定性范围；unscented 方法用确定性 sigma points 近似矩传播；particle filter 则用带权样本表示任意形状 posterior。
+
+这些方法不是对同一闭式公式的数值加速，而是在闭式不再成立后选择不同近似。多峰 posterior 用单个均值和协方差会把质量平均到低概率区域，此时线性化再精确也无法恢复被表示族丢掉的多峰结构。
+
+Kalman filter 的力量来自一组非常具体的闭包条件：线性映射、Gaussian 噪声与 Markov 状态。看清这些条件，也就看清什么时候应继续使用它，什么时候必须换模型而不只是调协方差参数。

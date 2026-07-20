@@ -1,0 +1,107 @@
+\section{训练动力学与数值稳定}
+
+梯度正确之后，模型仍可能完全学不动。原因可能来自步长、随机梯度方差、初始化、饱和、数据泄漏，也可能只是浮点计算把理论上有限的表达式算成了无穷或 NaN。训练是数学目标、随机优化和数值实现共同形成的动态系统。
+
+\subsection{Mini-batch 梯度只是真实经验梯度的噪声观察}
+
+若经验风险为
+
+\[
+\widehat R(\theta)
+=\frac1n\sum_{i=1}^n\ell_i(\theta),
+\]
+
+均匀抽取 mini-batch \(\mathcal B_t\) 后，
+
+\[
+\widehat g_t
+=\frac1{|\mathcal B_t|}
+\sum_{i\in\mathcal B_t}\nabla\ell_i(\theta_t)
+\]
+
+通常满足
+
+\[
+\E[\widehat g_t\mid\theta_t]
+=\nabla\widehat R(\theta_t).
+\]
+
+但无偏不意味着每一步都下降。更新
+
+\[
+\theta_{t+1}
+=\theta_t-\eta_t\widehat g_t
+\]
+
+会因 batch 噪声上下波动。batch 增大通常降低方差，却增加单步成本并改变迭代次数、归一化层统计和隐式正则化。epoch 只是大致遍历一次训练集，不能跨数据规模直接代表相同优化进展。
+
+学习率通常是最敏感的超参数。过大时 loss 振荡或发散，过小时曲线缓慢且可能在给定预算内几乎不动。momentum 平滑长期方向，Adam 按坐标缩放更新，但都不能取消选择全局学习率和 schedule 的需要。weight decay、梯度裁剪和 early stopping 分别改变目标或更新轨迹，不能当成同一种``防爆''开关。
+
+\subsection{初始化决定信号能否穿过深度}
+
+前向激活若层层放大，会溢出或进入饱和；层层缩小，则信息趋于常数。反向梯度同样连续乘以权重矩阵与 activation 导数。Xavier、He 等初始化通过匹配 fan-in/fan-out 近似维持方差，但它们依赖激活与独立性近似，不是任何架构的严格保证。
+
+训练初期应监控各层 activation 均值、方差与饱和比例，以及 gradient norm 和 parameter norm。若所有 ReLU 几乎为零，继续增加 epoch 通常无济于事；若梯度逐层指数增长，gradient clipping 可以限制单次更新，却不应掩盖错误初始化、归一化或循环动力学。
+
+\subsection{实数等价不代表浮点等价}
+
+softmax 的数学定义为
+
+\[
+p_k=\frac{e^{z_k}}{\sum_je^{z_j}}.
+\]
+
+对 logits \((1000,1001)\) 直接取指数会溢出。由于加同一常数不改变概率，令 \(m=\max_jz_j\)：
+
+\[
+p_k
+=\frac{e^{z_k-m}}{\sum_je^{z_j-m}}.
+\]
+
+所有指数自变量不大于零，至少有一项为 1。相应地，log-sum-exp 函数 \(\operatorname{LSE}(z)=\log\sum_je^{z_j}\)（cross-entropy 与似然中的对数归一化项）应写成稳定形式
+
+\[
+\operatorname{LSE}(z)
+=m+\log\sum_je^{z_j-m}.
+\]
+
+binary cross-entropy、log-softmax 和概率模型似然也应使用稳定融合公式。随意给概率加 \(\varepsilon\) 可能避免 \(\log0\)，却同时改变目标并掩盖上游 NaN；稳定恒等变换优先于经验补丁。
+
+mixed precision 减少内存和计算，但小梯度可能下溢。loss scaling 先放大损失和梯度，在更新前再缩回，并检测 overflow。它扩展了可用动态范围，不会修复病态模型或错误梯度。
+
+数值稳定性与问题 conditioning 也要区分。稳定算法使计算结果接近某个邻近问题的精确解；若模型本身对微小数据扰动极敏感，即便算法稳定，输出仍可能变化巨大。
+
+\subsection{一套能定位问题的训练顺序}
+
+面对新模型，先尝试过拟合极小数据子集。若连几十个样本都无法拟合，优先查 shape、标签、loss、梯度和容量，而不是调泛化正则。随后建立简单优化器基线，并记录：
+
+\begin{itemize}
+\tightlist
+\item
+  train data loss、regularization loss 与 validation metric；
+\item
+  学习率和每层 gradient/parameter norm；
+\item
+  activation 分布、非有限值出现位置；
+\item
+  不同随机种子下的曲线差异；
+\item
+  训练与验证分布、预处理是否严格隔离。
+\end{itemize}
+
+一次 Taylor 检查也很有帮助：小步更新前，局部预测
+
+\[
+L(\theta-\eta g)
+\approx L(\theta)-\eta\|g\|^2.
+\]
+
+若极小 \(\eta\) 下实际 loss 仍向相反方向变化，可能存在梯度符号、随机层状态或 loss reduction 问题。
+
+最后，低训练 loss 只说明优化了训练目标。validation 恶化属于泛化问题，部署漂移属于分布问题，概率失准属于校准问题；它们不应都被称为``没收敛''。
+
+\subsubsection{一次分层故障诊断}
+
+训练一个小型分类网络，依次人为制造四个故障：学习率过大、sigmoid 初始化进入饱和、直接对巨大 logits 做 exponent、在全数据上拟合标准化。为每个故障选择最早能暴露它的证据，并说明为什么其他训练指标可能仍显得正常。最后比较 clipping、减小学习率和稳定 log-softmax 各自解决的是哪一层问题。
+
+步长与凸下降理论见``梯度下降真正难在步长''；非凸驻点界、mini-batch 方差与优化---泛化分层见``非凸与随机优化：能下降不等于找到全局解''；稳定浮点原则见数值分析部分的``机器学习中的稳定计算''。

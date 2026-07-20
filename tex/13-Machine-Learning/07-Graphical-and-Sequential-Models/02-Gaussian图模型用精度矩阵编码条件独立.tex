@@ -1,0 +1,197 @@
+\section{Gaussian 图模型用精度矩阵编码条件独立}
+
+相关矩阵常被用来画网络：两个变量相关系数大，就在它们之间连边。但相关反映的是边缘关系，可能由共同变量或间接路径产生。Gaussian 图模型提供一个少见的精确对应：在联合 Gaussian 假设下，协方差的零表示边缘独立，精度矩阵的零表示给定其余变量后的条件独立。
+
+设
+
+\[
+X\sim\mathcal N(\mu,\Sigma),
+\qquad
+K=\Sigma^{-1},
+\]
+
+其中 \(K\) 称为 precision matrix。两种零元素承担不同语义：
+
+\[
+\Sigma_{ij}=0
+\quad\Longleftrightarrow\quad
+X_i\perp X_j,
+\]
+
+\[
+K_{ij}=0
+\quad\Longleftrightarrow\quad
+X_i\perp X_j
+\mid X_{-\set{i,j}}.
+\]
+
+第一个等价依赖 Gaussian 中“不相关即独立”；第二个才是无向图缺边使用的关系。
+
+\subsection{条件 Gaussian 来自 Schur complement}
+
+把变量分块为 \(X_A,X_B\)，协方差相应写成
+
+\[
+\Sigma=
+\begin{bmatrix}
+\Sigma_{AA}&\Sigma_{AB}\\
+\Sigma_{BA}&\Sigma_{BB}
+\end{bmatrix}.
+\]
+
+若 \(\Sigma_{BB}\) 可逆，则
+
+\[
+X_A\mid X_B=x_B
+\sim
+\mathcal N\left(
+\mu_A
++\Sigma_{AB}\Sigma_{BB}^{-1}
+(x_B-\mu_B),
+\;
+\Sigma_{AA}
+-\Sigma_{AB}\Sigma_{BB}^{-1}\Sigma_{BA}
+\right).
+\]
+
+条件 covariance 是一个 Schur complement。观察 \(X_B\) 只会消除能由 \(B\) 线性解释的那部分不确定性，不会把剩余 covariance 凭空设为零。
+
+若只取单个节点 \(i\)，用 precision 形式整理条件密度可得
+
+\[
+X_i\mid X_{-i}=x_{-i}
+\sim
+\mathcal N\left(
+\mu_i
+-K_{ii}^{-1}
+K_{i,-i}(x_{-i}-\mu_{-i}),
+\;
+K_{ii}^{-1}
+\right).
+\]
+
+条件均值只依赖 \(K_{ij}\neq0\) 的变量。因此在 Gaussian Markov random field 中，节点 \(i\) 的邻居正是 precision matrix 第 \(i\) 行的非零 off-diagonal 位置。
+
+控制其他变量后的 partial correlation 为
+
+\[
+\rho_{ij\cdot -\set{i,j}}
+=-\frac{K_{ij}}
+{\sqrt{K_{ii}K_{jj}}}.
+\]
+
+零 partial correlation 与条件独立在 Gaussian 情形中等价；离开 Gaussian 族后，零 partial correlation 通常只排除线性条件关系，不能推出完整条件独立。
+
+\subsection{Canonical density 把矩阵元素变成图上的势}
+
+中心化后，Gaussian density 可写成
+
+\[
+p(x)
+\propto
+\exp\left(
+-\frac12x^{\trans}Kx
+\right).
+\]
+
+展开二次型：
+
+\[
+-\frac12x^{\trans}Kx
+=-\frac12\sum_iK_{ii}x_i^2
+-\sum_{i<j}K_{ij}x_ix_j.
+\]
+
+对角项形成单节点势，非零 \(K_{ij}\) 形成 pairwise interaction。若 \(K_{ij}=0\)，density 中没有 \(x_ix_j\) 交互项，图中便没有边。正定约束 \(K\succ0\) 同时保证积分有限和 covariance 存在；任意稀疏对称矩阵都不能直接作为合法 precision。
+
+这与一般 Markov random field 的配分函数不同之处在于，Gaussian 二次型的归一化常数有闭式：
+
+\[
+A(K,\mu)
+=\frac d2\log(2\pi)
+-\frac12\log\det K
++\frac12\mu^{\trans}K\mu
+\]
+
+在相应 canonical parameterization 下可计算。高维学习仍需 log-determinant 与线性求解，但不必枚举指数多个离散状态。
+
+\subsection{Gaussian Bayesian network 用结构方程规定方向}
+
+给变量选定拓扑顺序，可以写线性 structural equations
+
+\[
+X_i
+=\sum_{j\in\operatorname{pa}(i)}
+B_{ij}X_j
++\varepsilon_i,
+\qquad
+\varepsilon_i
+\overset{\mathrm{ind}}\sim
+\mathcal N(0,\omega_i^2).
+\]
+
+向量形式为
+
+\[
+X=BX+\varepsilon,
+\qquad
+\varepsilon\sim\mathcal N(0,\Omega),
+\]
+
+其中按拓扑顺序排列后 \(B\) 严格下三角，\(\Omega\) 为对角矩阵。于是
+
+\[
+\Sigma
+=(I-B)^{-1}
+\Omega
+(I-B)^{-\trans},
+\]
+
+\[
+K
+=(I-B)^{\trans}
+\Omega^{-1}
+(I-B).
+\]
+
+DAG 中一条有向边描述局部条件均值对父节点的依赖；无向 Gaussian 图中的边描述给定所有其余变量后的条件依赖。把 DAG 变成无向图时常需连接共同子节点的父节点再去掉方向，不能简单把箭头擦掉就保留全部条件独立。
+
+线性 Gaussian 状态空间模型正是沿时间重复这种结构方程。下一节的 Kalman filter 利用链式图和 Gaussian 闭包递推条件分布；本节的矩阵公式解释了为何更新只需要均值、covariance 或 precision。
+
+\subsection{从样本 covariance 到稀疏图需要正则化}
+
+给定中心化样本的 empirical covariance \(S\)，Gaussian log-likelihood 对 precision 的参数相关部分为
+
+\[
+\ell(K)
+\propto
+\log\det K
+-\operatorname{tr}(SK),
+\qquad K\succ0.
+\]
+
+无约束 MLE 在 \(S\) 可逆时为 \(K=S^{-1}\)。当变量数接近或超过样本数时，\(S\) 奇异；即使可逆，小 eigenvalue 也会让逆矩阵极不稳定并产生大量虚假大边。
+
+Graphical lasso 解
+
+\[
+\widehat K
+\in
+\argmax_{K\succ0}
+\left[
+\log\det K
+-\operatorname{tr}(SK)
+-\lambda
+\sum_{i\ne j}\abs{K_{ij}}
+\right].
+\]
+
+off-diagonal \(L_1\) penalty 鼓励稀疏条件依赖图。\(\lambda\) 越大，图通常越稀疏；它代表偏差---方差选择，不是发现“真实边数”的客观刻度。变量尺度会影响 penalty，因此通常需要先标准化或使用加权 penalty。
+
+计算时不应显式形成 \(S^{-1}\) 来再做修补。Cholesky factorization、log-determinant 和线性系统求解能更稳定地利用正定结构；估计结果还应检查最小 eigenvalue、条件数和不同 \(\lambda\) 下边集稳定性。
+
+\subsection{一张稀疏图仍然只是条件模型}
+
+隐藏共同原因会让观测变量的 precision 结构变稠密；非 Gaussian 尾部和非线性依赖可能让零 precision 不再等价于条件独立；样本选择与测量误差也会改变边。因而 learned edge 既不是直接因果作用，也不是现实中不可再分的机制。
+
+可靠解释应分四层报告：联合 Gaussian 假设是否合理，precision 如何估计，正则化怎样选择，边在重抽样或新数据中是否稳定。只有在额外因果假设或干预信息下，图的方向和因果意义才有进一步依据。

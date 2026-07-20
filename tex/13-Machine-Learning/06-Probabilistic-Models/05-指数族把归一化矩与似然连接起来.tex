@@ -1,0 +1,163 @@
+\section{指数族把归一化、矩与似然连接起来}
+
+Bernoulli、Poisson、Gaussian 看似拥有不同的概率公式，参数估计时却反复出现同一种结构：数据先被压缩成若干求和或均值，似然梯度再要求“经验统计量等于模型统计量”。指数族把这条共同骨架写成
+
+\[
+p(x\mid\eta)
+=h(x)
+\exp\left(
+\eta^{\trans}T(x)-A(\eta)
+\right).
+\]
+
+\(T(x)\) 是充分统计量，\(\eta\) 是自然参数，\(h(x)\) 是不依赖参数的 base measure，而
+
+\[
+A(\eta)
+=\log\int
+h(x)\exp\left(
+\eta^{\trans}T(x)
+\right)\,dx
+\]
+
+是 log-partition function。离散情形将积分换成求和。\(A\) 不是为了美观补上的常数；它负责保证密度积分为 1，也承载了这个分布族的矩与曲率。
+
+\subsection{自然参数空间由积分是否有限决定}
+
+允许的自然参数集合是
+
+\[
+\mathcal H
+=\set{
+\eta:
+A(\eta)<\infty
+}.
+\]
+
+并非任意向量都能代入。例如已知方差 \(\sigma^2\) 的 Gaussian 可写成
+
+\[
+p(x\mid\mu)
+=h(x)
+\exp\left(
+\frac{\mu}{\sigma^2}x
+-\frac{\mu^2}{2\sigma^2}
+\right),
+\]
+
+其自然参数是 \(\eta=\mu/\sigma^2\)。若均值和方差都未知，则可取
+
+\[
+T(x)=
+\begin{bmatrix}
+x\\x^2
+\end{bmatrix},
+\qquad
+\eta=
+\begin{bmatrix}
+\mu/\sigma^2\\
+-1/(2\sigma^2)
+\end{bmatrix},
+\]
+
+第二个自然参数必须小于零，否则对 \(x\) 的积分发散。自然参数空间的边界因此常对应方差退化、概率集中或最大似然不存在。
+
+原始参数和自然参数也不一定一一对应。若充分统计量存在线性冗余，不同 \(\eta\) 可能产生相同分布，称为非最小表示。最小表示下，参数几何与 log-partition 的严格凸性更清楚。
+
+\subsection{Log-partition 的一阶导数给出均值}
+
+在可以交换求导与积分的条件下，
+
+\[
+\nabla_\eta A(\eta)
+=\frac{
+\int T(x)h(x)
+\exp\left(
+\eta^{\trans}T(x)
+\right)\,dx
+}{
+\int h(x)
+\exp\left(
+\eta^{\trans}T(x)
+\right)\,dx
+}
+=\E_\eta[T(X)].
+\]
+
+对 \(A\) 再求导得到
+
+\[
+\nabla_\eta^2 A(\eta)
+=\Cov_\eta(T(X)).
+\]
+
+协方差矩阵半正定，所以 \(A\) 是凸函数；在最小正则指数族中通常严格凸。归一化、期望和曲率由同一个函数统一：\(\nabla A\) 把自然参数送到 mean parameter，\(\nabla^2A\) 描述统计量对参数变化的敏感度，也与 Fisher information 相连。
+
+这与前面“配分函数把能量变成全局概率”中的公式相同。指数族把能量限制为统计量的线性组合，因此 partition gradient 变成明确的 moment map。
+
+\subsection{独立样本只通过充分统计量进入似然}
+
+对独立样本 \(x_{1:n}\)，联合密度为
+
+\[
+p(x_{1:n}\mid\eta)
+=\left(\prod_{i=1}^{n}h(x_i)\right)
+\exp\left(
+\eta^{\trans}\sum_{i=1}^{n}T(x_i)
+-nA(\eta)
+\right).
+\]
+
+参数相关部分只依赖
+
+\[
+S_n=\sum_{i=1}^{n}T(x_i).
+\]
+
+由 Fisher--Neyman factorization，\(S_n\) 是 \(\eta\) 的充分统计量。充分表示“给定 \(S_n\) 后，原始样本对参数不再提供额外 likelihood 信息”，不表示它保留了数据对所有其他任务的信息。样本顺序、异常结构或模型失配仍可能在压缩后消失。
+
+对数似然梯度为
+
+\[
+\nabla_\eta\ell(\eta)
+=\sum_{i=1}^{n}T(x_i)
+-n\nabla A(\eta).
+\]
+
+内部极大似然解因此满足
+
+\[
+\frac1n\sum_{i=1}^{n}T(x_i)
+=\E_{\widehat\eta}[T(X)].
+\]
+
+这就是 moment matching。它不是额外估计技巧，而是指数族 likelihood 的一阶条件。Hessian 为
+
+\[
+\nabla_\eta^2\ell(\eta)
+=-n\Cov_\eta(T(X)),
+\]
+
+所以最小表示下的 log-likelihood 是凹的，自然参数空间中的局部极大值也是全局极大值。
+
+\subsection{边界数据可能把 MLE 推到无穷远}
+
+对 Bernoulli 分布，
+
+\[
+p(x\mid\eta)
+=\exp\left(
+\eta x-\log(1+e^\eta)
+\right),
+\qquad x\in\set{0,1},
+\]
+
+自然参数是 log-odds，\(\nabla A(\eta)=\sigma(\eta)\)。若样本中既有 0 又有 1，moment matching 给出有限的样本比例；若全部观测为 1，则经验均值位于 mean parameter space 边界，只能令 \(\eta\to+\infty\) 逼近它，没有有限 MLE。
+
+Logistic regression 中完全分离的数据出现同样现象：likelihood 可以沿某个参数方向持续增加，而有限系数不存在。优化器迭代很久不是数值算法太差，而可能是目标根本没有有限最优点。先验、正则化或改变模型能把解拉回有限区域，但也相应改变了估计问题。
+
+\subsection{指数族不是“所有常见分布”的同义词}
+
+有限维指数族要求数据维度增加时，充分统计量维数仍固定。混合模型、重尾分布和参数相关支撑可能不满足常规正则条件；即便能写成某种指数形式，也未必拥有平滑开放的自然参数空间。混合模型的 component label 未知时，观测 likelihood 中的对数求和也不会因各成分属于指数族就自动变凸。
+
+最大熵怎样在期望约束下导出指数族，前文“最大熵原理从约束到分布”和“最大熵从约束中选择最少承诺的分布”已经完整推导。本节更关心另一方向：一旦模型属于指数族，归一化函数如何同时控制矩、似然曲率和充分统计量。下一节再利用这套代数解释共轭先验为何能保持 posterior 形式不变。

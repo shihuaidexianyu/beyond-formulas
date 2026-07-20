@@ -1,0 +1,75 @@
+\section{Minimax 与可容许性比较整条风险曲线}
+
+Bayesian 决策用 prior 平均不同状态下的风险。若没有可辩护的 prior，一种替代是控制最坏状态：
+
+\[
+\delta^*
+\in
+\argmin_\delta
+\sup_{\theta\in\Theta}
+R(\theta,\delta).
+\]
+
+这叫 minimax rule。它回答的是“无论真实状态落在哪里，最坏风险尽可能小”，不是“在常见状态下平均最好”。
+
+\subsection{最坏情况保护会牺牲容易区域}
+
+设只观察
+
+\[
+X\sim\mathcal N(\theta,\sigma^2)
+\]
+
+并用平方损失估计 $\theta$。朴素规则 $\delta_0(X)=X$ 的风险为
+
+\[
+R(\theta,\delta_0)=\sigma^2,
+\]
+
+对所有 $\theta$ 相同。
+
+考虑收缩规则 $\delta_c(X)=cX$，其中 $0<c<1$。它的风险为
+
+\[
+R(\theta,\delta_c)
+=
+(1-c)^2\theta^2+c^2\sigma^2.
+\]
+
+在 $\theta$ 接近零时，收缩降低方差并可能更好；当 $\abs{\theta}$ 很大时，偏差项增长，风险反而超过 $\sigma^2$。若参数空间是整条实线，最坏风险甚至无界；若已知 $\abs{\theta}\le B$，收缩则可能降低该有界空间上的最坏风险。
+
+同一更新规则是否稳健，取决于参数集合。Minimax 结论不能脱离“最坏是对哪些状态取上确界”来解释。
+
+\subsection{可容许只排除被全面改进的规则}
+
+若不存在另一规则在所有 $\theta$ 上风险都不更大、且至少一点严格更小，则称 $\delta$ admissible。可容许性是一道最低门槛：规则没有被另一条风险曲线完全压住。
+
+它不表示规则的最大风险小、平均风险小或现实代价合理。许多互相不可比较的规则都可能 admissible；要从中选择仍需 Bayes、minimax、对称性或其他准则。
+
+一个著名边界是 James--Stein 现象。若
+
+\[
+X\sim\mathcal N_d(\theta,I_d)
+\]
+
+并用平方 Euclidean loss 估计整个向量，坐标逐个使用 $\delta(X)=X$ 在 $d\ge3$ 时不可容许：适当向原点收缩的 James--Stein estimator 能在所有 $\theta$ 上降低总风险。每个坐标单看都自然，不代表把多个坐标合在同一损失下仍然不可改进。改进来自允许少量联合偏差换取更大方差下降，也依赖所选原点和损失的几何。
+
+\subsection{Bayes 与 minimax 有时由最不利 prior 连接}
+
+对任意 prior $\pi$，平均风险不超过最大风险：
+
+\[
+\inf_\delta r(\pi,\delta)
+\le
+\inf_\delta\sup_\theta R(\theta,\delta).
+\]
+
+因此 Bayes risk 可以为 minimax value 提供下界。在有限或适当紧致、凸的决策问题中，若某个 least favorable prior 使 Bayes rule 的风险上界恰好达到这个下界，该 Bayes rule 同时是 minimax。一般无限维或非紧问题需要额外正则条件，不能只凭交换 $\inf$ 与 $\sup$ 得出结论。
+
+这条联系说明 prior 还有一种用途：它未必表示主观信念，也可能作为构造最坏情况证书的数学工具。解释时必须说明 prior 扮演哪一种角色。
+
+\subsection{Minimax 不是对未知分布的万能保险}
+
+最坏情况集合过大时，最优规则可能极度保守甚至没有信息；集合过小时，又会漏掉真正部署变化。分布鲁棒优化把上确界扩展到某个概率分布邻域，仍必须选择距离、半径和损失。它只保护被不确定集合明确包含的变化，不自动处理标签定义改变、隐藏选择或因果机制翻转。
+
+稳健性始终是“对什么扰动稳健”。Minimax 提供一种清楚的回答方式，但不会替研究者定义可信的状态空间。

@@ -1,0 +1,77 @@
+\section{Bayes rule 最小化后验期望损失}
+
+给未知状态加入 prior $\pi(\theta)$ 后，观察 $X=x$ 得到 posterior $\pi(\theta\mid x)$。Bayesian 决策不要求先把 posterior 压成一个“最佳参数”，而是直接为每个候选行动计算后验期望损失：
+
+\[
+\rho(a\mid x)
+=
+\E\!\left[L(\theta,a)\mid X=x\right].
+\]
+
+Bayes rule 选择
+
+\[
+\delta_\pi(x)
+\in
+\argmin_{a\in\mathcal A}
+\rho(a\mid x).
+\]
+
+Posterior 描述仍可能的状态，损失决定这些状态怎样影响行动。只报告 posterior 而不说明行动代价，仍没有完成决策。
+
+\subsection{Posterior mean 来自平方损失}
+
+令 $m(x)=\E[\theta\mid X=x]$。平方损失下
+
+\[
+\begin{aligned}
+\E\!\left[(\theta-a)^2\mid X=x\right]
+&=
+\Var(\theta\mid X=x)
++\bigl(m(x)-a\bigr)^2.
+\end{aligned}
+\]
+
+第一项不依赖 $a$，所以最优行动是 posterior mean。它不是因为均值天然最“真实”，而是因为平方损失把大误差按二次速度惩罚。
+
+Absolute loss 下，任一 posterior median 最优；若状态是离散的并使用 0--1 loss，posterior mode 最优。连续参数上的点对点 0--1 loss 几乎处处相同，不能用这条结论无条件为连续 MAP 辩护。MAP 还依赖参数化，而 posterior mean 与 median 也分别随损失和坐标改变。
+
+\subsection{同一个 posterior 可以产生不同正确行动}
+
+设 $Y\in\{0,1\}$，看到数据后患病概率为 $p$。行动 $a=1$ 表示进一步检查，$a=0$ 表示不检查。若不必要检查损失为 $c_{10}$，漏诊损失为 $c_{01}$，则两项后验风险是
+
+\[
+\rho(1\mid x)=c_{10}(1-p),
+\qquad
+\rho(0\mid x)=c_{01}p.
+\]
+
+选择检查当且仅当
+
+\[
+p>
+\frac{c_{10}}{c_{01}+c_{10}}.
+\]
+
+概率没有改变，代价改变就会改变阈值。把所有概率大于 $1/2$ 的对象判为阳性，只对应两种错误代价相同的特殊情形。
+
+\subsection{Bayes risk 是对频率风险的 prior 平均}
+
+规则 $\delta$ 的 Bayes risk 为
+
+\[
+r(\pi,\delta)
+=
+\int_\Theta
+R(\theta,\delta)\,\pi(\theta)\,d\theta.
+\]
+
+逐个 $x$ 最小化后验期望损失，也会最小化这项 prior 平均风险。这里没有频率风险与 Bayesian 决策的逻辑冲突：同一规则既有每个固定 $\theta$ 下的风险曲线，也有按 prior 加权后的平均。
+
+Bayes 最优不表示对每个 $\theta$ 都最优。prior 质量很小的区域可以承担较大风险，以换取高 prior 区域的改善。若 prior 只是计算方便而非可信知识，应做 prior predictive check 和敏感性分析，并展示改变合理 prior 后行动是否翻转。
+
+\subsection{决策所需 posterior 可能比参数估计简单}
+
+有时完整 posterior 难算，但行动只依赖某个 posterior expectation、tail probability 或损失差。Monte Carlo 可以直接估计各行动的后验风险，而不必先寻找一个代表全部 posterior 的点。
+
+反过来，posterior 近似在 KL 或 ELBO 上看似不错，也不保证关键决策风险准确。若损失主要集中在稀有尾部，漏掉少量 posterior tail mass 就可能改变行动。近似推断的质量应按最终需要的函数量和损失检查，而不只看一个全局拟合指标。

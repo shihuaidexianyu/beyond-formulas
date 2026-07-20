@@ -1,0 +1,63 @@
+\section{DDP：用局部二次模型改进整条轨迹}
+
+\subsection{非线性控制很难一次求到全局答案}
+
+设离散动力学与有限时域代价为
+
+\[
+x_{t+1}=f_t(x_t,u_t),
+\qquad
+J=\phi(x_T)+\sum_{t=0}^{T-1}\ell_t(x_t,u_t).
+\]
+
+开车入库时，方向盘在不同姿态下对位置的作用不同；围绕整段动作序列直接做梯度下降，会忽略早期动作怎样通过动力学改变后续所有状态。Differential dynamic programming 从一条可执行 nominal trajectory 出发，在其附近同时近似动力学与价值函数。
+
+\subsection{反向递推构造局部动作改进}
+
+在时刻 \(t\)，定义局部状态动作价值
+
+\[
+Q_t(x,u)
+=\ell_t(x,u)+V_{t+1}(f_t(x,u)).
+\]
+
+围绕 nominal \((\bar x_t,\bar u_t)\) 作二阶展开。记偏移为 \(\delta x,\delta u\)，局部模型可写成
+
+\[
+Q_t\approx Q_0+Q_x^\trans\delta x+Q_u^\trans\delta u
++\frac12
+\begin{pmatrix}\delta x\\\delta u\end{pmatrix}^\trans
+\begin{pmatrix}Q_{xx}&Q_{xu}\\Q_{ux}&Q_{uu}\end{pmatrix}
+\begin{pmatrix}\delta x\\\delta u\end{pmatrix}.
+\]
+
+若 \(Q_{uu}\) 正定，最小化该二次式得到
+
+\[
+\delta u_t=k_t+K_t\delta x_t,
+\qquad
+k_t=-Q_{uu}^{-1}Q_u,
+\qquad
+K_t=-Q_{uu}^{-1}Q_{ux}.
+\]
+
+\(k_t\) 改进 nominal action，\(K_t\) 则给出局部反馈，抵消 forward rollout 中状态偏离 nominal 的影响。把最小值代回即可得到 \(V_t\) 的新二次近似，再向前一个时刻递推。
+
+\subsection{反向算策略，正向检验真实动力学}
+
+一次 backward pass 只在局部模型里承诺下降。随后用
+
+\[
+u_t^{\text{new}}
+=\bar u_t+\alpha k_t+K_t(x_t^{\text{new}}-\bar x_t)
+\]
+
+在真实非线性动力学中 forward rollout，并用 line search 选择 \(\alpha\)。若实际下降与二次模型预测不符，应缩小步长或正则化 \(Q_{uu}\)，而不是继续相信局部 Hessian。
+
+iLQR 常忽略动力学的二阶导数，只保留 cost 的二阶项与线性化动力学；DDP 保留更完整的二阶动力学贡献。二者都可看作利用时序结构的 Newton 型方法，比把全部控制量当作无结构长向量更有效。
+
+\subsection{局部轨迹优化仍有清楚边界}
+
+不同初始轨迹可能收敛到不同局部解；障碍、输入饱和与接触会使局部二次模型失真或需要 constrained variants；不可微碰撞不能靠 Hessian 自动处理。状态维度高时，导数计算、矩阵分解与 rollout 仍然昂贵。
+
+DDP 连接了 HJB 与实际算法：它不在整个状态空间求一个全局值函数，而只沿当前轨迹维护局部二次近似。这换来了可计算性，也把保证从全局最优缩成局部改进。初始化、正则化和真实 rollout 因而都是算法定义的一部分。

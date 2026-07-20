@@ -1,0 +1,91 @@
+\section{回归、加权与双重稳健估计各自依赖什么}
+
+假设已经接受一致性、条件可忽略性和重叠条件，观测数据为
+
+\[
+(C_i,X_i,Y_i),\qquad i=1,\ldots,n.
+\]
+
+现在才进入估计问题。识别告诉我们目标可由观察分布的哪些部分表示；估计则决定怎样用有限样本逼近这些部分。两层不能颠倒：一个估计量方差很小，只说明它稳定地估计了某个量，不说明那个量就是因果效应。
+
+\subsection{Outcome regression 直接建模条件结果}
+
+定义
+
+\[
+m_x(c)=\E[Y\mid X=x,C=c].
+\]
+
+拟合 $\widehat m_1,\widehat m_0$ 后，用所有样本的协变量分布做标准化：
+
+\[
+\widehat\tau_{\mathrm{OR}}
+=
+\frac1n\sum_{i=1}^{n}
+\left[
+\widehat m_1(C_i)-\widehat m_0(C_i)
+\right].
+\]
+
+这等价于为每个单位分别预测两种处理下的平均结果，再取总体平均差。若 outcome model 形式正确，它可以有效利用结果结构；若模型在稀少处理区域外推错误，估计会系统偏离。
+
+把 $X$ 与 $C$ 一起塞进线性回归并读取 $X$ 的系数，只在特定线性、无交互和效应同质设定下等同于 ATE。允许交互或非线性后，应显式计算标准化差，而不是期待某个单一系数自动承担总体加权。
+
+\subsection{Propensity score 描述谁会接受处理}
+
+定义 propensity score
+
+\[
+e(c)=\Prob(X=1\mid C=c).
+\]
+
+在条件可忽略性成立时，给定标量 $e(C)$ 足以平衡 $C$ 的处理组分布。逆概率加权估计量为
+
+\[
+\widehat\tau_{\mathrm{IPW}}
+=
+\frac1n\sum_{i=1}^{n}
+\left[
+\frac{X_iY_i}{\widehat e(C_i)}
+-
+\frac{(1-X_i)Y_i}{1-\widehat e(C_i)}
+\right].
+\]
+
+直觉是：在某类人中处理罕见，则观察到的处理者代表更多同类单位；对照罕见时同理。加权试图构造一个处理 assignment 与已测 $C$ 无关的伪总体。
+
+Propensity model 的目标不是把处理预测得越准越好。若模型几乎完美区分处理与对照，往往意味着重叠很差，权重 $1/e(C)$ 或 $1/(1-e(C))$ 会爆炸。应检查加权前后的协变量平衡、权重分布、有效样本量和不同截断规则，而不只报告分类 AUC。
+
+\subsection{增广估计把两个 nuisance model 接在一起}
+
+令 $\widehat m_x(c)$ 和 $\widehat e(c)$ 分别估计 outcome 与 propensity。AIPW 形式为
+
+\[
+\begin{aligned}
+\widehat\tau_{\mathrm{AIPW}}
+=\frac1n\sum_{i=1}^{n}
+\Bigg[&
+\widehat m_1(C_i)-\widehat m_0(C_i)\\
+&+\frac{X_i\bigl(Y_i-\widehat m_1(C_i)\bigr)}
+{\widehat e(C_i)}
+-\frac{(1-X_i)\bigl(Y_i-\widehat m_0(C_i)\bigr)}
+{1-\widehat e(C_i)}
+\Bigg].
+\end{aligned}
+\]
+
+第一行是 outcome regression 的标准化预测；后两项用实际结果残差纠正预测。在常见正则条件下，只要 outcome model 或 propensity model 其中一个一致，ATE 估计仍可一致，因此称为 doubly robust。
+
+“双重稳健”不表示两个模型都可以随意错，也不修复隐藏混杂、错误处理定义或重叠失败。若两个 nuisance model 都严重错设，结论仍会偏；若 propensity 接近 $0$ 或 $1$，残差修正项仍会高方差。
+
+\subsection{机器学习适合拟合 nuisance，不自动提供推断}
+
+树、boosting、kernel 或神经网络可以灵活估计 $m_x$ 与 $e$，但在同一数据上既拟合复杂 nuisance model 又计算修正项，可能产生过拟合偏差。Cross-fitting 把样本分折：在其他折拟合 nuisance，再对当前折计算预测与 influence-function 项，使每个观测的修正量来自未使用该观测训练的模型。
+
+渐近正态和标准误还需要 nuisance 误差乘积足够快衰减等条件。Cross-fitting 减少经验过程依赖，不保证任意黑箱模型都达到所需速率。报告中应区分：识别假设、nuisance 拟合策略、效应估计公式和不确定性计算。
+
+\subsection{三个估计量是在检验不同脆弱点}
+
+Outcome regression 害怕结果模型外推；IPW 害怕 propensity 极端和权重方差；AIPW 同时使用两者，能在一个模型正确时抵抗另一个模型错设，却仍依赖共同的因果识别条件。
+
+因此比较方法时，不应只选置信区间最窄者。还要观察协变量平衡、重叠区域、模型规格变化、权重截断和目标人群改变后结论是否稳定。稳定性分析不是为结果投票，而是在定位结论究竟由哪些样本和假设支撑。

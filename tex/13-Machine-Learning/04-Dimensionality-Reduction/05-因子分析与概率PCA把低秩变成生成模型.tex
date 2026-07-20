@@ -1,0 +1,52 @@
+\section{因子分析与概率 PCA：把低秩变成生成模型}
+
+\subsection{相关变量可能由少数共同原因驱动}
+
+一份家庭支出表里，餐饮、交通、娱乐等项目会一起变化，但每一列也有自己的记录误差与偶然波动。纯 PCA 只寻找重构平方误差最小的子空间；因子模型则明确假设观测怎样由潜变量生成：
+
+\[
+z\sim\mathcal N(0,I_k),
+\qquad
+x=\mu+\Lambda z+\varepsilon,
+\qquad
+\varepsilon\sim\mathcal N(0,\Psi).
+\]
+
+于是
+
+\[
+x\sim\mathcal N(\mu,\Lambda\Lambda^\trans+\Psi).
+\]
+
+低秩项 \(\Lambda\Lambda^\trans\) 表示共同变化，\(\Psi\) 表示各观测坐标的特有噪声。经典 factor analysis 令 \(\Psi\) 为正对角矩阵；probabilistic PCA 进一步约束 \(\Psi=\sigma^2I\)。
+
+\subsection{PCA 是 PPCA 的一个极限与最大似然方向}
+
+在 PPCA 中，各坐标噪声相同。对完整数据最大化 likelihood 时，\(\Lambda\) 的列空间由样本协方差最大的 \(k\) 个特征方向张成。随着 \(\sigma^2\to0\)，posterior mean 给出的重构趋向普通 PCA 投影。
+
+但两者回答的问题仍不同。PCA 定义一个确定性最佳子空间；PPCA 定义 \(p(x,z)\)，因而能计算 latent posterior、数据 likelihood，并在模型成立时处理缺失值。PPCA 多出来的概率语义来自各向同性 Gaussian 噪声假设，不是给 PCA 公式换了名称。
+
+\subsection{因子载荷不具有天然唯一方向}
+
+对任意正交矩阵 \(R\)，
+
+\[
+\Lambda\Lambda^\trans
+=(\Lambda R)(\Lambda R)^\trans.
+\]
+
+所以 likelihood 只能识别载荷张成的子空间，不能自动识别每一列的名称和方向。旋转载荷可能让解释更稀疏或更符合领域习惯，却不会由数据单独证明某列就是“消费倾向”或“生活质量”。
+
+缩放和符号也要固定约定。若允许一般 latent covariance，\(\Lambda\) 与 latent 尺度还能相互补偿；设 \(\Cov(z)=I\) 正是在移除这部分冗余。可辨认性约束不是排版选择，而是决定哪些参数陈述真正有意义。
+
+\subsection{FA 与 PCA 对噪声方向的判断不同}
+
+PCA 把总方差大的方向视为重要，即使大方差主要来自某个传感器自身噪声。Factor analysis 允许每列有不同 unique variance，试图把共同 covariance 与特有波动分开。若所有坐标噪声确实接近同尺度，PPCA 更简洁；若特有方差差异明显，普通 PCA 的主方向可能被最嘈杂的变量吸引。
+
+这种灵活性也带来代价：小样本下 \(\Psi\) 和 \(\Lambda\) 可能难以区分，likelihood 可出现局部最优或退化，因子数选择还依赖模型比较与预测任务。一个漂亮的二维载荷图不能替代残差 covariance、留出 likelihood 与稳定性检查。
+
+\subsection{生成模型不会自动赋予潜变量现实身份}
+
+潜因子是解释 covariance 的数学对象。若数据经过选择、量表设计或预处理，因子结构也会随之改变；不同群体甚至可能不共享同一载荷。将因子用于问卷或风险评分时，应检查 measurement invariance，并避免把旋转后的方向直接命名成不可观察实体。
+
+低秩假设说明许多变量可以共同变化，概率模型说明这种共同变化与噪声怎样分开。它们都没有单独回答潜变量是否可干预、是否跨人群稳定，或是否对应现实中的唯一原因。

@@ -1,0 +1,129 @@
+\section{粒子滤波用带权样本追踪非线性状态}
+
+Kalman filter 能用一个均值和协方差精确表示 filtering posterior，是因为线性变换和 Gaussian 条件化保持 Gaussian 族闭合。若目标可能在岔路口向左或向右，位置 posterior 会自然分成两个峰；用一个 Gaussian 表示时，均值可能落在两条路之间这个低概率位置。粒子滤波不再预设 posterior 必须单峰，而用带权样本近似
+
+\[
+p(x_t\mid y_{1:t})
+\approx
+\sum_{i=1}^{N}w_t^{(i)}
+\delta_{x_t^{(i)}}(x_t),
+\qquad
+\sum_{i=1}^{N}w_t^{(i)}=1.
+\]
+
+每个粒子是一种当前状态假设，权重表示它与已有观测的相容程度。表示更灵活的代价是引入 Monte Carlo 误差，并需要持续处理权重退化。
+
+\subsection{滤波递推由预测与校正组成}
+
+一般状态空间模型写为
+
+\[
+X_t\sim p(x_t\mid x_{t-1}),
+\qquad
+Y_t\sim p(y_t\mid x_t).
+\]
+
+利用 Markov 性，预测分布为
+
+\[
+p(x_t\mid y_{1:t-1})
+=\int p(x_t\mid x_{t-1})
+p(x_{t-1}\mid y_{1:t-1})\,dx_{t-1},
+\]
+
+新观测到达后再校正：
+
+\[
+p(x_t\mid y_{1:t})
+\propto
+p(y_t\mid x_t)
+p(x_t\mid y_{1:t-1}).
+\]
+
+这两式与 Kalman filter 完全同源。区别不在 Bayesian 公式，而在分布怎样表示、积分怎样近似。粒子方法用上一时刻的经验分布近似预测积分，再用 likelihood 更新每个样本的相对质量。
+
+\subsection{序列重要性采样给出权重递推}
+
+若从一般提议分布
+
+\[
+q(x_{0:t}\mid y_{1:t})
+=q(x_{0:t-1}\mid y_{1:t-1})
+q(x_t\mid x_{0:t-1},y_{1:t})
+\]
+
+延长每条粒子轨迹，则未归一化权重满足
+
+\[
+\widetilde w_t^{(i)}
+=w_{t-1}^{(i)}
+\frac{
+p(y_t\mid x_t^{(i)})
+p(x_t^{(i)}\mid x_{t-1}^{(i)})
+}{
+q(x_t^{(i)}\mid x_{0:t-1}^{(i)},y_{1:t})
+}.
+\]
+
+归一化后令
+
+\[
+w_t^{(i)}
+=\frac{\widetilde w_t^{(i)}}
+{\sum_j\widetilde w_t^{(j)}}.
+\]
+
+最简单的 bootstrap particle filter 选择转移先验作为提议：
+
+\[
+q(x_t\mid x_{t-1},y_t)
+=p(x_t\mid x_{t-1}).
+\]
+
+此时转移项抵消，算法只需从动力学传播粒子，再按 \(p(y_t\mid x_t^{(i)})\) 加权。这种选择易实现，却没有利用当前观测来提出候选。若观测极精确而转移噪声很大，大多数新粒子会落到 likelihood 几乎为零的区域，计算预算在看到观测之前已经浪费。
+
+\subsection{为什么必须重采样}
+
+重要性权重沿时间相乘。即使每一步差异不大，若不干预，少数轨迹也会逐渐占据几乎全部质量。常用诊断是
+
+\[
+N_{\mathrm{eff}}
+=\frac{1}{\sum_{i=1}^{N}(w_t^{(i)})^2},
+\]
+
+其取值在 \(1\) 与 \(N\) 之间。它只是权重集中度的启发式量，不是独立样本数的严格估计。
+
+当 \(N_{\mathrm{eff}}\) 低于阈值时，可按当前权重抽取 \(N\) 个祖先并把新权重重置为 \(1/N\)。高权重粒子可能被复制，低权重粒子可能消失。multinomial resampling 最直接；systematic 或 stratified resampling 通常有更小的额外抽样方差。
+
+重采样解决“权重集中在少数现有粒子上”，却会产生“许多粒子共享同一祖先”。两者不是同一个退化问题。频繁重采样会丢失多样性；长期 smoothing 时，早期轨迹往往只剩极少祖先，当前状态估计尚可，完整路径 posterior 却很差。因此通常按 ESS 自适应重采样，并在需要轨迹时使用 backward simulation、ancestor sampling 或专门的 particle smoothing 方法。
+
+\subsection{一轮基本算法在做什么}
+
+给定时刻 \(t-1\) 的等权粒子，bootstrap filter 的一轮可以概括为：
+
+\begin{enumerate}
+\tightlist
+\item 对每个粒子采样 \(x_t^{(i)}\sim p(x_t\mid x_{t-1}^{(i)})\)；
+\item 计算 log weight \(\log \widetilde w_t^{(i)}=\log p(y_t\mid x_t^{(i)})\)；
+\item 用 log-sum-exp 归一化，估计期望 \(\sum_iw_t^{(i)}h(x_t^{(i)})\)；
+\item 计算 \(N_{\mathrm{eff}}\)，必要时重采样并重置权重。
+\end{enumerate}
+
+先用 log weight 是数值要求，不只是代码风格。长序列下 likelihood 连乘很容易下溢为零。若所有 log weight 都极小，减去最大值再指数化只避免数值下溢，并不能修复提议分布与 posterior 严重错位。
+
+滤波的边缘 likelihood 也可由逐步归一化常数估计，这使粒子方法能用于参数比较或 particle MCMC。不过，由同一批有限粒子给出的 likelihood estimator 可能方差很大；无偏性不代表把它放入更外层算法后就一定高效。
+
+\subsection{粒子数无法单独修复模型错设}
+
+粒子滤波适合非线性、非 Gaussian，甚至多峰的低到中等维状态。但状态维度升高时，观测 likelihood 往往把质量压到极小区域，所需粒子数可能急剧增长。这是重要性采样的维数灾难，不是简单并行更多粒子就总能克服。
+
+可靠使用至少要区分三类失败：
+
+\begin{itemize}
+\tightlist
+\item \textbf{表示失败}：粒子数太少，稀有但重要的模态从未被覆盖；
+\item \textbf{提议失败}：粒子来自转移先验，却与当前观测几乎不相容；
+\item \textbf{模型失败}：真实状态转移或观测噪声不在模型中，更多粒子只会更精确地逼近错误 posterior。
+\end{itemize}
+
+可以在同一数据上改变粒子数和重采样阈值，检查估计是否稳定；监控 ESS、独特祖先数和多次独立运行之间的差异；在可退化为线性 Gaussian 的版本上与 Kalman filter 对照。若粒子数增加后结果不收敛，应先检查提议与实现；若稳定收敛却持续偏离真实轨迹，则应回到状态空间模型本身。

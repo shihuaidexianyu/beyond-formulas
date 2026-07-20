@@ -1,0 +1,193 @@
+\section{共轭先验让 Bayesian 更新保持同一形式}
+
+Bayesian 更新只有一条公式：
+
+\[
+p(\theta\mid x_{1:n})
+\propto
+p(\theta)
+\prod_{i=1}^{n}p(x_i\mid\theta).
+\]
+
+困难在于右侧乘积归一化后可能落入一个全新的复杂分布族。共轭先验选择一种与 likelihood 代数结构相配的 prior，使 posterior 仍属于同一族。它提供闭式计算和递推摘要，但不会替我们判断先验是否符合问题。
+
+\subsection{指数族的共轭形式来自收集同类项}
+
+若 likelihood 为
+
+\[
+p(x\mid\eta)
+=h(x)
+\exp\left(
+\eta^{\trans}T(x)-A(\eta)
+\right),
+\]
+
+可为自然参数选择形式
+
+\[
+p(\eta\mid\chi,\nu)
+=\exp\left(
+\eta^{\trans}\chi
+-\nu A(\eta)
+-B(\chi,\nu)
+\right),
+\]
+
+其中 \(B\) 负责对 \(\eta\) 归一化。观察独立数据后，
+
+\[
+p(\eta\mid x_{1:n},\chi,\nu)
+\propto
+\exp\left[
+\eta^{\trans}
+\left(
+\chi+\sum_{i=1}^{n}T(x_i)
+\right)
+-(\nu+n)A(\eta)
+\right].
+\]
+
+posterior 超参数只是
+
+\[
+\chi_n
+=\chi+\sum_{i=1}^{n}T(x_i),
+\qquad
+\nu_n=\nu+n.
+\]
+
+这就是共轭性的来源：prior 预先使用 likelihood 会产生的两种参数函数 \(\eta\) 与 \(A(\eta)\)，乘法后只需把系数相加。它不是“相似分布相乘仍相似”的模糊巧合。
+
+把 \(\chi/\nu\) 解释为先验统计量均值、把 \(\nu\) 解释为虚拟样本量有时很有用，但不是所有指数族和超参数区域都允许字面解释。首先必须保证 \(B(\chi,\nu)\) 有限，使 prior proper。
+
+\subsection{Beta--Bernoulli 把成功与失败分别计数}
+
+设
+
+\[
+X_i\mid p\sim\operatorname{Bernoulli}(p),
+\qquad
+p\sim\operatorname{Beta}(a,b).
+\]
+
+若 \(s=\sum_iX_i\)，likelihood 与 prior 相乘得到
+
+\[
+p\mid x_{1:n}
+\sim
+\operatorname{Beta}
+(a+s,b+n-s).
+\]
+
+posterior mean 为
+
+\[
+\E[p\mid x]
+=\frac{a+s}{a+b+n},
+\]
+
+下一次成功的 posterior predictive probability 也是该值：
+
+\[
+\Prob(X_{n+1}=1\mid x_{1:n})
+=\int p\,p(p\mid x_{1:n})\,dp.
+\]
+
+将 \(a-1,b-1\) 称为“先验成功和失败次数”只在特定参数化和解释下近似成立。例如 \(a<1\) 时所谓次数为负，却仍可能给出合法的 U 形 prior。更稳妥的说法是：\(a,b\) 控制边界形状、先验均值和集中程度。
+
+\subsection{Gamma--Poisson 汇总总计数与暴露量}
+
+采用 rate 参数化
+
+\[
+Y_i\mid\lambda
+\sim\operatorname{Poisson}(\lambda),
+\qquad
+\lambda
+\sim\operatorname{Gamma}(a,b),
+\]
+
+其中 prior density 与
+
+\[
+\lambda^{a-1}e^{-b\lambda}
+\]
+
+成比例。观察 \(n\) 个等暴露样本后，
+
+\[
+\lambda\mid y_{1:n}
+\sim
+\operatorname{Gamma}
+\left(
+a+\sum_i y_i,
+b+n
+\right).
+\]
+
+若每个观测有不同 exposure \(t_i\)，并令 \(Y_i\sim\operatorname{Poisson}(t_i\lambda)\)，rate 更新为 \(b+\sum_it_i\)。因此真正与参数相乘的是总暴露量，不一定是样本数。
+
+把 \(\lambda\) 积分掉后，posterior predictive 不再是把 posterior mean 塞回 Poisson 得到的普通 Poisson；参数不确定性会额外增加预测方差，得到 negative-binomial 型分布。Plug-in prediction 丢失的正是这部分不确定性。
+
+\subsection{Gaussian--Gaussian 用精度加权信息}
+
+设观测方差 \(\sigma^2\) 已知，
+
+\[
+X_i\mid\mu
+\sim\mathcal N(\mu,\sigma^2),
+\qquad
+\mu\sim\mathcal N(m_0,\tau_0^2).
+\]
+
+posterior 仍为 Gaussian，精度和自然参数分别相加：
+
+\[
+\tau_n^{-2}
+=\tau_0^{-2}+n\sigma^{-2},
+\]
+
+\[
+m_n
+=\tau_n^2
+\left(
+\tau_0^{-2}m_0
++\sigma^{-2}\sum_i x_i
+\right).
+\]
+
+所以 posterior mean 是 prior mean 与样本均值按精度加权的结果。样本多不必然压倒 prior：若观测噪声极大，单个样本贡献的精度很小；若 prior 极集中，它表达的是很强的外部信息或很强的建模承诺。
+
+当 \(\sigma^2\) 也未知时，只给 \(\mu\) 一个独立 Gaussian prior 一般不再闭合。常用 normal--inverse-gamma 或 normal--gamma 联合先验，让均值先验尺度随未知方差一起变化。共轭对象往往是参数的联合分布，不能逐参数随意挑选。
+
+\subsection{Posterior predictive 比参数点估计多一次积分}
+
+对新观测，
+
+\[
+p(x_*\mid x_{1:n})
+=\int
+p(x_*\mid\theta)
+p(\theta\mid x_{1:n})
+\,d\theta.
+\]
+
+这一步平均了 posterior 中仍然可能的参数。共轭模型常让积分闭式可得；非共轭时可用 Monte Carlo 或变分近似。把 MAP 或 posterior mean 代入 likelihood 只产生 plug-in distribution，一般低估参数不确定性。
+
+共轭还支持顺序更新：上一批 posterior 的超参数可直接作为下一批 prior 的超参数，前提是模型、数据条件独立结构和参数含义没有改变。若数据分布发生漂移，机械累加旧统计量会让模型对过时环境越来越自信。
+
+\subsection{计算便利不是选择先验的充分理由}
+
+共轭 prior 可能对边界、尾部或参数相关性施加强烈形状限制。数据很少时，超参数选择会明显改变 posterior；数据很多但模型错设时，posterior 可能只是更集中地支持一个错误近似。应进行 prior predictive check：先从 prior 采参数，再从 likelihood 生成数据，观察其尺度和结构是否合理。
+
+还应区分三种超参数处理：
+
+\begin{itemize}
+\tightlist
+\item 固定先验超参数，表达分析前的外部假设；
+\item empirical Bayes 用同一数据估计超参数，计算方便但没有完整传播这一步的不确定性；
+\item hierarchical Bayes 再为超参数放 prior，语义完整但通常失去简单闭式。
+\end{itemize}
+
+共轭性的真正价值，是让“数据提供了哪些充分统计量、先验提供了多少同类信息”完全可见。下一次遇到非共轭模型时，这套结构仍能帮助判断：困难究竟来自 likelihood 形状、参数约束，还是 posterior 归一化无法计算。

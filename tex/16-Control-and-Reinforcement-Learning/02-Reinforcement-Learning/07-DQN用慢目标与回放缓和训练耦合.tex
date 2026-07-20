@@ -1,0 +1,134 @@
+\section{DQN 用慢目标与回放缓和训练耦合}
+
+Deep Q Network 用神经网络表示动作价值。离散动作下，网络通常输入状态 \(s\)，一次输出所有 \(Q(s,a;\theta)\)。对经验
+
+\[
+e_t=(S_t,A_t,R_{t+1},S_{t+1},D_{t+1}),
+\]
+
+其中 \(D_{t+1}\) 表示是否终止，目标写为
+
+\[
+Y_t
+=R_{t+1}
++\gamma(1-D_{t+1})
+\max_{a'}Q(S_{t+1},a';\theta^-).
+\]
+
+在线参数 \(\theta\) 拟合当前动作分量：
+
+\[
+L(\theta)
+=\E_{e\sim\mathcal B}
+\left[
+\ell\left(
+Y(e;\theta^-)-Q(S,A;\theta)
+\right)
+\right].
+\]
+
+\(\mathcal B\) 是 replay buffer 的采样分布，\(\theta^-\) 是 target network 参数。这个写法已明确暴露三种耦合：数据由变化中的行为策略产生，监督目标来自另一个价值网络，当前参数又同时决定未来行为。
+
+\subsection{经验回放改变相关性，也改变了学习分布}
+
+若按环境时间顺序连续更新，相邻状态高度相关，某一小段轨迹会在短时间内主导梯度。Replay buffer 保存最近若干转移，再随机抽 mini-batch，主要带来三点作用：
+
+\begin{itemize}
+\tightlist
+\item 打散时间相关，使 batch gradient 更接近对某个混合分布的平均；
+\item 让一次昂贵交互被重复使用，提高数据利用率；
+\item 把当前网络更新与刚刚产生该样本的策略部分解耦。
+\end{itemize}
+
+第三点同时也是风险。缓冲区混合了许多旧策略，DQN 因此天然是 off-policy；容量太小会迅速遗忘稀有经验，容量太大又可能让大量过时数据拖慢适应。均匀回放没有恢复 iid 数据，也没有保证覆盖目标策略需要的状态动作，只是减弱局部时间相关。
+
+Prioritized replay 更常抽取绝对 TD error 大的经验，能集中计算在当前“惊讶”样本上，却改变了经验分布。若希望校正这项偏差，需要使用基于采样概率的 importance weight；实际中常把校正指数逐步调大，以偏差换早期效率。大 TD error 还可能来自噪声、异常值或错误奖励，并不总是更有学习价值。
+
+\subsection{目标网络把追逐自己的速度降下来}
+
+若直接令 \(\theta^-=\theta\)，一次梯度更新既改变预测 \(Q(S,A;\theta)\)，也改变下一批样本的 target。监督学习里标签通常固定；这里标签会随着被训练的函数一起移动。
+
+Hard update 每隔 \(C\) 步复制
+
+\[
+\theta^-\leftarrow\theta;
+\]
+
+soft update 则使用
+
+\[
+\theta^-
+\leftarrow
+(1-\tau)\theta^-+\tau\theta,
+\qquad 0<\tau\ll1.
+\]
+
+两者都让 target 在若干更新内变化较慢，使优化器有时间拟合一个近似固定的回归问题。同步太频繁会重新接近移动目标；太慢则让目标长期陈旧。目标网络缓和时间尺度耦合，却没有改变 target 仍由同一函数族 bootstrap 这一事实。
+
+实现时必须阻断 \(Y_t\) 对 target network 的梯度。否则优化器可能通过同时移动预测和标签来降低 loss，实际算法不再对应上式。
+
+\subsection{Double DQN 分开选择与评价}
+
+标准 target 使用
+
+\[
+\max_{a'}Q(S',a';\theta^-).
+\]
+
+多个动作估计都含噪声时，最大值倾向选中正误差较大的动作。Double DQN 用在线网络选择
+
+\[
+a^*
+=\argmax_{a'}Q(S',a';\theta),
+\]
+
+再用目标网络评价
+
+\[
+Y^{\mathrm{Double}}
+=R+\gamma(1-D)
+Q(S',a^*;\theta^-).
+\]
+
+选择和评价不再完全共享同一噪声，通常能减弱过估计。它不保证消除所有偏差：两套网络仍相关，也可能在某些任务中出现低估。应把它理解为针对 max selection bias 的机制，而不是一般稳定化魔法。
+
+\subsection{Huber loss 与裁剪控制的是局部数值影响}
+
+平方误差使梯度幅度随 TD error 线性增长。奖励尖峰或早期错误 target 可能令少数样本主导更新。Huber loss
+
+\[
+\ell_\kappa(\delta)
+=
+\begin{cases}
+\frac12\delta^2,
+&\abs{\delta}\le\kappa,\\
+\kappa\left(
+\abs{\delta}-\frac12\kappa
+\right),
+&\abs{\delta}>\kappa
+\end{cases}
+\]
+
+在零附近保留平方损失，在尾部改为线性增长。Gradient norm clipping、reward scaling 和合理初始化也能控制数值尺度。它们防止一次异常更新摧毁参数，却不能让错误 Bellman target 变正确；持续裁剪还可能掩盖价值尺度已经失控。
+
+终止状态的 mask 同样关键。真正终止后未来价值应为零；若只是因训练器的时间上限截断，是否 bootstrap 取决于任务语义。把 timeout 一律当作环境终止会系统性低估长时价值。
+
+\subsection{训练 loss 小不等于策略可靠}
+
+DQN 的 regression loss 由 replay distribution 加权。Loss 很小可能只表示网络拟合了缓冲区中常见转移，并不说明贪心动作在未覆盖状态正确。反过来，策略回报改善时 loss 也可能上升，因为策略访问了新的、尚未拟合区域。
+
+至少应同时监控：
+
+\begin{itemize}
+\tightlist
+\item episode return 的分布和多随机种子差异；
+\item Q 值尺度与实际 Monte Carlo return 是否同量级；
+\item TD error 的分位数，而不只平均 loss；
+\item replay buffer 的状态动作覆盖与样本年龄；
+\item online network 与 target network 的预测差距；
+\item 贪心动作比例、探索率和终止类型。
+\end{itemize}
+
+在固定离线数据上，DQN 的危险更大。\(\max_{a'}\) 可能选择日志中从未出现的动作，网络外推的虚高价值再被 bootstrap 向前传播。经验数量再多，也不能补出行为策略从未尝试的反事实。此时需要限制新策略偏离数据支持、对分布外动作使用保守价值，或退回行为克隆等更明确的基线。
+
+DQN 的设计可以概括为：回放减弱样本顺序耦合，目标网络减慢标签漂移，Double DQN 减少选择偏差，稳健损失限制异常样本影响。每一项都有明确对象，也都留下未解决的分布问题；下一节将把这个分布差异写成可计算的概率比率。
