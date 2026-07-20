@@ -13,7 +13,7 @@ likelihood 与 prior 可以计算，归一化常数
 p(y)=\int p(y\mid\theta)p(\theta)\,d\theta
 \]
 
-却可能不可得，也难以直接从 posterior 独立采样。MCMC 的想法不是消除归一化常数，而是构造一条长期访问频率为 \(\pi\) 的 Markov 链。
+却可能不可得，也难以直接从 posterior 独立采样。MCMC 通过构造一条长期访问频率为 \(\pi\) 的 Markov 链，绕开对归一化常数的直接计算。
 
 \subsection{Metropolis--Hastings 如何让目标分布保持不变}
 

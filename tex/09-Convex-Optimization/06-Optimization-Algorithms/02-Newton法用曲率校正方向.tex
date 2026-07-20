@@ -21,7 +21,7 @@ f(x)+\nabla f(x)^Tp
 x_+=x+\alpha p_{\mathrm N}.
 \]
 
-Newton 步不是``梯度除以二阶导数''的高维机械推广，而是先用 Hessian 把不同方向的尺度校正，再在局部二次模型中走到最小点。
+Newton 步先用 Hessian 校正不同方向的尺度，再在局部二次模型中走到最小点。把它只记成``梯度除以二阶导数''的高维推广，会丢失这个几何含义。
 
 \subsection{二次函数为什么一步到达}
 
@@ -62,7 +62,7 @@ C\lVert x_k-x^\star\rVert^2.
 
 因此实际算法通常使用阻尼 Newton 法：先解出方向，再通过回溯线搜索选择 \(\alpha\le1\)。远处小步保证全局进展，进入局部区域后线搜索开始接受 \(\alpha=1\)，恢复二次收敛。
 
-\subsection{不要求逆，而是解线性系统}
+\subsection{实际计算通过线性系统得到 Newton 步}
 
 Newton 方向应通过
 

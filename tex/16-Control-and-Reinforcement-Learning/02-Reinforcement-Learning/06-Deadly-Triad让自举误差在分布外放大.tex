@@ -1,6 +1,6 @@
 \section{Deadly Triad 让自举误差在分布外放大}
 
-函数逼近、bootstrap 与 off-policy 数据各自解决一个真实困难：参数共享让大状态空间可表示，bootstrap 让奖励信息无需等到回合结束，off-policy 学习允许复用历史策略或他人产生的数据。三者同时出现时，价值估计却可能不只是有偏，而是数值发散。这一组合称为 Deadly Triad。
+函数逼近、bootstrap 与 off-policy 数据各自解决一个真实困难：参数共享让大状态空间可表示，bootstrap 让奖励信息无需等到回合结束，off-policy 学习允许复用历史策略或他人产生的数据。三者同时出现时，价值估计除了可能有偏，还可能发生数值发散。这一组合称为 Deadly Triad。
 
 \subsection{表格 Bellman 压缩性为什么不再够用}
 
