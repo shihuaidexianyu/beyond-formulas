@@ -138,14 +138,3 @@ X^TX+\lambda I
 
 若一个极小的训练误差来自巨大参数抵消或严重病态设计矩阵，它在数学目标上可能优秀，在预测和数值上却不稳定。优化最优性不是完整的模型有效性。
 
-\subsubsection{留给读者}
-
-考虑带盒约束的 Ridge 问题
-
-\[
-\min_w\frac12\lVert Xw-y\rVert_2^2
-+\frac\lambda2\lVert w\rVert_2^2,
-\qquad -1\le w_i\le1.
-\]
-
-把它写成标准凸二次规划，给出 Hessian，并说明 \(\lambda=0\) 与 \(\lambda>0\) 时唯一性分别还需要什么条件。不要显式求逆。

@@ -119,18 +119,3 @@ J_r^TJ_r\succeq0.
 
 这个例子说明二阶近似不是越完整越好。结构化近似可以换取正定性、较低计算成本与更稳健的方向，但必须说明在哪个区域可信。
 
-\subsubsection{留给读者}
-
-对
-
-\[
-f(X)=\frac12\lVert AXB-C\rVert_F^2
-\]
-
-先使用上一节求得的梯度，再求 Hessian 作用 \(\mathcal H_X[H]\)。证明
-
-\[
-\langle H,\mathcal H_X[H]\rangle_F\ge0.
-\]
-
-若 \(A\) 或 \(B\) 秩亏，这个 Hessian 是否仍可能正定？

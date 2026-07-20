@@ -146,14 +146,3 @@ d\ell = \lambda^Tdb-\lambda^T(dA)x.
 
 数值实现还应根据结构选择 Cholesky、QR、SVD 或迭代法，并在反向中保持相同的转置与精度语义。近似前向求解会使反向梯度也只近似满足隐式方程；停止容差应与所需梯度精度协调。
 
-\subsubsection{留给读者}
-
-设
-
-\[
-x(\theta)=A(\theta)^{-1}b(\theta),
-\qquad
-\ell(\theta)=\frac12\lVert x(\theta)-y\rVert^2.
-\]
-
-写出不含显式逆的反向计算步骤：前向需要保存什么，伴随方程是什么，最终 \(d\ell/d\theta\) 怎样由 \(dA/d\theta\) 与 \(db/d\theta\) 组合？

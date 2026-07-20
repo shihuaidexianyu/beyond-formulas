@@ -201,12 +201,3 @@ p=\operatorname{softmax}(z/T),
 
 忘记 \(1/T\) 会使梯度尺度错误。任何看似相同的公式都必须先核对实际计算图。
 
-\subsubsection{留给读者}
-
-证明 softmax Jacobian 满足
-
-\[
-J\mathbf1=0
-\]
-
-且为半正定。然后解释：为什么从概率 \(p\) 无法唯一恢复 logits \(z\)，却可以恢复任意两个 logits 的差？

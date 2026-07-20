@@ -141,14 +141,3 @@ L(\theta,\delta(X))
 
 报告``估计值 \(\pm\) 标准误''不能自动成为置信区间；还需要抽样分布形状或渐近近似。对偏斜、边界或选择后的估计，正态对称误差条可能严重误导。
 
-\subsubsection{留给读者}
-
-设 \(X_i\sim\operatorname{Bernoulli}(\theta)\)，记 \(S=\sum_iX_i\)，比较
-
-\[
-\hat\theta_1=\bar X,
-\qquad
-\hat\theta_2=\frac{S+1}{n+2}.
-\]
-
-分别求偏差、方差和 MSE。第二个估计量有偏，但在哪些 \(\theta\) 与 \(n\) 下可能具有更小 MSE？不要只比较偏差。（\(\hat\theta_2\) 并非凭空而来：MAP 一节将看到，它是均匀先验下的后验均值。）

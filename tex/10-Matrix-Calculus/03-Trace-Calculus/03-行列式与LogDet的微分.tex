@@ -137,13 +137,3 @@ X=LL^T,
 
 当矩阵奇异时，\(\det X=0\)，log-determinant 趋于 \(-\infty\)，普通逆导数不存在。接近奇异时梯度 \(X^{-T}\) 可能巨大，真实反映了体积对小特征值的敏感性。
 
-\subsubsection{留给读者}
-
-令
-
-\[
-f(X)=\log\det X-\operatorname{tr}(SX),
-\qquad X\succ0,
-\]
-
-其中 \(S\succ0\)。求梯度并解出驻点。再用凹性说明该驻点是全局最大点。数值实现时应该怎样利用 \(S\) 的分解而不显式求逆？

@@ -201,12 +201,3 @@ D=\operatorname{diag}(p_i(1-p_i))\succeq0.
 
 有限差分或自动微分可以检查实现，但不能替代目标定义。若代码求的是样本和，而手推公式求的是样本平均，两者会稳定地相差 \(n\)，这不是浮点误差。
 
-\subsubsection{留给读者}
-
-给 logistic 回归加入每个样本权重 \(a_i\ge0\)：
-
-\[
-L=\frac{1}{\sum_i a_i}\sum_i a_i\ell_i.
-\]
-
-推导 \(w,b\) 的梯度，并写出向量化形式。若某个 \(a_i=0\)，该样本对 Hessian 有何贡献？
