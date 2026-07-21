@@ -44,7 +44,7 @@ w^\ast\propto S_w^{-1}(\mu_1-\mu_0)=\Sigma^{-1}(\mu_1-\mu_0).
 \qquad \rho\in[0,1].
 \]
 
-$\rho$ 由最小化 $\widetilde\Sigma$ 与真实 $\Sigma$ 的期望误差（MSE）选出，有闭式估计。几何上，收缩把 MP 律弥散开的特征值向中间挤压：大特征值压小、小特征值抬大，求逆时的噪声放大被限制在 $1/((1-\rho)(1-\sqrt c)^2+\rho\bar\sigma^2)$ 量级。统计上，这是偏差--方差权衡的又一个实例：收缩引入对 $\Sigma$ 的偏差假设（各方向方差相近），换取 $\widetilde\Sigma^{-1}$ 的方差大幅下降。Ridge 回归中$\lambda$ 的角色、James--Stein 估计中收缩因子的角色，与这里的 $\rho$ 是同构的。
+$\rho$ 由最小化 $\widetilde\Sigma$ 与真实 $\Sigma$ 的期望误差（MSE）选出，有闭式估计。几何上，收缩把 MP 律弥散开的特征值向目标值 $\bar\sigma^2$ 挤压：大特征值压小、小特征值抬大，求逆时的噪声放大被限制在 $1/((1-\rho)(1-\sqrt c)^2+\rho\bar\sigma^2)$ 量级。统计上，这是偏差--方差权衡的又一个实例：收缩引入对 $\Sigma$ 的偏差假设（各方向方差相近），换取 $\widetilde\Sigma^{-1}$ 的方差大幅下降。Ridge 回归中$\lambda$ 的角色、James--Stein 估计中收缩因子的角色，与这里的 $\rho$ 是同构的。
 
 \textbf{对角收缩与正则化 LDA。}更强的假设是直接取对角阵 $\widetilde\Sigma=\operatorname{diag}(\widehat\Sigma)$，即假设类内各特征不相关——这退化为 Naive Bayes 的 Gaussian 版本。看似倒退，在高维却常常优于全协方差 LDA：估计参数从 $O(p^2)$ 降到 $O(p)$，相关性误差小于求逆误差。两端的连续谱——全协方差、收缩、对角——就是``模型复杂度随样本量自适应''的一个干净例子。
 

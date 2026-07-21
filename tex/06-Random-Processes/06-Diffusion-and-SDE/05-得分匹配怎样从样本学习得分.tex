@@ -24,6 +24,21 @@ J(\theta)=\E_{p}\Bigl[\frac12\norm{s_\theta(x)}^2+\operatorname{tr}\bigl(\nabla_
 
 其中 $\nabla_x s_\theta$ 是 $s_\theta$ 的 Jacobian，$\operatorname{tr}$ 是散度。关键在于：右边只含模型量和对 $p$ 的期望，期望可以用样本平均替代。证明只需对交叉项 $\E_p[s_\theta\cdot\nabla\log p]$ 做分部积分，把对 $p$ 的导数搬到 $s_\theta$ 上——这与 Stein 方法和 Cramér--Rao 下界中``对数密度的期望积分为零''是同一技巧。
 
+以 $p=\mathcal N(0,1)$ 完整验证一次。此时 $\nabla\log p(x)=-x$。取 $s_\theta(x)=ax$（$a$ 为参数），Hyvärinen 目标的样本部分是
+
+\[
+\frac12\norm{s_\theta}^2+\operatorname{tr}(\nabla s_\theta)
+=\frac12 a^2x^2+a.
+\]
+
+对 $x\sim p$ 取期望：$\frac12a^2\E[x^2]+a=\frac12a^2+a$。而 Fisher 散度是
+
+\[
+\frac12\E[(ax-(-x))^2]=\frac12(a+1)^2\E[x^2]=\frac12(a+1)^2.
+\]
+
+两者相差 $\frac12(a^2+2a+1)-\frac12a^2-a=\frac12$，与 $\theta$ 无关——正是那个``常数''。最小化任一个都给出 $a=-1$，即 $s_\theta(x)=-x=\nabla\log p(x)$。常数不依赖参数，所以对优化无影响；等价的含义是``只差一个与 $\theta$ 无关的常数''。
+
 于是学习得分变成标准的回归问题：最小化样本上的 $\frac12\norm{s_\theta}^2+\operatorname{tr}(\nabla s_\theta)$，可用自动微分与随机梯度下降完成。
 
 \subsection{代价与折中：散度项的计算}
