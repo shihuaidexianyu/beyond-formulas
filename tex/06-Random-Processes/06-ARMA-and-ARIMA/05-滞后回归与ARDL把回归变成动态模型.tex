@@ -1,0 +1,95 @@
+\section{滞后回归与 ARDL：把回归变成动态模型}
+
+标准回归 $Y_t=\beta_0+\beta_1X_t+\varepsilon_t$ 假设同期关系：$X_t$ 影响 $Y_t$，但不涉及时间结构。滞后回归（lagged regression）把滞后因变量和滞后外生变量加入回归元，把静态回归变成动态模型。这是时间序列分析中连接``回归''与``ARMA''的桥梁。
+
+\subsection{从静态回归到动态回归}
+
+静态回归的问题在于它忽略了时间依赖：$Y_t$ 可能依赖 $Y_{t-1}$（惯性、习惯、调整成本），也可能依赖 $X_{t-1}$（延迟效应）。滞后回归加入这些项：
+
+\[
+Y_t=\beta_0+\phi_1Y_{t-1}+\beta_0X_t+\beta_1X_{t-1}+\varepsilon_t.
+\]
+
+这是自回归分布滞后（ARDL）模型的最简单形式：因变量有自回归项（$Y_{t-1}$），外生变量有分布滞后项（$X_t,X_{t-1}$）。
+
+ARDL(p,q) 的一般形式是
+
+\[
+Y_t=\beta_0+\sum_{i=1}^p\phi_iY_{t-i}+\sum_{j=0}^q\beta_jX_{t-j}+\varepsilon_t.
+\]
+
+$p$ 是因变量滞后阶数，$q$ 是外生变量滞后阶数。ARDL(1,0) 只有 $Y_{t-1}$ 和 $X_t$，ARDL(1,1) 加入 $X_{t-1}$，ARDL(2,2) 以此类推。
+
+ARDL 与 ARMA 的关系：ARDL 是``有外生变量的 ARMA''。若 $X_t$ 是白噪声且 $\beta_j=0$，ARDL 退化为 AR(p)。若 $\phi_i=0$，ARDL 是分布滞后模型（distributed lag model），只有外生变量的滞后效应。
+
+\subsection{ARDL 的估计：OLS 的适用与边界}
+
+ARDL 的回归元包含滞后因变量 $Y_{t-i}$，这使 OLS 的适用条件比静态回归更严格。若 $\varepsilon_t$ 是白噪声且与所有回归元不相关（严格外生性），OLS 一致且渐近正态。但滞后因变量与序列相关的误差会同时出现——$Y_{t-1}$ 与 $\varepsilon_{t-1}$ 相关，若 $\varepsilon_t$ 序列相关，则 $Y_{t-1}$ 与 $\varepsilon_t$ 相关，OLS 有偏且不一致。
+
+这就是``联立方程偏差''的时间序列版本：滞后因变量作为回归元，要求误差项无序列相关。若存在序列相关，需要工具变量（IV）或广义矩估计（GMM）。
+
+一个常见的误解是``ARDL 的 OLS 总是有效''。实际上，ARDL 的 OLS 有效性依赖两个条件：误差白噪声、以及严格外生性（$X_t$ 与所有 $\varepsilon_s$ 不相关，包括 $s>t$）。若 $X_t$ 是前定的（与 $\varepsilon_t$ 同期不相关，但可能与未来 $\varepsilon_{t+1}$ 相关），OLS 在小样本有偏，但大样本一致。
+
+\subsection{ARDL 与误差修正模型}
+
+ARDL 可以重写为误差修正模型（ECM），这对非平稳序列特别有用。ARDL(1,1) 为
+
+\[
+Y_t=\beta_0+\phi_1Y_{t-1}+\beta_0X_t+\beta_1X_{t-1}+\varepsilon_t.
+\]
+
+两边减去 $Y_{t-1}$，整理得
+
+\[
+\Delta Y_t=\beta_0+(\phi_1-1)Y_{t-1}+\beta_0\Delta X_t+(\beta_0+\beta_1)X_{t-1}+\varepsilon_t.
+\]
+
+再写为
+
+\[
+\Delta Y_t=\beta_0\Delta X_t+(\phi_1-1)\left(Y_{t-1}-\frac{\beta_0+\beta_1}{1-\phi_1}X_{t-1}\right)+\varepsilon_t.
+\]
+
+括号中的项是长期均衡关系 $Y=\frac{\beta_0+\beta_1}{1-\phi_1}X$ 的偏离，系数 $\phi_1-1$ 是调整速度：若 $Y$ 偏离均衡，$\Delta Y$ 会把它拉回（$\phi_1<1$ 时）。
+
+ECM 把短期动态（$\Delta X_t$ 的影响）与长期均衡（$Y$ 与 $X$ 的关系）分开。这在协整分析中特别有用：若 $Y$ 与 $X$ 协整（有长期均衡关系），ECM 是自然的建模框架。
+
+\subsection{ARDL 与 ARMA 的选择}
+
+ARDL 与 ARMA 的选择取决于问题结构：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{ARDL}：有明确的外生变量 $X_t$，关心 $X$ 对 $Y$ 的短期与长期影响，需要区分短期动态与长期均衡。
+\item
+  \textbf{ARMA}：没有明确的外生变量，或只关心 $Y$ 自身的动态结构，需要紧凑的统计描述和预测。
+\end{itemize}
+
+ARDL 的优势是结构清晰（回归元有经济含义）、估计简单（OLS 可用）、以及 ECM 形式便于协整分析。ARMA 的优势是参数少、识别工具成熟（ACF/PACF）、以及 Box-Jenkins 的诊断流程。
+
+混合使用：ARDL 的残差若有 ARMA 结构，可以拟合 ARMA-ARDL（误差项为 ARMA 的 ARDL）。这结合了 ARDL 的结构解释与 ARMA 的误差建模。
+
+\subsection{滞后回归的边界}
+
+滞后回归假设线性关系、参数恒定、以及（对 OLS）误差白噪声。以下情况需要扩展：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{序列相关误差}：需要 IV/GMM 或 ARMA-ARDL；
+\item
+  \textbf{非平稳序列}：需要协整分析（Engle-Granger 或 Johansen）；
+\item
+  \textbf{非线性}：需要 TAR、STAR 或神经网络；
+\item
+  \textbf{时变参数}：需要状态空间模型或时变系数回归；
+\item
+  \textbf{内生性}：$X_t$ 与 $\varepsilon_t$ 相关，需要工具变量。
+\end{itemize}
+
+滞后回归是时间序列分析中``回归视角''与``动态视角''的连接点。它把标准回归的清晰结构带入动态模型，同时保留了时间序列分析对惯性、延迟和调整的关注。
+
+\subsection{落点}
+
+滞后回归把静态回归变成动态模型，ARDL 把 AR 与分布滞后结合，ECM 把短期动态与长期均衡分开。这三者共同构成时间序列回归的完整框架：从最简单的滞后因变量，到 ARDL 的短期动态，再到 ECM 的长期均衡。理解这个框架，就是理解时间序列分析中``回归''与``ARMA''如何互补。
