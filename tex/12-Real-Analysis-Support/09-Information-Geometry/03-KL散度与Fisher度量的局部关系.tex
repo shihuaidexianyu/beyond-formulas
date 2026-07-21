@@ -1,0 +1,113 @@
+\section{KL 散度与 Fisher 度量的局部关系}
+
+Part 07 的 KL 散度 \(D_{\mathrm{KL}}(p\|q)\) 衡量``用 \(q\) 描述 \(p\) 的数据多付多少码长''，Part 11 的 Fisher 信息衡量``参数微小改变时分布有多容易区分''。这两个量看似不同，实则在参数空间中是同一几何的两面：KL 散度在无穷小参数位移下的二阶展开，正是 Fisher 度量。
+
+\subsection{KL 的二阶展开回到 Fisher 信息}
+
+设 \(p_\theta\) 是参数族，\(\theta\) 与 \(\theta+d\theta\) 是邻近参数。KL 散度为
+
+\[
+D_{\mathrm{KL}}(p_\theta\|p_{\theta+d\theta})
+=\E_\theta\!\left[
+\log\frac{p_\theta(X)}{p_{\theta+d\theta}(X)}
+\right].
+\]
+
+对 \(d\theta\) 做 Taylor 展开。记 \(s(x)=\nabla_\theta\log p_\theta(x)\) 为 score，则
+
+\[
+\log p_{\theta+d\theta}(x)
+=\log p_\theta(x)
++s(x)^\trans d\theta
++\frac12 d\theta^\trans\nabla_\theta s(x)\,d\theta
++o(\norm{d\theta}^2).
+\]
+
+代入 KL 并取期望。一阶项为
+
+\[
+\E_\theta[s(X)^\trans d\theta]=0,
+\]
+
+因为 score 的期望为零（``Score 与 Fisher 信息衡量局部可辨认性''）。二阶项为
+
+\[
+-\frac12 d\theta^\trans\E_\theta[\nabla_\theta s(X)]\,d\theta.
+\]
+
+由 Fisher 信息的二阶形式 \(I(\theta)=-\E_\theta[\nabla_\theta s]=\E_\theta[ss^\trans]\)，得到
+
+\[
+D_{\mathrm{KL}}(p_\theta\|p_{\theta+d\theta})
+=\frac12 d\theta^\trans I(\theta)\,d\theta
++o(\norm{d\theta}^2).
+\]
+
+这就是``Score 与 Fisher 信息衡量局部可辨认性''末尾预告的展开式。它说明：在无穷小位移下，KL 散度就是 Fisher 度量下的平方距离的一半。Fisher 度量不是外加的几何，而是 KL 散度在参数空间中的局部化。
+
+\subsection{为什么 KL 不对称，度量却对称}
+
+KL 散度不对称：\(D_{\mathrm{KL}}(p\|q)\ne D_{\mathrm{KL}}(q\|p)\)。但上面的展开式对 \(d\theta\) 是对称的（二次型）。这是因为展开只在 \(\theta\) 处做了一次，\(D_{\mathrm{KL}}(p_{\theta+d\theta}\|p_\theta)\) 的展开会给出
+
+\[
+D_{\mathrm{KL}}(p_{\theta+d\theta}\|p_\theta)
+=\frac12 d\theta^\trans I(\theta+d\theta)\,d\theta
++o(\norm{d\theta}^2),
+\]
+
+其中 Fisher 信息在 \(\theta+d\theta\) 处取值。当 \(d\theta\to0\) 时，\(I(\theta+d\theta)\to I(\theta)\)，两个方向的二阶项相同；不对称性只出现在三阶及更高阶项。在无穷小极限下，KL 的两个方向给出同一个度量——这正是黎曼度量对称性的来源。
+
+有限位移下 KL 的不对称性仍有意义：前向 KL（\(D_{\mathrm{KL}}(p\|q)\)）倾向覆盖 \(p\) 的支撑，反向 KL（\(D_{\mathrm{KL}}(q\|p)\)）倾向避开 \(p\) 的低密度区（``Gibbs 不等式与 KL 的方向性''）。这种不对称性在 Fisher 几何中对应``指数联络与混合联络''的区别，本书不展开；对优化而言，选择最小化哪个方向的 KL 就是选择不同的目标。
+
+\subsection{指数族的对偶几何}
+
+指数族 \(p_\theta(x)=h(x)\exp(\theta^\trans T(x)-A(\theta))\) 有一个特殊的结构：自然参数 \(\theta\) 与期望参数 \(\mu=\E_\theta[T(X)]=\nabla A(\theta)\) 互为 Legendre 对偶。定义
+
+\[
+A^*(\mu)=\sup_\theta\bigl(\theta^\trans\mu-A(\theta)\bigr),
+\]
+
+则 \(\theta=\nabla A^*(\mu)\)，且 \(A(\theta)+A^*(\mu)=\theta^\trans\mu\)。
+
+在这对坐标下，KL 散度有显式形式：
+
+\[
+D_{\mathrm{KL}}(p_\theta\|p_{\theta'})
+=A(\theta')-A(\theta)-\mu^\trans(\theta'-\theta),
+\]
+
+即 \(A\) 在 \(\theta\) 与 \(\theta'\) 之间的 Bregman 散度。Bregman 散度是凸函数与其切平面之间的差，它自然不对称，且在无穷小位移下退化为 \(\frac12 d\theta^\trans\nabla^2A(\theta)\,d\theta\)——正是 Fisher 度量。
+
+对偶参数 \(\mu\) 下的 KL 散度对应 \(A^*\) 的 Bregman 散度。两个坐标系、两个凸函数、两个 Bregman 散度，构成指数族的对偶几何。这解释了为什么指数族的 MLE 是 moment matching（\(\mu=\) 样本均值）：期望参数 \(\mu\) 是``数据可见的统计量''，自然参数 \(\theta\) 是``分布的坐标''，Legendre 变换在两者之间切换。
+
+\subsection{从局部几何到全局问题}
+
+Fisher 度量描述无穷小行为，但统计问题常需要全局答案：两个分布有多远，参数空间是否弯曲，测地线长什么样。这些全局问题不能从局部展开直接读出。
+
+一个经典例子是 Bernoulli 流形。在 logit 坐标 \(\eta=\log(\theta/(1-\theta))\) 下，Fisher 度量为 \(g_\eta=(1/4)\operatorname{sech}^2(\eta/2)\,d\eta^2\)。计算从 \(\eta_1\) 到 \(\eta_2\) 的 Fisher--Rao 距离：
+
+\[
+d_{\mathrm{FR}}(\eta_1,\eta_2)
+=\int_{\eta_1}^{\eta_2}\sqrt{g_\eta}\,d\eta
+=\frac12\int_{\eta_1}^{\eta_2}\operatorname{sech}(\eta/2)\,d\eta.
+\]
+
+这个积分可以算出，但更重要的是：当 \(\theta\to0\) 或 \(1\)（\(\eta\to\mp\infty\)）时，距离发散——边界在 Fisher 几何下被推到无穷远，与第一节的观察一致。Bernoulli 流形在 Fisher 度量下是一个完备的、常负曲率的空间（双曲空间），这不是欧氏直觉能猜到的。
+
+全局几何影响算法：在弯曲空间中，直线坐标下降可能绕远；测地线下降（沿 Fisher 度量的最短路径）才是几何正确的方向。自然梯度是局部最速下降，测地线下降是全局最短路径，两者在小步长下一致，在大步长下不同。
+
+\subsection{落点：信息几何的三层结构}
+
+本单元把三层结构接成一条线：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{局部}：Fisher 信息是 score 的方差，也是 KL 的二阶展开；
+\item
+  \textbf{几何}：Fisher 信息是统计流形上的黎曼度量，坐标不变；
+\item
+  \textbf{对偶}：指数族的自然参数与期望参数互为 Legendre 对偶，KL 是 Bregman 散度。
+\end{itemize}
+
+这条线从 Part 07 的 KL 散度出发，经过 Part 11 的 Fisher 信息，到 Part 12 的黎曼度量，最后回到 Part 10 的自然梯度。信息几何不是新数学，而是把已有概念按``参数即分布的坐标''这一原则重新组织。它的价值在于：当参数化、坐标选择或优化方向成为问题时，几何提供了一套不依赖坐标的标准答案。

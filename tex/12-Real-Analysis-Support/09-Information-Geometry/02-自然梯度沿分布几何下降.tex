@@ -1,0 +1,107 @@
+\section{自然梯度沿分布几何下降}
+
+Part 10 的``梯度来自内积，而不只是偏导排列''已经指出：欧氏梯度 \(\nabla f\) 只是导数泛函在欧氏内积下的代表元，换内积就换代表元。统计流形上的 Fisher 度量提供了一个自然的内积选择；在它之下的梯度称为自然梯度，它是``参数空间中沿分布几何的最速下降方向''。
+
+\subsection{欧氏梯度为什么随坐标改变}
+
+设目标函数 \(L(\theta)\)（例如负对数似然）。欧氏梯度 \(\nabla_\theta L\) 满足
+
+\[
+dL_\theta(v)=\langle\nabla_\theta L,v\rangle_{\mathrm{Euc}}
+=v^\trans\nabla_\theta L.
+\]
+
+重参数化 \(\eta=\eta(\theta)\) 时，链式法则给出
+
+\[
+\nabla_\eta L
+=\left(\frac{\partial\theta}{\partial\eta}\right)^\trans
+\nabla_\theta L.
+\]
+
+梯度向量本身按 Jacobian 变换，不是不变的。两个坐标系下的梯度方向可能完全不同——一个坐标系中``最陡''的方向，在另一个坐标系中可能很平缓。这就是为什么``用概率 \(\theta\) 还是用 logit \(\eta\) 做参数化''会影响普通梯度下降的行为，尽管它们描述同一个分布。
+
+病态的极端情况是参数高度相关：两个参数对分布的影响几乎相同，欧氏几何下沿对角线方向梯度很小，沿反对角线方向梯度很大，梯度下降在狭长谷中来回振荡（``梯度下降真正难在步长''中的二次碗）。这不是坐标选择错误，而是欧氏几何与问题的几何不匹配。
+
+\subsection{Fisher 度量下的自然梯度}
+
+在 Fisher 度量 \(g_\theta(u,v)=u^\trans I(\theta)v\) 下，导数泛函的代表元是
+
+\[
+\widetilde\nabla_\theta L
+=I(\theta)^{-1}\nabla_\theta L,
+\]
+
+称为自然梯度。它满足
+
+\[
+dL_\theta(v)
+=g_\theta\bigl(\widetilde\nabla_\theta L,v\bigr)
+=v^\trans I(\theta)\widetilde\nabla_\theta L
+=v^\trans\nabla_\theta L.
+\]
+
+自然梯度是``在 Fisher 几何下最速下降''的方向：在单位 Fisher 球 \(\{v:v^\trans I(\theta)v\le1\}\) 上，它使方向导数最大。这与欧氏梯度在单位欧氏球上的角色完全平行，只是球本身变了。
+
+关键性质是坐标不变性：若 \(\eta=\eta(\theta)\) 是重参数化，则
+
+\[
+\widetilde\nabla_\eta L
+=\left(\frac{\partial\eta}{\partial\theta}\right)
+\widetilde\nabla_\theta L,
+\]
+
+即自然梯度按向量场的推进法则变换，与欧氏梯度的 Jacobian 变换不同。这意味着：用 \(\theta\) 算自然梯度再转到 \(\eta\)，与直接用 \(\eta\) 算自然梯度，结果相同。自然梯度下降的几何行为不依赖坐标选择，只依赖分布族本身。
+
+\subsection{与 Newton 法的异同}
+
+Newton 方向是 \(-H^{-1}\nabla L\)，其中 \(H\) 是 \(L\) 的 Hessian。自然梯度方向是 \(-I(\theta)^{-1}\nabla L\)，其中 \(I(\theta)\) 是 Fisher 信息。两者都是``用某个正定矩阵预条件梯度''，但矩阵不同：
+
+\begin{itemize}
+\tightlist
+\item
+  Hessian \(H\) 依赖目标函数 \(L\) 的具体形式（例如包含残差、标签、正则项）；
+\item
+  Fisher 信息 \(I(\theta)\) 只依赖模型族 \(\{p_\theta\}\)，不依赖具体目标或数据。
+\end{itemize}
+
+在指数族的对数似然下，\(H\) 的期望等于 \(I(\theta)\)（``Score 与 Fisher 信息衡量局部可辨认性''中的二阶形式），所以渐近地两者接近。但有限样本下 \(H\) 是观测信息，\(I(\theta)\) 是期望信息，一般不同。自然梯度用模型本身的局部几何预条件，Newton 法用目标函数的局部曲率预条件——前者是几何的，后者是分析的。
+
+自然梯度下降因此比欧氏梯度下降更稳健：它自动适应参数空间中``哪些方向分布变化快、哪些慢''，避免在分布几乎不变的方向上走大步。这在高维、参数相关或尺度差异大的模型中尤其明显。
+
+\subsection{一个可算的例子：Bernoulli 的 MLE}
+
+对 Bernoulli 模型，负对数似然为
+
+\[
+L(\theta)=-S\log\theta-(n-S)\log(1-\theta),
+\]
+
+欧氏梯度为
+
+\[
+\nabla_\theta L=-\frac S\theta+\frac{n-S}{1-\theta},
+\]
+
+Fisher 信息为 \(I(\theta)=n/(\theta(1-\theta))\)。自然梯度为
+
+\[
+\widetilde\nabla_\theta L
+=\frac{\theta(1-\theta)}{n}
+\left(-\frac S\theta+\frac{n-S}{1-\theta}\right)
+=\theta-\frac Sn.
+\]
+
+这恰好是``当前参数与 MLE 的差''，方向直接指向 \(\widehat\theta=S/n\)。欧氏梯度在 \(\theta\) 接近 \(0\) 或 \(1\) 时发散（分母有 \(\theta\) 或 \(1-\theta\)），自然梯度却保持有界且方向稳定——Fisher 几何自动补偿了边界的参数化奇异性。
+
+这个例子也解释了为什么自然梯度在边界附近不会爆炸：它把``分布几乎确定''的几何事实写进了度量，而不是靠步长控制来避免。
+
+\subsection{计算与近似}
+
+精确 Fisher 信息需要对数据分布取期望，通常不可得。实践中用经验 Fisher（对样本取平均）或对角近似（只保留对角元）。K-FAC 等结构化近似把 Fisher 分解为块对角或 Kronecker 积形式，在深度网络中可用。这些近似的质量取决于模型结构，不是免费的——对角 Fisher 会忽略参数相关方向，可能重新引入病态。
+
+自然梯度也不是万能：它只改变下降方向，不改变目标函数的非凸性、随机梯度噪声或模型错设。在深度学习中，它通常作为 SGD 或 Adam 的预条件器使用，而不是替代整个优化器。
+
+\subsection{落点}
+
+自然梯度把``参数空间中怎样下降''从坐标技巧提升为几何选择：选 Fisher 度量，就是选``按分布区分难度来量步长''。它与 Newton 法共享预条件思想，但用模型几何代替目标曲率。下一节把 KL 散度与 Fisher 度量的局部关系补全，完成信息几何的最小闭环。

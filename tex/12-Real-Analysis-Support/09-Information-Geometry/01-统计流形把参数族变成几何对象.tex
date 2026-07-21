@@ -1,0 +1,78 @@
+\section{统计流形把参数族变成几何对象}
+
+参数化统计模型 \(\{p_\theta:\theta\in\Theta\}\) 把参数空间 \(\Theta\) 映射到分布空间。若这个映射足够光滑且可辨识，参数空间本身就带有一个几何结构：它不仅是坐标的容器，还是一个流形，其上的``距离''由分布的区分难度决定。
+
+\subsection{参数空间是流形，分布空间是函数空间}
+
+设 \(\Theta\subseteq\R^d\) 是开集，映射 \(\theta\mapsto p_\theta\) 光滑（\(p_\theta(x)\) 对 \(\theta\) 可微）。则 \(\Theta\) 是 \(\R^d\) 的开子流形，其切空间 \(T_\theta\Theta\cong\R^d\)。但每个点 \(\theta\) 对应的不是向量，而是整个分布 \(p_\theta\)——一个函数或测度。参数空间是流形，分布空间是函数空间；前者是后者的坐标。
+
+这与``流形是局部像欧氏空间的集合''中``参数化像''的构造完全同构：参数空间 \(\Theta\) 是定义域，分布空间是环境空间，映射 \(\theta\mapsto p_\theta\) 是嵌入。但环境空间不是有限维的——它是概率分布组成的无穷维空间。统计流形的几何因此是``无穷维空间中的有限维曲面''。
+
+Bernoulli 模型是最简单的例子：\(\theta\in(0,1)\) 是一维开区间，每个点对应一个 Bernoulli 分布。Gaussian 模型 \((\mu,\sigma^2)\in\R\times(0,\infty)\) 是二维开半平面，每个点对应一个正态分布。参数空间的维数就是模型的``自由度''，与数据空间维数无关。
+
+\subsection{Fisher 信息逐点定义内积}
+
+Part 11 已经定义 Fisher 信息矩阵
+
+\[
+I(\theta)=\E_\theta\!\left[
+\nabla_\theta\log p_\theta(X)\,
+\nabla_\theta\log p_\theta(X)^\trans
+\right].
+\]
+
+在正则条件下它对称半正定；若模型可辨识且正则，它正定。把 \(I(\theta)\) 当作切空间 \(T_\theta\Theta\) 上的内积，
+
+\[
+g_\theta(u,v)=u^\trans I(\theta)v,
+\qquad u,v\in T_\theta\Theta,
+\]
+
+就得到统计流形上的黎曼度量，称为 Fisher--Rao 度量。
+
+这个度量的意义与欧氏度量完全不同：它量的是``沿方向 \(u\) 微小改变参数，分布改变多少''，而不是``参数数值差多少''。两个参数点欧氏距离很近，若它们诱导的分布几乎相同（例如高维 Gaussian 中 \(\mu\) 沿某个数据缺失的方向），Fisher 距离就小；反之，若分布截然不同，Fisher 距离就大。``近''的标准从参数数值变成了分布行为。
+
+重参数化 \(\eta=\eta(\theta)\) 时，Fisher 信息按链式法则变换：
+
+\[
+I_\eta(\eta)
+=\left(\frac{\partial\theta}{\partial\eta}\right)^\trans
+I_\theta(\theta)
+\left(\frac{\partial\theta}{\partial\eta}\right),
+\]
+
+这正是黎曼度量在坐标变换下的变换规则（``黎曼度量让弯曲空间有长度''）。因此 Fisher 几何不依赖参数化——用概率 \(\theta\)、logit \(\eta=\log(\theta/(1-\theta))\) 或任何其他坐标，流形上的距离、角度、测地线都相同。这是它与欧氏参数几何的本质区别。
+
+\subsection{指数族给出最干净的例子}
+
+指数族
+
+\[
+p_\theta(x)=h(x)\exp\bigl(\theta^\trans T(x)-A(\theta)\bigr)
+\]
+
+的 score 是 \(\nabla_\theta\log p_\theta(x)=T(x)-\nabla A(\theta)\)，所以
+
+\[
+I(\theta)=\Cov_\theta(T(X))=\nabla^2A(\theta),
+\]
+
+即 log-partition 的 Hessian。Fisher 度量因此是 \(A\) 的 Hessian 度量，也称 Hessian 几何。\(A\) 严格凸（最小表示下）保证度量正定；自然参数空间是一个凸区域，Fisher 几何在其上定义良好。
+
+Bernoulli 的 log-partition 是 \(A(\theta)=\log(1+e^\theta)\)，其二阶导数是 \(e^\theta/(1+e^\theta)^2\)，所以 Fisher 度量为
+
+\[
+g_\theta=\frac{e^\theta}{(1+e^\theta)^2}\,d\theta^2.
+\]
+
+在 logit 坐标 \(\eta=\log(\theta/(1-\theta))\) 下，这变成 \(g_\eta=(1/4)\operatorname{sech}^2(\eta/2)\,d\eta^2\)。两种坐标下的度量形式不同，但几何相同：从 \(\theta=0.5\) 到 \(\theta=0.9\) 的 Fisher 距离，无论用哪种坐标计算都一样。
+
+\subsection{参数空间的边界行为}
+
+Fisher 度量在参数空间边界附近常出现退化或发散。Bernoulli 的 \(\theta\to0\) 或 \(1\) 时，score 方差趋于零（分布几乎确定），Fisher 信息 \(1/(\theta(1-\theta))\to\infty\)——边界在 Fisher 几何下被推到无穷远。这与``最大似然选择最能解释数据的参数''中``边界参数使 MLE 不存在或位于边界''的现象同源：边界处的分布族在几何上不再像内部。
+
+Gaussian 的 \(\sigma^2\to0\) 时，Fisher 信息矩阵的 \(\sigma^2\) 分量也发散。这些边界行为提醒我们：统计流形的几何在参数空间内部良好，在边界附近需要单独处理——紧化、边界坐标或改变模型都是可能的选择。
+
+\subsection{落点}
+
+统计流形把``参数''从``数''提升为``几何点''，Fisher 度量把``参数差''提升为``分布差''。下一节用这个几何重新看优化：梯度下降在 Fisher 几何下长什么样，为什么它比普通梯度下降更稳健。
