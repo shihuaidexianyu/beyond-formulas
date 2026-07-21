@@ -8,6 +8,8 @@
 \item
   生成式分类从 Naive Bayes 到 GDA：标签可见时，先学习各类怎样生成特征，再用 Bayes 公式反推类别。
 \item
+  LDA 与收缩：Fisher 的 Rayleigh 商给出同一判别方向的几何推导；高维下 $\widehat\Sigma^{-1}$ 的谱失真怎样由 Ledoit--Wolf 收缩修复。
+\item
   Gaussian 混合模型让类别成为隐变量：拿走标签后，每个样本属于哪个成分也需要推断，硬聚类变成 posterior responsibility。
 \item
   EM 用下界交替完成隐变量学习：隐变量未知使似然中出现难以拆开的对数求和，EM 用当前后验和参数更新交替推进。
