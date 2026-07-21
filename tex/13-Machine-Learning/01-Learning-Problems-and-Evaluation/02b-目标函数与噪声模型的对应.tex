@@ -1,0 +1,111 @@
+\section{目标函数与噪声模型的对应：从生成机制到优化目标}
+
+前面两篇区分了损失、风险、目标与指标，但留下一个更根本的问题：为什么回归用 MSE、分类用交叉熵？这些选择不是任意的，而是由数据的噪声结构决定的。目标函数是``对世界的假设''的数学形式——选择 MSE 就是假设 Gaussian 噪声，选择交叉熵就是假设 Bernoulli 噪声。
+
+\subsection{先感受困难：一个异常值毁掉整个回归}
+
+考虑简单线性回归 $y_i=\beta x_i+\varepsilon_i$，用 MSE 估计 $\beta$。若数据干净，MSE 给出最优估计；但若混入一个异常值 $(x_{n+1},y_{n+1})=(100,1000)$，MSE 会把它当作``信息量最大的点''——残差平方 $(y-\beta x)^2$ 随距离平方增长，异常值主导目标函数，把 $\widehat\beta$ 拉向自己。
+
+MAE（绝对损失）对这个异常值不敏感：残差线性增长，异常值的影响与它的距离成正比，不会被平方放大。但 MAE 在干净数据上效率低于 MSE——对 Gaussian 噪声，MSE 是最优的（Cramér--Rao 下界），MAE 只是鲁棒的折中。
+
+这个例子揭示了目标函数选择的根本困境：没有``普适最优''的损失，只有``与噪声模型匹配''的损失。MSE 对 Gaussian 噪声最优，MAE 对 Laplace 噪声最优，Huber 对 Gaussian+异常值混合最优。选择损失函数，就是选择对噪声的假设。
+
+\subsection{目标函数 = 负对数似然}
+
+噪声模型决定目标函数的机制是最大似然。设 $Y\mid X=x$ 的条件分布为 $p(y\mid x;\theta)$，对独立样本 $(x_i,y_i)$，似然为
+
+\[
+L(\theta)=\prod_{i=1}^n p(y_i\mid x_i;\theta).
+\]
+
+最大化似然等价于最小化负对数似然
+
+\[
+-\log L(\theta)=-\sum_{i=1}^n\log p(y_i\mid x_i;\theta).
+\]
+
+不同的噪声模型给出不同的负对数似然：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Gaussian 噪声}：$Y=\mu(x)+\varepsilon$，$\varepsilon\sim\mathcal N(0,\sigma^2)$，负对数似然是 $\frac{1}{2\sigma^2}\sum(y_i-\mu(x_i))^2+\text{常数}$——这正是 MSE（差一个常数因子）；
+\item
+  \textbf{Bernoulli 噪声}：$Y\sim\operatorname{Bernoulli}(p(x))$，负对数似然是 $-\sum[y_i\log p(x_i)+(1-y_i)\log(1-p(x_i))]$——这正是交叉熵；
+\item
+  \textbf{Laplace 噪声}：$\varepsilon\sim\operatorname{Laplace}(0,b)$，负对数似然是 $\frac1b\sum|y_i-\mu(x_i)|+\text{常数}$——这正是 MAE；
+\item
+  \textbf{Poisson 噪声}：$Y\sim\operatorname{Poisson}(\lambda(x))$，负对数似然是 $\sum[\lambda(x_i)-y_i\log\lambda(x_i)]$——这是 Poisson 损失。
+\end{itemize}
+
+目标函数不是``评价标准''，而是``对世界的假设''的数学形式。选择 MSE 就是假设 Gaussian 噪声，选择交叉熵就是假设 Bernoulli 噪声。这个对应不是查表，而是变分推断的必然结果：给定生成模型，最大似然给出目标函数。
+
+\subsection{目标函数的形状决定优化几何}
+
+目标函数的形状（凸性、光滑性、增长速率）决定优化的难度与性质：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{MSE 是二次的}：梯度线性，Hessian 常数，凸优化，线性回归有闭式解（正规方程）。但二次增长对异常值敏感——残差平方随距离平方增长；
+\item
+  \textbf{交叉熵是凸的}：梯度含 sigmoid/softmax，无闭式解，需要迭代优化（梯度下降、Newton）。凸性保证全局最优，但条件数可能很差（类别不平衡时）；
+\item
+  \textbf{MAE 是分段线性的}：次梯度（在零点不可导），中位数回归，对异常值鲁棒。但线性增长意味着对 Gaussian 噪声效率低（渐近方差比 MSE 大 $\pi/2$ 倍）；
+\item
+  \textbf{Hinge 是分段线性的}：次梯度，支持向量（稀疏解），几何间隔最大化。不可导点对应决策边界，次梯度提供下降方向。
+\end{itemize}
+
+形状决定优化几何：二次损失给出光滑凸问题，分段线性损失给出非光滑凸问题，0-1 损失给出非凸组合问题。选择损失函数，就是选择优化的几何。
+
+\subsection{目标函数的统计性质决定泛化}
+
+目标函数的统计性质（偏差-方差、校准、proper scoring rule）决定泛化能力：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{偏差-方差}：MSE 对 Gaussian 噪声是有效的（达到 Cramér--Rao 下界），但对异常值高方差；MAE 对异常值低方差，但对 Gaussian 噪声低效。偏差-方差权衡在目标函数选择中已经体现；
+\item
+  \textbf{校准}：交叉熵是 strictly proper scoring rule——最优预测是真实条件概率 $p(y|x)$，不是``最能分开两类的分数''。这保证概率输出可信，可以直接用于决策阈值（Part 11 的统计决策）；
+\item
+  \textbf{替代损失}：0-1 损失是最优的分类目标（Bayes 风险），但不可导。Hinge、logistic、交叉熵都是凸替代——在一定条件下（如 $p(y|x)$ 单调），替代损失的最优解与 0-1 损失一致，但替代损失本身可能过度惩罚``容易分类的点''（logistic）或``边界附近的点''（hinge）。
+\end{itemize}
+
+统计性质决定泛化：MSE 的平方增长给出低偏差但高方差，MAE 的线性增长给出高偏差但低方差，交叉熵的 proper scoring 给出校准概率。
+
+\subsection{目标函数是任务定义的一部分}
+
+目标函数的选择不是孤立的，它与模型类、优化算法、数据生成共同决定最终性能：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{回归}：MSE 假设连续输出、Gaussian 噪声、关心条件均值 $\E[Y|X]$；MAE 假设重尾噪声、关心条件中位数；
+\item
+  \textbf{分类}：交叉熵假设离散输出、Bernoulli/Categorical 噪声、关心条件概率 $P(Y|X)$；Hinge 不关心概率，只关心几何间隔；
+\item
+  \textbf{排序}：pairwise loss（如 RankNet）假设输出有序、关心相对顺序，不是绝对值；
+\item
+  \textbf{生成}：负对数似然假设数据有隐变量（VAE、GMM）、关心分布 $p(x)$ 本身，不是条件分布 $p(y|x)$。
+\end{itemize}
+
+目标函数是任务定义的一部分：选择 MSE 就是选择``预测均值''，选择交叉熵就是选择``预测概率''，选择 pairwise loss 就是选择``预测顺序''。这个选择无法简化为``训练完成后再调一个业务系数''——它从一开始就在选择要估计的统计量。
+
+\subsection{边界清单}
+
+\begin{itemize}
+\tightlist
+\item
+  目标函数与噪声模型匹配时最优，错配时失效：MSE 对 Gaussian 噪声最优，但对 Laplace 噪声低效；交叉熵对 Bernoulli 噪声最优，但对重尾噪声（如 t 分布）可能过度自信；
+\item
+  模型错设时目标函数失效：若真实噪声是混合分布，任何单一噪声假设的目标函数都只是近似；鲁棒方法（Huber、trimmed loss）是折中，不是最优；
+\item
+  替代损失与真实损失的差距：0-1 损失不可导，凸替代（hinge、logistic）在一定条件下一致，但替代损失本身可能过度惩罚某些点；
+\item
+  目标函数与优化算法交互：MSE+线性模型=闭式解，MSE+深度网络=非凸优化；交叉熵+线性模型=凸优化，交叉熵+深度网络=非凸优化。
+\end{itemize}
+
+\subsection{落点}
+
+目标函数的选择由噪声模型决定：MSE 对应 Gaussian 噪声，交叉熵对应 Bernoulli 噪声，MAE 对应 Laplace 噪声。这不是查表，而是最大似然的必然结果——噪声模型给出似然，似然给出目标函数。目标函数的形状决定优化几何（凸性、光滑性、增长速率），统计性质决定泛化（偏差-方差、校准、proper scoring rule），选择目标函数就是选择任务定义（预测均值、概率、顺序还是分布）。这是从``会用损失函数''到``理解损失函数''的关键一步。
