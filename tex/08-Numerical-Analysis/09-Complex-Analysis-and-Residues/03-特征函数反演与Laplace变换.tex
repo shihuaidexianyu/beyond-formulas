@@ -1,0 +1,75 @@
+\section{特征函数反演与 Laplace 变换}
+
+Part 05 的特征函数 $\varphi_X(t)=\E[e^{itX}]$ 唯一确定分布，但``确定''不等于``能算出来''。反演公式把特征函数变回密度，而它的严格推导与计算都依赖复平面上的围道方法。
+
+\subsection{反演公式的两种形式}
+
+若 $X$ 有密度 $f$ 且 $\varphi$ 可积，则
+
+\[
+f(x)=\frac1{2\pi}\int_{-\infty}^{\infty}e^{-itx}\varphi(t)\,dt.
+\]
+
+这是 Fourier 反演的直接应用：$\varphi$ 是 $f$ 的 Fourier 变换（差一个常数），反变换恢复 $f$。若 $X$ 有离散分布，反演公式给出概率质量函数
+
+\[
+p_k=\frac1{2\pi}\int_{-\pi}^{\pi}e^{-itk}\varphi(t)\,dt,
+\qquad k\in\Z,
+\]
+
+即 Fourier 级数的系数公式。
+
+连续情形的反演要求 $\varphi$ 可积（$\int|\varphi|<\infty$），这对应 $f$ 有一定光滑性。若 $\varphi$ 不可积，密度可能不存在（如离散或奇异分布），需要更一般的反演公式（Lévy 反演定理，用截断逼近）。
+
+\subsection{用留数定理计算反演}
+
+特征函数的反演积分常可通过留数定理计算。以 Cauchy 分布为例：其特征函数是 $\varphi(t)=e^{-|t|}$。反演公式给出
+
+\[
+f(x)=\frac1{2\pi}\int_{-\infty}^{\infty}e^{-itx}e^{-|t|}\,dt.
+\]
+
+对 $x>0$，把 $e^{-itx}$ 写为 $e^{tx}$（$t$ 换成 $-t$），积分变成 $\int e^{-t(x+1)}$ 与 $\int e^{t(x-1)}$ 的组合。在复平面 $t=\tau+i\sigma$ 上，对 $x>0$ 沿下半平面闭合围道，利用 $e^{-|t|}$ 的衰减和 Jordan 引理，极点贡献给出
+
+\[
+f(x)=\frac1{\pi(1+x^2)}.
+\]
+
+这正是 Cauchy 密度。计算的关键是把实积分变成复围道积分，利用 $e^{-|t|}$ 在复平面上的衰减控制。
+
+Gaussian 的特征函数反演更简单：$\varphi(t)=e^{-t^2/2}$ 是整函数，反演积分可以直接配方，不需要留数定理。这也是 Gaussian 特殊的原因之一——它的特征函数和密度在同一函数族中。
+
+\subsection{Laplace 变换与生成函数的奇点}
+
+Laplace 变换 $\hat f(s)=\int_0^\infty e^{-sx}f(x)\,dx$ 在 $\operatorname{Re}s>a$ 时收敛，$a$ 由 $f$ 的增长决定。反演 Bromwich 积分
+
+\[
+f(x)=\frac1{2\pi i}\int_{c-i\infty}^{c+i\infty}e^{sx}\hat f(s)\,ds,
+\qquad c>a,
+\]
+
+沿垂直线 $\operatorname{Re}s=c$ 积分。留数定理允许把围道向左移动，经过 $\hat f$ 的奇点，奇点留数给出 $f$ 的渐近项。
+
+生成函数 $G(z)=\sum_k p_kz^k$ 在 $|z|<R$ 内解析，$R$ 是最近奇点的距离。奇点的位置和类型决定系数 $p_k$ 的渐近行为：
+
+\begin{itemize}
+\tightlist
+\item
+  极点 $z=R$ 给出指数增长 $p_k\sim CR^{-k}$；
+\item
+  代数奇点 $(R-z)^{-\alpha}$ 给出 $p_k\sim Ck^{\alpha-1}R^{-k}$；
+\item
+  对数奇点给出对数修正。
+\end{itemize}
+
+这是分析组合学（analytic combinatorics）的核心：生成函数的奇点结构决定计数序列的渐近形状。分枝过程、随机树、组合结构的渐近计数，都依赖这种奇点分析。
+
+\subsection{与本书已有内容的连接}
+
+``特征函数''中 $\varphi_Z(t)=e^{-t^2/2}$ 的计算用围道移动；``生成函数矩母函数与特征函数''中 MGF 的存在性对应 Laplace 变换的收敛域；``大数定律与长期平均''中弱收敛的 Lévy 连续性定理，其证明也用 Fourier 方法。
+
+留数定理和围道移动是这些结果的共同技术基础。它们不是概率论的装饰，而是把``变换--计算--反演''闭环变成可执行操作的工具。
+
+\subsection{落点}
+
+特征函数反演和 Laplace 变换把复分析从``积分技巧''变成概率论的计算工具。反演公式的合法性、奇点决定渐近、以及围道移动的技术，共同支撑了变换方法在概率论中的有效性。至此，Part 08 的 Fourier 与谱方法有了复分析的完整地基：实轴上的计算只是投影，复平面上的结构才是本质。

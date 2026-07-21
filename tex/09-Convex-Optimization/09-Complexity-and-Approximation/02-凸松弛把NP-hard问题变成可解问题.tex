@@ -1,0 +1,98 @@
+\section{凸松弛把 NP-hard 问题变成可解问题}
+
+NP-hard 问题没有多项式精确算法，但许多可以写成``凸问题加非凸约束''的形式。去掉非凸约束（或把它换成凸替代），就得到凸松弛——一个可解的问题，其最优值给出原问题的界，其解有时还能恢复或近似原问题的解。
+
+\subsection{整数规划的 LP 松弛：去掉整数约束}
+
+整数线性规划（ILP）是 NP-hard 的：
+
+\[
+\begin{aligned}
+\min\quad&c^\trans x\\
+\text{s.t.}\quad&Ax\le b,\\
+&x\in\{0,1\}^n.
+\end{aligned}
+\]
+
+把 $x\in\{0,1\}^n$ 换成 $x\in[0,1]^n$，得到 LP 松弛，多项式时间可解。LP 最优值是 ILP 最优值的下界（可行域变大，最小化问题的值变小）。
+
+松弛差距（relaxation gap）是 ILP 最优值与 LP 最优值之比。若 LP 解恰好是整数，它就是 ILP 最优解；否则需要舍入（rounding）把分数解变成整数解。舍入的质量决定近似比。
+
+经典例子是最小顶点覆盖：ILP 中 $x_i\in\{0,1\}$ 表示是否选顶点 $i$，目标是最小化 $\sum_i x_i$，约束是每条边至少一个端点被选。LP 松弛后，若所有 $x_i=1/2$，舍入到 $1$ 给出 2-近似——LP 值是最优值的一半，舍入解是最优值的两倍。
+
+\subsection{秩约束的核范数松弛：去掉低秩要求}
+
+矩阵补全（``矩阵补全从缺失条目到低秩正则''）的理想形式是
+
+\[
+\min_X\operatorname{rank}(X)
+\quad\text{s.t.}\quad
+P_\Omega(X)=P_\Omega(M).
+\]
+
+秩是非凸的（两个低秩矩阵的和可以高秩）。核范数 $\|X\|_*=\sum_i\sigma_i(X)$ 是秩的凸包络（在低秩矩阵集合上），松弛后变成半正定规划（SDP），多项式时间可解。
+
+核范数松弛在矩阵补全、系统辨识、相位恢复中给出可证明的恢复保证：在适当的不相干性（incoherence）和采样条件下，核范数最小化解以高概率恢复真实低秩矩阵。这不是所有 NP-hard 秩问题的通用解法，而是特定结构下的成功案例——凸松弛在特定几何中精确，在一般情形中只是近似。
+
+\subsection{最大割的 SDP 松弛：Goemans--Williamson}
+
+最大割把图的顶点分成两组，使跨组边数最大。写成二次整数规划：
+
+\[
+\begin{aligned}
+\max\quad&\frac12\sum_{(i,j)\in E}(1-x_ix_j)\\
+\text{s.t.}\quad&x_i\in\{-1,+1\}.
+\end{aligned}
+\]
+
+把 $x_i\in\R$ 提升为向量 $v_i\in\R^n$、$\|v_i\|=1$，目标变成最大化 $\frac12\sum(1-\langle v_i,v_j\rangle)$。这是向量规划，等价于半正定规划（Gram 矩阵 $X_{ij}=\langle v_i,v_j\rangle$ 半正定、对角为 1）。
+
+Goemans--Williamson 算法解 SDP 后，用一个随机超平面把向量分成两组：选随机单位向量 $r$，令 $x_i=\sign(\langle v_i,r\rangle)$。分析表明，这个随机舍入的期望近似比为
+
+\[
+\alpha_{\mathrm{GW}}=\min_{0\le\theta\le\pi}\frac{2}{\pi}\frac{\theta}{1-\cos\theta}\approx0.878.
+\]
+
+这是多项式时间算法对最大割的最好已知保证。若唯一游戏猜想（Unique Games Conjecture）成立，0.878 是多项式时间可达的最优近似比——近似 hardness 与近似算法在这个问题中相遇。
+
+\subsection{松弛的质量由什么决定}
+
+不是所有凸松弛都同样好。决定质量的因素包括：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{松弛差距}：原问题最优值与松弛最优值之比。差距小，松弛紧；差距大，松弛松。
+\item
+  \textbf{舍入质量}：把松弛解变回原问题可行解的方法。随机舍入、阈值化、迭代舍入各有适用场景。
+\item
+  \textbf{结构利用}：松弛是否利用了问题的特殊结构（如图的稀疏性、矩阵的低秩性）。通用松弛通常不如结构松弛紧。
+\end{itemize}
+
+凸松弛不是免费的：它把 NP-hard 问题变成可解问题，但解的质量由松弛差距和舍入方法决定。理解这三者，才能判断一个松弛是否值得用。
+
+\subsection{近似算法的最坏情况保证}
+
+近似算法的核心指标是近似比：对最小化问题，算法给出解的值 $\mathrm{ALG}$ 与最优值 $\mathrm{OPT}$ 的比 $\mathrm{ALG}/\mathrm{OPT}\le\rho$；对最大化问题，比 $\mathrm{OPT}/\mathrm{ALG}\le\rho$。$\rho$ 越小越好，$\rho=1$ 是最优。
+
+经典结果包括：
+
+\begin{itemize}
+\tightlist
+\item
+  最大割：0.878（Goemans--Williamson，SDP 松弛）；
+\item
+  旅行商（度量 TSP）：1.5（Christofides，最小生成树 + 最小权匹配）；
+\item
+  顶点覆盖：2（LP 舍入或贪心匹配）；
+\item
+  集合覆盖：$\ln n$（贪心，且是近似最优的，除非 P = NP）。
+\end{itemize}
+
+这些保证都是最坏情况的：对任何实例，算法输出与最优的比都不超过 $\rho$。实际表现通常更好，但保证让我们能够比较不同算法的最坏风险。
+
+近似 hardness 研究近似比的下界：在 P $\ne$ NP 或更强假设下，某些问题不能在多项式时间内近似到某个比值以下。最大割的 0.878 若唯一游戏猜想成立就是最优；集合覆盖的 $\ln n$ 在 P $\ne$ NP 下就是最优。近似算法与近似 hardness 一起，给出问题``可近似程度''的完整图景。
+
+\subsection{落点}
+
+凸松弛把 NP-hard 问题变成可解问题，近似算法给出最坏情况保证，近似 hardness 划定保证的边界。三者共同构成``困难问题能做什么''的完整回答。这与凸优化的关系是：凸松弛是凸优化的应用，近似算法是松弛质量的度量，近似 hardness 是复杂度的边界。理解这三层，才能在遇到 NP-hard 问题时做出有根据的算法选择。
