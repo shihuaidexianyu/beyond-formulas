@@ -1,0 +1,56 @@
+\section{神经网络的函数空间视角}
+
+神经网络通常被看作参数化函数 $f_\theta(x)$，参数 $\theta$ 通过梯度下降更新。但在无限宽极限下，网络有另一种描述：它变成核方法（NTK）或 Wasserstein 梯度流（mean-field）。这些视角揭示了深度学习的本质结构。
+
+\subsection{NTK：无限宽网络作为核方法}
+
+考虑宽度为 $m$ 的全连接网络 $f_\theta(x)=\frac{1}{\sqrt m}\sum_{i=1}^m a_i\sigma(w_i^\trans x+b_i)$。当 $m\to\infty$ 且学习率足够小时，参数 $\theta$ 的变化可以线性化：
+
+\[
+f_{\theta_t}(x)\approx f_{\theta_0}(x)+\langle\nabla_\theta f_{\theta_0}(x),\theta_t-\theta_0\rangle.
+\]
+
+在这个线性化下，网络训练等价于核回归，核函数为
+
+\[
+K(x,x')=\E_{w,b}\left[\sigma'(w^\trans x+b)\sigma'(w^\trans x'+b)xx'^\trans\right],
+\]
+
+即神经正切核（NTK）。NTK 是固定的（不随训练改变），网络学习等价于在这个固定核下的核回归。
+
+NTK 解释了为什么无限宽网络容易训练：它们本质上是凸的核方法，没有非凸优化的困难。但它也解释了为什么有限宽网络可能更强大：有限宽网络的 NTK 随训练改变，可以学习特征。
+
+\subsection{mean-field 极限：网络动力学作为 Wasserstein 梯度流}
+
+NTK 视角固定了核，mean-field 视角允许核随训练演化。考虑两层网络 $f(x)=\frac1m\sum_{i=1}^m a_i\sigma(w_i^\trans x)$，把神经元看作粒子，参数分布 $\rho_m=\frac1m\sum\delta_{(a_i,w_i)}$ 是经验分布。当 $m\to\infty$，$\rho_m$ 收敛到连续分布 $\rho$，网络训练等价于 $\rho$ 的 Wasserstein 梯度流：
+
+\[
+\partial_t\rho=\nabla\cdot\left(\rho\nabla\frac{\delta F}{\delta\rho}\right),
+\]
+
+其中 $F(\rho)$ 是目标函数（如均方误差）。
+
+mean-field 视角揭示了深度学习的本质：不是``参数优化''，而是``概率分布的演化''。神经网络的训练是寻找最优神经元分布，这个分布在 Wasserstein 空间中演化。
+
+\subsection{两种视角的互补}
+
+NTK 和 mean-field 是同一现象的两种极限：NTK 固定核（学习率小、宽度大），mean-field 允许核演化（学习率大、宽度大）。实际网络介于两者之间：宽度有限，核随训练改变，但改变有限。
+
+这两种视角解释了深度学习的不同现象：
+\begin{itemize}
+\tightlist
+\item
+  NTK 解释了为什么某些网络容易训练（接近凸问题），为什么泛化好（核方法的稳定性）；
+\item
+  mean-field 解释了为什么网络能学习特征（分布演化），为什么需要非线性激活（否则分布不变）。
+\end{itemize}
+
+\subsection{函数空间视角的边界}
+
+NTK 和 mean-field 都是无限宽极限，实际网络有限宽。有限宽效应（NTK 的演化、mean-field 的涨落）是理解实际网络的关键。此外，这些视角主要针对全连接网络，卷积、注意力等结构的对应理论仍在发展中。
+
+函数空间视角不是替代参数空间视角，而是补充：参数空间视角适合实际计算，函数空间视角适合理论理解。两者结合，才能既会训练网络，也理解为什么训练有效。
+
+\subsection{落点}
+
+神经网络的函数空间视角把深度学习从``参数优化''提升为``核方法''或``分布演化''。NTK 解释了无限宽网络的凸性，mean-field 解释了特征学习的动力学。理解这些，就是理解为什么深度网络能工作、什么时候会失效、以及失效时应该回到哪里。
