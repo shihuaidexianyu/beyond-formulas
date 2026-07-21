@@ -1,0 +1,127 @@
+\section{ARCH 与 GARCH 的随机过程结构}
+
+ARCH 与 GARCH 把条件方差写成自回归随机过程。参数控制冲击的短期影响、波动的持久性、以及新信息与旧波动的相对权重。平稳性条件来自随机过程理论，不是任意的技术假设。
+
+\subsection{ARCH(q)：方差依赖历史冲击}
+
+ARCH(q) 模型由 Engle（1982）提出：
+
+\[
+\sigma_t^2=\omega+\alpha_1\varepsilon_{t-1}^2+\cdots+\alpha_q\varepsilon_{t-q}^2,
+\]
+
+其中 $\varepsilon_t=\sigma_tz_t$ 是残差（非标准化），$\omega>0$，$\alpha_i\ge0$。
+
+ARCH(1) 是最简单的形式：$\sigma_t^2=\omega+\alpha\varepsilon_{t-1}^2$。昨天的冲击平方 $\varepsilon_{t-1}^2$ 大，今天的方差就大——波动率聚集自然产生。
+
+ARCH(1) 的平稳性条件可以从随机过程推导。把 $\varepsilon_t^2$ 写成
+
+\[
+\varepsilon_t^2=\sigma_t^2z_t^2=(\omega+\alpha\varepsilon_{t-1}^2)z_t^2.
+\]
+
+取期望（假设 $z_t$ 与 $\varepsilon_{t-1}$ 独立，$\E z_t^2=1$）：
+
+\[
+\E[\varepsilon_t^2]=\omega+\alpha\E[\varepsilon_{t-1}^2].
+\]
+
+若 $\E[\varepsilon_t^2]$ 收敛到常数 $v$，则 $v=\omega+\alpha v$，即 $v=\omega/(1-\alpha)$。这要求 $\alpha<1$；$\alpha\ge1$ 时方差发散或不存在。
+
+更严格的平稳性分析（涉及 $\varepsilon_t^2$ 作为随机差分方程的解）给出相同条件：$\alpha<1$ 时 $\varepsilon_t^2$ 是平稳的 AR(1) 型过程，$\alpha\ge1$ 时非平稳。
+
+ARCH(q) 的平稳性条件是 $\sum_{i=1}^q\alpha_i<1$，推导类似但涉及高阶差分方程。
+
+\subsection{GARCH(p,q)：方差也依赖历史方差}
+
+GARCH(p,q) 由 Bollerslev（1986）推广，把条件方差写成
+
+\[
+\sigma_t^2=\omega+\sum_{i=1}^q\alpha_i\varepsilon_{t-i}^2+\sum_{j=1}^p\beta_j\sigma_{t-j}^2.
+\]
+
+GARCH(1,1) 是最常用的形式：
+
+\[
+\sigma_t^2=\omega+\alpha\varepsilon_{t-1}^2+\beta\sigma_{t-1}^2.
+\]
+
+GARCH(1,1) 的平稳性条件推导：令 $v_t=\varepsilon_t^2-\sigma_t^2$（方差创新），则
+
+\[
+\varepsilon_t^2=\omega+(\alpha+\beta)\varepsilon_{t-1}^2-\beta v_{t-1}+v_t.
+\]
+
+取期望（$\E v_t=0$，因为 $\E[\varepsilon_t^2]=\E[\sigma_t^2]$）：
+
+\[
+\E[\varepsilon_t^2]=\omega+(\alpha+\beta)\E[\varepsilon_{t-1}^2].
+\]
+
+若 $\E[\varepsilon_t^2]$ 收敛到 $v$，则 $v=\omega+(\alpha+\beta)v$，即 $v=\omega/(1-\alpha-\beta)$。这要求 $\alpha+\beta<1$；$\alpha+\beta\ge1$ 时方差发散或不存在。
+
+参数的经济含义：
+
+\begin{itemize}
+\tightlist
+\item
+  $\omega$：长期平均方差的基准水平（$\omega/(1-\alpha-\beta)$ 是无条件方差）；
+\item
+  $\alpha$：新冲击的短期影响（``新闻''对波动率的即时冲击）；
+\item
+  $\beta$：旧波动的持久性（``旧波动''的衰减速率）。
+\end{itemize}
+
+$\alpha+\beta$ 接近 1 时，波动率高度持久——冲击的影响持续很久。$\alpha+\beta\ge1$ 时，方差爆炸或随机游走，非平稳。
+
+\subsection{GARCH 与 ARMA 的对应}
+
+GARCH(1,1) 的 $\varepsilon_t^2$ 方程可以写成 ARMA(1,1) 形式：
+
+\[
+\varepsilon_t^2=\omega+(\alpha+\beta)\varepsilon_{t-1}^2-\beta v_{t-1}+v_t.
+\]
+
+这是 ARMA(1,1)：$\varepsilon_t^2$ 是自回归项 $(\alpha+\beta)\varepsilon_{t-1}^2$ 加滑动平均项 $-\beta v_{t-1}+v_t$。GARCH 的平稳性条件 $\alpha+\beta<1$ 对应 ARMA 的平稳性条件。
+
+这个对应解释了 GARCH 的 ACF：$\varepsilon_t^2$ 的 ACF 指数衰减，速率由 $\alpha+\beta$ 决定。GARCH(1,1) 的 $\varepsilon_t^2$ 是 ARMA(1,1) 过程，其 ACF 为
+
+\[
+\rho_1=\frac{\alpha(1-\beta^2-\alpha\beta)}{1-\beta^2-2\alpha\beta},
+\qquad
+\rho_k=(\alpha+\beta)\rho_{k-1}\ (k\ge2).
+\]
+
+这是 GARCH 的指纹：平方序列的 ACF 首值后指数衰减。
+
+\subsection{GARCH 的预测与矩结构}
+
+GARCH(1,1) 的 $h$ 步预测方差为
+
+\[
+\E[\sigma_{t+h}^2\mid\mathcal F_t]
+=\omega\frac{1-(\alpha+\beta)^h}{1-\alpha-\beta}
++(\alpha+\beta)^h\sigma_t^2.
+\]
+
+预测方差从当前值 $\sigma_t^2$ 指数回归到长期平均 $\omega/(1-\alpha-\beta)$，回归速率由 $\alpha+\beta$ 决定。$\alpha+\beta$ 越大，回归越慢，波动率预测越持久。
+
+GARCH 的高阶矩存在性依赖更严格的条件。$\E[\varepsilon_t^4]$ 存在要求 $(\alpha+\beta)^2+\alpha^2(\E z_t^4-1)<1$（对 Gaussian $z_t$，这是 $(\alpha+\beta)^2+2\alpha^2<1$）。厚尾分布（Student-t）的矩条件更苛刻。
+
+\subsection{GARCH 的边界}
+
+标准 GARCH 假设：创新 $z_t$ 独立同分布、条件方差对称响应正负冲击、参数恒定。以下情况需要扩展：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{杠杆效应}：负冲击比正冲击引起更大波动，需要 EGARCH 或 GJR-GARCH；
+\item
+  \textbf{长记忆}：$\varepsilon_t^2$ 的 ACF 按幂律衰减，需要 FIGARCH（分数积分 GARCH）；
+\item
+  \textbf{结构突变}：参数随时间变化，需要 Markov 转换 GARCH 或时变参数模型；
+\item
+  \textbf{多元}：多个相关序列的协方差矩阵，需要 DCC-GARCH 或 BEKK。
+\end{itemize}
+
+GARCH 的价值在于它是``条件方差建模的最简完整框架''：参数少、可解释、平稳性条件明确。下一节看 GARCH 的估计、诊断与扩展。

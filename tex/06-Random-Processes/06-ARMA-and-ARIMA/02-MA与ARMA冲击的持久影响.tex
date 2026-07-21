@@ -1,0 +1,66 @@
+\section{MA 与 ARMA：冲击的持久影响}
+
+AR 模型假设未来由历史值直接决定，但许多序列的依赖是间接的：一个冲击（政策变化、设备故障、市场恐慌）影响未来几期，然后逐渐消失。滑动平均（MA）模型捕捉这种``冲击的持久影响''，ARMA 把 AR 与 MA 结合起来。
+
+\subsection{MA(q) 的定义与可逆性}
+
+MA(q) 模型为
+
+\[
+X_t=\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_q\varepsilon_{t-q},
+\]
+
+其中 $\varepsilon_t$ 是白噪声。与 AR 不同，MA 的当前值不依赖历史值，而依赖历史冲击。
+
+MA(q) 总是平稳的（有限白噪声加权和），但其 ACF 有特征形状：$\rho_k=0$ 对 $k>q$，即 ACF 在滞后 $q$ 后截尾。这与 AR 的 PACF 截尾形成对偶：AR 的 ACF 拖尾、PACF 截尾；MA 的 ACF 截尾、PACF 拖尾。
+
+可逆性条件是 MA 特有的：要求 $\theta(B)=1+\theta_1B+\cdots+\theta_qB^q=0$ 的根在单位圆外。这保证 MA 可以写成 AR($\infty$) 形式，即当前冲击可以用历史值线性表示。可逆性对预测和参数估计都重要——不可逆的 MA 有多个参数化产生相同 ACF，识别困难。
+
+\subsection{ARMA(p,q) 的混合结构}
+
+ARMA(p,q) 模型为
+
+\[
+X_t=\phi_1X_{t-1}+\cdots+\phi_pX_{t-p}
++\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_q\varepsilon_{t-q}.
+\]
+
+用滞后算子写为 $\phi(B)X_t=\theta(B)\varepsilon_t$。平稳性由 $\phi(B)$ 的根决定（与 AR 相同），可逆性由 $\theta(B)$ 的根决定（与 MA 相同）。
+
+ARMA 的 ACF 与 PACF 都拖尾，不能单独用来识别阶数。识别 ARMA 需要更细致的工具：扩展 ACF（EACF）、信息准则（AIC/BIC）或经验试错（先拟合 AR，检查残差的 ACF 是否像 MA）。
+
+ARMA(1,1) 是最简单的混合模型：$X_t=\phi X_{t-1}+\varepsilon_t+\theta\varepsilon_{t-1}$。其 ACF 为
+
+\[
+\rho_1=\frac{(1+\phi\theta)(\phi+\theta)}{1+\theta^2+2\phi\theta},
+\qquad
+\rho_k=\phi\rho_{k-1}\ (k\ge2),
+\]
+
+即滞后 1 后指数衰减，但首值由 $\phi,\theta$ 共同决定。这种``AR 的衰减 + MA 的首值调整''是 ARMA 的典型特征。
+
+\subsection{ARMA 与线性动力系统}
+
+ARMA 是线性动力系统的一种参数化。状态空间形式（Part 13 的 Kalman filter）更一般：状态可以不可观测，观测可以是状态的线性组合。ARMA 是状态空间模型的特殊情形——状态就是历史值与历史冲击。
+
+这个联系解释了 ARMA 的预测与 Kalman 滤波的关系：ARMA 预测是最小均方误差预测，与 Kalman 预测在平稳 ARMA 下等价。状态空间框架的优势在于处理时变参数、缺失数据、以及非平稳初始条件；ARMA 的优势在于参数少、识别直接、理论成熟。
+
+\subsection{ARMA 的边界}
+
+ARMA 假设线性、平稳、白噪声创新。以下情况需要扩展：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{非平稳}：单位根或趋势，需要 ARIMA 或状态空间；
+\item
+  \textbf{长记忆}：ACF 按幂律衰减，需要 ARFIMA；
+\item
+  \textbf{非线性}：条件均值非线性，需要 TAR、STAR 或神经网络；
+\item
+  \textbf{异方差}：创新方差时变，需要 GARCH；
+\item
+  \textbf{多元}：多个相关序列，需要 VAR（向量 AR）。
+\end{itemize}
+
+ARMA 的价值在于它是``最简的完整模型''：有明确的识别工具（ACF/PACF）、有效的估计方法（Yule-Walker/MLE）、以及严格的预测理论（Box-Jenkins）。下一节处理非平稳序列，把 ARMA 扩展为 ARIMA。

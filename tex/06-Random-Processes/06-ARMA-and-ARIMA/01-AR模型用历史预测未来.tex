@@ -1,0 +1,105 @@
+\section{AR 模型用历史预测未来}
+
+最简单的时序依赖是``下一个值与最近几个值线性相关''。自回归（AR）模型把这个直觉写成随机差分方程，并给出从数据到模型的完整路径。
+
+\subsection{AR(p) 的定义与平稳性}
+
+AR(p) 模型为
+
+\[
+X_t=\phi_1X_{t-1}+\cdots+\phi_pX_{t-p}+\varepsilon_t,
+\]
+
+其中 $\varepsilon_t$ 是白噪声（零均值、方差 $\sigma^2$、不相关）。参数 $\phi_1,\ldots,\phi_p$ 决定历史怎样影响未来。
+
+平稳性条件用滞后算子 $B$（$BX_t=X_{t-1}$）写最清楚：AR(p) 变成
+
+\[
+\phi(B)X_t=\varepsilon_t,
+\qquad
+\phi(z)=1-\phi_1z-\cdots-\phi_pz^p.
+\]
+
+过程平稳当且仅当特征多项式 $\phi(z)=0$ 的所有根满足 $|z|>1$（在单位圆外）。这保证 $X_t$ 可以写成白噪声的绝对可和线性组合（$X_t=\sum_{j=0}^\infty\psi_j\varepsilon_{t-j}$），均值与协方差函数不随时间变化。
+
+AR(1) 是最简例子：$X_t=\phi X_{t-1}+\varepsilon_t$，平稳当且仅当 $|\phi|<1$。此时 $X_t$ 是均值为零、方差 $\sigma^2/(1-\phi^2)$、ACF 为 $\rho_k=\phi^{|k|}$ 的平稳过程——指数衰减的自相关是 AR(1) 的指纹。$\phi\to1$ 时方差发散，$\phi=1$ 是随机游走（非平稳）。
+
+\subsection{ACF 与 PACF：识别阶数的两个工具}
+
+自相关函数（ACF）$\rho_k=\gamma_k/\gamma_0$ 衡量 $X_t$ 与 $X_{t-k}$ 的相关性。偏自相关函数（PACF）$\alpha_k$ 衡量在控制中间滞后 $X_{t-1},\ldots,X_{t-k+1}$ 后，$X_t$ 与 $X_{t-k}$ 的剩余相关性——即``去掉间接影响后，第 $k$ 步历史还有多大直接作用''。
+
+AR(p) 的 ACF 指数衰减（或振荡衰减），PACF 在滞后 $p$ 后截尾（$\alpha_k=0$ 对 $k>p$）。这是识别 AR 阶数的核心特征：PACF 截尾点给出 $p$。
+
+计算 PACF 的实用方法是逐步拟合 AR(k)，取最后一个系数 $\widehat\phi_{kk}$ 作为 $\alpha_k$ 的估计。样本 PACF 在 $k>p$ 时应在 $\pm1.96/\sqrt n$ 内随机波动，超出则提示阶数不足。
+
+\subsection{Yule-Walker 方程：从 ACF 到参数}
+
+AR(p) 的参数与 ACF 由 Yule-Walker 方程连接。用 $X_{t-k}$ 乘 AR(p) 方程并取期望，得
+
+\[
+\gamma_k=\phi_1\gamma_{k-1}+\cdots+\phi_p\gamma_{k-p},
+\qquad k\ge1.
+\]
+
+取 $k=1,\ldots,p$，写成矩阵形式
+
+\[
+\begin{pmatrix}
+\gamma_1\\ \vdots\\ \gamma_p
+\end{pmatrix}
+=
+\begin{pmatrix}
+\gamma_0 & \gamma_1 & \cdots & \gamma_{p-1}\\
+\gamma_1 & \gamma_0 & \cdots & \gamma_{p-2}\\
+\vdots & \vdots & \ddots & \vdots\\
+\gamma_{p-1} & \gamma_{p-2} & \cdots & \gamma_0
+\end{pmatrix}
+\begin{pmatrix}
+\phi_1\\ \vdots\\ \phi_p
+\end{pmatrix}.
+\]
+
+由样本 ACF 估计 $\widehat\gamma_k$，解这个线性系统得 Yule-Walker 估计 $\widehat\phi_j$。它等价于最小二乘，计算简单且保证平稳性（在适当条件下）。
+
+Yule-Walker 估计的渐近性质依赖平稳性与白噪声假设。若序列有趋势或单位根，估计会偏向虚假的高阶 AR——这正是 ARIMA 需要处理的问题（第四节）。
+
+\subsection{一个可算的例子：AR(2)}
+
+AR(2) 模型 $X_t=\phi_1X_{t-1}+\phi_2X_{t-2}+\varepsilon_t$ 的平稳性条件是特征方程 $1-\phi_1z-\phi_2z^2=0$ 的根在单位圆外，等价于
+
+\[
+\phi_2+\phi_1<1,\qquad
+\phi_2-\phi_1<1,\qquad
+|\phi_2|<1.
+\]
+
+Yule-Walker 方程为
+
+\[
+\begin{aligned}
+\rho_1&=\phi_1+\phi_2\rho_1,\\
+\rho_2&=\phi_1\rho_1+\phi_2.
+\end{aligned}
+\]
+
+给定 $\rho_1,\rho_2$，解出 $\phi_1,\phi_2$。若 $\rho_1=0.8,\rho_2=0.5$，解得 $\phi_1\approx0.61,\phi_2\approx0.01$——接近 AR(1)，PACF 在滞后 2 处应接近零。
+
+这个例子说明 AR(2) 的 ACF 仍是指数衰减（差分方程的解），但 PACF 在滞后 2 后截尾——与 AR(1) 的 PACF 在滞后 1 后截尾形成对照。
+
+\subsection{AR 模型的边界}
+
+AR 模型假设线性依赖与白噪声创新。以下情况需要扩展：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{长记忆}：ACF 按幂律衰减而非指数，需要 ARFIMA（分数差分）；
+\item
+  \textbf{非线性}：条件均值非线性，需要 TAR（门限 AR）或神经网络；
+\item
+  \textbf{异方差}：$\varepsilon_t$ 的方差随时间变化，需要 GARCH（Part 11 的对应单元）；
+\item
+  \textbf{结构突变}：参数随时间变化，需要状态空间模型或变点检测。
+\end{itemize}
+
+AR 是时间序列分析的起点，不是终点。它的价值在于：给定平稳序列，AR 提供可解释、可计算、可诊断的基线模型。下一节把 MA 与 ARMA 加入，处理冲击的持久影响。

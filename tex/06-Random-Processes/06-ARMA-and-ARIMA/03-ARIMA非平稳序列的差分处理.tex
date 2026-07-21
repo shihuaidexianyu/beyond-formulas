@@ -1,0 +1,86 @@
+\section{ARIMA：非平稳序列的差分处理}
+
+许多实际序列——股票价格、GDP、人口——不是平稳的：均值随时间增长，方差可能扩大，ACF 衰减极慢。ARIMA（自回归积分滑动平均）的处理方式是：先差分直到平稳，再拟合 ARMA。
+
+\subsection{单位根与随机游走}
+
+AR(1) 模型 $X_t=\phi X_{t-1}+\varepsilon_t$ 在 $\phi=1$ 时变成随机游走：
+
+\[
+X_t=X_{t-1}+\varepsilon_t,
+\qquad
+X_t=X_0+\sum_{j=1}^t\varepsilon_j.
+\]
+
+随机游走的方差随时间增长（$\Var(X_t)=t\sigma^2$），ACF 衰减极慢（$\rho_k=\sqrt{1-k/t}\approx1$ 对 $k\ll t$），且不可预测长期位置——最好的预测是``明天等于今天''。这就是单位根过程：特征方程 $1-\phi z=0$ 的根 $z=1$ 在单位圆上。
+
+单位根检验（ADF、KPSS）区分平稳与单位根。ADF 检验的原假设是``有单位根''（非平稳），拒绝它支持平稳；KPSS 的原假设是``平稳''，拒绝它支持单位根。两者互补，应结合使用。
+
+\subsection{差分平稳 vs 趋势平稳}
+
+非平稳有两种机制，处理方式完全不同：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{差分平稳（DS）}：$X_t$ 有单位根，差分后平稳。一阶差分 $\Delta X_t=X_t-X_{t-1}$ 消除随机趋势，二阶差分 $\Delta^2X_t$ 处理更复杂的情形。
+\item
+  \textbf{趋势平稳（TS）}：$X_t$ 有确定性趋势，去趋势后平稳。拟合 $X_t=\alpha+\beta t+Y_t$（$Y_t$ 平稳），用残差 $Y_t$ 建模。
+\end{itemize}
+
+混淆 DS 与 TS 是常见错误：对 DS 序列去趋势会留下单位根（虚假回归），对 TS 序列差分会引入 MA 单位根（过度差分）。判断依据：DS 序列的方差随时间增长，TS 序列的方差恒定；DS 序列的 ACF 衰减极慢，TS 序列去趋势后 ACF 正常。
+
+金融价格通常是 DS（对数差分后平稳），宏观变量可能是 TS 或 DS，需要检验。
+
+\subsection{ARIMA(p,d,q) 的完整形式}
+
+ARIMA(p,d,q) 模型为
+
+\[
+\phi(B)(1-B)^dX_t=\theta(B)\varepsilon_t,
+\]
+
+其中 $d$ 是差分阶数，$\phi(B)$ 与 $\theta(B)$ 是 ARMA 部分。$(1-B)^d$ 是差分算子：$d=1$ 是一阶差分，$d=2$ 是二阶差分。
+
+ARIMA(0,1,0) 是随机游走；ARIMA(1,1,0) 是差分后的 AR(1)；ARIMA(0,1,1) 是指数平滑的 ARIMA 形式（简单指数平滑对应 ARIMA(0,1,1) 的特定参数）。 Holt 线性趋势方法对应 ARIMA(0,2,2)。
+
+差分阶数 $d$ 的选择：从 $d=0$ 开始，逐步增加直到序列平稳（ACF 快速衰减、单位根检验通过）。通常 $d\le2$；$d>2$ 很少见，且可能掩盖了结构变化或模型误设。
+
+\subsection{Box-Jenkins 方法论：识别-估计-诊断-预测}
+
+Box-Jenkins 是 ARIMA 建模的标准流程，四步循环：
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{识别}：检查平稳性（ACF 衰减速度、单位根检验），确定 $d$；用 ACF/PACF 或 EACF 初步确定 $p,q$；用 AIC/BIC 比较候选。
+\item
+  \textbf{估计}：Yule-Walker（AR）、最大似然（ARMA/ARIMA）或条件最小二乘。MLE 更一般但计算复杂，需要处理初始条件。
+\item
+  \textbf{诊断}：检查残差是否白噪声（Ljung-Box 检验）、是否正态（QQ 图）、是否同方差（残差图）。若残差有结构，回到识别步修改模型。
+\item
+  \textbf{预测}：用估计的模型计算未来值与预测区间。ARIMA 预测是最小均方误差预测，预测区间假设创新正态。
+\end{enumerate}
+
+这个流程不是一次性的：诊断发现问题时回到识别，直到残差通过检验。Box-Jenkins 的价值在于它把``建模''从``拟合''提升为``迭代验证''。
+
+\subsection{ARIMA 的边界}
+
+ARIMA 假设线性、差分平稳、白噪声创新。以下情况需要扩展：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{结构突变}：参数随时间变化，需要状态空间或变点检测；
+\item
+  \textbf{长记忆}：ACF 按幂律衰减，需要 ARFIMA（分数差分 $d\in(0,0.5)$）；
+\item
+  \textbf{非线性}：条件均值非线性，需要 TAR、STAR 或神经网络；
+\item
+  \textbf{异方差}：创新方差时变，需要 GARCH；
+\item
+  \textbf{多元}：多个相关序列，需要 VAR 或协整分析。
+\end{itemize}
+
+ARIMA 是时间序列分析的``经典学派''：参数少、可解释、理论成熟。它的局限在于假设较强；它的优势在于这些假设可以检验，且检验失败时有明确的扩展方向。下一节把 ARIMA 与状态空间、机器学习连接起来，看它们在什么场景下各自适用。

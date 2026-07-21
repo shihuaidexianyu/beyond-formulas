@@ -1,0 +1,87 @@
+\section{GARCH 的估计、诊断与扩展}
+
+GARCH 模型的价值在于可估计、可检验、可扩展。最大似然给出标准估计方法，标准化残差检验给出诊断工具，EGARCH/GJR-GARCH 给出对杠杆效应的处理。
+
+\subsection{最大似然估计}
+
+GARCH 模型的似然函数由标准化创新的密度给出。若 $z_t\sim\mathcal N(0,1)$，则 $X_t\mid\mathcal F_{t-1}\sim\mathcal N(0,\sigma_t^2)$，对数似然为
+
+\[
+\ell(\theta)
+=-\frac12\sum_{t=1}^T
+\left(
+\log(2\pi)+\log\sigma_t^2+\frac{X_t^2}{\sigma_t^2}
+\right),
+\]
+
+其中 $\theta=(\omega,\alpha,\beta)$。似然函数非线性（$\sigma_t^2$ 依赖参数），需要数值优化。
+
+初始方差 $\sigma_0^2$ 的处理：常用无条件方差 $\omega/(1-\alpha-\beta)$ 或样本方差。优化通常用 BFGS 或 Nelder-Mead，需要约束 $\omega>0,\alpha\ge0,\beta\ge0,\alpha+\beta<1$。
+
+Student-t 创新更稳健：实际数据的尾部常比 Gaussian 厚，Student-t 分布的额外自由度参数 $\nu$ 可以捕捉厚尾。$\nu\to\infty$ 时退化为 Gaussian，$\nu$ 小（如 5-10）时尾部更厚。
+
+估计的标准误由观测信息矩阵的逆给出。GARCH 参数通常高度相关（$\alpha$ 与 $\beta$ 的估计相关性强），需要谨慎解释单个参数的显著性。
+
+拟似然（quasi-MLE）放宽分布假设：即使 $z_t$ 不是 Gaussian，Gaussian 似然仍给出一致估计（在适当矩条件下），但标准误需要 sandwich 校正。这与``最大似然选择最能解释数据的参数''中``模型错设时 MLE 收敛到伪真参数''的逻辑一致。
+
+\subsection{诊断：标准化残差检验}
+
+拟合 GARCH 后，计算标准化残差
+
+\[
+\widehat z_t=\frac{X_t}{\widehat\sigma_t}.
+\]
+
+若模型正确，$\widehat z_t$ 应近似 iid、零均值、单位方差、无自相关。诊断检验包括：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Ljung-Box 检验}：对 $\widehat z_t$ 和 $\widehat z_t^2$ 分别检验白噪声。若 $\widehat z_t^2$ 仍有显著 ACF，波动率模型不足。
+\item
+  \textbf{正态性检验}：QQ 图或 Jarque-Bera 检验。若拒绝正态，考虑 Student-t 或其他分布。
+\item
+  \textbf{符号偏差检验}：正负冲击的响应是否对称。若不对称，需要 EGARCH 或 GJR-GARCH。
+\end{itemize}
+
+诊断失败时，回到模型设定：增加 GARCH 阶数、改变创新分布、或加入杠杆效应。
+
+\subsection{杠杆效应：EGARCH 与 GJR-GARCH}
+
+标准 GARCH 中，正负冲击对条件方差的影响对称：$\varepsilon_{t-1}^2$ 只依赖大小，不依赖符号。但许多序列中，负冲击比正冲击引起更大波动——这叫杠杆效应（价格下跌增加财务杠杆）或非对称波动率。
+
+GJR-GARCH（Glosten-Jagannathan-Runkle）加入指示函数：
+
+\[
+\sigma_t^2=\omega+\alpha\varepsilon_{t-1}^2+\gamma\ind\{\varepsilon_{t-1}<0\}\varepsilon_{t-1}^2+\beta\sigma_{t-1}^2.
+\]
+
+$\gamma>0$ 时，负冲击的额外影响被捕捉。
+
+EGARCH（指数 GARCH）用对数方差：
+
+\[
+\log\sigma_t^2=\omega+\alpha\frac{|\varepsilon_{t-1}|}{\sigma_{t-1}}+\gamma\frac{\varepsilon_{t-1}}{\sigma_{t-1}}+\beta\log\sigma_{t-1}^2.
+\]
+
+$\gamma<0$ 捕捉杠杆效应（负 $\varepsilon$ 增大方差），且不需要参数非负约束（对数方差自动为正）。EGARCH 的缺点是解释稍复杂。
+
+两种模型都改善了非对称数据的拟合，但增加了参数和估计难度。选择应基于诊断检验：若标准 GARCH 的残差显示符号偏差，才需要杠杆模型。
+
+\subsection{GARCH 的边界与扩展}
+
+GARCH 假设：条件方差由历史冲击和方差决定、创新独立同分布、参数恒定。以下情况需要扩展：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{长记忆}：$\varepsilon_t^2$ 的 ACF 按幂律衰减，需要 FIGARCH（分数积分 GARCH）；
+\item
+  \textbf{结构突变}：参数随时间变化，需要 Markov 转换 GARCH（不同 regime 不同参数）；
+\item
+  \textbf{高频数据}：日内波动率的 U 形模式、已实现波动率（realized volatility），需要 HAR 或 MIDAS 模型；
+\item
+  \textbf{多元}：多个相关序列的协方差矩阵，需要 DCC-GARCH（动态条件相关）或 BEKK。
+\end{itemize}
+
+GARCH 不是条件异方差建模的终点，而是最广泛使用的起点。它的成功在于：参数有明确含义、估计标准、诊断明确、扩展自然。理解 GARCH，就是理解条件异方差时间序列分析的核心工具。
