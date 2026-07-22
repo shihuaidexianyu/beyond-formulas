@@ -1,4 +1,9 @@
 \section{矩阵补全从缺失条目到低秩正则}
+\label{sec:13-Machine-Learning/04-Dimensionality-Reduction/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}矩阵补全能从少量条目恢复其余部分，是因为假设矩阵近似低秩且观测位置足够分散。缺失机制偏向特定用户或项目时，低秩本身并不能保证可恢复。
+\end{quote}
 
 推荐系统中的用户---物品矩阵大多是空的。我们知道少数评分，却想预测尚未发生的评分。若完整矩阵近似低秩，似乎可以借助潜在偏好恢复空白；但``低秩''本身远远不够。
 
@@ -17,7 +22,7 @@
 令真实矩阵为 \(M\)，观测位置集合为 \(\Omega\)，\(P_\Omega\) 只保留这些位置的条目、其余位置置零。理想化的无噪声问题是
 
 \[
-\min_X\operatorname{rank}(X)
+\min_X\rank(X)
 \quad\text{s.t.}\quad
 P_\Omega(X)=P_\Omega(M).
 \]
@@ -45,10 +50,10 @@ P_\Omega(X)=P_\Omega(M).
 
 核范数是奇异值的 \(\ell_1\) 范数，因而像 Lasso 令系数稀疏一样，鼓励奇异值变为零。它的近端算子正是对奇异值作软阈值：先对矩阵作 SVD，把每个 \(\sigma_j\) 变为 \((\sigma_j-\tau)_+\)（\(\tau\) 为阈值参数，\((\cdot)_+\) 表示取正部），再重组矩阵。
 
-另一条路线直接写 \(X=UV^\top\)，优化
+另一条路线直接写 \(X=UV^{\trans}\)，优化
 
 \[
-\frac12\|P_\Omega(UV^\top-Y)\|_F^2
+\frac12\|P_\Omega(UV^{\trans}-Y)\|_F^2
 +\frac{\lambda}{2}
 \left(\|U\|_F^2+\|V\|_F^2\right).
 \]
@@ -82,7 +87,6 @@ P_\Omega(X)=P_\Omega(M).
 一次可信的矩阵补全分析至少包括：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   先画观测 mask，检查整行、整列缺失和曝光偏差；

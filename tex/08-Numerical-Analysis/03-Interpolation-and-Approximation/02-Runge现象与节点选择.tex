@@ -1,4 +1,9 @@
 \section{Runge 现象与节点选择}
+\label{sec:08-Numerical-Analysis/03-Interpolation-and-Approximation/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}插值曲线在所有数据点上误差为零，本来就是题目要求，不能证明点与点之间也准确。等距节点配上越来越高次的多项式，端点附近反而可能剧烈摆动。换节点常比盲目加次数更重要。
+\end{quote}
 
 \subsection{节点全部命中，区间中间却越来越糟}
 
@@ -37,7 +42,7 @@ f(x)=\frac{1}{1+25x^2},\qquad x\in[-1,1].
 
 称为 Lebesgue 常数。它是插值问题相对于节点数据的条件数。等距节点的 \(\Lambda_n\) 随次数近似指数增长，端点区域尤其敏感。
 
-记 \(\mathbb P_n\) 为次数不超过 \(n\) 的多项式全体。任取 \(q\in\mathbb P_n\)，它在节点处被自己的数据精确插值，故 \(I_nq=q\)，于是
+记 \(P_n\) 为次数不超过 \(n\) 的多项式全体。任取 \(q\in P_n\)，它在节点处被自己的数据精确插值，故 \(I_nq=q\)，于是
 
 \[
 f-I_nf=(f-q)-I_n(f-q).
@@ -48,7 +53,7 @@ f-I_nf=(f-q)-I_n(f-q).
 \[
 \|f-I_nf\|_\infty
 \le(1+\Lambda_n)
-\inf_{q\in\mathbb P_n}
+\inf_{q\in P_n}
 \|f-q\|_\infty.
 \]
 

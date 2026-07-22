@@ -1,19 +1,24 @@
 \section{风险、收益与投资组合}
+\label{sec:09-Convex-Optimization/07-Applications/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}投资组合优化不是寻找一个脱离偏好的“最佳组合”，而是在预期收益、协方差风险和现实约束之间画出可选择的边界。输入估计稍有变化，最优权重就可能大变，因此稳健性与求解同样重要。
+\end{quote}
 
 投资组合选择展示了凸优化最吸引人也最危险的一面：数学模型清楚、求解全局可靠，但输入的期望收益与协方差很难准确估计。算法可以精确解决模型，却不能替模型承担预测风险。
 
 设 \(w_i\) 是资产 \(i\) 的资金权重，\(R\) 是各资产收益率组成的随机向量，\(\mu\) 是其期望（预期收益向量），\(\Sigma\succeq0\) 是其协方差（\(\succeq0\) 表示半正定）。组合的预期收益与方差分别是
 
 \[
-\mu^Tw,
+\mu^{\trans}w,
 \qquad
-w^T\Sigma w.
+w^{\trans}\Sigma w.
 \]
 
 预算约束通常为
 
 \[
-\mathbf1^Tw=1.
+\mathbf1^{\trans}w=1.
 \]
 
 若不允许做空，还加入 \(w\ge0\)。
@@ -23,7 +28,7 @@ w^T\Sigma w.
 一种形式是给定风险厌恶参数 \(\gamma>0\)，最小化
 
 \[
-\frac{\gamma}{2}w^T\Sigma w-\mu^Tw
+\frac{\gamma}{2}w^{\trans}\Sigma w-\mu^{\trans}w
 \]
 
 并满足预算与持仓约束。由于 \(\Sigma\succeq0\)，目标凸；线性约束保持可行域凸。
@@ -32,10 +37,10 @@ w^T\Sigma w.
 
 \[
 \begin{aligned}
-\min_w\quad&w^T\Sigma w\\
+\min_w\quad&w^{\trans}\Sigma w\\
 \text{s.t.}\quad&
-\mu^Tw\ge r,\\
-&\mathbf1^Tw=1,\\
+\mu^{\trans}w\ge r,\\
+&\mathbf1^{\trans}w=1,\\
 &w\in C.
 \end{aligned}
 \]
@@ -49,7 +54,7 @@ w^T\Sigma w.
 若两项资产高度正相关，同时持有它们未必显著降低风险；若相关性较低或为负，组合方差可能小于各单项风险。二次型展开为
 
 \[
-w^T\Sigma w = \sum_i w_i^2\sigma_i^2
+w^{\trans}\Sigma w = \sum_i w_i^2\sigma_i^2
 +2\sum_{i< j}w_iw_j\Cov(R_i,R_j).
 \]
 交叉协方差决定了分散化效果。逐元素非负或方差都小，不足以判断整个组合；\(\Sigma\) 必须整体半正定，才能保证任何权重方向的方差非负。
@@ -66,12 +71,12 @@ w^T\Sigma w = \sum_i w_i^2\sigma_i^2
 \item
   行业暴露等线性约束；
 \item
-  总杠杆 \(\lVert w\rVert_1\le L\)；
+  总杠杆 \(\norm{ w}_1\le L\)；
 \item
   与当前持仓 \(w^{\mathrm{old}}\) 的换手限制
 
   \[
-  \lVert w-w^{\mathrm{old}}\rVert_1\le T;
+  \norm{ w-w^{\mathrm{old}}}_1\le T;
   \]
 \item
   线性或分段线性交易成本；
@@ -110,4 +115,3 @@ w^T\Sigma w = \sum_i w_i^2\sigma_i^2
 \end{itemize}
 
 一个原始---对偶间隙为 \(10^{-10}\) 的组合，只能说明给定模型几乎被精确求解；若 \(\mu\) 的误差远大于模型中的收益差，更多求解精度没有决策价值。
-

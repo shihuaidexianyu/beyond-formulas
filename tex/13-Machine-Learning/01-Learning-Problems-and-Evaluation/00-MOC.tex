@@ -3,7 +3,6 @@
 本单元把一项学习任务拆成三个不能交换顺序的问题：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   从现实决策到学习问题：先固定预测单位、可用信息、输出与行动，再定义数据、假设空间和部署分布。算法只能在这个问题内部求解，不能替代问题定义。
@@ -16,3 +15,19 @@
 \end{enumerate}
 
 这一单元规定后续所有模型必须遵守的评价纪律，暂不涉及具体模型的选择。读完后，应能把``模型在测试集上达到某个分数''改写成一条带条件的陈述：在哪个采样机制下、对哪个预测单位、用什么损失、经过多少次选择，估计了哪个目标分布上的表现。
+
+\subsection{怎么读这一章}
+
+第一次阅读先抓住``单位—时点—行动—代价''这条链，并能区分损失、风险、训练目标和报告指标。若只想快速建立评价纪律，第一、二、四篇是最短路线；第三篇在需要追查 MSE、交叉熵等目标为何出现时再细读。读到能把一个模糊的``准确率问题''改写成可验证的风险估计问题，就可以继续向后。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/01]{``从现实决策到学习问题''}；
+\item \hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/02]{``损失、风险、目标与指标不是同一个量''}；
+\item \hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/03]{``目标函数与噪声模型的对应：从生成机制到优化目标''}；
+\item \hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/04]{``数据划分、泄漏与分布偏移''}。
+\end{itemize}

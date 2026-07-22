@@ -1,4 +1,9 @@
 \section{似然比比较两个模型对数据的解释力}
+\label{sec:11-Mathematical-Statistics/05-Hypothesis-Testing/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}似然比比较受限模型与更一般模型各自能把观测数据解释到什么程度。把它换成卡方阈值通常是渐近结论，参数在边界或模型不正则时不能照搬。
+\end{quote}
 
 若两个简单假设完全指定了分布，
 
@@ -44,7 +49,7 @@ X\sim N(\mu,\sigma^2),
 \log\frac{p_{\mu_1}(X)}{p_{\mu_0}(X)} = \frac{\mu_1-\mu_0}{\sigma^2}X
 +\text{与 }X\text{ 无关的常数}.
 \]
-它随 \(X\) 单调增加，因此最有力检验拒绝``大 \(X\)''，正是``两类错误与功效共同定义检验''一节中单侧 \(z\) 检验的结构。尾部方向由似然比的单调性导出，无须凭直觉选择。
+它随 \(X\) 单调增加，因此最有力检验拒绝``大 \(X\)''，正是\hyperref[sec:11-Mathematical-Statistics/05-Hypothesis-Testing/01]{``两类错误与功效共同定义检验''}一节中单侧 \(z\) 检验的结构。尾部方向由似然比的单调性导出，无须凭直觉选择。
 
 \subsection{广义似然比处理复合假设}
 
@@ -104,8 +109,7 @@ X\sim N(\mu,\sigma^2),
 似然比比较数据在两个参数值下的相对可能性。Bayesian 后验 odds 还需要先验 odds：
 
 \[
-\frac{\Pr(H_1\mid x)}{\Pr(H_0\mid x)} = \frac{p(x\mid H_1)}{p(x\mid H_0)}
-\frac{\Pr(H_1)}{\Pr(H_0)}.
+\frac{P(H_1\mid x)}{P(H_0\mid x)} = \frac{p(x\mid H_1)}{p(x\mid H_0)}
+\frac{P(H_1)}{P(H_0)}.
 \]
 复合模型中的 Bayes factor 需要对参数先验积分，而不是使用最大似然。广义似然比、Bayes factor 和后验概率回答不同问题。
-

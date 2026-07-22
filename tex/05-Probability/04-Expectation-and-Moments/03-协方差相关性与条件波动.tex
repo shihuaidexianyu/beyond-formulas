@@ -1,19 +1,24 @@
 \section{协方差、相关性与条件波动}
+\label{sec:05-Probability/04-Expectation-and-Moments/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}协方差是总和方差中不能忽略的交叉项，相关系数只是其无量纲版本。二者只看线性共同变化：零相关不排除确定的非线性依赖，也不抵御混合群体造成的伪关联。
+\end{quote}
 
 若两个资产常一起上涨或一起下跌，把它们放进同一组合不会像独立资产那样有效分散风险。要计算总和的波动，仅知道各自方差还不够，还要知道它们是否共同变化。
 
 \subsection{协方差衡量线性共同变化}
 
-随机变量 $X,Y$ 的协方差定义为
+随机变量 \(X,Y\) 的协方差定义为
 
 \[
-\operatorname{Cov}(X,Y)
+\Cov(X,Y)
 =\E[(X-\mu_X)(Y-\mu_Y)].
 \]
 展开可得
 
 \[
-\operatorname{Cov}(X,Y)
+\Cov(X,Y)
 =\E[XY]-\E[X]\E[Y].
 \]
 \begin{itemize}
@@ -29,27 +34,27 @@
 方差是协方差的特例：
 
 \[
-\operatorname{Var}(X)=\operatorname{Cov}(X,X).
+\Var(X)=\Cov(X,X).
 \]
 \subsection{总和方差为什么多出交叉项}
 
 展开平方得到
 
 \[
-\operatorname{Var}(X+Y)
-=\operatorname{Var}(X)+\operatorname{Var}(Y)
-+2\operatorname{Cov}(X,Y).
+\Var(X+Y)
+=\Var(X)+\Var(Y)
++2\Cov(X,Y).
 \]
 更一般地，
 
 \[
-\operatorname{Var}\left(\sum_{i=1}^{n}X_i\right)
-=\sum_i\operatorname{Var}(X_i)
-+2\sum_{i<j}\operatorname{Cov}(X_i,X_j).
+\Var\left(\sum_{i=1}^{n}X_i\right)
+=\sum_i\Var(X_i)
++2\sum_{i<j}\Cov(X_i,X_j).
 \]
-只有当变量两两不相关时，方差才直接相加。独立且二阶矩存在会推出协方差为零，因此独立变量的方差可加；但``期望可加''从来不需要独立（见期望线性性一节）。
+只有当变量两两不相关时，方差才直接相加。独立且二阶矩存在会推出协方差为零，因此独立变量的方差可加；但``期望可加''从来不需要独立（见\hyperref[sec:05-Probability/04-Expectation-and-Moments/01]{``期望、线性性与指示变量''}）。
 
-若 $X_1,\ldots,X_n$ 独立同分布，方差为 $\sigma^2$，样本均值
+若 \(X_1,\ldots,X_n\) 独立同分布，方差为 \(\sigma^2\)，样本均值
 
 \[
 \bar X_n=\frac1n\sum_{i=1}^{n}X_i
@@ -57,9 +62,9 @@
 满足
 
 \[
-\operatorname{Var}(\bar X_n)=\frac{\sigma^2}{n}.
+\Var(\bar X_n)=\frac{\sigma^2}{n}.
 \]
-平均能降低噪声的关键在于交叉协方差消失。若测量共享系统偏差，重复平均无法按 $1/n$ 消除那部分误差。
+平均能降低噪声的关键在于交叉协方差消失。若测量共享系统偏差，重复平均无法按 \(1/n\) 消除那部分误差。
 
 \subsection{相关系数消除单位}
 
@@ -67,7 +72,7 @@
 
 \[
 \rho_{X,Y}
-=\frac{\operatorname{Cov}(X,Y)}
+=\frac{\Cov(X,Y)}
 {\sigma_X\sigma_Y}.
 \]
 由 Cauchy--Schwarz 不等式，
@@ -75,7 +80,7 @@
 \[
 -1\le\rho_{X,Y}\le1.
 \]
-这里用的是它的期望形式 $|\E[UV]|\le\sqrt{\E[U^2]\E[V^2]}$，取 $U=X-\mu_X$，$V=Y-\mu_Y$；向量形式及其证明见线性代数部分。$\rho=1$ 或 $-1$ 正是 Cauchy--Schwarz 取等的情形，表示二者几乎必然存在正或负线性关系
+这里用的是它的期望形式 \(|\E[UV]|\le\sqrt{\E[U^2]\E[V^2]}\)，取 \(U=X-\mu_X\)，\(V=Y-\mu_Y\)；向量形式及其证明见线性代数部分。\(\rho=1\) 或 \(-1\) 正是 Cauchy--Schwarz 取等的情形，表示二者几乎必然存在正或负线性关系
 
 \[
 Y=aX+b.
@@ -84,7 +89,7 @@ Y=aX+b.
 
 \subsection{不相关不等于独立}
 
-令 $X$ 在 $[-1,1]$ 上均匀，$Y=X^2$。显然 $Y$ 完全由 $X$ 决定，因此不独立。但由对称性
+令 \(X\) 在 \([-1,1]\) 上均匀，\(Y=X^2\)。显然 \(Y\) 完全由 \(X\) 决定，因此不独立。但由对称性
 
 \[
 \E[X]=0,\qquad
@@ -93,11 +98,11 @@ Y=aX+b.
 所以
 
 \[
-\operatorname{Cov}(X,Y)=0.
+\Cov(X,Y)=0.
 \]
 散点图是一条抛物线，依赖极强，线性相关却为零。看到相关系数接近零，只能说没有明显线性趋势。
 
-反方向上，若 $(X,Y)$ 独立且二阶矩有限，则
+反方向上，若 \((X,Y)\) 独立且二阶矩有限，则
 
 \[
 \E[XY]=\E[X]\E[Y],
@@ -109,7 +114,7 @@ Y=aX+b.
 =\sum_{x,y}xy\,P(X=x,Y=y)
 =\Bigl(\sum_x x\,P(X=x)\Bigr)\Bigl(\sum_y y\,P(Y=y)\Bigr),
 \]
-关键一步正是独立性 $P(X=x,Y=y)=P(X=x)P(Y=y)$ 让联合求和拆成两个各自为政的求和；对比期望线性性一节，期望的可加性从不需要这种拆分。Gaussian 联合分布（联合密度完全由均值、方差与相关系数决定的一类钟形分布，下一单元正式定义）是一个特殊例外族：在联合 Gaussian 条件下，不相关确实推出独立。离开这个条件便不能使用。
+关键一步正是独立性 \(P(X=x,Y=y)=P(X=x)P(Y=y)\) 让联合求和拆成两个各自为政的求和；对比\hyperref[sec:05-Probability/04-Expectation-and-Moments/01]{``期望、线性性与指示变量''}，期望的可加性从不需要这种拆分。Gaussian 联合分布（联合密度完全由均值向量与协方差矩阵决定的一类分布，见\hyperref[sec:05-Probability/06-Common-Distributions/05]{``Gaussian 与多元 Gaussian''}）是一个特殊例外族：在联合 Gaussian 条件下，不相关确实推出独立。离开这个条件便不能使用。
 
 \subsection{相关性也可能由混合群体制造}
 

@@ -1,7 +1,6 @@
 上一单元确认了：条件合适时，初值问题有唯一解，解是一族互不相交的曲线。这一单元换一个问题——不写出解的公式，能否说出解的长期去向？答案是把解当作状态空间中的几何对象来研究：轨迹流向哪里、在哪里停住、绕什么打转，这些问题可以不依赖公式回答。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   相平面：把解画成几何：二维自治系统的向量场与轨迹，不动点按线性化特征值分类，极限环作为系统自产的周期行为。
@@ -12,3 +11,18 @@
 \end{enumerate}
 
 三节依次放弃的东西越来越多：第一节还要向量场的解析表达式，第二节只需一个能量函数，第三节只剩一条迭代规则——但保留的始终是同一个判断：系统长期去向哪里。
+
+\subsection{怎么读这一章}
+
+首次阅读先掌握三件事：线性化只在双曲平衡点附近可靠；Lyapunov 函数给出的是带条件的稳定性证书；确定性迭代也可能对初值极敏感。Hartman--Grobman、LaSalle 原理和分岔参数的计算属于回读层。尤其不要把``没有找到 Lyapunov 函数''当成不稳定证明，也不要把正 Lyapunov 指数简单等同于所有意义下的混沌。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/01]{``相平面：把解画成几何''}；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/03]{``离散动力系统、分岔与混沌''}。
+\end{itemize}

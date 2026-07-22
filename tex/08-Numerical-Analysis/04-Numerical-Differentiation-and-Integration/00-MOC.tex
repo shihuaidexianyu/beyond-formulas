@@ -1,7 +1,6 @@
 导数观察局部变化，会把高频噪声和舍入误差放大；积分汇总区间贡献，往往能平均局部扰动。两类方法都可从``用低次多项式替代函数''推导，但误差传播完全不同。本单元从步长的 U 形误差开始，再把梯形、Simpson、Gaussian 与自适应求积连成一条选择路径。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   数值微分为何不能无限缩小步长
@@ -10,3 +9,20 @@
 \item
   Gaussian 与自适应求积
 \end{enumerate}
+
+\subsection{怎么读这一章}
+
+第一次读先看同一个小量 \(h\) 扮演的两种角色：它变小会降低差分与求积的截断误差，却也可能放大舍入、噪声和采样盲区。公式的阶数只描述进入渐近区后的理想行为；实际选择还要看函数是否光滑、能否自由取样，以及粗细两套节点是否可能同时漏掉结构。
+
+前一单元：\hyperref[ch:063]{``插值与逼近：通过数据点，不等于理解点之间''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/01]{``数值微分为何不能无限缩小步长''}；
+\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/02]{``从插值多项式到梯形与 Simpson 求积''}；
+\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/03]{``Gaussian 与自适应求积''}。
+\end{itemize}

@@ -3,7 +3,6 @@
 本单元从二维表格和密度区域开始，逐步进入组合与几何：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   联合、边缘与条件分布：从联合概率恢复单变量分布，并在观察一个变量后切片。
@@ -18,3 +17,22 @@
 \end{enumerate}
 
 这些工具会在多元 Gaussian、随机过程、统计推断和机器学习中反复出现。
+
+\subsection{怎么读这一章}
+
+首次阅读先抓前三篇：联合分布保存配对信息，条件分布是在观测后重新切片，独立性是整个联合分布的分解条件；卷积只在独立等条件下由边缘分布单独决定。后两篇把同一结构写成线性代数与变量替换：协方差只描述二阶依赖，Jacobian 负责概率质量在坐标变化下守恒。多分支变换和退化协方差可第二遍处理，但``不相关不等于独立''与``边缘不能恢复联合''不能后置。
+
+读完后至少应能先做三个判断：手里的边缘分布是否足以回答问题；计算和的分布时是否真的有独立性；变量变换后是否同时更新了密度与支撑。若其中任一项说不清，就不应急着套卷积、协方差或 Jacobian 公式。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:05-Probability/05-Joint-Distributions/01]{``联合、边缘与条件分布''}；
+\item \hyperref[sec:05-Probability/05-Joint-Distributions/02]{``随机变量的独立与依赖''}；
+\item \hyperref[sec:05-Probability/05-Joint-Distributions/03]{``随机变量之和与卷积''}；
+\item \hyperref[sec:05-Probability/05-Joint-Distributions/04]{``随机向量与协方差矩阵''}；
+\item \hyperref[sec:05-Probability/05-Joint-Distributions/05]{``多维变量变换与 Jacobian''}。
+\end{itemize}

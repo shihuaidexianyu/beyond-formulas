@@ -3,7 +3,6 @@
 阅读顺序：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   加法、乘法与排列组合
@@ -16,3 +15,33 @@
 \end{enumerate}
 
 每个公式都应能由``同一批对象的生成方式''重新推出来。若忘记公式，回到对象与是否重复计数，通常比搜索记忆更可靠。
+
+\subsection{怎么读这一章}
+
+可以根据计数卡在哪里选择入口：
+
+\begin{itemize}
+\tightlist
+\item
+  若连``一个结果''怎样生成都还不清楚，读\hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/01]{``加法、乘法与排列组合''}；先判断结果是互斥分支还是连续步骤，再判断顺序和重复是否产生新对象。
+\item
+  若想理解组合恒等式为什么成立，而不是只做阶乘化简，读\hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/02]{``二项式与双重计数''}；核心方法是建立双射，或把同一对象集合按两种方式分类。
+\item
+  若题目只要求证明``某种碰撞必然存在''，读\hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/03]{``鸽巢原理与必然碰撞''}；真正困难通常是选择盒子，使同盒恰好意味着目标结构出现。
+\item
+  若多个条件会重叠、直接相加会重复，读\hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/04]{``容斥原理与重复计数''}；集合太多时还要区分精确容斥与只取前几层的上下界。
+\end{itemize}
+
+第一次阅读可以在能完成一份``计数审计''时停下：对象定义是什么？每个对象被生成几次？各分支是否互斥且穷尽？如果不能回答这三问，套用的公式还没有可靠含义。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/01]{``加法、乘法与排列组合''}；
+\item \hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/02]{``二项式与双重计数''}；
+\item \hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/03]{``鸽巢原理与必然碰撞''}；
+\item \hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/04]{``容斥原理与重复计数''}。
+\end{itemize}

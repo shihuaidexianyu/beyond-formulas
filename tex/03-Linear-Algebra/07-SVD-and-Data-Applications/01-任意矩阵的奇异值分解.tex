@@ -1,4 +1,9 @@
 \section{任意矩阵的奇异值分解}
+\label{sec:03-Linear-Algebra/07-SVD-and-Data-Applications/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}任意矩阵都能分解为输入空间旋转、沿正交方向按奇异值缩放、再在输出空间旋转。SVD 不要求方阵或可对角化，因此比特征分解适用更广。
+\end{quote}
 
 \subsection{特征向量为什么不够用}
 
@@ -6,26 +11,26 @@
 
 真正值得保留的问题是：\textbf{能否找到一些互相垂直的输入方向，使它们的输出也互相垂直？} 这里无须要求输入方向本身保持不变。如果可以，矩阵在这些方向上就只需要做彼此独立的伸缩。
 
-把单位圆交给一个 \(2\times2\) 矩阵，通常会得到椭圆。椭圆的两条主轴互相垂直；它们在原单位圆上的原像也互相垂直。高维情形完全一样：单位球被压成一个可能退化的椭球，椭球半轴的方向和长度正是 SVD 要找的对象。``原像也互相垂直''目前只是几何观察，下一小节会用 \(A^\top A\) 把它变成严格结论。
+把单位圆交给一个 \(2\times2\) 矩阵，通常会得到椭圆。椭圆的两条主轴互相垂直；它们在原单位圆上的原像也互相垂直。高维情形完全一样：单位球被压成一个可能退化的椭球，椭球半轴的方向和长度正是 SVD 要找的对象。``原像也互相垂直''目前只是几何观察，下一小节会用 \(A^{\trans} A\) 把它变成严格结论。
 
-\subsection{\texorpdfstring{从 \(A^\top A\) 推出 SVD}{从 A^\top A 推出 SVD}}
+\subsection{\texorpdfstring{从 \(A^{\trans} A\) 推出 SVD}{从 A^{\trans} A 推出 SVD}}
 
 设 \(A\in\R^{m\times n}\)。虽然 \(A\) 未必是方阵，
 
 \[
-A^\top A\in\R^{n\times n}
+A^{\trans} A\in\R^{n\times n}
 \]
 
 总是对称半正定，因为
 
 \[
-x^\top A^\top Ax=\|Ax\|_2^2\ge 0.
+x^{\trans} A^{\trans} Ax=\|Ax\|_2^2\ge 0.
 \]
 
 谱定理因此保证存在一组标准正交向量 \(v_1,\ldots,v_n\)，使
 
 \[
-A^\top Av_i=\lambda_i v_i,
+A^{\trans} Av_i=\lambda_i v_i,
 \qquad
 \lambda_1\ge\lambda_2\ge\cdots\ge\lambda_n\ge0.
 \]
@@ -39,27 +44,27 @@ u_i=\frac{Av_i}{\sigma_i}.
 这些 \(u_i\) 为什么正交？对 \(i\ne j\)，
 
 \[
-u_i^\top u_j
-=\frac{v_i^\top A^\top Av_j}{\sigma_i\sigma_j}
-=\frac{\lambda_j v_i^\top v_j}{\sigma_i\sigma_j}=0,
+u_i^{\trans} u_j
+=\frac{v_i^{\trans} A^{\trans} Av_j}{\sigma_i\sigma_j}
+=\frac{\lambda_j v_i^{\trans} v_j}{\sigma_i\sigma_j}=0,
 \]
 
-而 \(\|u_i\|=1\)，因为 \(\|Av_i\|^2=v_i^\top A^\top Av_i=\lambda_i=\sigma_i^2\)。所以 \(A\) 把正交输入方向 \(v_i\) 变成正交输出方向 \(u_i\)，并只乘上非负尺度 \(\sigma_i\)：
+而 \(\|u_i\|=1\)，因为 \(\|Av_i\|^2=v_i^{\trans} A^{\trans} Av_i=\lambda_i=\sigma_i^2\)。所以 \(A\) 把正交输入方向 \(v_i\) 变成正交输出方向 \(u_i\)，并只乘上非负尺度 \(\sigma_i\)：
 
 \[
 Av_i=\sigma_i u_i.
 \]
 
-若 \(r=\rank(A)\)，把非零奇异值对应的向量排在前面。此时还需收一个尾：当 \(i>r\) 时 \(\sigma_i=0\)，即 \(\|Av_i\|^2=v_i^\top A^\top Av_i=0\)，故 \(Av_i=0\)。于是矩阵 \(\sum_{i=1}^{r}\sigma_iu_iv_i^\top\) 与 \(A\) 在标准正交基 \(v_1,\ldots,v_n\) 的每个向量上作用相同，两矩阵必然相等。这就得到紧致 SVD
+若 \(r=\rank(A)\)，把非零奇异值对应的向量排在前面。此时还需收一个尾：当 \(i>r\) 时 \(\sigma_i=0\)，即 \(\|Av_i\|^2=v_i^{\trans} A^{\trans} Av_i=0\)，故 \(Av_i=0\)。于是矩阵 \(\sum_{i=1}^{r}\sigma_iu_iv_i^{\trans}\) 与 \(A\) 在标准正交基 \(v_1,\ldots,v_n\) 的每个向量上作用相同，两矩阵必然相等。这就得到紧致 SVD
 
 \[
-A=U_r\Sigma_rV_r^\top
-=\sum_{i=1}^{r}\sigma_i u_i v_i^\top.
+A=U_r\Sigma_rV_r^{\trans}
+=\sum_{i=1}^{r}\sigma_i u_i v_i^{\trans}.
 \]
 
-其中 \(U_r\in\R^{m\times r}\)、\(V_r\in\R^{n\times r}\) 的列正交，\(\Sigma_r=\diag(\sigma_1,\ldots,\sigma_r)\)。若把两组正交向量补成完整基，就得到完整 SVD \(A=U\Sigma V^\top\)。
+其中 \(U_r\in\R^{m\times r}\)、\(V_r\in\R^{n\times r}\) 的列正交，\(\Sigma_r=\diag(\sigma_1,\ldots,\sigma_r)\)。若把两组正交向量补成完整基，就得到完整 SVD \(A=U\Sigma V^{\trans}\)。
 
-这个分解可以按从右向左阅读：\(V^\top\) 把输入改写到``特殊输入方向''的坐标中，\(\Sigma\) 分别伸缩各坐标，\(U\) 再把它们放到输出空间。正交变换不改变长度，矩阵所有真正的放大、压缩与信息丢失都集中在 \(\Sigma\) 里。
+这个分解可以按从右向左阅读：\(V^{\trans}\) 把输入改写到``特殊输入方向''的坐标中，\(\Sigma\) 分别伸缩各坐标，\(U\) 再把它们放到输出空间。正交变换不改变长度，矩阵所有真正的放大、压缩与信息丢失都集中在 \(\Sigma\) 里。
 
 \subsection{一个长方形矩阵的完整图景}
 
@@ -77,11 +82,11 @@ A=
 它把二维平面嵌入三维空间：第一坐标伸长为两倍，第二坐标保持不变。这里
 
 \[
-A^\top A=
+A^{\trans} A=
 \begin{bmatrix}4&0\\0&1\end{bmatrix},
 \]
 
-所以 \(v_1=e_1,v_2=e_2\)，奇异值为 \(2,1\)，相应输出方向为 \(u_1=e_1,u_2=e_2\)。第三个输出方向 \(e_3\) 从来不会由 \(A\) 产生，它属于 \(A^\top\) 的零空间。
+所以 \(v_1=e_1,v_2=e_2\)，奇异值为 \(2,1\)，相应输出方向为 \(u_1=e_1,u_2=e_2\)。第三个输出方向 \(e_3\) 从来不会由 \(A\) 产生，它属于 \(A^{\trans}\) 的零空间。
 
 这个简单例子已经把四个基本子空间都放到了 SVD 中：
 
@@ -90,10 +95,10 @@ A^\top A=
 \item
   \(v_1,\ldots,v_r\) 张成 \(A\) 的行空间；其余右奇异向量张成 \(N(A)\)；
 \item
-  \(u_1,\ldots,u_r\) 张成 \(A\) 的列空间；其余左奇异向量张成 \(N(A^\top)\)。
+  \(u_1,\ldots,u_r\) 张成 \(A\) 的列空间；其余左奇异向量张成 \(N(A^{\trans})\)。
 \end{itemize}
 
-这些断言都可以直接读出来：\(i>r\) 时 \(\|Av_i\|^2=v_i^\top A^\top Av_i=0\)，故靠后的右奇异向量确实落在 \(N(A)\) 中；而 \(A=\sum_{i\le r}\sigma_iu_iv_i^\top\) 表明每个输出都是前 \(r\) 个 \(u_i\) 的组合、每一行都是前 \(r\) 个 \(v_i\) 的组合，各空间维数又恰好与秩吻合。
+这些断言都可以直接读出来：\(i>r\) 时 \(\|Av_i\|^2=v_i^{\trans} A^{\trans} Av_i=0\)，故靠后的右奇异向量确实落在 \(N(A)\) 中；而 \(A=\sum_{i\le r}\sigma_iu_iv_i^{\trans}\) 表明每个输出都是前 \(r\) 个 \(u_i\) 的组合、每一行都是前 \(r\) 个 \(v_i\) 的组合，各空间维数又恰好与秩吻合。
 
 因此 SVD 不只是一个计算公式，它同时给出输入中被保留的方向、被消灭的方向，以及输出中可以到达和永远到不了的方向。
 
@@ -103,7 +108,7 @@ A^\top A=
 B=\begin{bmatrix}1&1\\1&1\end{bmatrix}.
 \]
 
-沿 \(v_1=(1,1)^\top/\sqrt2\) 的输入被放大两倍并送到同方向；沿 \(v_2=(1,-1)^\top/\sqrt2\) 的输入则被完全压成零。于是 \(\sigma_1=2,\sigma_2=0\)。零奇异值明确告诉我们：输入的``差异方向''已经不可恢复。它是结构信息，不应当成计算事故。
+沿 \(v_1=(1,1)^{\trans}/\sqrt2\) 的输入被放大两倍并送到同方向；沿 \(v_2=(1,-1)^{\trans}/\sqrt2\) 的输入则被完全压成零。于是 \(\sigma_1=2,\sigma_2=0\)。零奇异值明确告诉我们：输入的``差异方向''已经不可恢复。它是结构信息，不应当成计算事故。
 
 \subsection{需要保留的边界}
 

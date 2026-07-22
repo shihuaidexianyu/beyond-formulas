@@ -1,7 +1,6 @@
 给定有限样本，我们想在未观测位置重建函数。插值要求曲线逐点命中数据，逼近则允许偏离样本以换取整体误差更小或模型更简单。高次多项式虽然自由度多，却可能因节点几何在端点剧烈振荡；样条通过分段低次结构获得局部性。这个单元关注数据、函数空间、误差范数与节点选择怎样共同决定结果；公式数量本身不是学习目标。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   一个插值多项式的两种构造
@@ -12,3 +11,21 @@
 \item
   三次样条：用局部性换稳定
 \end{enumerate}
+
+\subsection{怎么读这一章}
+
+第一次读，先把三件事分开：插值只保证穿过给定点，逼近关心整个区间的误差，稳定求值则关心计算过程会不会放大舍入和数据扰动。Lagrange、Newton 和样条不是三份要背的公式，而是在回答``节点能否选择、数据会不会增加、改一个点应影响多远''这些不同问题。
+
+前一单元：\hyperref[ch:062]{``非线性方程求根：可靠性、速度与信息成本''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:08-Numerical-Analysis/03-Interpolation-and-Approximation/01]{``一个插值多项式的两种构造''}；
+\item \hyperref[sec:08-Numerical-Analysis/03-Interpolation-and-Approximation/02]{``Runge 现象与节点选择''}；
+\item \hyperref[sec:08-Numerical-Analysis/03-Interpolation-and-Approximation/03]{``从精确插值到整体逼近''}；
+\item \hyperref[sec:08-Numerical-Analysis/03-Interpolation-and-Approximation/04]{``三次样条：用局部性换稳定''}。
+\end{itemize}

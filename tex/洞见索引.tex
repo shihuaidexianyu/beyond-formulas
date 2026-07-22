@@ -1,0 +1,113 @@
+数学主题看着多，反复出现的结构其实就那么几种。投影、对偶、不变量、局部线性化、分解、固定点、凸性、熵与变分原理、偏差与方差——你在完全不同的学科里反复撞见它们，穿的衣服不一样，骨架是同一副。
+
+下面每组先给一句可以带走的洞见，再列出几个入口。沿结构而不是沿学科阅读，你会开始看到同一套思维怎样从纯数学一直迁移到统计、学习、控制——这大概是学数学最让人上瘾的地方。
+
+\subsection{投影：把不可实现的目标换成最近的可实现对象}
+
+投影不是一个矩阵公式，而是一种决策原则：先确定允许选择的集合，再在选定几何下寻找最近点。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:03-Linear-Algebra/03-Orthogonality/02]{``投影与最近点''}；
+\item \hyperref[sec:03-Linear-Algebra/03-Orthogonality/03]{``最小二乘''}；
+\item \hyperref[sec:12-Real-Analysis-Support/07-Lp-Spaces-and-Function-Geometry/04]{``条件期望与线性回归是两种投影''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/05]{``线性价值函数逼近求解投影 Bellman 方程''}。
+\end{itemize}
+
+\subsection{对偶：从直接求解转向寻找约束的证书}
+
+对偶把原问题的可行性和最优性翻译成另一个视角；对偶变量还量化了放松约束的边际价值。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/05-Duality/01]{``Lagrangian 怎样制造全局下界''}；
+\item \hyperref[sec:09-Convex-Optimization/05-Duality/03]{``KKT 把最优性写成一组方程''}；
+\item \hyperref[sec:09-Convex-Optimization/05-Duality/04]{``对偶变量是约束的影子价格''}；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/05]{``率失真允许失真时的压缩极限''}。
+\end{itemize}
+
+\subsection{不变量：在变化中寻找不会被更新规则破坏的量}
+
+当逐步轨迹太复杂时，不变量常比显式求解更有力量：它把无限多步压缩成一个始终成立的约束。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:01-Mathematical-Language/04-Induction-and-Recursion/04]{``不变量与算法正确性''}；
+\item \hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/04]{``不变函数与等变映射''}；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}；
+\item \hyperref[sec:14-Deep-Learning/04-Convolutional-Networks/01]{``卷积把平移结构写进线性映射''}。
+\end{itemize}
+
+\subsection{局部线性化：用最简单的局部模型预测复杂变化}
+
+导数、Jacobian、Hessian 和线性稳定性分析都在做同一件事：把足够小尺度上的非线性变化替换为线性映射，再控制替换误差。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:02-Calculus/03-Differentiation/05]{``线性近似与极值问题''}；
+\item \hyperref[sec:10-Matrix-Calculus/01-Derivative-Conventions/01]{``导数是最佳线性映射''}；
+\item \hyperref[sec:10-Matrix-Calculus/02-Differentials/03]{``Hessian 是二阶线性算子''}；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/01]{``相平面把解画成几何''}。
+\end{itemize}
+
+\subsection{分解：选择坐标，让耦合问题显露简单方向}
+
+好的分解不是把矩阵拆开而已，而是找到问题自然作用的方向，使求解、压缩或解释变得可分。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:03-Linear-Algebra/03-Orthogonality/04]{``正交基与 QR 分解''}；
+\item \hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/02]{``对角化与动力系统''}；
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/01]{``任意矩阵的奇异值分解''}；
+\item \hyperref[sec:13-Machine-Learning/04-Dimensionality-Reduction/01]{``PCA 从最大方差到最小重构误差''}。
+\end{itemize}
+
+\subsection{固定点：长期行为常由一个自洽方程决定}
+
+固定点把``不断更新会去哪里''变成``什么对象经过更新后保持不变''。真正困难的是存在性、唯一性和迭代是否能到达它。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:06-Random-Processes/03-Markov-Chains/04]{``平稳分布、可逆性与遍历收敛''}；
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/04]{``EM 用下界交替完成隐变量学习''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/02]{``Bellman 方程与值迭代、策略迭代''}；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}。
+\end{itemize}
+
+\subsection{凸性：让局部比较获得全局含义}
+
+凸性最重要的作用不是让图像呈碗形，而是把局部切线、驻点和对偶证书提升为全局判断。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/03-Convex-Functions/02]{``切平面为何是全局下界''}；
+\item \hyperref[sec:09-Convex-Optimization/03-Convex-Functions/03]{``曲率区分凸、严格凸与强凸''}；
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/03]{``Jensen 不等式与随机凸性''}；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/03]{``变分推断把后验近似变成优化''}。
+\end{itemize}
+
+\subsection{熵与变分原理：用一个可优化目标表达未知分布}
+
+熵、KL 散度、自由能和 ELBO 反复把概率推断写成优化：选择一个分布，同时权衡拟合、复杂度和归一化代价。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/02]{``Shannon 熵与二元熵''}；
+\item \hyperref[sec:07-Information-Theory/03-Divergences/01]{``错误模型的代价：从交叉熵到 KL 散度''}；
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/04]{``EM 用下界交替完成隐变量学习''}；
+\item \hyperref[sec:13-Machine-Learning/13-Statistical-Physics-and-Free-Energy/01]{``自由能把配分函数变成热力学量''}。
+\end{itemize}
+
+\subsection{偏差与方差：减少一种误差往往会放大另一种}
+
+正则化、平均、采样和 bootstrap 表面上属于不同方法，背后都在重新分配系统误差与随机波动。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:11-Mathematical-Statistics/02-Point-Estimation/01]{``偏差、方差与均方误差''}；
+\item \hyperref[sec:13-Machine-Learning/02-Linear-Models/02]{``正则化：从 Ridge 到 Lasso''}；
+\item \hyperref[sec:13-Machine-Learning/03-Trees-Ensembles-and-Neighbors/02]{``集成用平均与逐步加法改变误差''}；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/04]{``Bootstrap 重建分析流程的不确定性''}。
+\end{itemize}
+
+这些结构不是各自独立的标签。一次真正的分析往往同时调用好几种：先用局部线性化建立近似，再用投影选出可表示的部分，用凸性或固定点判断算法的行为，最后用偏差与方差来度量有限数据下你的结论有多可信。它们在你手里应该像一套互相认识的工具，而不是一堆互相不搭理的零件。

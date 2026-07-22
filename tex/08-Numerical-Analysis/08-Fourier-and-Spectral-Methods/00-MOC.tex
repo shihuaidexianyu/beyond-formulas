@@ -1,7 +1,6 @@
 正弦和复指数构成一组正交坐标，``找周期''只是它们的用途之一。进入频率空间后，微分变成乘以频率，卷积变成逐点相乘，函数光滑性表现为高频系数衰减。连续函数被采样后又会出现混叠、频谱泄漏和离散周期性；FFT 只加速 DFT，并不会自动修复这些信息损失。而当频率成分随时间变化时，Fourier 坐标还会抹掉``何时''；加窗与小波给出两种把时间与频率（尺度）联合起来的折中。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   从 Fourier 级数到连续变换
@@ -16,3 +15,21 @@
 \item
   小波与多尺度分解
 \end{enumerate}
+
+\subsection{怎么读这一章}
+
+第一次读不必急着记变换公式。先抓住两条线：前三篇说明把信号换到频率坐标后能看见什么，以及采样和有限观察会丢掉什么。后三篇说明怎样利用这些坐标做计算，以及当频率随时间变化时为什么还要引入窗口和尺度。若想先熟悉``根据最终目标选择计算形式''的思路，可以回看上一单元 \hyperref[ch:067]{``机器学习中的稳定计算''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}；
+\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/02]{``采样、混叠与可恢复性''}；
+\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/03]{``DFT 是变换，FFT 是算法''}；
+\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/04]{``谱方法：用光滑性换高精度''}；
+\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/05]{``时频局部化：Fourier 丢掉了``何时'''}；
+\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/06]{``小波与多尺度分解''}。
+\end{itemize}

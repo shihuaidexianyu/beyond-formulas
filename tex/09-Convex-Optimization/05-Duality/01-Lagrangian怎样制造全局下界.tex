@@ -1,4 +1,9 @@
 \section{Lagrangian 怎样制造全局下界}
+\label{sec:09-Convex-Optimization/05-Duality/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}Lagrangian 把约束违规按非负价格加进目标。对任意一组价格，把变量先优化后得到的数都不会超过原问题的最优值，因此它天然是一张全局下界证书。
+\end{quote}
 
 考虑原始问题
 
@@ -131,7 +136,6 @@ d^\star\le p^\star.
 弱对偶立即提供两个用途：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \item
   若找到原始可行点 \(\hat x\) 和对偶可行乘子 \((\hat\lambda,\hat\nu)\)，则
 
@@ -147,4 +151,3 @@ d^\star\le p^\star.
 \end{enumerate}
 
 对偶把``约束对目标下界的贡献''参数化，由原问题自然导出。下一节要问：最高下界是否一定能碰到真实最优值？
-

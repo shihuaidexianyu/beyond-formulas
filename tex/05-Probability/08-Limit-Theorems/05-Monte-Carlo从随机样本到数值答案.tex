@@ -1,4 +1,9 @@
 \section{Monte Carlo：从随机样本到数值答案}
+\label{sec:05-Probability/08-Limit-Theorems/05}
+
+\begin{quote}
+\textbf{先抓住这一点：}Monte Carlo 用抽样把积分改写成平均，误差通常按 \(1/\sqrt n\) 缩小。可信结果还必须确认抽样目标正确、方差可控并处理样本相关性。
+\end{quote}
 
 许多积分和期望无法解析计算，却可以从相应分布中抽样。Monte Carlo 方法把数值问题改写成期望，再用样本平均估计：
 
@@ -8,7 +13,7 @@ I=\E[g(X)]
 \widehat I_n
 =\frac1n\sum_{i=1}^{n}g(X_i).
 \]
-这里 $X_i$ 是从目标分布独立抽取的样本。
+这里 \(X_i\) 是从目标分布独立抽取的样本。
 
 \subsection{大数定律提供一致性}
 
@@ -31,7 +36,7 @@ I=\E[g(X)]
 若
 
 \[
-\sigma_g^2=\operatorname{Var}(g(X))<\infty,
+\sigma_g^2=\Var(g(X))<\infty,
 \]
 则
 
@@ -52,23 +57,23 @@ s_g^2
 =\frac1{n-1}\sum_{i=1}^{n}
 \bigl(g(X_i)-\widehat I_n\bigr)^2
 \]
-估计 $\sigma_g^2$，便得到
+估计 \(\sigma_g^2\)，便得到
 
 \[
-\operatorname{SE}(\widehat I_n)
+\SE(\widehat I_n)
 \approx\frac{s_g}{\sqrt n}.
 \]
-一个常用近似 (95%) 误差区间是
+一个常用近似 \(95\%\) 误差区间是
 
 \[
 \widehat I_n
 \pm1.96\frac{s_g}{\sqrt n}.
 \]
-要把标准误缩小一半，样本量要增加到四倍。这种 $1/\sqrt n$ 收敛较慢，却在维度上不像规则网格积分那样直接遭受 $m^d$ 个网格点的爆炸。
+要把标准误缩小一半，样本量要增加到四倍。这种 \(1/\sqrt n\) 收敛较慢，却在维度上不像规则网格积分那样直接遭受 \(m^d\) 个网格点的爆炸。
 
-\subsection{用随机点估计 $\pi$}
+\subsection{用随机点估计 \(\pi\)}
 
-在正方形 $[-1,1]^2$ 中均匀抽点 ($X_i,Y_i$)，定义
+在正方形 \([-1,1]^2\) 中均匀抽点 (\(X_i,Y_i\))，定义
 
 \[
 Z_i=\mathbf1_{\{X_i^2+Y_i^2\le1\}}.
@@ -84,20 +89,20 @@ P(Z_i=1)=\frac{\pi}{4}.
 \widehat\pi_n
 =4\bar Z_n
 \]
-是 $\pi$ 的无偏估计。
+是 \(\pi\) 的无偏估计。
 
-因为 $Z_i$ 是 Bernoulli，
+因为 \(Z_i\) 是 Bernoulli，
 
 \[
-\operatorname{Var}(\widehat\pi_n)
+\Var(\widehat\pi_n)
 =\frac{16p(1-p)}n,
 \qquad p=\frac\pi4.
 \]
-这个例子直观，却不是计算 $\pi$ 的高效方法。它的教学价值在于展示怎样把几何面积变成事件概率；它也反向使用了``大数定律与长期平均''一节建立的同一联系：那里由模型概率 $p$ 预言长期频率，这里由长期频率反推未知的 $p$。
+这个例子直观，却不是计算 \(\pi\) 的高效方法。它的教学价值在于展示怎样把几何面积变成事件概率；它也反向使用了\hyperref[sec:05-Probability/08-Limit-Theorems/02]{``大数定律与长期平均''}一节建立的同一联系：那里由模型概率 \(p\) 预言长期频率，这里由长期频率反推未知的 \(p\)。
 
 \subsection{方差缩减比盲目加样本更聪明}
 
-Monte Carlo 误差常数由 $\operatorname{Var}(g(X))$ 决定。除了增大 $n$，还可以改变估计器而保持目标期望：
+Monte Carlo 误差常数由 \(\Var(g(X))\) 决定。除了增大 \(n\)，还可以改变估计器而保持目标期望：
 
 \begin{itemize}
 \tightlist
@@ -123,15 +128,18 @@ I=\E_q\left[
 g(X)\frac{p(X)}{q(X)}
 \right],
 \]
-其中下标 $q$ 表示 $X$ 改从密度 $q$ 抽取，前提是 $q(x)>0$ 覆盖所有 $g(x)p(x)\ne0$ 的区域。若 $q$ 选得差，权重可能重尾，方差甚至无穷。
+其中下标 \(q\) 表示 \(X\) 改从密度 \(q\) 抽取，前提是 \(q(x)>0\) 覆盖所有 \(g(x)p(x)\ne0\) 的区域。若 \(q\) 选得差，权重可能重尾，方差甚至无穷。
 
 \subsection{独立样本是假设，不是界面按钮}
 
-伪随机数生成器要有足够质量；马尔可夫链 Monte Carlo（MCMC）样本通常相关，不能把样本数 $n$ 当作 $n$ 个独立观察。相关性会降低有效样本量：
+伪随机数生成器要有足够质量；马尔可夫链 Monte Carlo（MCMC）样本通常相关，不能把样本数 \(n\) 当作 \(n\) 个独立观察。对平稳链和某个具体估计函数，常用近似为
 
 \[
-n_{\mathrm{eff}}<n.
+n_{\mathrm{eff}}
+\approx
+\frac{n}{1+2\sum_{k\ge1}\rho_k},
 \]
+其中 \(\rho_k\) 是该函数值序列的滞后 \(k\) 自相关。MCMC 中常见的正自相关通常使 \(n_{\mathrm{eff}}<n\)，但这不是逻辑必然：负自相关可能使某些估计量的有效样本量超过 \(n\)。实际计算还要稳定估计或截断这串自相关和，不能把单个通用 ESS 当作整条链的固有属性。
 此外还要区分：
 
 \begin{itemize}
@@ -146,14 +154,13 @@ n_{\mathrm{eff}}<n.
   \textbf{初始与收敛偏差}：MCMC 尚未进入平稳状态。
 \end{itemize}
 
-样本平均非常稳定地收敛到错误目标，仍然是错误答案——这与``大数定律与长期平均''一节列出的选择偏差、共同系统误差同源：重复只能缩小随机误差，不能修正抽样机制本身。
+样本平均非常稳定地收敛到错误目标，仍然是错误答案——这与\hyperref[sec:05-Probability/08-Limit-Theorems/02]{``大数定律与长期平均''}一节列出的选择偏差、共同系统误差同源：重复只能缩小随机误差，不能修正抽样机制本身。
 
 \subsection{一份可报告的 Monte Carlo 结果}
 
 至少应说明：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   目标期望怎样定义；

@@ -1,4 +1,9 @@
 \section{近端与坐标方法利用可分结构}
+\label{sec:09-Convex-Optimization/06-Optimization-Algorithms/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}目标里有一个难以求导但结构简单的部分时，不必把它粗暴地当普通梯度处理。近端法把这部分精确留在一个小子问题里，坐标法则一次只动少量变量，两者都在用结构换取便宜而稳定的更新。
+\end{quote}
 
 许多模型具有复合形式
 
@@ -9,9 +14,9 @@ F(x)=f(x)+g(x),
 其中 \(f\) 光滑凸，\(g\) 凸但可能不可微。例如 Lasso 中
 
 \[
-f(w)=\frac12\lVert Xw-y\rVert_2^2,
+f(w)=\frac12\norm{ Xw-y}_2^2,
 \qquad
-g(w)=\lambda\lVert w\rVert_1.
+g(w)=\lambda\norm{ w}_1.
 \]
 
 普通次梯度法把两部分都压缩成一个粗糙方向，浪费了 \(f\) 的光滑性和 \(g\) 的特殊结构。近端方法选择分别对待它们。
@@ -23,7 +28,7 @@ g(w)=\lambda\lVert w\rVert_1.
 \[
 \operatorname{prox}_{\alpha g}(v) = \argmin_x
 \left\{
-g(x)+\frac{1}{2\alpha}\lVert x-v\rVert_2^2
+g(x)+\frac{1}{2\alpha}\norm{ x-v}_2^2
 \right\}.
 \]
 它在降低 \(g\) 与不离开 \(v\) 太远之间权衡。二次项是强凸的，因此在常见闭凸条件下近端点唯一。
@@ -41,7 +46,7 @@ x_{k+1} = \operatorname{prox}_{\alpha g}
 若 \(g=I_C\) 是凸集 \(C\) 的指标函数，
 
 \[
-\operatorname{prox}_{\alpha I_C}(v) = \argmin_{x\in C}\lVert x-v\rVert^2
+\operatorname{prox}_{\alpha I_C}(v) = \argmin_{x\in C}\norm{ x-v}^2
 =\Pi_C(v).
 \]
 因此
@@ -103,4 +108,3 @@ v+\alpha\lambda,&v<-\alpha\lambda.
 \end{itemize}
 
 算法名称不是选择依据，计算原语才是。
-

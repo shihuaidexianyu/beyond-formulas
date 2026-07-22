@@ -1,4 +1,9 @@
 \section{行列式与体积：线性变换是放大、翻转，还是压扁空间}
+\label{sec:03-Linear-Algebra/04-Determinants/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}行列式给出线性映射对有向体积的缩放因子。绝对值表示体积放大倍数，符号记录方向是否翻转，零则表示至少一个维度被压扁。
+\end{quote}
 
 设一个 \(2\times2\) 矩阵的两列为
 
@@ -67,7 +72,7 @@ a_2=\begin{pmatrix}c\\d\end{pmatrix}.
 
 \subsection{高维中的含义}
 
-对 \(A\in\mathbb R^{n\times n}\)，单位立方体
+对 \(A\in\R^{n\times n}\)，单位立方体
 
 \[
 \{x:0\le x_i\le1\}
@@ -112,7 +117,6 @@ A=\begin{pmatrix}2&1\\0&3\end{pmatrix}
 三类初等行操作对行列式的影响，可以直接从有向体积理解：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   交换两行，方向翻转，行列式乘 \(-1\)；
@@ -122,7 +126,7 @@ A=\begin{pmatrix}2&1\\0&3\end{pmatrix}
   一行加上另一行的倍数，只做剪切，行列式不变。
 \end{enumerate}
 
-列操作有完全相同的规则，因为列操作相当于转置之后做行操作；这依赖于转置不改变行列式（\(\det(A^{\mathsf T})=\det A\)），其证明见下一节。
+列操作有完全相同的规则，因为列操作相当于转置之后做行操作；这依赖于转置不改变行列式（\(\det(A^{\trans})=\det A\)），其证明见下一节。
 
 这说明 Gaussian 消元不仅能判断可逆性，也能跟踪体积因子。把矩阵化为三角形后，行列式就是对角元之积，再根据交换和缩放恢复相应因子。
 
@@ -143,7 +147,7 @@ A=\begin{pmatrix}2&1\\0&3\end{pmatrix}
 \Longleftrightarrow
 A\text{ 可逆}
 \Longleftrightarrow
-\operatorname{rank}(A)=n
+\rank(A)=n
 \Longleftrightarrow
 \mathcal N(A)=\{0\}.
 \]
@@ -172,7 +176,7 @@ F=\begin{pmatrix}1&0\\0&-1\end{pmatrix}
 
 满足 \(\det F=-1\)：面积不变，但方向翻转。
 
-这也是为什么正交矩阵的行列式只能是 \(1\) 或 \(-1\)：由 \(Q^{\mathsf T}Q=I\)，利用下一节的乘法性质 \(\det(AB)=\det A\,\det B\) 与 \(\det I=1\) 可得 \((\det Q)^2=1\)。
+这也是为什么正交矩阵的行列式只能是 \(1\) 或 \(-1\)：由 \(Q^{\trans}Q=I\)，利用下一节的乘法性质 \(\det(AB)=\det A\,\det B\) 与 \(\det I=1\) 可得 \((\det Q)^2=1\)。
 
 \subsection{一个需要警惕的误解}
 
@@ -180,10 +184,4 @@ F=\begin{pmatrix}1&0\\0&-1\end{pmatrix}
 
 例如 \(0.01I_{100}\) 的行列式是 \(10^{-200}\)，看起来极小，但它在所有方向上缩放完全一致，条件数仍为 \(1\)。判断数值敏感性需要奇异值和条件数，而不是只看行列式。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06：Properties of Determinants
-\end{itemize}
+延伸阅读：MIT 18.06：Properties of Determinants。

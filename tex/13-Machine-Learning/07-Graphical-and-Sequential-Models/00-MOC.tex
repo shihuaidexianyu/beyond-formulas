@@ -2,4 +2,21 @@
 
 本单元从三层推进。第一层建立 Bayesian network、Markov random field、d-separation、因子图与配分函数的共同语言，再用 Gaussian 图模型说明 covariance 与 precision 的零分别编码哪一种独立；第二层处理序列模型，从 HMM 走向线性 Gaussian 状态空间模型、Kalman filtering 和 smoothing；第三层比较生成式序列模型与条件随机场，解释归一化范围、动态规划和特征设计怎样改变学习与推断。
 
-已有的 HMM 正文留在“概率模型与隐变量”作为离散隐状态入口。本单元省去对前向---后向算法的重复讲解，先从 precision matrix 的静态条件独立进入线性 Gaussian 动态系统，再追问两个更一般的问题：状态是连续且非线性时怎样保留不确定性，标签由整段输入共同决定时怎样直接建模 \(p(y\mid x)\)。最后一节把 HMM、线性状态空间模型、CRF 与 self-attention 放在同一坐标系中，防止因为它们都处理序列就误认为彼此只是不同实现。
+已有的 HMM 正文留在``概率模型与隐变量''作为离散隐状态入口。本单元省去对前向---后向算法的重复讲解，先从 precision matrix 的静态条件独立进入线性 Gaussian 动态系统，再追问两个更一般的问题：状态是连续且非线性时怎样保留不确定性，标签由整段输入共同决定时怎样直接建模 \(p(y\mid x)\)。最后一节把 HMM、线性状态空间模型、CRF 与 self-attention 放在同一坐标系中，防止因为它们都处理序列就误认为彼此只是不同实现。
+
+\subsection{怎么读这一章}
+
+首次阅读先抓``分解—独立—消元''：第一篇理解图如何声明联合分布的局部因子，第二篇区分 covariance 零与 precision 零，第三、四篇观察链结构怎样让 filtering、smoothing、配分函数与解码可由动态规划完成。最后一篇用于选型回顾。d-separation 的完整规则和消息传递细节可以第二遍练习，但必须从一开始区分统计图、推断算法与因果图；箭头和缺边只有在所声明的 Markov 与因果假设下才有相应含义。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/01]{``图结构把联合分布拆成局部因子''}；
+\item \hyperref[sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/02]{``Gaussian 图模型用精度矩阵编码条件独立''}；
+\item \hyperref[sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/03]{``Kalman filter 是动态系统上的 Gaussian 条件化''}；
+\item \hyperref[sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/04]{``CRF 对整条标签序列做条件归一化''}；
+\item \hyperref[sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/05]{``四类序列模型回答不同问题''}。
+\end{itemize}

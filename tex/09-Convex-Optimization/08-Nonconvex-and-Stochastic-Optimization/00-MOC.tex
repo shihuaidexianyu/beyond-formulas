@@ -3,7 +3,6 @@
 本单元沿六个层次走出凸性：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   下降引理在非凸地形中只保证接近驻点：复用光滑性结论，推导梯度范数的复杂度界，并说明小梯度不是全局证书。
@@ -21,3 +20,20 @@
 
 这里要建立证据等级，避免给深度学习制造过于整齐的保证：目标下降、梯度变小、到达局部极小、找到全局最优、经验风险降低和总体风险改善是六个不同结论。每次报告``收敛''时，都应明确究竟证明或观察到了哪一个。
 
+\subsection{怎么读这一章}
+
+离开凸性后，先把承诺降到正确层级。前三篇区分驻点、鞍点和仍可恢复全局速率的特殊结构；后三篇讨论随机梯度、动量与泛化，说明训练曲线变好不等于统计问题已经解决。读时始终分清算法找到了什么、理论证明了什么。凸情形的基准可回看 \hyperref[ch:076]{``凸优化算法：利用梯度、曲率与可分结构''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/01]{``下降引理在非凸地形中只保证接近驻点''}；
+\item \hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/02]{``二阶结构区分局部极小与鞍点''}；
+\item \hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/03]{``PL 条件让部分非凸问题恢复全局速率''}；
+\item \hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/04]{``SGD 在期望中下降但噪声会留下平台''}；
+\item \hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/05]{``动量与自适应缩放改变的是动力学''}；
+\item \hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/06]{``优化误差、统计误差与泛化不能混为一谈''}。
+\end{itemize}

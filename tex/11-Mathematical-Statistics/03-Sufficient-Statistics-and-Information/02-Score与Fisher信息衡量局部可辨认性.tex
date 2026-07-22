@@ -1,4 +1,9 @@
 \section{Score 与 Fisher 信息衡量局部可辨认性}
+\label{sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}score 表示对参数轻微移动时对数似然怎样变化，Fisher 信息则衡量这种变化通常有多强。信息大意味着邻近参数更容易从数据中区分，但结论依赖正确的概率模型。
+\end{quote}
 
 如果参数稍微改变，数据分布几乎不变，就很难从有限样本区分这两个参数；如果似然对参数变化非常敏感，估计可以更精确。Fisher 信息把这种局部可辨认性写成 log-likelihood 斜率的波动。
 
@@ -14,14 +19,14 @@ U_\theta(X) = \frac{\partial}{\partial\theta}
 Fisher 信息定义为
 
 \[
-I(\theta) = \mathbb E_\theta[U_\theta(X)^2]
+I(\theta) = \E_\theta[U_\theta(X)^2]
 \]
 在标量参数下；向量参数则为
 
 \[
-I(\theta) = \mathbb E_\theta
+I(\theta) = \E_\theta
 \bigl[
-U_\theta(X)U_\theta(X)^T
+U_\theta(X)U_\theta(X)^{\trans}
 \bigr].
 \]
 \subsection{为什么 score 的期望通常为零}
@@ -30,7 +35,7 @@ U_\theta(X)U_\theta(X)^T
 
 \[
 \begin{aligned}
-\mathbb E_\theta[U_\theta(X)]
+\E_\theta[U_\theta(X)]
 &=
 \int
 \frac{\partial}{\partial\theta}
@@ -46,9 +51,9 @@ p_\theta(x)\,dx\\
 \end{aligned}
 \]
 
-因此 Fisher 信息也是 score 的方差：\(\operatorname{Var}(U_\theta)=\mathbb E_\theta[U_\theta^2]-(\mathbb E_\theta[U_\theta])^2\)，第二项恰为零。
+因此 Fisher 信息也是 score 的方差：\(\Var(U_\theta)=\E_\theta[U_\theta^2]-(\E_\theta[U_\theta])^2\)，第二项恰为零。
 
-对 \(\mathbb E_\theta[U_\theta(X)]=0\) 再求一次导，仍交换求导与积分：
+对 \(\E_\theta[U_\theta(X)]=0\) 再求一次导，仍交换求导与积分：
 
 \[
 \begin{aligned}
@@ -72,7 +77,7 @@ p_\theta(x)\,dx,
 其中第二项用了 \(\frac{\partial}{\partial\theta}p_\theta(x)=U_\theta(x)\,p_\theta(x)\)。移项得到另一种常用形式：
 
 \[
-I(\theta) = -\mathbb E_\theta
+I(\theta) = -\E_\theta
 \left[
 \frac{\partial^2}{\partial\theta^2}
 \log p_\theta(X)
@@ -93,14 +98,14 @@ score 为
 U_\theta(X) = \frac X\theta - \frac{1-X}{1-\theta}
 = \frac{X-\theta}{\theta(1-\theta)}.
 \]
-由 \(\mathbb E_\theta[X-\theta]=0\) 与 \(\operatorname{Var}(X)=\theta(1-\theta)\)，
+由 \(\E_\theta[X-\theta]=0\) 与 \(\Var(X)=\theta(1-\theta)\)，
 
 \[
 I_1(\theta)
 =
-\mathbb E_\theta[U_\theta(X)^2]
+\E_\theta[U_\theta(X)^2]
 =
-\frac{\operatorname{Var}(X)}{\theta^2(1-\theta)^2}
+\frac{\Var(X)}{\theta^2(1-\theta)^2}
 =
 \frac{1}{\theta(1-\theta)}.
 \]
@@ -118,7 +123,7 @@ I_n(\theta)=nI_1(\theta).
 p_i=\operatorname{logistic}(\beta_0+\beta_1d_i),
 \]
 
-单次观测对 \((\beta_0,\beta_1)\) 的信息贡献含有权重 \(p_i(1-p_i)\) 和方向向量 \((1,d_i)^T\)。若所有人看到同一优惠，设计矩阵只有一个方向，两项参数无法分开；再多同样记录也不能恢复缺失的秩。若优惠落在几乎无人或人人购买的区间，\(p_i(1-p_i)\) 很小，单条记录的信息也少。信息不仅取决于样本量，还取决于输入覆盖。
+单次观测对 \((\beta_0,\beta_1)\) 的信息贡献含有权重 \(p_i(1-p_i)\) 和方向向量 \((1,d_i)^{\trans}\)。若所有人看到同一优惠，设计矩阵只有一个方向，两项参数无法分开；再多同样记录也不能恢复缺失的秩。若优惠落在几乎无人或人人购买的区间，\(p_i(1-p_i)\) 很小，单条记录的信息也少。信息不仅取决于样本量，还取决于输入覆盖。
 
 剂量反应实验只是把优惠 \(d_i\) 换成剂量，数学结构没有改变，后果却更严肃。实验设计需要覆盖足以区分基线与剂量斜率的范围，但伦理与安全约束又决定某些剂量根本不能尝试。Fisher 信息可以比较允许方案的可辨认性，不能取消现实中的试验边界。
 
@@ -152,7 +157,7 @@ I(\hat\theta)^{-1}.
 H^{-1}JH^{-1}
 \]
 
-而不是简单的信息逆。这里 \(H\) 是负 Hessian（期望或观测值），\(J\) 指 score 的外积二阶矩 \(\mathbb E_\theta[U_\theta U_\theta^T]\)，与上文观测信息的记号含义不同；模型正确时 \(H=J=I(\theta)\)，夹心形式退化回 \(I(\theta)^{-1}\)。
+而不是简单的信息逆。这里 \(H\) 是负 Hessian（期望或观测值），\(J\) 指 score 的外积二阶矩 \(\E_\theta[U_\theta U_\theta^{\trans}]\)，与上文观测信息的记号含义不同；模型正确时 \(H=J=I(\theta)\)，夹心形式退化回 \(I(\theta)^{-1}\)。
 
 \subsection{重参数化改变数值但保留几何}
 
@@ -175,7 +180,7 @@ I(\theta)(d\theta)^2
 在正则模型中，相邻参数分布的 KL divergence 有二阶展开
 
 \[
-D_{\mathrm{KL}}
+\KL
 \bigl(
 p_\theta\Vert p_{\theta+d\theta}
 \bigr)
@@ -190,4 +195,3 @@ Fisher 信息因此衡量分布空间中局部可区分距离。
 向量参数的 \(I(\theta)\) 若有零方向，说明沿某个参数方向改变对分布的一阶影响为零。原因可能是不可识别、冗余参数、标签交换对称或当前点的局部退化。
 
 优化中的 Hessian 奇异与统计不可识别相关但不完全相同；前者还受具体样本和参数化影响。检查特征值与条件数有助于发现弱识别，但不能单凭数值阈值建立模型可识别性证明。
-

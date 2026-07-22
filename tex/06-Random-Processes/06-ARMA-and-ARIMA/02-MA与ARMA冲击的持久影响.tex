@@ -1,4 +1,9 @@
 \section{MA 与 ARMA：冲击的持久影响}
+\label{sec:06-Random-Processes/06-ARMA-and-ARIMA/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}MA 描述冲击直接影响多少期，AR 描述冲击经过系统反馈后怎样衰减。ARMA 把有限冲击窗口与递归传播叠在一起，平稳性和可逆性因此回答两个不同问题。
+\end{quote}
 
 AR 模型假设未来由历史值直接决定，但许多序列的依赖是间接的：一个冲击（政策变化、设备故障、市场恐慌）影响未来几期，然后逐渐消失。滑动平均（MA）模型捕捉这种``冲击的持久影响''，ARMA 把 AR 与 MA 结合起来。
 
@@ -10,11 +15,11 @@ MA(q) 模型为
 X_t=\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_q\varepsilon_{t-q},
 \]
 
-其中 $\varepsilon_t$ 是白噪声。与 AR 不同，MA 的当前值不依赖历史值，而依赖历史冲击。
+其中 \(\varepsilon_t\) 是白噪声。与 AR 不同，MA 的当前值不依赖历史值，而依赖历史冲击。
 
-MA(q) 总是平稳的（有限白噪声加权和），但其 ACF 有特征形状：$\rho_k=0$ 对 $k>q$，即 ACF 在滞后 $q$ 后截尾。这与 AR 的 PACF 截尾形成对偶：AR 的 ACF 拖尾、PACF 截尾；MA 的 ACF 截尾、PACF 拖尾。
+MA(q) 总是平稳的（有限白噪声加权和），但其 ACF 有特征形状：\(\rho_k=0\) 对 \(k>q\)，即 ACF 在滞后 \(q\) 后截尾。这与 AR 的 PACF 截尾形成对偶：AR 的 ACF 拖尾、PACF 截尾；MA 的 ACF 截尾、PACF 拖尾。
 
-可逆性条件是 MA 特有的：要求 $\theta(B)=1+\theta_1B+\cdots+\theta_qB^q=0$ 的根在单位圆外。这保证 MA 可以写成 AR($\infty$) 形式，即当前冲击可以用历史值线性表示。可逆性对预测和参数估计都重要——不可逆的 MA 有多个参数化产生相同 ACF，识别困难。
+可逆性条件是 MA 特有的：要求 \(\theta(B)=1+\theta_1B+\cdots+\theta_qB^q=0\) 的根在单位圆外。这保证 MA 可以写成 AR(\(\infty\)) 形式，即当前冲击可以用历史值线性表示。可逆性对预测和参数估计都重要——不可逆的 MA 有多个参数化产生相同 ACF，识别困难。
 
 \subsection{ARMA(p,q) 的混合结构}
 
@@ -25,11 +30,11 @@ X_t=\phi_1X_{t-1}+\cdots+\phi_pX_{t-p}
 +\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_q\varepsilon_{t-q}.
 \]
 
-用滞后算子写为 $\phi(B)X_t=\theta(B)\varepsilon_t$。平稳性由 $\phi(B)$ 的根决定（与 AR 相同），可逆性由 $\theta(B)$ 的根决定（与 MA 相同）。
+用滞后算子写为 \(\phi(B)X_t=\theta(B)\varepsilon_t\)。平稳性由 \(\phi(B)\) 的根决定（与 AR 相同），可逆性由 \(\theta(B)\) 的根决定（与 MA 相同）。
 
 ARMA 的 ACF 与 PACF 都拖尾，不能单独用来识别阶数。识别 ARMA 需要更细致的工具：扩展 ACF（EACF）、信息准则（AIC/BIC）或经验试错（先拟合 AR，检查残差的 ACF 是否像 MA）。
 
-ARMA(1,1) 是最简单的混合模型：$X_t=\phi X_{t-1}+\varepsilon_t+\theta\varepsilon_{t-1}$。其 ACF 为
+ARMA(1,1) 是最简单的混合模型：\(X_t=\phi X_{t-1}+\varepsilon_t+\theta\varepsilon_{t-1}\)。其 ACF 为
 
 \[
 \rho_1=\frac{(1+\phi\theta)(\phi+\theta)}{1+\theta^2+2\phi\theta},
@@ -37,7 +42,7 @@ ARMA(1,1) 是最简单的混合模型：$X_t=\phi X_{t-1}+\varepsilon_t+\theta\v
 \rho_k=\phi\rho_{k-1}\ (k\ge2),
 \]
 
-即滞后 1 后指数衰减，但首值由 $\phi,\theta$ 共同决定。这种``AR 的衰减 + MA 的首值调整''是 ARMA 的典型特征。
+即滞后 1 后指数衰减，但首值由 \(\phi,\theta\) 共同决定。这种``AR 的衰减 + MA 的首值调整''是 ARMA 的典型特征。
 
 \subsection{ARMA 与线性动力系统}
 

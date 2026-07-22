@@ -1,6 +1,11 @@
 \section{Gaussian process 把核变成函数先验}
+\label{sec:13-Machine-Learning/09-Kernel-Methods-and-Gaussian-Processes/05}
 
 核岭回归把核当作相似度与函数范数的来源。Gaussian process 使用同一个正定核做另一件事：它直接规定任意有限输入点上的函数值服从怎样的联合 Gaussian 分布，无须预先选择一个固定函数。核由此成为函数先验的协方差。
+
+\begin{quote}
+\textbf{先抓住这一点：}Gaussian process 的核不是事后计算相似度的技巧，而是对函数如何共同变化的先验承诺。条件化能精确传播这套模型内部的不确定性，却不会自动覆盖核选错、分布漂移或未知机制造成的现实误差。
+\end{quote}
 
 \subsection{随机函数通过所有有限边缘分布定义}
 

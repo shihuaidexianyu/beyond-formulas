@@ -1,0 +1,100 @@
+这份索引不是从学科名称出发的——你人在困惑里，不会先想到"这属于数理统计"。它从一次真实的卡壳出发：矩阵算不稳、梯度对不上、训练好但部署差、概率算出来了却不知道该按什么按钮。
+
+每组链接里，第一项是当前最值得先读的入口——读完它，你的判断方式通常会变。其余链接帮你沿路回补前置知识。
+
+\subsection{一句数学陈述到底承诺了什么}
+
+当困难来自``这句话究竟在说什么''，先检查论域、量词、条件和结论，而不要急着计算。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:01-Mathematical-Language/01-Logic/02]{``蕴含与充要条件''}：分清充分、必要、逆命题与逆否命题；
+\item \hyperref[sec:01-Mathematical-Language/01-Logic/03]{``量词与否定''}：判断``所有''、``存在''和量词顺序作出的承诺；
+\item \hyperref[sec:01-Mathematical-Language/03-Proof-Techniques/04]{``怎样发现并修复错误证明''}：定位偷换论域、循环论证和隐藏假设。
+\end{itemize}
+
+\subsection{矩阵公式为什么算不稳}
+
+公式在精确算术中成立，不表示它在有限精度下同样可靠。先区分问题本身是否病态，再判断算法有没有额外放大误差。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/02]{``伪逆与病态问题''}：用奇异值看哪些方向会放大误差；
+\item \hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/03]{``条件数衡量问题对输入误差的敏感性''}：区分问题敏感性与算法稳定性；
+\item \hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/03]{``Cholesky 利用正定结构''}：利用矩阵结构避免不必要的通用计算；
+\item \hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/03]{``需要的是解而不是逆矩阵''}：把显式求逆改写为线性求解。
+\end{itemize}
+
+\subsection{梯度存在，为什么训练仍会失败}
+
+梯度只描述局部变化。训练是否可靠还取决于尺度、曲率、随机噪声、数值精度和目标函数是否真的对应任务。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:10-Matrix-Calculus/02-Differentials/02]{``链式法则就是线性映射复合''}：先确认梯度是怎样传播的；
+\item \hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/01]{``梯度下降真正难在步长''}：理解下降方向为何仍可能导致震荡；
+\item \hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/04]{``SGD 在期望中下降但噪声会留下平台''}：区分平均下降与单条轨迹；
+\item \hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/01]{``训练动力学与数值稳定''}：把优化、参数化和有限精度放在同一条链上。
+\end{itemize}
+
+\subsection{训练表现很好，为什么部署后失效}
+
+先检查评价流程是否泄漏，再检查训练分布与部署分布是否相同，最后才讨论模型容量和优化。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/04]{``数据划分、泄漏与分布偏移''}：判断测试结果是否仍对应部署问题；
+\item \hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/03]{``交叉验证评估的是完整训练流程''}：防止把调参信息泄漏到评价中；
+\item \hyperref[sec:13-Machine-Learning/10-Learning-Theory/01]{``训练误差为何总是乐观''}：理解经验风险与总体风险的缺口；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/06]{``可识别不等于可外推也不等于可决策''}：识别数据支持范围之外的结论。
+\end{itemize}
+
+\subsection{概率算出来以后，为什么行动仍不确定}
+
+概率描述不确定性，行动还需要损失、资源、约束和拒绝选项。概率模型不能替代决策问题的定义。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/01]{``状态、行动、损失与风险构成决策问题''}：把预测接到行动后果；
+\item \hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/02]{``Bayes rule 最小化后验期望损失''}：说明同一后验怎样产生不同决策；
+\item \hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/04]{``Proper scoring rule 与校准衡量概率是否诚实''}：判断概率输出能否按频率解释；
+\item \hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/06]{``拒绝预测与容量约束把概率变成行动''}：把有限资源与不行动选项纳入规则。
+\end{itemize}
+
+\subsection{后验或期望写得出，为什么算不出来}
+
+困难通常不在概率定义，而在高维积分、归一化常数或无法独立采样。不同近似方法交换的是不同误差。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/01]{``Monte Carlo 用随机样本逼近期望''}：把积分误差变成抽样误差；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/02]{``MCMC 在无法独立采样时构造平稳链''}：用相关样本换取可采样性；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/03]{``变分推断把后验近似变成优化''}：用受限分布族换取可计算性；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/05]{``粒子滤波用带权样本追踪非线性状态''}：在时间推进中持续近似分布。
+\end{itemize}
+
+\subsection{迭代为什么震荡、发散或依赖初值}
+
+先问系统的固定点是什么，再分别检查局部稳定性、全局能量、离散步长和噪声。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/01]{``相平面把解画成几何''}：从单条数值轨迹转向整体流；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}：用能量函数证明轨迹不会逃逸；
+\item \hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/02]{``二阶结构区分局部极小与鞍点''}：判断驻点附近的几何；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/06]{``Deadly Triad 让自举误差在分布外放大''}：理解强化学习中特有的反馈放大。
+\end{itemize}
+
+\subsection{观察到相关性，为什么仍不能解释干预}
+
+预测利用联合分布中的稳定关系；干预问题还需要说明哪些机制保持不变，以及处理分配为何允许比较替代世界。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/01]{``观察、干预与反事实回答不同问题''}：先区分三类问题；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/02]{``结构因果模型把干预写成机制替换''}：说明 (do) 操作改变了什么；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/03]{``混杂、碰撞点与后门调整''}：判断控制变量何时消除偏差、何时制造偏差；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/04]{``潜在结果把处理效应定义在替代世界之间''}：把因果效应与缺失反事实联系起来。
+\end{itemize}
+
+这份索引不是故障排查的终点。读完入口之后，还得回到正文里去追一层：失败到底来自问题定义、数学模型、计算方法、数据证据，还是行动约束？相同的表面症状，可能来自完全不同的层级——查缺的不二法门就是定位到层级再动手。

@@ -1,34 +1,39 @@
 \section{最大间隔与支持向量机}
+\label{sec:09-Convex-Optimization/07-Applications/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}许多超平面都能把可分数据分开，SVM 选择离两类最近样本仍尽量远的那一条。最终真正限制间隔的只是少数支持向量，其他远离边界的样本不会直接决定解。
+\end{quote}
 
 给定标签 \(y_i\in\{-1,1\}\)，超平面
 
 \[
-w^Tx+b=0
+w^{\trans}x+b=0
 \]
 
-按 \(\operatorname{sign}(w^Tx+b)\) 分类。若数据可分，存在无穷多条分离超平面。支持向量机会在分对训练样本的超平面中，选择离两类最近样本都尽可能远的那一条。
+按 \(\sign(w^{\trans}x+b)\) 分类。若数据可分，存在无穷多条分离超平面。支持向量机会在分对训练样本的超平面中，选择离两类最近样本都尽可能远的那一条。
 
 \subsection{固定函数间隔后，最小化参数范数}
 
 点 \(x_i\) 到超平面的有符号几何距离是
 
 \[
-\frac{y_i(w^Tx_i+b)}{\lVert w\rVert_2}.
+\frac{y_i(w^{\trans}x_i+b)}{\norm{ w}_2}.
 \]
 
 同时把 \((w,b)\) 乘正数不会改变超平面，因此可以固定最近样本的函数间隔为一：
 
 \[
-y_i(w^Tx_i+b)\ge1.
+y_i(w^{\trans}x_i+b)\ge1.
 \]
 
-两侧支持超平面 \(w^Tx+b=\pm1\) 的距离为 \(2/\lVert w\rVert_2\)。最大化间隔等价于
+两侧支持超平面 \(w^{\trans}x+b=\pm1\) 的距离为 \(2/\norm{ w}_2\)。最大化间隔等价于
 
 \[
 \begin{aligned}
-\min_{w,b}\quad&\frac12\lVert w\rVert_2^2\\
+\min_{w,b}\quad&\frac12\norm{ w}_2^2\\
 \text{s.t.}\quad&
-y_i(w^Tx_i+b)\ge1,\quad i=1,\ldots,n.
+y_i(w^{\trans}x_i+b)\ge1,\quad i=1,\ldots,n.
 \end{aligned}
 \]
 
@@ -39,14 +44,14 @@ y_i(w^Tx_i+b)\ge1,\quad i=1,\ldots,n.
 现实数据通常不能完全线性分开。引入松弛变量 \(\xi_i\ge0\)：
 
 \[
-y_i(w^Tx_i+b)\ge1-\xi_i,
+y_i(w^{\trans}x_i+b)\ge1-\xi_i,
 \]
 
 并惩罚总违规：
 
 \[
 \min_{w,b,\xi}
-\frac12\lVert w\rVert_2^2
+\frac12\norm{ w}_2^2
 +C\sum_i\xi_i.
 \]
 
@@ -54,9 +59,9 @@ y_i(w^Tx_i+b)\ge1-\xi_i,
 
 \[
 \min_{w,b}
-\frac12\lVert w\rVert_2^2
+\frac12\norm{ w}_2^2
 +C\sum_i
-\max\{0,1-y_i(w^Tx_i+b)\}.
+\max\{0,1-y_i(w^{\trans}x_i+b)\}.
 \]
 
 hinge loss 在 margin 大于一时为零，在 margin 不足时线性惩罚。它凸但不可微，适合次梯度、坐标或近端型方法。与第一节的 logistic 损失相比，它把样本推出间隔后便完全松手；下文将看到，正是这块为零的平坦区域让大多数样本的对偶乘子为零。
@@ -77,7 +82,7 @@ w=\sum_i\alpha_i y_i x_i,
 
 \[
 \alpha_i
-\bigl[y_i(w^Tx_i+b)-1\bigr]=0.
+\bigl[y_i(w^{\trans}x_i+b)-1\bigr]=0.
 \]
 
 若样本严格位于间隔外，方括号为正，必有 \(\alpha_i=0\)；只有落在间隔边界或软间隔内的样本可能有非零乘子。这些点就是支持向量，它们``支撑''了最优超平面。
@@ -92,7 +97,7 @@ w=\sum_i\alpha_i y_i x_i,
 
 \subsection{核方法仍然依赖凸性与半正定性}
 
-对偶目标只通过内积 \(x_i^Tx_j\) 使用数据。把内积替换为核函数
+对偶目标只通过内积 \(x_i^{\trans}x_j\) 使用数据。把内积替换为核函数
 
 \[
 K(x_i,x_j)=\langle\phi(x_i),\phi(x_j)\rangle
@@ -106,5 +111,4 @@ K(x_i,x_j)=\langle\phi(x_i),\phi(x_j)\rangle
 
 SVM 输出的是有符号 margin，不天然是概率。若应用需要校准概率，可在独立数据上做 Platt scaling、isotonic regression 等后处理，但这增加了另一层统计模型。
 
-特征尺度同样会改变几何间隔，因为 \(\lVert w\rVert_2\) 与坐标单位有关。训练前标准化、明确截距处理、检查类别权重和报告支持向量比例，都是模型解释的一部分。
-
+特征尺度同样会改变几何间隔，因为 \(\norm{ w}_2\) 与坐标单位有关。训练前标准化、明确截距处理、检查类别权重和报告支持向量比例，都是模型解释的一部分。

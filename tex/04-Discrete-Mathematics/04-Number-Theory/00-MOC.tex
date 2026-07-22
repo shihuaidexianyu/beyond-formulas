@@ -1,7 +1,6 @@
 数论不只研究``神奇整数性质''。整除给出离散结构，Euclid 算法把结构变成高效计算，Bézout 恒等式判断模逆是否存在，Fermat/Euler 定理压缩巨大指数，中国剩余定理再把多个局部余数拼回全局整数。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   整除、最大公约数与 Euclid 算法
@@ -14,3 +13,33 @@
 \end{enumerate}
 
 每次``约掉''、``取逆''都要先检查互素条件。模运算像普通代数，却不是每个非零元素都可除；这条边界贯穿全单元。
+
+\subsection{怎么读这一章}
+
+这四篇既可以顺读，也可以从手头的问题反向进入：
+
+\begin{itemize}
+\tightlist
+\item
+  若要判断一个整数方程是否可解，或真正算出模逆，从\hyperref[sec:04-Discrete-Mathematics/04-Number-Theory/01]{``整除、最大公约数与 Euclid 算法''}进入，再读\hyperref[sec:04-Discrete-Mathematics/04-Number-Theory/02]{``模运算与模逆''}；核心桥梁是 Bézout 恒等式。
+\item
+  若要压缩巨大指数或理解 RSA 的数学骨架，读\hyperref[sec:04-Discrete-Mathematics/04-Number-Theory/03]{``Fermat 与 Euler 定理''}；先检查底数是否可逆，再谈周期。
+\item
+  若要把多个局部余数拼成一个全局整数，或把大模数计算拆成小模数并行处理，读\hyperref[sec:04-Discrete-Mathematics/04-Number-Theory/04]{``中国剩余定理''}；先检查模数是否互素，非互素时改查相容条件。
+\item
+  若从有限域、插值或纠错码回补基础，只需先读模逆一篇，再进入\hyperref[ch:031]{``编码与多项式方法：用结构化冗余对抗丢失和错误''}；不必先学完所有密码学应用。
+\end{itemize}
+
+第一次阅读可以在能稳定回答两个问题时停下：当前想消去的元素是否有逆？当前结论给出的是存在性、构造算法，还是只给一个周期上界？
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/04-Number-Theory/01]{``整除、最大公约数与 Euclid 算法''}；
+\item \hyperref[sec:04-Discrete-Mathematics/04-Number-Theory/02]{``模运算与模逆''}；
+\item \hyperref[sec:04-Discrete-Mathematics/04-Number-Theory/03]{``Fermat 与 Euler 定理''}；
+\item \hyperref[sec:04-Discrete-Mathematics/04-Number-Theory/04]{``中国剩余定理''}。
+\end{itemize}

@@ -1,6 +1,11 @@
 \section{微分熵为何不是离散熵的直接复制}
+\label{sec:07-Information-Theory/01-Information-and-Entropy/03}
 
-对连续变量 $X$ 的密度 $f$，形式上把求和换成积分：
+\begin{quote}
+\textbf{先抓住这一点：}连续变量没有天然的最小格子，所以单看微分熵，它会随着单位和坐标改变，甚至可以是负数。这不是计算出错，而是在提醒我们：连续情形里，分布之间的相对信息通常比一个分布自己的熵更可靠。
+\end{quote}
+
+对连续变量 \(X\) 的密度 \(f\)，形式上把求和换成积分：
 
 \[
 h(X)
@@ -20,23 +25,23 @@ X\sim\mathrm{Unif}(0,a),
 \[
 h(X)=\log a.
 \]
-当 $0<a<1$ 时，
+当 \(0<a<1\) 时，
 
 \[
 h(X)<0.
 \]
-这不矛盾，因为微分熵不是离散编码所需 bit 数的直接下界。密度可大于一，$-\log f(X)$ 也可以为负。
+这不矛盾，因为微分熵不是离散编码所需 bit 数的直接下界。密度可大于一，\(-\log f(X)\) 也可以为负。
 
 \subsection{缩放会改变微分熵}
 
-若 $Y=aX+b$，$a\ne0$，则
+若 \(Y=aX+b\)，\(a\ne0\)，则
 
 \[
 h(Y)=h(X)+\log|a|.
 \]
-把米改成厘米，相当于乘一百，微分熵增加 $\log100$。同一个物理量仅因单位改变便有不同微分熵，所以它不是坐标不变的绝对不确定度。
+把米改成厘米，相当于乘一百，微分熵增加 \(\log100\)。同一个物理量仅因单位改变便有不同微分熵，所以它不是坐标不变的绝对不确定度。
 
-更一般的可逆变换 $Y=g(X)$，由密度变换公式 $f_Y(y)=f_X(g^{-1}(y))\,\lvert\det J_{g^{-1}}(y)\rvert$ 代入积分即得
+更一般的可逆变换 \(Y=g(X)\)，由密度变换公式 \(f_Y(y)=f_X(g^{-1}(y))\,\lvert\det J_{g^{-1}}(y)\rvert\) 代入积分即得
 
 \[
 h(Y)
@@ -51,14 +56,14 @@ Jacobian 体积伸缩直接进入熵。
 
 \subsection{离散量化解释它的角色}
 
-把连续 $X$ 以步长 $\Delta$ 量化为 $X_\Delta$，即只记录它落在哪个长度为 $\Delta$ 的小区间。在正则条件下，第 $i$ 个小区间上的概率约为 $f(i\Delta)\Delta$，于是
+把连续 \(X\) 以步长 \(\Delta\) 量化为 \(X_\Delta\)，即只记录它落在哪个长度为 \(\Delta\) 的小区间。在正则条件下，第 \(i\) 个小区间上的概率约为 \(f(i\Delta)\Delta\)，于是
 
 \[
 H(X_\Delta)
 \approx-\sum_i f(i\Delta)\Delta\,\log\bigl(f(i\Delta)\Delta\bigr)
 =-\sum_i f(i\Delta)\log f(i\Delta)\,\Delta+\log\frac1\Delta.
 \]
-这是近似等式；当 $\Delta\to0$，右端第一项是 $-\int f\log f$ 的 Riemann 和，趋于 $h(X)$，因此
+这是近似等式；当 \(\Delta\to0\)，右端第一项是 \(-\int f\log f\) 的 Riemann 和，趋于 \(h(X)\)，因此
 
 \[
 H(X_\Delta)
@@ -84,14 +89,14 @@ h(X)+\log\frac1\Delta.
 
 \subsection{哪些连续信息量更可靠}
 
-虽然单独微分熵依赖坐标，以下差值或组合具有更稳定意义：
+虽然单独微分熵依赖坐标，以下相对量或适当组合具有更稳定意义：
 
 \begin{itemize}
 \item
-  互信息
+  互信息最稳妥地定义为
 
   \[
-  I(X;Y)=h(X)+h(Y)-h(X,Y);
+  I(X;Y)=D(P_{XY}\|P_XP_Y);
   \]
 \item
   KL 散度；
@@ -101,9 +106,15 @@ h(X)+\log\frac1\Delta.
   熵功率等适当组合。
 \end{itemize}
 
-在共同可逆坐标变换下，Jacobian 项会抵消，因此互信息保持不变。
+当三个微分熵都定义良好且不会形成 \(\infty-\infty\) 时，才可再写成
 
-上面列举的 KL 散度定义为 $D(f\|g)=\int f\log(f/g)\,dx$，衡量两个分布的相对差异；下一节会用它的非负性证明 Gaussian 的最大熵地位，本部分后续单元再系统讨论。
+\[
+I(X;Y)=h(X)+h(Y)-h(X,Y).
+\]
+
+对 \(X\) 与 \(Y\) 分别施加可逆、足够正则的坐标变换时，Jacobian 项会抵消，因此互信息保持不变。KL 形式即使在单个微分熵发散时也往往仍有明确意义。
+
+上面列举的 KL 散度定义为 \(D(f\|g)=\int f\log(f/g)\,dx\)，衡量两个分布的相对差异；下一节会用它的非负性证明 Gaussian 的最大熵地位，本部分后续单元再系统讨论。
 
 \subsection{Gaussian 微分熵}
 
@@ -118,7 +129,7 @@ X\sim\mathcal N(\mu,\sigma^2),
 h(X)
 =\frac12\log(2\pi e\sigma^2).
 \]
-它不依赖均值，只随尺度 $\sigma$ 改变。
+它不依赖均值，只随尺度 \(\sigma\) 改变。
 
 多元 Gaussian
 
@@ -131,7 +142,7 @@ X\sim\mathcal N(\mu,\Sigma)
 h(X)
 =\frac12\log\left((2\pi e)^d|\Sigma|\right).
 \]
-协方差行列式刻画椭球总体积尺度。若 $\Sigma$ 奇异，分布集中在低维子空间，相对于整个空间没有普通密度，公式中的 $\log|\Sigma|$ 趋于负无穷。
+协方差行列式刻画椭球总体积尺度。若 \(\Sigma\) 奇异，分布集中在低维子空间，相对于整个 \(\R^d\) 的 Lebesgue 测度没有普通密度，所以全维微分熵并未按上述定义存在。若用 \(\Sigma+\varepsilon I\) 加入微小全维噪声再令 \(\varepsilon\downarrow0\)，相应微分熵才趋于负无穷；这是一种极限说法，不能替代原定义。
 
 \subsection{最大熵结论必须区分离散与连续}
 

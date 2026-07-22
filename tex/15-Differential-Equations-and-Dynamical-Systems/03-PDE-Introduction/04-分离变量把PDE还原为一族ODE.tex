@@ -1,6 +1,11 @@
 \section{分离变量：把 PDE 还原为一族 ODE}
+\label{sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/04}
 
-前三节都在讲``行为''，本节给出经典线性 PDE 最系统的求解方法：分离变量。它的前提只有两条——方程线性、区域与边界条件允许变量分离——而回报是把 PDE 完全还原成本 Part 第一单元已经会解的 ODE 族。
+\begin{quote}
+\textbf{先抓住这一点：}分离变量真正依赖的是算子、区域与边界条件共同提供的谱结构。乘积试探只是找到这些空间模态的入口。
+\end{quote}
+
+前三节都在讲``行为''，本节给出经典线性 PDE 的一类系统求解方法：分离变量。它要求方程、区域与边界条件具有可分结构，并且所得空间特征函数足够完备；满足这些条件时，PDE 可以展开成第一单元已经会分析的一族 ODE。
 
 \subsection{试探乘积解：一个假设引出两个 ODE}
 
@@ -43,7 +48,7 @@ X_k(x)=\sin\frac{k\pi x}{L},
 T_k(t)=e^{-\kappa\lambda_k t},
 \]
 
-正是``三类典型方程行为迥异''开头算过的高频衰减。
+正是\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/02]{``三类典型方程行为迥异''}开头算过的高频衰减。
 
 \subsection{叠加原理把级数拼成通解}
 
@@ -67,7 +72,7 @@ u_0(x)=\sum_{k=1}^{\infty}b_k\sin\frac{k\pi x}{L},
 b_k=\frac{2}{L}\int_0^L u_0(x)\sin\frac{k\pi x}{L}\,dx.
 \]
 
-至此 PDE 完全解出：初始分布的每个 Fourier 成分独立地按自己的时间常数衰减，高频先死，低频后死——上一节的定性结论变成了逐项可见的公式。
+在允许逐项运算且级数按所需意义收敛的条件下，解由这些模态重建：初始分布的每个 Fourier 成分独立地按自己的时间常数衰减，高频先死，低频后死——上一节的定性结论变成了逐项可见的公式。
 
 \subsection{同一机器处理波动与 Laplace}
 
@@ -92,7 +97,7 @@ T_k(t)=A_k\cos\frac{ck\pi t}{L}+B_k\sin\frac{ck\pi t}{L}.
 \item
   区间 + 齐次 Dirichlet：正弦；齐次 Neumann：余弦；
 \item
-  周期区间：完整 Fourier 系（``从 Fourier 级数到连续变换''）；
+  周期区间：完整 Fourier 系（\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}）；
 \item
   圆盘：极坐标分离，角向是三角函数，径向是 Bessel 函数；
 \item

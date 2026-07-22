@@ -1,6 +1,11 @@
 \section{Hidden Markov Model：从观测反推状态}
+\label{sec:06-Random-Processes/04-Applications/04}
 
-Markov 链假设状态 $Z_t$ 可以直接观察。很多系统只暴露带噪信号：
+\begin{quote}
+\textbf{先抓住这一点：}HMM 把不可见的动态状态与可见的带噪观测分开：Markov 性压缩时间依赖，条件独立性让指数多条隐藏路径能够用前向、后向和 Viterbi 动态规划处理。
+\end{quote}
+
+Markov 链假设状态 \(Z_t\) 可以直接观察。很多系统只暴露带噪信号：
 
 \begin{itemize}
 \tightlist
@@ -12,22 +17,21 @@ Markov 链假设状态 $Z_t$ 可以直接观察。很多系统只暴露带噪信
   隐藏生物状态产生测量序列。
 \end{itemize}
 
-Hidden Markov Model（HMM）加入观测变量 $Y_t$：
+Hidden Markov Model（HMM）加入观测变量 \(Y_t\)：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  隐状态 $Z_t$ 构成 Markov 链；
+  隐状态 \(Z_t\) 构成 Markov 链；
 \item
-  给定当前隐状态 $Z_t$，观测 $Y_t$ 与其他变量条件独立；
+  给定当前隐状态 \(Z_t\)，观测 \(Y_t\) 与其他变量条件独立；
 \item
   观测分布只由当前状态决定。
 \end{enumerate}
 
 \subsection{联合分布如何分解}
 
-设初始分布为 $\pi_i$，转移概率
+设初始分布为 \(\pi_i\)，转移概率
 
 \[
 A_{ij}=P(Z_t=j\mid Z_{t-1}=i),
@@ -45,7 +49,7 @@ P(z_{1:T},y_{1:T})
 \prod_{t=2}^{T}
 A_{z_{t-1}z_t}B_{z_t}(y_t).
 \]
-如果枚举所有 $K^T$ 条隐藏路径（$K$ 为隐状态个数），计算量指数增长。HMM 的价值在于 Markov 与条件独立结构允许动态规划。
+如果枚举所有 \(K^T\) 条隐藏路径（\(K\) 为隐状态个数），计算量指数增长。HMM 的价值在于 Markov 与条件独立结构允许动态规划。
 
 \subsection{前向算法：观测序列有多可能}
 
@@ -71,7 +75,7 @@ A_{z_{t-1}z_t}B_{z_t}(y_t).
 \[
 P(y_{1:T})=\sum_j\alpha_T(j).
 \]
-每一步先预测状态分布，再乘当前观测似然。复杂度从指数降为 $O(TK^2)$：每个时刻对 $K$ 个状态各做一次 $K$ 项求和。
+每一步先预测状态分布，再乘当前观测似然。复杂度从指数降为 \(O(TK^2)\)：每个时刻对 \(K\) 个状态各做一次 \(K\) 项求和。
 
 \subsection{过滤、预测与平滑}
 
@@ -119,7 +123,7 @@ P(y_{1:T})=\sum_j\alpha_T(j).
 P(Z_t=i\mid y_{1:T})
 \propto\alpha_t(i)\,\beta_t(i),
 \]
-因为给定 $Z_t$ 时，过去观测与未来观测条件独立，两式相乘正好合出 $P(Z_t=i,y_{1:T})$。
+因为给定 \(Z_t\) 时，过去观测与未来观测条件独立，两式相乘正好合出 \(P(Z_t=i,y_{1:T})\)。
 
 平滑通常比过滤准确，但不能在线实时完成，因为它需要未来数据。
 
@@ -166,7 +170,7 @@ Viterbi 算法寻找整条最可能路径：
 \item
   给定状态后观测条件独立；
 \item
-  状态驻留时间隐含为 Geometric（驻留 $k$ 步的概率为 $A_{ii}^{k-1}(1-A_{ii})$）；
+  状态驻留时间隐含为 Geometric（驻留 \(k\) 步的概率为 \(A_{ii}^{k-1}(1-A_{ii})\)）；
 \item
   参数通常不随时间变。
 \end{itemize}

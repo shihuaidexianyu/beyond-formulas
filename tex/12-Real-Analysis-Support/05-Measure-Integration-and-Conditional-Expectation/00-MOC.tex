@@ -1,12 +1,11 @@
-前面的概率论把概率空间写成 $(\Omega,\mathcal F,\Prob)$，把随机变量写成可测函数，也已经使用单调收敛、控制收敛与条件期望。但这些概念还有一层尚未展开：为什么事件必须组成 $\sigma$-代数，连续型期望究竟是哪一种积分，条件期望在无法写出条件密度时由什么定义，以及``几乎处处收敛''为什么仍可能丢失期望。
+前面的概率论把概率空间写成 \((\Omega,\mathcal F,P)\)，把随机变量写成可测函数，也已经使用单调收敛、控制收敛与条件期望。但这些概念还有一层尚未展开：为什么事件必须组成 \(\sigma\)-代数，连续型期望究竟是哪一种积分，条件期望在无法写出条件密度时由什么定义，以及``几乎处处收敛''为什么仍可能丢失期望。
 
 本单元补上这层结构，却不追求完整复刻一门测度论课程。主线由六个问题组成：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  $\sigma$-代数把可观察事件组织成封闭系统：从有限分割、Borel 集与随机变量生成的信息解释可测性。
+  \(\sigma\)-代数把可观察事件组织成封闭系统：从有限分割、Borel 集与随机变量生成的信息解释可测性。
 \item
   测度把长度、计数与概率统一起来：用可数可加性推出集合极限，并区分零测集与不可能事件。
 \item
@@ -14,10 +13,27 @@
 \item
   Radon--Nikodym 导数把``密度相对于谁''说清楚：统一概率密度、似然比与换测度，并处理没有普通密度的分布。
 \item
-  条件期望是对信息 $\sigma$-代数的投影：给出不依赖条件密度的定义，解释几乎处处唯一、塔式性质与最佳预测。
+  条件期望是对信息 \(\sigma\)-代数的投影：给出不依赖条件密度的定义，解释几乎处处唯一、塔式性质与最佳预测。
 \item
-  一致可积性阻止少量大值携带期望质量：说明何时能把依概率收敛升级为 $L^1$ 收敛。
+  一致可积性阻止少量大值携带期望质量：说明何时能把依概率收敛升级为 \(L^1\) 收敛。
 \end{enumerate}
 
 阅读时可以把本单元看作一次``回填地基''。初次接触概率时，先用离散求和与连续密度建立直觉是合理的；现在回到这里，是为了让同一套语言能够覆盖混合分布、随机过程、重要性采样、martingale 和 Bellman 条件期望，而不再依赖``应该存在一个密度''的侥幸。
 
+\subsection{怎么读这一章}
+
+按“事件—大小—积分—换参考—加信息”推进。sigma 代数规定哪些事件可谈，测度给它们大小，Lebesgue 积分累计函数值，Radon--Nikodym 导数比较两个测度，条件期望则只保留当前信息能看见的部分。最后用一致可积性控制期望不逃逸。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/01]{``\(\sigma\)-代数把可观察事件组织成封闭系统''}；
+\item \hyperref[sec:12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/02]{``测度把长度、计数与概率统一起来''}；
+\item \hyperref[sec:12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/03]{``Lebesgue 积分先积简单函数再逼近''}；
+\item \hyperref[sec:12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/04]{``Radon--Nikodym 导数把``相对于谁''说清楚''}；
+\item \hyperref[sec:12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/05]{``条件期望是对信息 \(\sigma\)-代数的投影''}；
+\item \hyperref[sec:12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/06]{``一致可积性阻止期望质量逃逸''}。
+\end{itemize}

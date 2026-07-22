@@ -1,4 +1,9 @@
-\section{\texorpdfstring{$L^2$ 的几何让投影与正交可用}{L2 的几何让投影与正交可用}}
+\section{\texorpdfstring{\(L^2\) 的几何让投影与正交可用}{L2 的几何让投影与正交可用}}
+\label{sec:12-Real-Analysis-Support/07-Lp-Spaces-and-Function-Geometry/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}\(L^2\) 不只有距离，还有内积，因此可以谈角度、正交和最近点投影。最小二乘的正规方程正是``残差与可用方向正交''的函数空间版本。
+\end{quote}
 
 在所有 \(L^p\) 中，只有 \(p=2\) 自带内积：
 
@@ -44,7 +49,7 @@ Pythagoras 定理随之而来：
 \qquad\text{对所有 }f.
 \]
 
-有限维情形在``导数是最佳线性映射''中见过：线性泛函由它在基上的取值决定，把这些取值排成向量即可。Hilbert 空间的证明同样以正交分解为工具：若 \(\ell\ne0\)，其核的真子空间余下一维，取该方向上的一个向量缩放即得 \(u\)。连续性不可或缺：它保证核是闭的，投影定理才能用。
+有限维情形在\hyperref[sec:10-Matrix-Calculus/01-Derivative-Conventions/01]{``导数是最佳线性映射''}中见过：线性泛函由它在基上的取值决定，把这些取值排成向量即可。Hilbert 空间的证明同样以正交分解为工具：若 \(\ell\ne0\)，其核的真子空间余下一维，取该方向上的一个向量缩放即得 \(u\)。连续性不可或缺：它保证核是闭的，投影定理才能用。
 
 这个定理立刻解释了 RKHS 为什么特殊。``再生核希尔伯特空间把函数当成点''中，求值泛函 \(f\mapsto f(x)\) 满足
 
@@ -60,7 +65,7 @@ Pythagoras 定理随之而来：
 
 \[
 e_k(x)=\frac{1}{\sqrt{2\pi}}e^{ikx},
-\qquad k\in\mathbb Z
+\qquad k\in\Z
 \]
 
 标准正交：\(\langle e_k,e_\ell\rangle=\delta_{k\ell}\)。把 \(f\) 向前 \(2N+1\) 个基函数张成的（有限维、闭）子空间投影，系数为
@@ -75,7 +80,7 @@ e_k(x)=\frac{1}{\sqrt{2\pi}}e^{ikx},
 S_Nf=\sum_{|k|\le N}\widehat f(k)e_k,
 \]
 
-并且由投影定理，这是用前 \(2N+1\) 个频率对 \(f\) 的最佳 \(L^2\) 逼近。``从 Fourier 级数到连续变换''中曾以形式推导引入这些系数，现在它们的身份清楚了：Fourier 系数是坐标，Fourier 部分和是正交投影。
+并且由投影定理，这是用前 \(2N+1\) 个频率对 \(f\) 的最佳 \(L^2\) 逼近。\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}中曾以形式推导引入这些系数，现在它们的身份清楚了：Fourier 系数是坐标，Fourier 部分和是正交投影。
 
 Bessel 不等式是 Pythagoras 的直接推论：
 
@@ -86,7 +91,7 @@ Bessel 不等式是 Pythagoras 的直接推论：
 而三角函数系在 \(L^2([-\pi,\pi])\) 中完备（张成的子空间稠密），于是部分和在 \(L^2\) 中收敛到 \(f\)，并有 Parseval 恒等式
 
 \[
-\sum_{k\in\mathbb Z}|\widehat f(k)|^2=\norm{f}_2^2.
+\sum_{k\in\Z}|\widehat f(k)|^2=\norm{f}_2^2.
 \]
 
 ``时域能量等于频域能量''因此不是额外物理定律，而是正交展开在完备基下的 Pythagoras 定理。同一个框架直接搬到任意完备标准正交系（Legendre 多项式、Haar 系、小波基），只是换了一组坐标轴。

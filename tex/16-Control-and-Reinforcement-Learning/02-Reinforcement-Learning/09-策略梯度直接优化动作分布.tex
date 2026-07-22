@@ -1,4 +1,9 @@
 \section{策略梯度直接优化动作分布}
+\label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/09}
+
+\begin{quote}
+\textbf{先抓住这一点：}策略梯度用对数导数把环境动力学从梯度公式中消去，但没有消除采样方差、局部最优与分布覆盖问题。
+\end{quote}
 
 价值方法先估计每个动作的长期价值，再选择价值最大的动作。连续动作中逐点取最大可能昂贵，随机策略本身也可能是问题所需的对象。策略梯度改为参数化
 

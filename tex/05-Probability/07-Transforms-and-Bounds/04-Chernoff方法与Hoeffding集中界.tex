@@ -1,25 +1,29 @@
 \section{Chernoff 方法与 Hoeffding 集中界}
+\label{sec:05-Probability/07-Transforms-and-Bounds/04}
 
-Chebyshev 只使用方差，因此尾界按 $1/a^2$ 衰减。若随机变量有更强结构，尤其是独立、有界或具有有限指数矩，尾概率往往会指数衰减。
+\begin{quote}
+\textbf{先抓住这一点：}Chernoff 方法用指数函数放大尾事件，再以 Markov、独立性和参数优化换来指数尾界。Hoeffding 则只保留变量的有界区间，因此稳健但可能牺牲分布细节。
+\end{quote}
+
+Chebyshev 只使用方差，因此尾界按 \(1/a^2\) 衰减。若随机变量有更强结构，尤其是独立、有界或具有有限指数矩，尾概率往往会指数衰减。
 
 Chernoff 方法的关键是下面这个可重复使用的构造，具体上界公式都由它导出：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   用单调指数函数把尾事件改写；
 \item
-  对非负变量 $e^{tX}$ 使用 Markov；
+  对非负变量 \(e^{tX}\) 使用 Markov；
 \item
   利用独立性分解矩母函数；
 \item
-  优化自由参数 $t$。
+  优化自由参数 \(t\)。
 \end{enumerate}
 
 \subsection{指数 Markov}
 
-对 $t>0$，事件 $X\ge a$ 等价于
+对 \(t>0\)，事件 \(X\ge a\) 等价于
 
 \[
 e^{tX}\ge e^{ta}.
@@ -31,21 +35,21 @@ P(X\ge a)
 \le e^{-ta}\E[e^{tX}]
 =e^{-ta}M_X(t).
 \]
-对所有允许的 $t>0$ 都成立，所以可以取最优：
+对所有允许的 \(t>0\) 都成立，所以可以取最优：
 
 \[
 P(X\ge a)
 \le
-\inf_{t>0}
+\inf_{t>0:\,M_X(t)<\infty}
 \exp\bigl(K_X(t)-ta\bigr),
 \]
-其中 $K_X(t)=\log M_X(t)$ 正是第一节引入的累积量生成函数。
+其中 \(K_X(t)=\log M_X(t)\) 正是第一节引入的累积量生成函数。
 
-对左尾可使用 $t<0$，或对 $-X$ 应用同样方法。
+对左尾可使用 \(t<0\)，或对 \(-X\) 应用同样方法。
 
 \subsection{独立和为何产生指数级效果}
 
-若 $S_n=X_1+\cdots+X_n$ 且变量独立，
+若 \(S_n=X_1+\cdots+X_n\) 且变量独立，
 
 \[
 M_{S_n}(t)=\prod_iM_{X_i}(t),
@@ -55,7 +59,7 @@ M_{S_n}(t)=\prod_iM_{X_i}(t),
 \[
 \log M_{S_n}(t)=\sum_i\log M_{X_i}(t).
 \]
-独立性把一个复杂和的指数矩变成逐项累加。优化后，指数中的量通常与 $n$ 成正比，于是偏离概率按 $e^{-cn}$ 衰减。
+独立性把一个复杂和的指数矩变成逐项累加。优化后，指数中的量通常与 \(n\) 成正比，于是偏离概率按 \(e^{-cn}\) 衰减。
 
 若变量相关，直接分解 MGF 就不合法。某些依赖结构有专门集中界，但不能照搬独立版本。
 
@@ -74,7 +78,7 @@ S_n=\sum_iX_i.
 Hoeffding 不等式给出
 
 \[
-P(S_n-\E[S_n{]}\ge t)
+P(S_n-\E[S_n]\ge t)
 \le
 \exp\left(
 -\frac{2t^2}{\sum_i(b_i-a_i)^2}
@@ -83,21 +87,21 @@ P(S_n-\E[S_n{]}\ge t)
 双侧版本为
 
 \[
-P(|S_n-\E[S_n{]}|\ge t)
+P(|S_n-\E[S_n]|\ge t)
 \le
 2\exp\left(
 -\frac{2t^2}{\sum_i(b_i-a_i)^2}
 \right).
 \]
-证明的骨架正是上面的 Chernoff 构造，关键一步是 Hoeffding 引理：均值为零且落在 $[a,b]$ 内的变量满足 $\E[e^{tX}{]}\le e^{t^2(b-a)^2/8}$（引理本身的证明略去）；逐因子相乘即得此指数。这也解释了分母中 $(b_i-a_i)^2$ 的来源。
+证明的骨架正是上面的 Chernoff 构造，关键一步是 Hoeffding 引理：均值为零且落在 \([a,b]\) 内的变量满足 \(\E[e^{tX}]\le e^{t^2(b-a)^2/8}\)（引理本身的证明略去）；逐因子相乘即得此指数。这也解释了分母中 \((b_i-a_i)^2\) 的来源。
 
-若 $X_i\in[0,1]$，则 $\sum_i(b_i-a_i)^2=n$；把事件 $|\bar X_n-\E[\bar X_n{]}|\ge\varepsilon$ 改写为 $|S_n-\E[S_n{]}|\ge n\varepsilon$ 代入，对样本均值 $\bar X_n$ 得
+若 \(X_i\in[0,1]\)，则 \(\sum_i(b_i-a_i)^2=n\)；把事件 \(|\bar X_n-\E[\bar X_n]|\ge\varepsilon\) 改写为 \(|S_n-\E[S_n]|\ge n\varepsilon\) 代入，对样本均值 \(\bar X_n\) 得
 
 \[
-P(|\bar X_n-\E[\bar X_n{]}|\ge\varepsilon)
+P(|\bar X_n-\E[\bar X_n]|\ge\varepsilon)
 \le2e^{-2n\varepsilon^2}.
 \]
-与 Chebyshev 的 $O(1/n)$ 相比，这是指数衰减，但代价是更强的独立和有界条件。
+与 Chebyshev 的 \(O(1/n)\) 相比，这是指数衰减，但代价是更强的独立和有界条件。
 
 \subsection{一个样本量保证}
 
@@ -117,9 +121,9 @@ P(|\bar X_n-\mu|\ge\varepsilon)\le\delta,
 n\ge
 \frac{\log(2/\delta)}{2\varepsilon^2}.
 \]
-对比上一节：若改用 Chebyshev，同样的目标要求 $n\ge\frac{\sigma^2}{\varepsilon^2\delta}$，对 $\delta$ 的依赖是 $1/\delta$；指数尾界把它降为 $\log(1/\delta)$。
+对比上一节：若改用 Chebyshev，同样的目标要求 \(n\ge\frac{\sigma^2}{\varepsilon^2\delta}\)，对 \(\delta\) 的依赖是 \(1/\delta\)；指数尾界把它降为 \(\log(1/\delta)\)。
 
-这给出分布无关的有限样本保证：不必知道 $[0,1]$ 变量的具体分布，只需独立同分布和取值有界。
+这给出分布无关的有限样本保证：不必知道 \([0,1]\) 变量的具体分布，只需独立同分布和取值有界。
 
 ``分布无关''不代表``假设无关''。若数据有自相关、选择偏差或分布漂移，这个样本量公式不能保证目标。
 
@@ -140,13 +144,13 @@ P(S_n\ge(1+\delta)\mu)
 \right)^\mu,
 \qquad\delta>0.
 \]
-较易记但稍松的版本在 $0<\delta\le1$ 时为
+较易记但稍松的版本在 \(0<\delta\le1\) 时为
 
 \[
 P(S_n\ge(1+\delta)\mu)
 \le e^{-\mu\delta^2/3}.
 \]
-它可由上一式取对数得到：在该区间上 $\delta-(1+\delta)\log(1+\delta)\le-\delta^2/3$（两次求导即可验证）。
+它可由上一式取对数得到：在该区间上 \(\delta-(1+\delta)\log(1+\delta)\le-\delta^2/3\)（两次求导即可验证）。
 精确优化还会出现 Bernoulli 相对熵：
 
 \[

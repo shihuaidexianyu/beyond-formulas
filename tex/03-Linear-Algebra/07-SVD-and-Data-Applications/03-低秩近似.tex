@@ -1,11 +1,16 @@
 \section{低秩近似：用少数方向保留主要结构}
+\label{sec:03-Linear-Algebra/07-SVD-and-Data-Applications/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}保留最大的几个奇异值，就是在给定秩限制下最接近原矩阵的近似。被丢掉的尾部可以是噪声，也可能包含微弱但重要的结构，截断阈值要由任务判断。
+\end{quote}
 
 \subsection{数据往往不是低秩的，却可能接近低秩}
 
 秩为 \(r\) 的矩阵可以写成 \(r\) 个秩一矩阵之和：
 
 \[
-A=\sum_{i=1}^{r}\sigma_i u_iv_i^\top.
+A=\sum_{i=1}^{r}\sigma_i u_iv_i^{\trans}.
 \]
 
 每一项只做一件事：读取输入在 \(v_i\) 方向上的坐标，再沿 \(u_i\) 方向输出。如果奇异值快速衰减，后面若干项的作用很弱。于是自然会问：只保留前 \(k\) 项，是否真的比别的秩 \(k\) 矩阵更好？
@@ -17,14 +22,14 @@ A=\sum_{i=1}^{r}\sigma_i u_iv_i^\top.
 将奇异值按 \(\sigma_1\ge\cdots\ge\sigma_r>0\) 排列，定义
 
 \[
-A_k=\sum_{i=1}^{k}\sigma_i u_iv_i^\top
-=U_k\Sigma_kV_k^\top.
+A_k=\sum_{i=1}^{k}\sigma_i u_iv_i^{\trans}
+=U_k\Sigma_kV_k^{\trans}.
 \]
 
 它的秩至多为 \(k\)，并且把其余奇异方向完全舍去。差矩阵仍有清楚的 SVD：
 
 \[
-A-A_k=\sum_{i=k+1}^{r}\sigma_i u_iv_i^\top.
+A-A_k=\sum_{i=k+1}^{r}\sigma_i u_iv_i^{\trans}.
 \]
 
 因此两种常用误差立刻可见：

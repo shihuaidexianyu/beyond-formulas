@@ -3,7 +3,6 @@
 本单元回答三个问题：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   条件异方差的统计特征：为什么平方序列的 ACF 显著而原序列不相关，以及这对弱平稳假设的破坏。
@@ -14,3 +13,18 @@
 \end{enumerate}
 
 这三个问题共用一条主线：条件异方差不是``更复杂的 ARMA''，而是``ARMA 的二阶推广''。ARMA 建模条件均值的一阶结构，条件异方差建模条件方差的二阶结构。理解这一点，才能判断什么时候标准 ARMA 足够（方差稳定），什么时候需要 GARCH（方差时变）。
+
+\subsection{怎么读这一章}
+
+先从收益本身相关性弱、平方收益却成簇出现的经验事实进入，再看 ARCH/GARCH 如何让条件方差随历史更新。最后一篇重点检查参数约束、残差诊断和尾部分布；拟合出波动曲线不等于模型已经可信。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:11-Mathematical-Statistics/10-GARCH-and-Volatility/01]{``条件异方差的统计特征''}；
+\item \hyperref[sec:11-Mathematical-Statistics/10-GARCH-and-Volatility/02]{``ARCH 与 GARCH 的随机过程结构''}；
+\item \hyperref[sec:11-Mathematical-Statistics/10-GARCH-and-Volatility/03]{``GARCH 的估计、诊断与扩展''}。
+\end{itemize}

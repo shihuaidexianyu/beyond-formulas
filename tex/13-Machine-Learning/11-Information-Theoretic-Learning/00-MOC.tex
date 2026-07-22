@@ -1,7 +1,6 @@
 信息论进入机器学习时，最容易出现两种误解：一是把 entropy、cross-entropy 和 KL 当成可互换的名称；二是只要目标里出现 mutual information，就认为泛化或鲁棒性已有保证。本单元从可严格推导的关系出发，再逐步讨论它们怎样参与建模。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   交叉熵训练其实在最小化 KL 差异：连接概率编码、最大似然、proper scoring rule 与稳定分类训练。
@@ -14,3 +13,19 @@
 \end{enumerate}
 
 这四节分别从概率预测、分布选择、模型选择和表示学习切入，但都遵守同一原则：先说明随机变量、分布和约束，再解释目标；先区分精确量与 variational bound，再讨论经验效果。
+
+\subsection{怎么读这一章}
+
+随手阅读时，先看每篇开头的“核心洞见”，再分别抓住四个判断式：\(H(p,q)=H(p)+\KL(p\|q)\)、最大熵的约束集合、\(L(M)+L(D\mid M)\)、以及 \(I(X;Z)-\beta I(Z;Y)\)。想理解来源，再读 Lagrange 对偶、Kraft 不等式和数据处理不等式。真正使用这些目标时，最后检查哪些分布被固定、支持与基准测度是什么、编码协议是否完整，以及优化的究竟是精确信息量还是 variational bound。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/01]{``交叉熵训练其实在最小化 KL 差异''}；
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/02]{``最大熵从约束中选择最少承诺的分布''}；
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/03]{``MDL 把拟合与描述长度放在同一尺度''}；
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/04]{``信息瓶颈在压缩与预测之间权衡''}。
+\end{itemize}

@@ -1,4 +1,9 @@
 \section{从最小二乘到 logistic 回归梯度}
+\label{sec:10-Matrix-Calculus/04-Applications/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}最小二乘与 Logistic 回归的梯度都能读成“设计矩阵的转置乘残差”。差别在于模型怎样把线性预测变成均值，以及残差因此具有怎样的尺度。
+\end{quote}
 
 设有 \(n\) 个样本、\(d\) 个特征：
 
@@ -14,14 +19,14 @@ w\in\R^d.
 z=Xw\in\R^n.
 \]
 
-最小二乘与 logistic 回归共享这一步，区别在于怎样把预测 \(z_i\) 与标签比较。损失函数一变，反向传播到 \(z\) 的``残差信号''就会改变；线性层的伴随始终是乘以 \(X^T\)。
+最小二乘与 logistic 回归共享这一步，区别在于怎样把预测 \(z_i\) 与标签比较。损失函数一变，反向传播到 \(z\) 的``残差信号''就会改变；线性层的伴随始终是乘以 \(X^{\trans}\)。
 
 \subsection{最小二乘：误差本身就是输出梯度}
 
 对连续标签 \(y\in\R^n\)，令
 
 \[
-L(w)=\frac{1}{2n}\lVert Xw-y\rVert_2^2.
+L(w)=\frac{1}{2n}\norm{ Xw-y}_2^2.
 \]
 
 记残差
@@ -33,37 +38,36 @@ r=Xw-y.
 微分为
 
 \[
-dL = \frac1n r^Tdr
-=\frac1n r^TX\,dw.
+dL = \frac1n r^{\trans}dr
+=\frac1n r^{\trans}X\,dw.
 \]
 因此
 
 \[
-\nabla_wL = \frac1nX^T(Xw-y).
+\nabla_wL = \frac1nX^{\trans}(Xw-y).
 \]
 这条公式可以按两层理解：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   平方损失对预测 \(z\) 的梯度是平均残差 \(r/n\)；
 \item
-  线性映射 \(z=Xw\) 的反向伴随把它乘以 \(X^T\)。
+  线性映射 \(z=Xw\) 的反向伴随把它乘以 \(X^{\trans}\)。
 \end{enumerate}
 
 Hessian 为
 
 \[
-\nabla_w^2L = \frac1nX^TX\succeq0.
+\nabla_w^2L = \frac1nX^{\trans}X\succeq0.
 \]
-它不依赖 \(w\)，因为目标本来就是二次函数。若加入 Ridge 项 \(\lambda\lVert w\rVert^2/2\)，
+它不依赖 \(w\)，因为目标本来就是二次函数。若加入 Ridge 项 \(\lambda\norm{ w}^2/2\)，
 
 \[
-\nabla_wL = \frac1nX^Tr+\lambda w,
+\nabla_wL = \frac1nX^{\trans}r+\lambda w,
 \]
 \[
-\nabla_w^2L = \frac1nX^TX+\lambda I.
+\nabla_w^2L = \frac1nX^{\trans}X+\lambda I.
 \]
 样本和、样本平均以及是否含 \(\frac12\) 都会改变常数因子。推导前必须先写清目标定义，不能把不同资料的梯度直接比较。
 
@@ -80,20 +84,20 @@ Y\in\R^{n\times k},
 预测为 \(XW\)，目标
 
 \[
-L(W)=\frac{1}{2n}\lVert XW-Y\rVert_F^2.
+L(W)=\frac{1}{2n}\norm{ XW-Y}_F^2.
 \]
 
 沿用矩阵残差 \(R=XW-Y\)，微分为
 
 \[
-dL=\frac1n\operatorname{tr}(R^TdR)
-=\frac1n\operatorname{tr}\bigl((X^TR)^TdW\bigr),
+dL=\frac1n\trace(R^{\trans}dR)
+=\frac1n\trace\bigl((X^{\trans}R)^{\trans}dW\bigr),
 \]
 
 读出
 
 \[
-\nabla_WL=\frac1nX^TR.
+\nabla_WL=\frac1nX^{\trans}R.
 \]
 
 形状为 \(d\times k\)，与 \(W\) 相同。向量公式就是矩阵公式在 \(k=1\) 时的特例，无须再当成独立结论记忆。
@@ -144,10 +148,10 @@ y_i\log p_i+(1-y_i)\log(1-p_i)
 于是批量梯度为
 
 \[
-\nabla_wL = \frac1nX^T(p-y),
+\nabla_wL = \frac1nX^{\trans}(p-y),
 \]
 \[
-\frac{\partial L}{\partial b} = \frac1n\mathbf1^T(p-y).
+\frac{\partial L}{\partial b} = \frac1n\mathbf1^{\trans}(p-y).
 \]
 与最小二乘相比，线性层的反向形式完全相同，只有预测空间中的残差从 \(z-y\) 变成 \(p-y\)。
 
@@ -169,12 +173,12 @@ y_i\log p_i+(1-y_i)\log(1-p_i)
 Hessian 为
 
 \[
-\nabla_w^2L = \frac1nX^TDX,
+\nabla_w^2L = \frac1nX^{\trans}DX,
 \]
 其中
 
 \[
-D=\operatorname{diag}(p_i(1-p_i))\succeq0.
+D=\diag(p_i(1-p_i))\succeq0.
 \]
 
 所以 logistic 目标凸。若加入 \(L_2\) 正则，Hessian 再加 \(\lambda I\)。
@@ -186,7 +190,7 @@ D=\operatorname{diag}(p_i(1-p_i))\succeq0.
 \begin{itemize}
 \tightlist
 \item
-  \(X^T(p-y)\) 的形状是否与 \(w\) 一致；
+  \(X^{\trans}(p-y)\) 的形状是否与 \(w\) 一致；
 \item
   对 bias 是否沿 batch 轴求和，而不是保留样本维；
 \item
@@ -200,4 +204,3 @@ D=\operatorname{diag}(p_i(1-p_i))\succeq0.
 \end{itemize}
 
 有限差分或自动微分可以检查实现，但不能替代目标定义。若代码求的是样本和，而手推公式求的是样本平均，两者会稳定地相差 \(n\)，这不是浮点误差。
-

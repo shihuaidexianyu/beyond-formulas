@@ -1,76 +1,91 @@
 \section{得分匹配：怎样从样本学习得分}
+\label{sec:06-Random-Processes/06-Diffusion-and-SDE/05}
 
-上一节的时间反演把生成归结为估计得分场 $\nabla_x\log p_t(x)$。但这里有一个看似致命的障碍：我们连密度 $p_t$ 都没有——有的话就不必做生成了——只有来自它的样本。怎样在不知道密度的情况下学习密度的对数梯度？得分匹配给出的答案出人意料：有一个目标函数只依赖样本，却等价于回归真实得分。
+\begin{quote}
+\textbf{先抓住这一点：}得分匹配绕开密度归一化常数，直接学习 \(\nabla\log p\)。去噪版本进一步把未知边缘得分转成已知加噪核条件得分的回归目标，使扩散模型可以只凭样本训练。
+\end{quote}
+
+上一节的时间反演把生成归结为估计得分场 \(\nabla_x\log p_t(x)\)。但这里有一个看似致命的障碍：我们连密度 \(p_t\) 都没有——有的话就不必做生成了——只有来自它的样本。怎样在不知道密度的情况下学习密度的对数梯度？得分匹配给出的答案出人意料：有一个目标函数只依赖样本，却等价于回归真实得分。
 
 \subsection{先感受困难：密度未知，梯度从何谈起}
 
 最直接的想法是先估计密度（核密度估计、直方图），再取对数求梯度。但核密度估计在高维失效：带宽小了过拟合、带宽大了抹平结构，维度诅咒让它在高维数据上不可信（Part 13 的流形假设单元已经遇到这个问题）。
 
-更根本的问题是：我们其实不需要密度本身。反向 SDE 只用得分 $\nabla\log p_t$，而得分是密度的对数梯度——对数把归一化常数变成可加常数，梯度又把它消掉。这提示可以绕过密度，直接对得分建目标。
+更根本的问题是：我们其实不需要密度本身。反向 SDE 只用得分 \(\nabla\log p_t\)，而得分是密度的对数梯度——对数把归一化常数变成可加常数，梯度又把它消掉。这提示可以绕过密度，直接对得分建目标。
 
 \subsection{Fisher 散度：直接比较得分场}
 
-设模型得分场为 $s_\theta(x)$（一个神经网络），真实得分为 $\nabla\log p(x)$。最自然的度量是 Fisher 散度
+设模型得分场为 \(s_\theta(x)\)（一个神经网络），真实得分为 \(\nabla\log p(x)\)。最自然的度量是 Fisher 散度
 
 \[
 J(\theta)=\frac12\E_{p}\bigl[\norm{s_\theta(x)-\nabla\log p(x)}^2\bigr].
 \]
 
-这个目标无法直接计算——里面有未知的 $\nabla\log p$。但 Hyvärinen 的得分匹配定理说：在温和正则条件下，
+这个目标无法直接计算——里面有未知的 \(\nabla\log p\)。但 Hyvärinen 的得分匹配定理说：在温和正则条件下，
 
 \[
-J(\theta)=\E_{p}\Bigl[\frac12\norm{s_\theta(x)}^2+\operatorname{tr}\bigl(\nabla_x s_\theta(x)\bigr)\Bigr]+\text{常数},
+J(\theta)=\E_{p}\Bigl[\frac12\norm{s_\theta(x)}^2+\trace\bigl(\nabla_x s_\theta(x)\bigr)\Bigr]+\text{常数},
 \]
 
-其中 $\nabla_x s_\theta$ 是 $s_\theta$ 的 Jacobian，$\operatorname{tr}$ 是散度。关键在于：右边只含模型量和对 $p$ 的期望，期望可以用样本平均替代。证明只需对交叉项 $\E_p[s_\theta\cdot\nabla\log p]$ 做分部积分，把对 $p$ 的导数搬到 $s_\theta$ 上——这与 Stein 方法和 Cramér--Rao 下界中``对数密度的期望积分为零''是同一技巧。
+其中 \(\nabla_x s_\theta\) 是 \(s_\theta\) 的 Jacobian，\(\trace\) 是散度。关键在于：右边只含模型量和对 \(p\) 的期望，期望可以用样本平均替代。证明只需对交叉项 \(\E_p[s_\theta\cdot\nabla\log p]\) 做分部积分，把对 \(p\) 的导数搬到 \(s_\theta\) 上——这与 Stein 方法和 Cramér--Rao 下界中``对数密度的期望积分为零''是同一技巧。
 
-以 $p=\mathcal N(0,1)$ 完整验证一次。此时 $\nabla\log p(x)=-x$。取 $s_\theta(x)=ax$（$a$ 为参数），Hyvärinen 目标的样本部分是
+以 \(p=\mathcal N(0,1)\) 完整验证一次。此时 \(\nabla\log p(x)=-x\)。取 \(s_\theta(x)=ax\)（\(a\) 为参数），Hyvärinen 目标的样本部分是
 
 \[
-\frac12\norm{s_\theta}^2+\operatorname{tr}(\nabla s_\theta)
+\frac12\norm{s_\theta}^2+\trace(\nabla s_\theta)
 =\frac12 a^2x^2+a.
 \]
 
-对 $x\sim p$ 取期望：$\frac12a^2\E[x^2]+a=\frac12a^2+a$。而 Fisher 散度是
+对 \(x\sim p\) 取期望：\(\frac12a^2\E[x^2]+a=\frac12a^2+a\)。而 Fisher 散度是
 
 \[
 \frac12\E[(ax-(-x))^2]=\frac12(a+1)^2\E[x^2]=\frac12(a+1)^2.
 \]
 
-两者相差 $\frac12(a^2+2a+1)-\frac12a^2-a=\frac12$，与 $\theta$ 无关——正是那个``常数''。最小化任一个都给出 $a=-1$，即 $s_\theta(x)=-x=\nabla\log p(x)$。常数不依赖参数，所以对优化无影响；等价的含义是``只差一个与 $\theta$ 无关的常数''。
+两者相差 \(\frac12(a^2+2a+1)-\frac12a^2-a=\frac12\)，与 \(\theta\) 无关——正是那个``常数''。最小化任一个都给出 \(a=-1\)，即 \(s_\theta(x)=-x=\nabla\log p(x)\)。常数不依赖参数，所以对优化无影响；等价的含义是``只差一个与 \(\theta\) 无关的常数''。
 
-于是学习得分变成标准的回归问题：最小化样本上的 $\frac12\norm{s_\theta}^2+\operatorname{tr}(\nabla s_\theta)$，可用自动微分与随机梯度下降完成。
+于是学习得分变成标准的回归问题：最小化样本上的 \(\frac12\norm{s_\theta}^2+\trace(\nabla s_\theta)\)，可用自动微分与随机梯度下降完成。
 
 \subsection{代价与折中：散度项的计算}
 
-迹项 $\operatorname{tr}(\nabla s_\theta)$ 是 $d\times d$ Jacobian 的对角和。高维数据（$d$ 为像素数）时直接计算需要 $d$ 次反向传播，代价过高。两条出路：
+迹项 \(\trace(\nabla s_\theta)\) 是 \(d\times d\) Jacobian 的对角和。高维数据（\(d\) 为像素数）时直接计算需要 \(d\) 次反向传播，代价过高。两条出路：
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{切片得分匹配}：把散度换成随机方向投影 $\E_v[v^\trans\nabla s_\theta\,v]$，$v$ 取 Rademacher 随机向量，无偏且只需一次反向传播；
+  \textbf{切片得分匹配}：把散度换成随机方向投影 \(\E_v[v^\trans\nabla s_\theta\,v]\)，\(v\) 取 Rademacher 随机向量，无偏且只需一次反向传播；
 \item
-  \textbf{去噪得分匹配}：不在原分布上而在加噪条件分布上匹配。若 $q(\tilde x|x)$ 是已知的加噪核（如 $\mathcal N(x,\sigma^2)$），则回归目标退化为
+  \textbf{去噪得分匹配}：不在原分布上而在加噪条件分布上匹配。若 \(q(\tilde x|x)\) 是已知的加噪核（如 \(\mathcal N(x,\sigma^2)\)），则回归目标退化为
 \[
 \E_{p(x)q(\tilde x|x)}\bigl[\norm{s_\theta(\tilde x)-\nabla_{\tilde x}\log q(\tilde x|x)}^2\bigr],
 \]
-条件得分 $\nabla_{\tilde x}\log q(\tilde x|x)=-( \tilde x-x)/\sigma^2$ 有闭式。Gaussian 加噪下，这等价于训练网络从 $\tilde x$ 预测噪声——正是扩散模型实际使用的训练目标。
+条件得分 \(\nabla_{\tilde x}\log q(\tilde x|x)=-( \tilde x-x)/\sigma^2\) 有闭式。Gaussian 加噪下，这等价于训练网络从 \(\tilde x\) 预测噪声——正是扩散模型实际使用的训练目标。
 \end{itemize}
 
-去噪得分匹配把``不可能的任务''（回归未知密度的得分）变成``平凡的监督学习''（预测加入的噪声）。每一个噪声水平 $\sigma$ 训练一个得分场，上一节的反向 SDE 沿噪声从大到小依次调用它们——先粗轮廓、后补细节，与时间反演中得分随时间变化的角色完全对应。
+这里训练标签是条件得分，而反向 SDE 需要加噪边缘分布 \(p_\sigma(\tilde x)=\int p(x)q(\tilde x\mid x)\,dx\) 的得分。二者之所以接得上，是因为平方损失的总体最优预测满足
+
+\[
+s^*(\tilde x)
+=\E\!\left[\nabla_{\tilde x}\log q(\tilde x\mid X)\mid \tilde X=\tilde x\right]
+=\nabla_{\tilde x}\log p_\sigma(\tilde x),
+\]
+
+其中第二个等号需要在积分与求导可交换等正则条件下成立。这一步说明去噪得分匹配不是把条件得分误当成边缘得分，而是利用条件期望把前者平均成后者。
+
+去噪得分匹配把``不可能的任务''（回归未知密度的得分）变成带已知监督信号的回归（预测加入的噪声）。概念上每个噪声水平 \(\sigma\) 对应一个得分场；实际通常用同一个以时间或噪声水平为条件的网络联合表示它们。上一节的反向 SDE 沿噪声从大到小依次调用这些得分——先粗轮廓、后补细节，与时间反演中得分随时间变化的角色完全对应。
 
 \subsection{边界清单}
 
 \begin{itemize}
 \tightlist
 \item
-  得分匹配定理要求密度在边界处衰减足够快（分部积分无边界项）；有界支持的分布（像素值截断在 $[0,1]$）要小心。
+  得分匹配定理要求密度在边界处衰减足够快（分部积分无边界项）；有界支持的分布（像素值截断在 \([0,1]\)）要小心。
 \item
-  Fisher 散度对低密度区域不敏感（期望在 $p$ 下取，样本稀少处权重小）——生成模型在分布尾部质量差，根源之一在这里。
+  Fisher 散度对低密度区域不敏感（期望在 \(p\) 下取，样本稀少处权重小）——生成模型在分布尾部质量差，根源之一在这里。
 \item
   得分场必须是梯度场才与某个密度相容；一般向量场最小化 Fisher 散度后未必可积。实际中神经网络不强制可积，误差由反向采样的鲁棒性部分吸收。
 \item
-  去噪得分匹配估计的是加噪分布 $p_t$ 的得分，不是原分布的得分；$\sigma\to0$ 时目标方差爆炸，$\sigma$ 太大时得分过于平滑——噪声调度（上一节的时间网格）因此是模型设计的一部分。
+  去噪得分匹配估计的是加噪分布 \(p_t\) 的得分，不是原分布的得分；\(\sigma\to0\) 时目标方差爆炸，\(\sigma\) 太大时得分过于平滑——噪声调度（上一节的时间网格）因此是模型设计的一部分。
 \end{itemize}
 
 \subsection{落点}

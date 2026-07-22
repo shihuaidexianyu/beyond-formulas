@@ -1,10 +1,15 @@
 \section{条件期望与线性回归是两种投影}
+\label{sec:12-Real-Analysis-Support/07-Lp-Spaces-and-Function-Geometry/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}条件期望投影到所有由给定信息可测的平方可积函数上，线性回归只投影到特征的线性张成空间。前者的投影空间通常更大。
+\end{quote}
 
 ``条件期望是对信息 \(\sigma\)-代数的投影''曾用``在每个信息事件上积分匹配''定义条件期望。在平方可积的范围内，这个定义还有一个更直观的几何身份：条件期望就是 \(L^2\) 中的正交投影。同时，最小二乘线性回归也是投影，但投到的是另一个小得多的子空间。把两者放在同一幅图里，``预测''的两个层次就分开了。
 
-\subsection{\texorpdfstring{条件期望是向 $\mathcal G$ 可测函数的投影}{条件期望是向 G 可测函数的投影}}
+\subsection{\texorpdfstring{条件期望是向 \(\mathcal G\) 可测函数的投影}{条件期望是向 G 可测函数的投影}}
 
-设 \(X\in L^2(\Omega,\mathcal F,\Prob)\)，\(\mathcal G\subseteq\mathcal F\) 是子 \(\sigma\)-代数。所有 \(\mathcal G\)-可测且平方可积的随机变量组成 \(L^2\) 的闭线性子空间，记为 \(L^2(\mathcal G)\)。把 \(X\) 向它投影，得到唯一的 \(\E[X\mid\mathcal G]\)，满足
+设 \(X\in L^2(\Omega,\mathcal F,P)\)，\(\mathcal G\subseteq\mathcal F\) 是子 \(\sigma\)-代数。所有 \(\mathcal G\)-可测且平方可积的随机变量组成 \(L^2\) 的闭线性子空间，记为 \(L^2(\mathcal G)\)。把 \(X\) 向它投影，得到唯一的 \(\E[X\mid\mathcal G]\)，满足
 
 \[
 \E\bigl[(X-\E[X\mid\mathcal G])Z\bigr]=0
@@ -14,7 +19,7 @@
 取 \(Z=\mathbf1_G\)（\(G\in\mathcal G\)），上式正是条件期望的定义性质
 
 \[
-\int_G X\,d\Prob=\int_G\E[X\mid\mathcal G]\,d\Prob.
+\int_G X\,dP=\int_G\E[X\mid\mathcal G]\,dP.
 \]
 
 两个定义在 \(L^2\) 中完全等价：积分匹配是逐事件的说法，正交性是几何的说法。投影身份立刻白送三条性质：
@@ -53,7 +58,7 @@ b=\frac{\Cov(X,Y)}{\Var(X)},
 a=\E Y-b\E X.
 \]
 
-这就是一元最小二乘的斜率与截距——``线性回归从投影到概率模型''中由列空间几何得到的同一对量，现在出现在 Hilbert 空间投影中。
+这就是一元最小二乘的斜率与截距——\hyperref[sec:13-Machine-Learning/02-Linear-Models/01]{``线性回归从投影到概率模型''}中由列空间几何得到的同一对量，现在出现在 Hilbert 空间投影中。
 
 两种投影的关系一目了然：
 
@@ -76,7 +81,7 @@ a=\E Y-b\E X.
 
 验证只需代入联合密度（或利用联合 Gaussian 的条件分布公式）。此时最佳均方预测与最佳线性预测相同——不是线性方法变强了，而是 Gaussian 世界里所有条件结构本来就是线性的。这解释了为什么``概率论''与``数理统计''中，相关与回归在 Gaussian 假设下配合得天衣无缝，也提示了外推的边界：离开 Gaussian 族，条件期望一般是曲线，线性投影只在它自己的子空间里最优。
 
-\subsection{\texorpdfstring{投影视角统一了$L^2$ 统计的半壁江山}{投影视角统一了 L2 统计的半壁江山}}
+\subsection{\texorpdfstring{投影视角统一了\(L^2\) 统计的半壁江山}{投影视角统一了 L2 统计的半壁江山}}
 
 \begin{itemize}
 \tightlist

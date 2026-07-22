@@ -1,4 +1,9 @@
 \section{张量分解初步：CP、Tucker 与 SVD 的关系}
+\label{sec:03-Linear-Algebra/09-Tensors/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}CP 与 Tucker 不是同一个``张量 SVD''的两种算法：CP 寻找少数跨模可分离成分，Tucker 寻找各模低维子空间及其交互。矩阵 SVD 的诸多整齐性质只是二阶情形的特殊幸运。
+\end{quote}
 
 矩阵 SVD 把一张二维表拆成正交秩一成分：
 
@@ -90,7 +95,7 @@ a_r\otimes b_r\otimes c_r
 这意味着优化问题
 
 \[
-\inf_{\operatorname{rank}_{\mathrm{CP}}(\mathcal Y)\le R}
+\inf_{\rank_{\mathrm{CP}}(\mathcal Y)\le R}
 \norm{\mathcal X-\mathcal Y}_F
 \]
 
@@ -169,7 +174,6 @@ X_{(1)}\in\R^{I\times JK},
 高阶 SVD（HOSVD）的一种基本构造是：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   对每个展开矩阵 \(X_{(k)}\) 做 SVD；

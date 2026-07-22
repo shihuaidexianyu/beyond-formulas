@@ -3,7 +3,6 @@
 本单元从``能否无损压缩''走向``精度能有多高''：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   充分统计量保留了哪些参数信息用条件分布和因子分解定理说明何时摘要不会丢失参数信息，并通过 Rao--Blackwell 化解释其用途。
@@ -14,3 +13,18 @@
 \end{enumerate}
 
 Fisher 信息不是 Shannon 熵的另一个名字。它描述参数微小改变时分布有多容易被区分，是局部、参数化相关的几何量。
+
+\subsection{怎么读这一章}
+
+三篇从压缩、局部敏感度和精度下界逐步推进。先看充分统计量何时能在不损失参数信息的前提下压缩样本，再用 score 与 Fisher 信息量化似然对参数的反应，最后理解 Cramér--Rao 界究竟约束哪一类估计量。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/01]{``充分统计量保留了哪些参数信息''}；
+\item \hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}；
+\item \hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/03]{``Cramér--Rao 界给无偏估计设下限''}。
+\end{itemize}

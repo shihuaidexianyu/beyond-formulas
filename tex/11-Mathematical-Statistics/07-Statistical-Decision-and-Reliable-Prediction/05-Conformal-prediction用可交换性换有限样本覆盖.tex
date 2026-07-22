@@ -1,10 +1,15 @@
 \section{Conformal prediction 用可交换性换有限样本覆盖}
+\label{sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/05}
 
-普通回归模型给出点预测 $\widehat f(x)$，却不说明新结果可能偏离多远。参数置信区间针对未知参数，不能直接当作新观测的预测区间；Bayesian posterior predictive interval 又依赖 prior 与 likelihood。Conformal prediction 采取另一条路线：不要求模型正确，用样本之间的可交换性校准预测集合的有限样本覆盖。
+\begin{quote}
+\textbf{先抓住这一点：}conformal prediction 用样本的可交换性把新样本与旧样本的非一致性分数放在同一排名中，从而得到有限样本边际覆盖。它不自动提供每个子群或每个输入点的条件覆盖。
+\end{quote}
+
+普通回归模型给出点预测 \(\widehat f(x)\)，却不说明新结果可能偏离多远。参数置信区间针对未知参数，不能直接当作新观测的预测区间；Bayesian posterior predictive interval 又依赖 prior 与 likelihood。Conformal prediction 采取另一条路线：不要求模型正确，用样本之间的可交换性校准预测集合的有限样本覆盖。
 
 \subsection{Split conformal 把拟合与校准分开}
 
-把数据分成 training set 和含 $m$ 个样本的 calibration set。先只用 training data 拟合任意预测器 $\widehat f$，再在 calibration data 上计算 nonconformity scores
+把数据分成 training set 和含 \(m\) 个样本的 calibration set。先只用 training data 拟合任意预测器 \(\widehat f\)，再在 calibration data 上计算 nonconformity scores
 
 \[
 R_i=\abs{Y_i-\widehat f(X_i)},
@@ -23,7 +28,7 @@ R_{(1)}\le\cdots\le R_{(m)},
 k=\left\lceil(m+1)(1-\alpha)\right\rceil.
 \]
 
-当 $k\le m$ 时令 $q=R_{(k)}$；若 $k=m+1$，可把 $q$ 视为无穷大。对新输入 $x$ 输出区间
+当 \(k\le m\) 时令 \(q=R_{(k)}\)；若 \(k=m+1\)，可把 \(q\) 视为无穷大。对新输入 \(x\) 输出区间
 
 \[
 C(x)
@@ -34,29 +39,29 @@ C(x)
 \right].
 \]
 
-这里的有限样本修正是 $m+1$，不是随手取 calibration scores 的经验 $1-\alpha$ 分位数。它把新样本也计入可能的秩位置。
+这里的有限样本修正是 \(m+1\)，不是随手取 calibration scores 的经验 \(1-\alpha\) 分位数。它把新样本也计入可能的秩位置。
 
 \subsection{覆盖保证来自秩的对称性}
 
-条件于 training data 后，若 $m$ 个 calibration examples 与新样本可交换，则它们的 $m+1$ 个 scores 也可交换。忽略 ties 时，新 score 的秩在 $1,ldots,m+1$ 上均匀；有 ties 时采用相应保守处理仍得到
+条件于 training data 后，若 \(m\) 个 calibration examples 与新样本可交换，则它们的 \(m+1\) 个 scores 也可交换。忽略 ties 时，新 score 的秩在 \(1,ldots,m+1\) 上均匀；有 ties 时采用相应保守处理仍得到
 
 \[
-\Prob\bigl(Y_{\mathrm{new}}\in C(X_{\mathrm{new}})\bigr)
+P\bigl(Y_{\mathrm{new}}\in C(X_{\mathrm{new}})\bigr)
 \ge
 1-\alpha.
 \]
 
-保证对任意样本量成立，不依赖线性、Gaussian 噪声或 $\widehat f$ 一致。模型越好，residual scores 通常越小，区间越窄；模型很差时 coverage 仍可能成立，只是集合宽到没有用途。Conformal 校准覆盖，不制造预测信息。
+保证对任意样本量成立，不依赖线性、Gaussian 噪声或 \(\widehat f\) 一致。模型越好，residual scores 通常越小，区间越窄；模型很差时 coverage 仍可能成立，只是集合宽到没有用途。Conformal 校准覆盖，不制造预测信息。
 
 \subsection{分类输出集合而不是强迫单标签}
 
-若分类器给出类别概率 $\widehat p_y(x)$，可用
+若分类器给出类别概率 \(\widehat p_y(x)\)，可用
 
 \[
 R_i=1-\widehat p_{Y_i}(X_i)
 \]
 
-作为 score。以 calibration quantile $q$ 构造
+作为 score。以 calibration quantile \(q\) 构造
 
 \[
 C(x)=
@@ -72,11 +77,11 @@ C(x)=
 上式平均于新样本的整体分布。它不推出
 
 \[
-\Prob\bigl(Y\in C(X)\mid X=x\bigr)
+P\bigl(Y\in C(X)\mid X=x\bigr)
 \ge1-\alpha
 \]
 
-对每个 $x$ 成立，也不保证每个年龄、地区或风险组都达到名义覆盖。无分布假设下要求所有点都具有非平凡的精确条件覆盖，一般不可实现；局部适应需要平滑性、分组样本量或模型结构等额外条件。
+对每个 \(x\) 成立，也不保证每个年龄、地区或风险组都达到名义覆盖。无分布假设下要求所有点都具有非平凡的精确条件覆盖，一般不可实现；局部适应需要平滑性、分组样本量或模型结构等额外条件。
 
 总体 coverage 可以由容易的大群体补偿困难小群体。因而应同时检查有实际意义的预设子群、集合宽度和 coverage 的不确定性，但不能看完结果后无限搜索最差子群而忽略多重选择。
 
@@ -86,4 +91,4 @@ C(x)=
 
 同一 calibration set 若被反复用于选择模型、score、超参数和最终 quantile，新样本 rank 不再与一个预先固定程序直接对称。应把模型拟合、方法选择和最终校准的数据角色分开，或使用能重现完整选择流程的有效方案。
 
-Conformal 把主要假设集中到可交换性，并给出一个清楚的有限样本覆盖承诺；分布变化可以击穿它，所以不能概括为“无需假设”。
+Conformal 把主要假设集中到可交换性，并给出一个清楚的有限样本覆盖承诺；分布变化可以击穿它，所以不能概括为``无需假设''。

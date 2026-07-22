@@ -3,7 +3,6 @@ Markov 性常被简称为``未来只依赖现在''。真正关键不在遗忘历
 这一单元从局部转移逐步走向长期行为：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Markov 性质、转移矩阵与多步演化：一步规则怎样通过矩阵乘法生成整个路径分布。
@@ -18,3 +17,22 @@ Markov 性常被简称为``未来只依赖现在''。真正关键不在遗忘历
 \end{enumerate}
 
 这五节的主线是：局部转移规则并不足以直接说明长期稳定；通信结构、常返性和周期性必须先被辨认。
+
+\subsection{怎么读这一章}
+
+若只想建立可靠直觉，先读五篇开头的``核心洞见''，并牢牢记住：Markov 性取决于状态表示；平稳分布是转移算子的固定点；逐时刻分布收敛与单条路径时间平均是不同结论。遇到``链最终会稳定''之类说法时，应追问不可约、正常返与非周期条件是否齐全。
+
+若要实际计算，再学习转移矩阵幂、通信类、首步分析和吸收链基本矩阵；若要进入 MCMC、PageRank 或强化学习，则应进一步掌握可逆性、谱隙与遍历定理。返回性分类的证明可在需要处理无限状态链时再深入。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:06-Random-Processes/03-Markov-Chains/01]{``Markov 性质、转移矩阵与多步演化''}；
+\item \hyperref[sec:06-Random-Processes/03-Markov-Chains/02]{``可达、通信类与周期性''}；
+\item \hyperref[sec:06-Random-Processes/03-Markov-Chains/03]{``常返、暂留与返回时间''}；
+\item \hyperref[sec:06-Random-Processes/03-Markov-Chains/04]{``平稳分布、可逆性与遍历收敛''}；
+\item \hyperref[sec:06-Random-Processes/03-Markov-Chains/05]{``首步分析、击中时间与吸收链''}。
+\end{itemize}

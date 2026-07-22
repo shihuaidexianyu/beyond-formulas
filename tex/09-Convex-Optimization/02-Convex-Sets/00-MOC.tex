@@ -3,7 +3,6 @@
 本单元沿三层几何逐步推进，用结构串起各类集合，避免逐个陈列名称：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   线段、凸组合与凸包从两点混合出发，建立凸集的定义、构造方法与反例判断。
@@ -14,3 +13,18 @@
 \end{enumerate}
 
 读完后，面对一个约束集合，读者应能优先尝试``由已知凸集通过交、仿射像或原像构造''的证明；若怀疑它非凸，则寻找两点及其中间点作为反例，而不是依赖有限随机采样。
+
+\subsection{怎么读这一章}
+
+先不要把凸集理解成某种特定外形。读第一篇时只问一件事：两个可行方案按比例混合后，是否仍然可行。第二篇再看线性等式和不等式怎样制造最常见的凸集。第三篇把同一个``非负组合仍可行''的想法推广到方向和矩阵。若还不清楚这项几何性质为何重要，可先回看 \hyperref[ch:071]{``从现实选择到优化问题''}中局部最优与全局最优的区别。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/02-Convex-Sets/01]{``线段、凸组合与凸包''}；
+\item \hyperref[sec:09-Convex-Optimization/02-Convex-Sets/02]{``等式与不等式如何塑造可行域''}；
+\item \hyperref[sec:09-Convex-Optimization/02-Convex-Sets/03]{``从方向的集合到半正定锥''}。
+\end{itemize}

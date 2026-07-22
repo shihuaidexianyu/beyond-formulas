@@ -1,4 +1,9 @@
 \section{行列式与 log-determinant 的微分}
+\label{sec:10-Matrix-Calculus/03-Trace-Calculus/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}行列式把所有方向的缩放乘在一起，直接计算很容易溢出或下溢。log-determinant 把乘积变成和，它的微分也自然落到 \(A^{-1}\) 与扰动的配对上。
+\end{quote}
 
 行列式描述线性映射对有向体积的缩放。它也是全部特征值的乘积，因此很容易在高维中上溢、下溢或因接近奇异而变得极端。理论推导中常出现 \(\det X\)，数值与统计计算中更常使用 \(\log\det X\)。
 
@@ -8,29 +13,29 @@
 
 \[
 d\det X = \det X\cdot
-\operatorname{tr}(X^{-1}dX).
+\trace(X^{-1}dX).
 \]
-它来自 \(\det(X+tH)=\det X\cdot\det(I+tX^{-1}H)\) 与展开式 \(\det(I+tM)=1+t\operatorname{tr}M+O(t^2)\)：把行列式写成特征值之积并保留一阶项即得后者。因此
+它来自 \(\det(X+tH)=\det X\cdot\det(I+tX^{-1}H)\) 与展开式 \(\det(I+tM)=1+t\trace M+O(t^2)\)：把行列式写成特征值之积并保留一阶项即得后者。因此
 
 \[
 d\log\det X = \frac{1}{\det X}d\det X
-=\operatorname{tr}(X^{-1}dX).
+=\trace(X^{-1}dX).
 \]
 与梯度定义比较：
 
 \[
-\operatorname{tr}(X^{-1}dX) = \operatorname{tr}\bigl((X^{-T})^TdX\bigr),
+\trace(X^{-1}dX) = \trace\bigl((X^{-\trans})^{\trans}dX\bigr),
 \]
 所以
 
 \[
-\nabla_X\log\det X=X^{-T},
+\nabla_X\log\det X=X^{-\trans},
 \]
 
 并且
 
 \[
-\nabla_X\det X = \det X\cdot X^{-T}.
+\nabla_X\det X = \det X\cdot X^{-\trans}.
 \]
 一元情形退化为
 
@@ -51,13 +56,13 @@ d\log\det X = \frac{1}{\det X}d\det X
 一阶导数为
 
 \[
-\phi'(0)=\operatorname{tr}(X^{-1}H).
+\phi'(0)=\trace(X^{-1}H).
 \]
 
 利用上一节逆的微分 \(d(X^{-1})=-X^{-1}(dX)X^{-1}\)，
 
 \[
-\phi''(0) = -\operatorname{tr}(X^{-1}HX^{-1}H).
+\phi''(0) = -\trace(X^{-1}HX^{-1}H).
 \]
 写
 
@@ -68,17 +73,17 @@ S=X^{-1/2}HX^{-1/2},
 便有
 
 \[
-\phi''(0) = -\operatorname{tr}(S^2)
-=-\lVert S\rVert_F^2
+\phi''(0) = -\trace(S^2)
+=-\norm{ S}_F^2
 \le0.
 \]
-中间一步用到 \(S\) 对称：\(\operatorname{tr}(S^2)=\operatorname{tr}(S^TS)=\lVert S\rVert_F^2\)，这正是要求扰动方向 \(H\) 对称的原因。
+中间一步用到 \(S\) 对称：\(\trace(S^2)=\trace(S^{\trans}S)=\norm{ S}_F^2\)，这正是要求扰动方向 \(H\) 对称的原因。
 所以 \(\log\det X\) 在正定锥上凹，\(-\log\det X\) 凸。后者在矩阵接近奇异边界时趋于 \(+\infty\)，因此可作为半正定锥内部的障碍函数。
 
 实验设计利用的是同一个体积解释。若第 \(i\) 类测量提供方向 \(a_i\)，投入权重 \(w_i\ge0\) 后的信息矩阵可写成
 
 \[
-M(w)=\sum_i w_i a_i a_i^T.
+M(w)=\sum_i w_i a_i a_i^{\trans}.
 \]
 
 在预算约束下最大化 \(\log\det M(w)\)，会倾向于同时覆盖各个参数方向；在线性 Gaussian 近似中，这等价于缩小置信椭球的体积。若所有传感器都沿近乎相同的方向测量，\(M(w)\) 接近奇异，log-det 会直接暴露仍未被识别的方向。不过这个准则只评估所给局部模型中的信息：共同偏差、错误噪声模型或未纳入的物理变量，不会因为行列式变大而自动消失。
@@ -88,7 +93,7 @@ M(w)=\sum_i w_i a_i a_i^T.
 若 \(X=X(\theta)\)，链式法则给
 
 \[
-\frac{d}{d\theta}\log\det X(\theta) = \operatorname{tr}
+\frac{d}{d\theta}\log\det X(\theta) = \trace
 \left(
 X(\theta)^{-1}
 \frac{dX}{d\theta}
@@ -97,15 +102,15 @@ X(\theta)^{-1}
 同上一节，计算时不应显式求逆：若需要 trace 的精确值，可对多个右端分别求解；若矩阵巨大、只需要随机 trace 估计，还可用
 
 \[
-\operatorname{tr}(M) = \E[z^TMz]
+\trace(M) = \E[z^{\trans}Mz]
 \]
-对满足 \(\E[zz^T]=I\) 的随机向量 \(z\) 估计，但这会引入采样误差。
+对满足 \(\E[zz^{\trans}]=I\) 的随机向量 \(z\) 估计，但这会引入采样误差。
 
 Gaussian 对数似然常含
 
 \[
 \frac12\log\det\Sigma
-+\frac12(x-\mu)^T\Sigma^{-1}(x-\mu).
++\frac12(x-\mu)^{\trans}\Sigma^{-1}(x-\mu).
 \]
 
 前一项惩罚总体体积，后一项衡量 Mahalanobis 距离；二者的导数都可通过 Cholesky 分解和线性求解计算。
@@ -115,7 +120,7 @@ Gaussian 对数似然常含
 对对称正定矩阵
 
 \[
-X=LL^T,
+X=LL^{\trans},
 \]
 
 有
@@ -135,5 +140,4 @@ X=LL^T,
 
 不能把 \(\log|\det X|\) 与 \(\log\det X\) 混为一谈；它们的定义域、几何解释和某些导数边界不同。
 
-当矩阵奇异时，\(\det X=0\)，log-determinant 趋于 \(-\infty\)，普通逆导数不存在。接近奇异时梯度 \(X^{-T}\) 可能巨大，真实反映了体积对小特征值的敏感性。
-
+当矩阵奇异时，\(\det X=0\)，log-determinant 趋于 \(-\infty\)，普通逆导数不存在。接近奇异时梯度 \(X^{-\trans}\) 可能巨大，真实反映了体积对小特征值的敏感性。

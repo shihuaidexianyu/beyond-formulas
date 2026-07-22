@@ -1,4 +1,9 @@
 \section{逆矩阵与 LU 分解：撤销变换并复用消元}
+\label{sec:03-Linear-Algebra/01-Linear-Systems-and-Matrices/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}逆矩阵描述线性映射如何整体撤销，LU 分解则记录一次消元，便于高效求解多个右端。实际计算需要解方程时，分解通常比显式形成逆矩阵更合适。
+\end{quote}
 
 如果同一个系数矩阵 \(A\) 要面对许多不同右端 \(b\)，每次都从头消元会重复大量工作。我们希望把 \(A\) 中与右端无关的结构先提取出来，之后只做少量计算。
 
@@ -242,10 +247,4 @@ A=LU
 
 前者属于代数结构，后者将在数值分析中进一步展开。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06：Factorization into \(A=LU\)
-\end{itemize}
+延伸阅读：MIT 18.06：Factorization into \(A=LU\)。

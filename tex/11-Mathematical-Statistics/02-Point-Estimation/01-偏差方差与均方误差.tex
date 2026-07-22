@@ -1,43 +1,48 @@
 \section{偏差、方差与均方误差}
+\label{sec:11-Mathematical-Statistics/02-Point-Estimation/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}估计量平均而言正确，不代表每次都接近真值；波动很小，也可能稳定地偏向错误方向。均方误差把偏差平方和方差放到同一尺度上比较。
+\end{quote}
 
 估计量 \(\hat\theta\) 在重复抽样中会变化。评价它时至少要区分两个问题：平均而言是否瞄准真值，以及每次抽样会波动多大。
 
 偏差定义为
 
 \[
-\operatorname{Bias}_\theta(\hat\theta) = \mathbb E_\theta[\hat\theta]-\theta.
+\Bias_\theta(\hat\theta) = \E_\theta[\hat\theta]-\theta.
 \]
 方差为
 
 \[
-\operatorname{Var}_\theta(\hat\theta).
+\Var_\theta(\hat\theta).
 \]
 
 在平方误差损失下，均方误差
 
 \[
-\operatorname{MSE}_\theta(\hat\theta) = \mathbb E_\theta[(\hat\theta-\theta)^2]
+\MSE_\theta(\hat\theta) = \E_\theta[(\hat\theta-\theta)^2]
 \]
 分解为
 
 \[
-\operatorname{MSE} = \operatorname{Var}(\hat\theta)
-+\operatorname{Bias}(\hat\theta)^2.
+\MSE = \Var(\hat\theta)
++\Bias(\hat\theta)^2.
 \]
 证明只需写
 
 \[
-\hat\theta-\theta = \bigl(\hat\theta-\mathbb E\hat\theta\bigr)
-+\bigl(\mathbb E\hat\theta-\theta\bigr)
+\hat\theta-\theta = \bigl(\hat\theta-\E\hat\theta\bigr)
++\bigl(\E\hat\theta-\theta\bigr)
 \]
-并展开平方。交叉项期望为零：给定 \(\theta\) 时 \(\mathbb E\hat\theta-\theta\) 是常数，提出后剩下 \(\mathbb E[\hat\theta-\mathbb E\hat\theta]=0\)。
+并展开平方。交叉项期望为零：给定 \(\theta\) 时 \(\E\hat\theta-\theta\) 是常数，提出后剩下 \(\E[\hat\theta-\E\hat\theta]=0\)。
 
 \subsection{无偏不等于更准确}
 
 无偏估计量满足
 
 \[
-\mathbb E_\theta[\hat\theta]=\theta
+\E_\theta[\hat\theta]=\theta
 \]
 
 对所有参数成立。它消除了系统性中心偏移，却没有限制方差。一个无偏估计量可能波动巨大，MSE 反而高于稍有偏差但稳定的估计量。
@@ -55,7 +60,7 @@ X_1,\ldots,X_n\sim N(\mu,\sigma^2),
 \qquad0\le a\le1.
 \]
 
-由 \(\mathbb E\bar X=\mu\) 与 \(\operatorname{Var}(\bar X)=\sigma^2/n\)，其偏差为
+由 \(\E\bar X=\mu\) 与 \(\Var(\bar X)=\sigma^2/n\)，其偏差为
 
 \[
 (a-1)\mu,
@@ -70,7 +75,7 @@ X_1,\ldots,X_n\sim N(\mu,\sigma^2),
 所以
 
 \[
-\operatorname{MSE}(\hat\mu_a) = (1-a)^2\mu^2
+\MSE(\hat\mu_a) = (1-a)^2\mu^2
 +\frac{a^2\sigma^2}{n}.
 \]
 对 \(a\) 求导令零，得最优收缩系数
@@ -95,7 +100,7 @@ a^*=\frac{\mu^2}{\mu^2+\sigma^2/n},
 称为一致估计。即对任意 \(\varepsilon>0\)，
 
 \[
-\Pr_\theta
+P_\theta
 \bigl(
 |\hat\theta_n-\theta|>\varepsilon
 \bigr)
@@ -121,7 +126,7 @@ Bernoulli 样本均值由大数定律一致。
 更一般地，给定损失 \(L(\theta,a)\)，估计量 \(\delta(X)\) 的风险为
 
 \[
-R(\theta,\delta) = \mathbb E_\theta
+R(\theta,\delta) = \E_\theta
 \bigl[
 L(\theta,\delta(X))
 \bigr].
@@ -135,9 +140,8 @@ L(\theta,\delta(X))
 估计量标准差
 
 \[
-\operatorname{SE}_\theta(\hat\theta) = \sqrt{\operatorname{Var}_\theta(\hat\theta)}
+\SE_\theta(\hat\theta) = \sqrt{\Var_\theta(\hat\theta)}
 \]
 通常依赖未知参数，需要从数据估计。它量化抽样波动，不包含偏差平方、模型错设和选择偏差。
 
 报告``估计值 \(\pm\) 标准误''不能自动成为置信区间；还需要抽样分布形状或渐近近似。对偏斜、边界或选择后的估计，正态对称误差条可能严重误导。
-

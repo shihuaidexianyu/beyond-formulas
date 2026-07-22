@@ -1,4 +1,9 @@
 \section{Jensen--Shannon 散度与尺度选择}
+\label{sec:07-Information-Theory/03-Divergences/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}把来自 \(P\) 和 \(Q\) 的样本混在一起，只看一个样本时，你有多大把握猜出它来自哪边？两个分布越容易分辨，JS 散度越大。因为双方地位相同，它天然是对称的。
+\end{quote}
 
 \subsection{当方向性成了任务的障碍}
 
@@ -27,7 +32,7 @@ M=\frac12(P+Q).
 =\frac12D(P\|M)+\frac12D(Q\|M).
 \]
 
-由于 \(M\) 包含 \(P\) 和 \(Q\) 各自的一半概率质量，只要 \(P(x)>0\) 或 \(Q(x)>0\)，就有 \(M(x)>0\)。所以两个 KL 都有限，不再因双方支持不同而爆炸。
+由于 \(M\ge P/2\) 且 \(M\ge Q/2\)，在相应支持上有密度比 \(dP/dM\le2\) 与 \(dQ/dM\le2\)。所以两个 KL 都不超过 \(\log 2\)，不再因双方支持不同而爆炸；这个论证也适用于连续分布，不依赖逐点概率。
 
 定义立刻给出三个性质：
 
@@ -113,7 +118,6 @@ JS 本身一般不满足三角不等式，所以严格说仍是散度；但 \(\s
 选择比较量前，可以依次问：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   是否存在明确的真实分布与近似分布？若有，KL 的方向可能正是问题的一部分；

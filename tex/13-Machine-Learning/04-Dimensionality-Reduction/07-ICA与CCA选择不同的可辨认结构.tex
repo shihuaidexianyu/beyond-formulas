@@ -1,4 +1,9 @@
 \section{ICA 与 CCA：选择不同的可辨认结构}
+\label{sec:13-Machine-Learning/04-Dimensionality-Reduction/07}
+
+\begin{quote}
+\textbf{先抓住这一点：}ICA 用非 Gaussian 独立性寻找潜在源，CCA 寻找两组变量间相关最大的成对方向。它们优化的结构不同，可辨认性条件也不能从 PCA 直接继承。
+\end{quote}
 
 \subsection{PCA 去相关，ICA 追求独立}
 
@@ -52,4 +57,4 @@ b^\trans\Sigma_{YY}b=1.
 
 若 \(p\) 或 \(q\) 接近样本数，样本 covariance 可能奇异，CCA 会找到几乎完美却不可复现的相关方向。正则化 CCA 用 \(\Sigma_{XX}+\lambda_xI\)、\(\Sigma_{YY}+\lambda_yI\) 稳定 whitening；参数必须在训练数据内选择，并在独立样本上评价相关性。
 
-CCA 找到两个表示间最强的线性共同变化，但不能据此断定两边共享同一个因果因素。若日期、季节或采样设备同时影响两个视图，canonical correlation 会忠实捕捉这种混杂。ICA 依赖独立与非 Gaussian 性来选择单个视图的方向，CCA 依赖跨视图相关来选择成对方向；两者回答的是不同的可辨认问题，不能视为“比 PCA 更高级”的统一替代品。
+CCA 找到两个表示间最强的线性共同变化，但不能据此断定两边共享同一个因果因素。若日期、季节或采样设备同时影响两个视图，canonical correlation 会忠实捕捉这种混杂。ICA 依赖独立与非 Gaussian 性来选择单个视图的方向，CCA 依赖跨视图相关来选择成对方向；两者回答的是不同的可辨认问题，不能视为``比 PCA 更高级''的统一替代品。

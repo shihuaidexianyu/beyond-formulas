@@ -1,10 +1,9 @@
 本单元先站在最强假设上：系统的动力学 \(\dot x=f(x,u)\) 与代价函数都已知，问题只剩一个——怎样把``控制好''写成数学，并解出来；最后再撤掉``完整状态可见''与``模型天然已知''两项假设。六篇按从反馈直觉、最优性条件到可计算算法和数据辨识的顺序组织：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  从开环到闭环反馈：为什么事先算好的计划在现实中必然失效，反馈怎样用误差信号稳住系统，PID 三项各治什么病、各带什么副作用。
+  从开环到闭环反馈：为什么事先算好的计划对模型误差与扰动脆弱，反馈怎样用误差信号稳住系统，PID 三项各治什么病、各带什么副作用。
 \item
   最大值原理：把最优轨线变成两点边值：从``最优轨线不能被扰动改进''的变分思想出发，引出 Hamiltonian 与协态，把寻优问题化为微分方程的两点边值问题。
 \item
@@ -18,3 +17,21 @@
 \end{enumerate}
 
 记号在全单元统一：状态记 \(x\)，控制输入记 \(u\)，值函数记 \(V\)。HJB 的维数灾难不是故事的终点：LQG 利用线性 Gaussian 结构获得有限维递推，DDP 只在一条轨迹附近建立局部模型，系统辨识则先从实验数据取得动力学。当状态空间大到无法逐点解方程、模型又只能通过交互学习时，才进入下一单元的强化学习。
+
+\subsection{怎么读这一章}
+
+首次阅读先抓``反馈、目标、价值''三层：第一篇建立反馈直觉，第二与第三篇对照``一条候选最优轨线的必要条件''和``所有状态的最优剩余代价''。LQG、DDP 与系统辨识是三种结构化出路，分别依赖线性 Gaussian、局部二次近似与有信息量的数据。公式可后置，但每种方法的假设、局部性和可辨认性不能后置。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/01]{``从开环到闭环反馈''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/02]{``最大值原理：把最优轨线变成两点边值''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/03]{``HJB 方程与动态规划''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/04]{``LQG：看不全状态时怎样继续反馈''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/05]{``DDP：用局部二次模型改进整条轨迹''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/06]{``系统辨识：从输入输出数据估计动力学''}。
+\end{itemize}

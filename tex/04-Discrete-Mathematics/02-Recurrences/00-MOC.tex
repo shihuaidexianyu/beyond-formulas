@@ -1,7 +1,6 @@
 递推式说明规模 \(n\) 的对象怎样由较小规模生成，通常不会直接给出第 \(n\) 项的闭式表达。它适合描述算法运行时间、组合对象数量和动态过程。分析时先保证初值足以唯一确定序列，再根据结构选择展开、递归树、特征方程或生成函数。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   递推建模与递归树
@@ -12,3 +11,32 @@
 \end{enumerate}
 
 闭式公式不是唯一目标。有时渐近增长、稳定性或可计算递推已经更有价值；方法应服务于问题，而不是强迫每个递推都写成复杂根式。
+
+\subsection{怎么读这一章}
+
+先按想得到的答案选择工具：
+
+\begin{itemize}
+\tightlist
+\item
+  若还在建立模型，或只想看分治算法的成本从哪些层累积，读\hyperref[sec:04-Discrete-Mathematics/02-Recurrences/01]{``递推建模与递归树''}；先检查状态定义、初始条件和分类是否互斥且穷尽。
+\item
+  若递推是常系数线性的，并且关心闭式、长期增长、衰减或振荡，读\hyperref[sec:04-Discrete-Mathematics/02-Recurrences/02]{``线性递推与特征根''}；指数模式之所以出现，是因为它在平移下只改变比例。
+\item
+  若递推含有卷积、组合对象的规模拆分，或希望把整条序列一次性打包，读\hyperref[sec:04-Discrete-Mathematics/02-Recurrences/03]{``生成函数把递推变成代数''}；先把幂级数视作记录系数的形式对象，再按需要讨论收敛。
+\item
+  若只需要数量级，不必强求精确闭式；若需要逐项稳定计算，漂亮闭式也未必是最好的数值算法。
+\end{itemize}
+
+第一次阅读可以在能回答三件事时停下：递推和哪些初值共同唯一确定对象？目标是精确值、增长阶还是结构解释？所选方法利用了递推的哪一种特殊结构？
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/02-Recurrences/01]{``递推建模与递归树''}；
+\item \hyperref[sec:04-Discrete-Mathematics/02-Recurrences/02]{``线性递推与特征根''}；
+\item \hyperref[sec:04-Discrete-Mathematics/02-Recurrences/03]{``生成函数把递推变成代数''}。
+\end{itemize}

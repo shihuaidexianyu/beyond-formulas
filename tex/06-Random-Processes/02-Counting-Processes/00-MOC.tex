@@ -1,7 +1,6 @@
-电话、请求、故障和顾客到达都可先忽略具体内容，只记录累计事件数 $N(t)$。计数过程的路径从零开始、只向上跳；同一过程既可以从``固定时间数事件''观察，也可以从``固定事件数看等待时间''观察。
+电话、请求、故障和顾客到达都可先忽略具体内容，只记录累计事件数 \(N(t)\)。计数过程的路径从零开始、只向上跳；同一过程既可以从``固定时间数事件''观察，也可以从``固定事件数看等待时间''观察。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Bernoulli 过程与离散到达：先在离散时隙中理解计数、到达时刻与等待间隔。
@@ -14,3 +13,21 @@
 \end{enumerate}
 
 Poisson 是最重要的基准模型，但并不是``所有到达数据''的默认答案。聚集、季节变化、容量限制和个体异质性都会破坏其独立平稳增量。
+
+\subsection{怎么读这一章}
+
+若只想获得可随时调用的直觉，先记住同一过程的三种读法：固定时间看计数 \(N(t)\)，固定事件序号看到达时刻 \(T_r\)，相邻事件之间看等待 \(W_r\)。Poisson、Exponential 与 Gamma 不是三套孤立公式，而是这三种读法在同一模型中的对应结果。
+
+若要做模型判断，再重点阅读独立增量、平稳增量与无记忆性分别排除了什么；若数据出现聚集、周期变化或老化效应，则进入非齐次 Poisson 或更新过程。长期更新率和检查悖论的推导可以在需要计算时间平均与随机观察偏差时再细读。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/01]{``Bernoulli 过程与离散到达''}；
+\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/02]{``Poisson 过程与独立增量''}；
+\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/03]{``到达时刻、指数等待与条件均匀性''}；
+\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/04]{``更新过程与长期更新率''}。
+\end{itemize}

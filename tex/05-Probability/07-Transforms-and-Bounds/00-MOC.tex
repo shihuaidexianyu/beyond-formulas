@@ -11,7 +11,6 @@
 本单元依照``可用信息逐渐增多，界逐渐变强''的顺序阅读：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   生成函数、矩母函数与特征函数：比较三种变换的适用对象、存在条件和求和规则。
@@ -24,3 +23,21 @@
 \end{enumerate}
 
 概率界给的是保证，不是精确概率。界很松并不意味着事件常发生，只说明现有信息不足以排除它；界很强也必须建立在相应独立性、矩存在或有界性条件上。
+
+\subsection{怎么读这一章}
+
+若目标是识别或组合分布，先读第一篇，并在使用 PGF、MGF、特征函数前分别检查取值类型、存在域与独立性。若目标只是控制坏事件，按可用信息选择：只有事件概率用 Union Bound，只有非负均值用 Markov，有有限方差用 Chebyshev 或 Cantelli，有独立有界结构再用 Hoeffding；Jensen 则负责判断非线性运算与平均的先后代价。
+
+读完后应能先回答三个问题：我要的是精确分布还是可靠上界；手里的假设能支持哪一级工具；上界很松究竟表示事件危险，还是只表示信息不足。不能回答这三问时，不应只因公式更复杂就优先使用它。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/01]{``生成函数、矩母函数与特征函数''}；
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/02]{``从 Union Bound 到 Markov 与 Chebyshev''}；
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/03]{``Jensen 不等式与随机凸性''}；
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/04]{``Chernoff 方法与 Hoeffding 集中界''}。
+\end{itemize}

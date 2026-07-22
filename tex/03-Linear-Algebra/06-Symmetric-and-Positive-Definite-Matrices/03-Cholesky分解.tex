@@ -1,9 +1,14 @@
 \section{Cholesky 分解：把正能量写成平方和}
+\label{sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}对称正定矩阵可以写成 \(LL^{\trans}\)，相当于矩阵版本的正数平方根。Cholesky 比一般 LU 利用更多结构，求解和 log-determinant 计算都更省。
+\end{quote}
 
 正定矩阵不仅拥有正特征值，还允许一种比一般 LU 更紧凑的分解：
 
 \[
-A=LL^{\mathsf T},
+A=LL^{\trans},
 \]
 
 其中 \(L\) 是对角元为正的下三角矩阵。这称为 Cholesky 分解。
@@ -11,9 +16,9 @@ A=LL^{\mathsf T},
 它把对称性和正定性同时编码进分解。代入二次型：
 
 \[
-x^{\mathsf T}Ax
-=x^{\mathsf T}LL^{\mathsf T}x
-=\|L^{\mathsf T}x\|_2^2.
+x^{\trans}Ax
+=x^{\trans}LL^{\trans}x
+=\|L^{\trans}x\|_2^2.
 \]
 
 正定二次型因此成为若干线性表达式的平方和。
@@ -31,7 +36,7 @@ L=\begin{pmatrix}\ell_{11}&0\\\ell_{21}&\ell_{22}\end{pmatrix}.
 比较
 
 \[
-LL^{\mathsf T}
+LL^{\trans}
 =\begin{pmatrix}
 \ell_{11}^2&\ell_{11}\ell_{21}\\
 \ell_{11}\ell_{21}&\ell_{21}^2+\ell_{22}^2
@@ -91,18 +96,18 @@ A=
 相应二次型变成
 
 \[
-x^{\mathsf T}Ax
+x^{\trans}Ax
 =(2x_1+x_2)^2+2x_2^2,
 \]
 
-从平方和形式可以立即看出，只要 \(x\ne0\)，结果严格为正。这也正是``配平方''路线应得到的答案：两个平方项里的线性表达式正是 \(L^{\mathsf T}x\) 的两个分量。
+从平方和形式可以立即看出，只要 \(x\ne0\)，结果严格为正。这也正是``配平方''路线应得到的答案：两个平方项里的线性表达式正是 \(L^{\trans}x\) 的两个分量。
 
 \subsection{与消元的关系}
 
 对称正定矩阵做 Gaussian 消元时不需要行交换，所有主元都为正。若写成
 
 \[
-A=LDL^{\mathsf T},
+A=LDL^{\trans},
 \]
 
 其中 \(L\) 为单位下三角、\(D\) 为正对角矩阵，再把 \(D^{1/2}\) 吸收到 \(L\) 中，就得到 Cholesky 分解。
@@ -115,7 +120,7 @@ A=LDL^{\mathsf T},
 
 \[
 Ax=b,
-\qquad A=LL^{\mathsf T},
+\qquad A=LL^{\trans},
 \]
 
 先解
@@ -127,19 +132,19 @@ Ly=b,
 再解
 
 \[
-L^{\mathsf T}x=y.
+L^{\trans}x=y.
 \]
 
 两步都是三角求解。与一般 LU 相比，Cholesky 大约只需一半存储和一半主要运算，并且无需选主元，是对称正定系统的首选直接方法。
 
-常见来源包括最小二乘的正规矩阵、核方法、Gaussian process、协方差模型和有限元刚度矩阵。需要注意：形成 \(A^{\mathsf T}A\) 仍会平方条件数；不能因为它正定，就忽略 QR 或 SVD 在最小二乘中的稳定性优势。
+常见来源包括最小二乘的正规矩阵、核方法、Gaussian process、协方差模型和有限元刚度矩阵。需要注意：形成 \(A^{\trans}A\) 仍会平方条件数；不能因为它正定，就忽略 QR 或 SVD 在最小二乘中的稳定性优势。
 
 \subsection{行列式和概率计算}
 
 由于
 
 \[
-\det A=\det L\det L^{\mathsf T}
+\det A=\det L\det L^{\trans}
 =\left(\prod_i\ell_{ii}\right)^2,
 \]
 
@@ -160,7 +165,7 @@ x=\mu+Lz
 具有协方差
 
 \[
-\Cov(x)=LL^{\mathsf T}=A.
+\Cov(x)=LL^{\trans}=A.
 \]
 
 因此 \(L\) 还能把独立标准噪声变成具有指定相关结构的 Gaussian 向量。
@@ -176,7 +181,7 @@ x=\mu+Lz
 \item
   带主元或秩揭示的 Cholesky；
 \item
-  \(LDL^{\mathsf T}\) 分解；
+  \(LDL^{\trans}\) 分解；
 \item
   特征分解或 SVD；
 \item
@@ -201,10 +206,4 @@ x=\mu+Lz
 
 因此，Cholesky 失败不仅是程序错误信息，也是在提醒我们重新检查假设。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06：Positive Definite Matrices and Minima
-\end{itemize}
+延伸阅读：MIT 18.06：Positive Definite Matrices and Minima。

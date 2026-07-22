@@ -3,7 +3,6 @@
 \subsection{阅读顺序}
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   不变方向与特征值
@@ -18,3 +17,19 @@
 第一节产生特征方程；第二节说明一组完整特征向量如何形成最合适的坐标；第三节研究特征方向不足时的结构，并为复特征值和更稳定的 SVD 观点留下接口；第四节把多项式、指数与更一般的标量函数作用到矩阵上，说明对角化时只需作用于特征值，而 Jordan 块还会读取函数的导数。
 
 主要参考 MIT 18.06 关于 eigenvalues、diagonalization、matrix powers、differential equations 与 Jordan form 的讲授。
+
+\subsection{怎么读这一章}
+
+首次阅读以前两篇为主：特征向量是不变方向，对角化是用一组不变方向作坐标。第三篇用于理解``为什么有时做不到''，Jordan 形的手算细节可以后置，但广义特征向量产生多项式乘指数的现象值得保留。第四篇是回读入口，把矩阵幂与矩阵指数统一起来。数值计算中通常不会把 Jordan 分解当作稳定算法；这里使用它主要是揭示代数结构。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/01]{``不变方向与特征值：寻找矩阵最自然的坐标轴''}；
+\item \hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/02]{``对角化与动力系统：把耦合演化变成独立缩放''}；
+\item \hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/03]{``对角化失败与 Jordan 形：独立特征方向不够时怎么办''}；
+\item \hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/04]{``矩阵函数：从多项式到指数''}。
+\end{itemize}

@@ -1,4 +1,9 @@
 \section{粒子滤波用带权样本追踪非线性状态}
+\label{sec:13-Machine-Learning/08-Sampling-and-Inference/05}
+
+\begin{quote}
+\textbf{先抓住这一点：}粒子滤波同时保留许多种``系统现在可能在哪里''的猜测，新的观测到来后，让吻合的猜测多活下来一些。状态维数太高或观测过于苛刻时，几乎所有猜测的权重都会变成零，这套方法就会吃力。
+\end{quote}
 
 Kalman filter 能用一个均值和协方差精确表示 filtering posterior，是因为线性变换和 Gaussian 条件化保持 Gaussian 族闭合。若目标可能在岔路口向左或向右，位置 posterior 会自然分成两个峰；用一个 Gaussian 表示时，均值可能落在两条路之间这个低概率位置。粒子滤波不再预设 posterior 必须单峰，而用带权样本近似
 
@@ -95,7 +100,7 @@ N_{\mathrm{eff}}
 
 当 \(N_{\mathrm{eff}}\) 低于阈值时，可按当前权重抽取 \(N\) 个祖先并把新权重重置为 \(1/N\)。高权重粒子可能被复制，低权重粒子可能消失。multinomial resampling 最直接；systematic 或 stratified resampling 通常有更小的额外抽样方差。
 
-重采样解决“权重集中在少数现有粒子上”，却会产生“许多粒子共享同一祖先”。两者不是同一个退化问题。频繁重采样会丢失多样性；长期 smoothing 时，早期轨迹往往只剩极少祖先，当前状态估计尚可，完整路径 posterior 却很差。因此通常按 ESS 自适应重采样，并在需要轨迹时使用 backward simulation、ancestor sampling 或专门的 particle smoothing 方法。
+重采样解决``权重集中在少数现有粒子上''，却会产生``许多粒子共享同一祖先''。两者不是同一个退化问题。频繁重采样会丢失多样性；长期 smoothing 时，早期轨迹往往只剩极少祖先，当前状态估计尚可，完整路径 posterior 却很差。因此通常按 ESS 自适应重采样，并在需要轨迹时使用 backward simulation、ancestor sampling 或专门的 particle smoothing 方法。
 
 \subsection{一轮基本算法在做什么}
 

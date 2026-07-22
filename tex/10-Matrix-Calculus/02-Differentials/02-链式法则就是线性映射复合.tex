@@ -1,4 +1,9 @@
 \section{链式法则就是线性映射复合}
+\label{sec:10-Matrix-Calculus/02-Differentials/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}复合函数的扰动先经过内层导数，再经过外层导数。正向模式按这个顺序推送扰动，反向模式则用伴随映射把敏感度倒着传回来。
+\end{quote}
 
 若
 
@@ -27,16 +32,16 @@ J_{g\circ f}(x)v = J_g(y)\bigl(J_f(x)v\bigr).
 \]
 因此不必先形成两个 Jacobian 再相乘。可以先计算 \(dy=J_fv\)，再计算 \(dz=J_gdy\)。这就是正向模式自动微分。
 
-若输入维度很小、输出很多，少量输入方向就能得到完整导数。例如 \(f:\mathbb R\to\mathbb R^m\) 只有一个输入方向，一次正向传播便得到所有输出对该标量的导数。
+若输入维度很小、输出很多，少量输入方向就能得到完整导数。例如 \(f:\R\to\R^m\) 只有一个输入方向，一次正向传播便得到所有输出对该标量的导数。
 
 \subsection{VJP 是把输出敏感度反向拉回}
 
 设最终损失 \(\ell(z)\) 为标量。链式法则给
 
 \[
-\nabla_x\ell = J_f(x)^T J_g(y)^T\nabla_z\ell.
+\nabla_x\ell = J_f(x)^{\trans} J_g(y)^{\trans}\nabla_z\ell.
 \]
-计算顺序从右到左：先把 \(\nabla_z\ell\) 通过 \(J_g^T\) 拉回 \(y\)，再通过 \(J_f^T\) 拉回 \(x\)。这就是反向模式。
+计算顺序从右到左：先把 \(\nabla_z\ell\) 通过 \(J_g^{\trans}\) 拉回 \(y\)，再通过 \(J_f^{\trans}\) 拉回 \(x\)。这就是反向模式。
 
 当输入参数很多、输出只有一个标量损失时，一次反向传播就得到全部参数梯度；逐输入方向做正向传播则需要许多次。这一复杂度差异来自 Jacobian 形状，而不是神经网络的特殊魔法。
 
@@ -47,7 +52,7 @@ J_{g\circ f}(x)v = J_g(y)\bigl(J_f(x)v\bigr).
 \[
 u=Ax,\qquad
 v=\tanh u,\qquad
-\ell=\frac12\lVert v-y\rVert_2^2.
+\ell=\frac12\norm{ v-y}_2^2.
 \]
 
 正向先保存 \(u,v\)。反向从
@@ -64,9 +69,9 @@ v=\tanh u,\qquad
 最后
 
 \[
-\nabla_x\ell=A^T\bar u,
+\nabla_x\ell=A^{\trans}\bar u,
 \qquad
-\nabla_A\ell=\bar u x^T.
+\nabla_A\ell=\bar u x^{\trans}.
 \]
 
 为什么 \(\nabla_A\ell\) 是外积？扰动 \(dA\) 产生
@@ -78,11 +83,11 @@ du=(dA)x,
 所以
 
 \[
-d\ell = \bar u^T(dA)x
-=\operatorname{tr}(\bar u^TdA\,x)
-=\operatorname{tr}\bigl((\bar u x^T)^TdA\bigr).
+d\ell = \bar u^{\trans}(dA)x
+=\trace(\bar u^{\trans}dA\,x)
+=\trace\bigl((\bar u x^{\trans})^{\trans}dA\bigr).
 \]
-先把标量写成迹，再整段循环移动。形状与微分同时决定了答案：把 \(d\ell\) 整理成 \(\operatorname{tr}\bigl(G^TdA\bigr)\) 后，系数 \(G=\bar ux^T\) 就是梯度——这正是上一节的读取规则。
+先把标量写成迹，再整段循环移动。形状与微分同时决定了答案：把 \(d\ell\) 整理成 \(\trace\bigl(G^{\trans}dA\bigr)\) 后，系数 \(G=\bar ux^{\trans}\) 就是梯度——这正是上一节的读取规则。
 
 \subsection{分支处要相加，共享处要累积}
 
@@ -107,4 +112,3 @@ d\ell = \left(\frac{\partial\ell}{\partial y}Df(x)
 ReLU、max、排序和离散分支可能在某些点不可微。自动微分系统通常采用约定的次梯度或分支导数，但这不等于经典导数存在。随机采样、状态更新和停止梯度还会改变``所执行程序''与抽象数学模型之间的关系。
 
 因此反向传播正确性包含两层：链式组合是否实现正确，以及每个基本算子的局部求导规则是否符合预期语义。
-

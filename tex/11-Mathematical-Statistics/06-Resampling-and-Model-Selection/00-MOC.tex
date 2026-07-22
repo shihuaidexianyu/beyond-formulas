@@ -3,7 +3,6 @@
 本单元区分四种常被混用的任务：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Bootstrap 近似估计量的抽样波动从经验分布重抽样，用于标准误、偏差与区间。
@@ -16,3 +15,19 @@
 \end{enumerate}
 
 Bootstrap、permutation 与 cross-validation 都会``重复使用数据''，但它们模拟的随机机制完全不同，不能只因实现都包含循环和随机抽样就互相替代。
+
+\subsection{怎么读这一章}
+
+这四篇的共同问题是：没有新的总体样本时，怎样近似完整分析流程在重复数据上的表现。Bootstrap 重抽观测，置换检验重排标签，交叉验证重跑训练流程；它们成立的交换性与独立性条件并不相同。最后再把这些工具放回偏差—方差与模型选择。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/01]{``Bootstrap 近似估计量的抽样波动''}；
+\item \hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/02]{``置换检验依赖可交换性''}；
+\item \hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/03]{``交叉验证评估的是完整训练流程''}；
+\item \hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/04]{``偏差---方差、正则化与模型选择''}。
+\end{itemize}

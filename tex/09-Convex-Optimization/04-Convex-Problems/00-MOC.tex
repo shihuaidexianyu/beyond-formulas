@@ -3,7 +3,6 @@
 本单元从最透明的模型逐步扩展：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   标准形式与线性规划说明为什么凸不等式必须朝正确方向，仿射等式为何特殊，并从多面体几何理解线性规划。
@@ -16,3 +15,19 @@
 \end{enumerate}
 
 标准形式是现实问题与求解算法之间的中间语言，无须要求原问题一开始就呈现这种外观。建模的关键始终是：变换是否等价、定义域是否保存，以及最终得到的凸性是否有严格依据。
+
+\subsection{怎么读这一章}
+
+这一章的重点不是看见一个漂亮公式就宣布它凸，而是依次检查变量的定义域、目标函数、每个不等式和每个等式。前两篇从常见标准模型入手，后两篇展示凸性有时藏在变量表示或矩阵不等式后面。需要补函数判据时，可回看 \hyperref[ch:073]{``凸函数：局部信息为何能控制全局''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/04-Convex-Problems/01]{``标准形式与线性规划''}；
+\item \hyperref[sec:09-Convex-Optimization/04-Convex-Problems/02]{``最小二乘、范数与二次规划''}；
+\item \hyperref[sec:09-Convex-Optimization/04-Convex-Problems/03]{``变量变换揭示隐藏凸性''}；
+\item \hyperref[sec:09-Convex-Optimization/04-Convex-Problems/04]{``半正定规划优化矩阵不等式''}。
+\end{itemize}

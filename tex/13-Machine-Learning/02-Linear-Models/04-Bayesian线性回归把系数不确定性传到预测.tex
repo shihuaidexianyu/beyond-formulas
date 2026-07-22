@@ -1,4 +1,9 @@
 \section{Bayesian 线性回归把系数不确定性传到预测}
+\label{sec:13-Machine-Learning/02-Linear-Models/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}Bayesian 线性回归不是只给一组最佳系数，而是更新整个系数后验，再把参数不确定性传到预测分布。区间宽度仍依赖先验、噪声与线性模型是否合理。
+\end{quote}
 
 普通最小二乘给出一个系数向量 \(\widehat\beta\)，经典区间用重复抽样分布描述估计程序的波动。Bayesian 线性回归改为给系数指定 prior，观察数据后得到参数 posterior，再把这份不确定性积分进新样本预测。三者可以共享同一个线性均值模型，却回答不同概率问题。
 
@@ -90,7 +95,7 @@ Posterior mode 等价于最小化
 
 所以 isotropic zero-mean Gaussian prior 的 MAP 与 Ridge 解相同。在当前 Gaussian posterior 中，mean 与 mode 也恰好相等；对偏斜或多峰 posterior，这两个点一般不同。
 
-“Ridge 等于 Bayesian regression”仍不完整。Ridge 通常只使用 MAP 点，完整 Bayesian 分析保留 \(S_n\) 并在预测时积分参数。相同的最优系数不意味着相同的不确定性输出。
+``Ridge 等于 Bayesian regression''仍不完整。Ridge 通常只使用 MAP 点，完整 Bayesian 分析保留 \(S_n\) 并在预测时积分参数。相同的最优系数不意味着相同的不确定性输出。
 
 Proper Gaussian prior 还使 \(X^{\trans}X\) 秩亏时 posterior precision 仍可逆。此时可得到唯一 posterior 和预测分布，但某些方向主要由 prior 而非数据辨认；数值可解不能被误读为数据已经识别全部系数。
 
@@ -141,7 +146,7 @@ X_*m_n,
 
 \subsection{不确定性沿特征方向变化，而不只随距离变化}
 
-若 \(x_*\) 指向数据充分覆盖的特征方向，\(x_*^{\trans}S_nx_*\) 较小；若它含有训练设计几乎没有激发的方向，该项可能很大。所谓“离训练数据远”应在设计矩阵和 prior 诱导的几何中理解，而不是只看原始坐标的 Euclidean distance。
+若 \(x_*\) 指向数据充分覆盖的特征方向，\(x_*^{\trans}S_nx_*\) 较小；若它含有训练设计几乎没有激发的方向，该项可能很大。所谓``离训练数据远''应在设计矩阵和 prior 诱导的几何中理解，而不是只看原始坐标的 Euclidean distance。
 
 若特征先做标准化，prior scale 的含义更一致；若未标准化，对所有系数使用相同 \(\tau\) 会对不同单位施加完全不同的实际收缩。改变单位不应悄悄改变科学结论，因此 prior 必须和特征变换一起记录。
 
@@ -151,7 +156,7 @@ X_*m_n,
 
 实际中 \(\sigma^2\) 通常未知。若使用与 \(\sigma^2\) 相配的 normal--inverse-gamma prior，可以同时更新系数与噪声方差，并在积分二者后得到 multivariate Student-(t) posterior predictive。相对把 \(\sigma^2\) 固定为点估计，Student-(t) 尾部额外反映有限数据下的方差不确定性。
 
-若只给 \(\sigma^2\) 一个极弱 improper prior，需要检查 posterior 是否 proper；样本数不足或设计秩亏时，形式上的积分可能发散。所谓“无信息先验”也不是免费删除假设。
+若只给 \(\sigma^2\) 一个极弱 improper prior，需要检查 posterior 是否 proper；样本数不足或设计秩亏时，形式上的积分可能发散。所谓``无信息先验''也不是免费删除假设。
 
 \subsection{数值实现不应形成显式逆矩阵}
 
@@ -165,4 +170,4 @@ X_*m_n,
 
 模型检查不能只看 posterior 是否窄。应做 posterior predictive checks，比较生成数据与真实数据的残差形状、异方差、尾部和分组结构；改变合理 prior scale 检查敏感性；在独立数据上核对 predictive interval coverage。若区间系统性漏掉某一类样本，增加 MCMC 样本或提高线性代数精度都不能修复错误 likelihood。
 
-Bayesian 线性回归把前面三条线接在一起：最小二乘提供线性几何，Ridge 提供收缩，Gaussian 共轭提供完整 posterior。下一单元的指数族与共轭先验会说明，这种“precision 加 precision”的闭式更新只是更一般代数结构的一种具体实现。
+Bayesian 线性回归把前面三条线接在一起：最小二乘提供线性几何，Ridge 提供收缩，Gaussian 共轭提供完整 posterior。下一单元的指数族与共轭先验会说明，这种``precision 加 precision''的闭式更新只是更一般代数结构的一种具体实现。

@@ -3,7 +3,6 @@
 本单元用三节完成线性代数的收束：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   为什么线性代数需要复数：从旋转碰壁出发，引入复内积、伴随与酉变换。
@@ -14,3 +13,20 @@
 \end{enumerate}
 
 前两节建立语言，第三节展示这套语言为何值得学习。之后在概率、数值分析和信息论中遇到频域方法时，不必把 Fourier 变换当作一张新公式表；它只是一次精心选择的酉换基。
+
+\subsection{怎么读这一章}
+
+若只想快速抓住主线，先记住三个对应：复数把幅值与相位放进一次乘法，共轭转置在复空间中恢复长度与正交，Fourier 基则把循环移位变成逐坐标乘法。可以先读每篇开头的``核心洞见''，然后直接跳到第三篇的移位特征向量与卷积定理。需要核对严格性时，再回补 Hermitian 与正规矩阵的谱定理。
+
+第一遍的停点是：能解释 Fourier 基为何由平移结构逼出，为何酉性意味着能量不变，以及为何周期边界、采样不足和非线性会阻断``换到频域就全部解耦''的直觉。随后可进入\hyperref[ch:068]{``Fourier 与谱方法''}研究连续函数与数值计算，或进入\hyperref[ch:126]{``卷积网络''}研究局部性、参数共享与非线性复合。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/01]{``为什么线性代数需要复数''}；
+\item \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/02]{``Hermitian 矩阵与复谱定理''}；
+\item \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/03]{``Fourier 基与 FFT''}。
+\end{itemize}

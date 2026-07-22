@@ -1,4 +1,9 @@
 \section{不可微时次梯度为何仍能前进}
+\label{sec:09-Convex-Optimization/06-Optimization-Algorithms/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}凸函数即使在尖点没有唯一梯度，仍有能托住整张图像的次梯度。它足以提供下降信息，但方向会抖、速度也通常比光滑梯度法慢，不能把两者的收敛体验混为一谈。
+\end{quote}
 
 函数 \(f(x)=|x|\) 的最优点恰好是不可微点。最大值、\(L_1\) 正则和 hinge loss 也会产生尖角，因此不能要求所有凸模型都交给普通梯度法。
 
@@ -11,7 +16,7 @@ x_{k+1}=x_k-\alpha_k g_k.
 它看起来与梯度下降相同，但含义不同。梯度是局部最佳线性近似，负梯度在光滑点提供下降方向；次梯度只保证全局支持不等式
 
 \[
-f(y)\ge f(x_k)+g_k^T(y-x_k).
+f(y)\ge f(x_k)+g_k^{\trans}(y-x_k).
 \]
 
 因此负次梯度不一定让下一步目标下降。
@@ -24,22 +29,22 @@ f(y)\ge f(x_k)+g_k^T(y-x_k).
 
 \subsection{收敛界来自支持不等式}
 
-设最优点为 \(x^\star\)，并假设次梯度有界 \(\lVert g_k\rVert\le G\)。展开距离：
+设最优点为 \(x^\star\)，并假设次梯度有界 \(\norm{ g_k}\le G\)。展开距离：
 
 \[
 \begin{aligned}
-\lVert x_{k+1}-x^\star\rVert^2
+\norm{ x_{k+1}-x^\star}^2
 &=
-\lVert x_k-x^\star\rVert^2
--2\alpha_k g_k^T(x_k-x^\star)
-+\alpha_k^2\lVert g_k\rVert^2.
+\norm{ x_k-x^\star}^2
+-2\alpha_k g_k^{\trans}(x_k-x^\star)
++\alpha_k^2\norm{ g_k}^2.
 \end{aligned}
 \]
 
 次梯度不等式给出
 
 \[
-g_k^T(x_k-x^\star)
+g_k^{\trans}(x_k-x^\star)
 \ge f(x_k)-f^\star.
 \]
 
@@ -49,7 +54,7 @@ g_k^T(x_k-x^\star)
 \min_{0\le k<N}\bigl(f(x_k)-f^\star\bigr)
 \le
 \frac{
-\lVert x_0-x^\star\rVert^2
+\norm{ x_0-x^\star}^2
 +G^2\sum_{k=0}^{N-1}\alpha_k^2
 }{
 2\sum_{k=0}^{N-1}\alpha_k
@@ -78,7 +83,7 @@ g_k^T(x_k-x^\star)
 
   \[
   \alpha_k=
-  \frac{f(x_k)-f^\star}{\lVert g_k\rVert^2};
+  \frac{f(x_k)-f^\star}{\norm{ g_k}^2};
   \]
 \item
   约束集合简单时，更新后投影回 \(C\)：
@@ -95,4 +100,3 @@ g_k^T(x_k-x^\star)
 次梯度法每步便宜，只需一个次梯度和可能的投影；它适合超大规模、低精度目标，或作为更复杂分解算法的一部分。但它收敛慢、轨迹不平滑，对步长敏感。
 
 若非光滑项有可计算的近端算子，下一节的 proximal gradient 往往明显更快。若目标是有限和，还可以利用随机、方差缩减或 bundle 方法。选择次梯度法不应只因为``函数不可微''，还要问非光滑结构是否可以被更精确地处理。
-

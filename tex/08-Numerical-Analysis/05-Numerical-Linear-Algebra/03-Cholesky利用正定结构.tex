@@ -1,17 +1,22 @@
 \section{Cholesky：利用正定结构}
+\label{sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}对称正定矩阵像一个各方向都向上的碗，这份结构保证 Cholesky 分解一路都能开出正平方根。它比通用 LU 更省，但矩阵只要是半正定、近奇异，或只是被代码强行``对称化''，这份保证就可能消失。
+\end{quote}
 
 \subsection{正定性让消元不再需要一般主元策略}
 
 若实对称矩阵 \(A\) 满足
 
 \[
-x^TAx>0\qquad\text{对所有 }x\ne0,
+x^{\trans}Ax>0\qquad\text{对所有 }x\ne0,
 \]
 
 则存在唯一的下三角矩阵 \(L\)，其对角元为正，使
 
 \[
-\boxed{A=LL^T.}
+\boxed{A=LL^{\trans}.}
 \]
 
 这就是 Cholesky 分解。正定性保证消元过程中需要开方的量为正，不必像一般 LU 那样做行主元；只存一个三角因子，运算量约为一般 LU 的一半。
@@ -44,8 +49,8 @@ a_{ij}-\sum_{k<j}l_{ik}l_{jk}
 根号内量是逐步形成的 Schur complement 对角元。它必为正可用一步论证看出：消去前若干列后，剩余块是 \(S=A_{22}-A_{21}A_{11}^{-1}A_{12}\)；对任意 \(x\ne0\)，取 \(y=-A_{11}^{-1}A_{12}x\)，直接展开可得
 
 \[
-x^TSx=
-\begin{pmatrix}y\\x\end{pmatrix}^{T}
+x^{\trans}Sx=
+\begin{pmatrix}y\\x\end{pmatrix}^{\trans}
 A
 \begin{pmatrix}y\\x\end{pmatrix}>0,
 \]
@@ -55,12 +60,12 @@ A
 解 \(Ax=b\) 时依次做
 
 \[
-Ly=b,\qquad L^Tx=y.
+Ly=b,\qquad L^{\trans}x=y.
 \]
 
 若有多个右端，复用 \(L\)。
 
-Gaussian 过程给出了一个常见的完整计算链。给定协方差矩阵 \(K\) 和观测向量 \(y\)，预测与似然计算通常需要 \(K\alpha=y\) 以及 \(\log\det K\)。若 \(K=LL^T\)，前者只需两次三角求解，后者则由
+Gaussian 过程给出了一个常见的完整计算链。给定协方差矩阵 \(K\) 和观测向量 \(y\)，预测与似然计算通常需要 \(K\alpha=y\) 以及 \(\log\det K\)。若 \(K=LL^{\trans}\)，前者只需两次三角求解，后者则由
 
 \[
 \log\det K
@@ -76,7 +81,7 @@ Gaussian 过程给出了一个常见的完整计算链。给定协方差矩阵 \
 \item
   二次能量与凸二次优化的 Hessian；
 \item
-  独立观测下最小二乘正规方程的系数矩阵 \(A^TA\)（当 \(A\) 满列秩）；
+  独立观测下最小二乘正规方程的系数矩阵 \(A^{\trans}A\)（当 \(A\) 满列秩）；
 \item
   合法协方差矩阵在严格正定情形；
 \item
@@ -87,11 +92,11 @@ Gaussian 过程给出了一个常见的完整计算链。给定协方差矩阵 \
 
 Cholesky 不只节省计算，也作为结构检查。若分解在某步根号内出现非正数，可能说明矩阵不对称、不正定、数据构造错误，或矩阵极接近半正定而受到舍入影响。
 
-\subsection{\texorpdfstring{为什么不应为用 Cholesky 而强行形成 \(A^TA\)}{为什么不应为用 Cholesky 而强行形成 A\^{}TA}}
+\subsection{\texorpdfstring{为什么不应为用 Cholesky 而强行形成 \(A^{\trans}A\)}{为什么不应为用 Cholesky 而强行形成 A\^{}TA}}
 
-最小二乘正规方程 \(A^TAx=A^Tb\) 确实可用 Cholesky，但它把条件数平方（上一节已分析正规方程的这一问题）。Cholesky 对正规方程的分解本身可以后向稳定，却是对一个已经更病态的问题稳定。
+最小二乘正规方程 \(A^{\trans}Ax=A^{\trans}b\) 确实可用 Cholesky，但它把条件数平方（上一节已分析正规方程的这一问题）。Cholesky 对正规方程的分解本身可以后向稳定，却是对一个已经更病态的问题稳定。
 
-这再次说明：稳定算法无法消除前一步问题变换制造的条件恶化。最小二乘默认用 QR 或 SVD，原因是形成 \(A^TA\) 会改变数值敏感性，而非 Cholesky 算法本身差。
+这再次说明：稳定算法无法消除前一步问题变换制造的条件恶化。最小二乘默认用 QR 或 SVD，原因是形成 \(A^{\trans}A\) 会改变数值敏感性，而非 Cholesky 算法本身差。
 
 \subsection{半正定与``加 jitter''}
 
@@ -116,7 +121,7 @@ A_\lambda=A+\lambda I
 检查
 
 \[
-\frac{\|A-LL^T\|}{\|A\|}
+\frac{\|A-LL^{\trans}\|}{\|A\|}
 \]
 
 以及三角结构、正对角与对称性。分解成功并不证明输入是数学上严格正定到任意精度；分解失败也应先检查尺度与对称误差，而不是立即加一个任意大对角量。

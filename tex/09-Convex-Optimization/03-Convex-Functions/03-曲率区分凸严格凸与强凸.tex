@@ -1,4 +1,9 @@
 \section{曲率区分凸、严格凸与强凸}
+\label{sec:09-Convex-Optimization/03-Convex-Functions/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}凸只要求函数不向下弯，严格凸排除整段平坦的最优区域，强凸还要求至少有固定程度的向上弯曲。三者给出的唯一性、稳定性和收敛速度保证并不相同。
+\end{quote}
 
 一阶条件说切平面位于图像下方；二阶条件则直接检查每个方向上的曲率。若 \(f\) 在开凸域上二次可微，那么
 
@@ -12,7 +17,7 @@ f\text{ 凸}
 Hessian 半正定意味着对任意方向 \(v\)，
 
 \[
-v^T\nabla^2f(x)v\ge0.
+v^{\trans}\nabla^2f(x)v\ge0.
 \]
 
 这正是沿直线 \(\phi(t)=f(x+tv)\) 的二阶导数非负。因此高维凸性可以理解为：函数沿每一条直线都没有向下弯的方向。
@@ -22,15 +27,15 @@ v^T\nabla^2f(x)v\ge0.
 沿 \(d=y-x\) 定义 \(\phi(t)=f(x+td)\)。Taylor 积分形式给出
 
 \[
-f(y) = f(x)+\nabla f(x)^Td
+f(y) = f(x)+\nabla f(x)^{\trans}d
 +
 \int_0^1(1-t)\,
-d^T\nabla^2f(x+td)d\,dt.
+d^{\trans}\nabla^2f(x+td)d\,dt.
 \]
 若 Hessian 处处半正定，积分项非负，于是得到
 
 \[
-f(y)\ge f(x)+\nabla f(x)^T(y-x).
+f(y)\ge f(x)+\nabla f(x)^{\trans}(y-x).
 \]
 
 这个推导把局部曲率、切平面下界和全局凸性连接成同一件事。
@@ -53,8 +58,8 @@ f(\theta x+(1-\theta)y)
 
 \[
 f(y)\ge
-f(x)+\nabla f(x)^T(y-x)
-+\frac m2\lVert y-x\rVert_2^2.
+f(x)+\nabla f(x)^{\trans}(y-x)
++\frac m2\norm{ y-x}_2^2.
 \]
 
 图像不仅在切平面上方，还至少高出一个二次碗。二次可微时，这等价于
@@ -78,7 +83,7 @@ f''(x)=12x^2
 相比之下，\(f(x)=x^2\) 的二阶导数恒为 \(2\)，是 \(2\)-强凸函数。若给任意凸函数加上
 
 \[
-\frac{\lambda}{2}\lVert x\rVert_2^2,\qquad \lambda>0,
+\frac{\lambda}{2}\norm{ x}_2^2,\qquad \lambda>0,
 \]
 
 就会获得至少 \(\lambda\) 的强凸性。这解释了 Ridge 正则化不仅控制参数大小，还能改善唯一性和数值条件。
@@ -90,7 +95,7 @@ f''(x)=12x^2
 \[
 f(x)-f(x^\star)
 \ge
-\frac m2\lVert x-x^\star\rVert_2^2.
+\frac m2\norm{ x-x^\star}_2^2.
 \]
 
 目标差因此控制了解的距离：一个目标值接近最优的点不可能离最优解任意远。普通凸函数若有平坦谷底，就没有这种保证。
@@ -114,4 +119,3 @@ f(x)-f(x^\star)
 处处正定 Hessian 能推出严格凸，但严格凸函数的 Hessian 不必处处正定，\(x^4\) 已是反例。反过来，只在某个点 Hessian 半正定，也不能证明整个定义域凸；二阶条件必须在整个凸域上成立。
 
 对非光滑函数，Hessian 不存在，但它仍可能强凸。例如强凸光滑函数与任意凸非光滑函数之和仍强凸。定义不依赖二阶可微性，Hessian 只是方便的判据。
-

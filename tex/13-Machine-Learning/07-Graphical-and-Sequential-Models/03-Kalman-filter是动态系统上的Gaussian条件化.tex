@@ -1,4 +1,9 @@
 \section{Kalman filter 是动态系统上的 Gaussian 条件化}
+\label{sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}Kalman 滤波不断重复两步：先根据动力学猜下一刻在哪里，再用新观测纠正这个猜测。在线性 Gaussian 模型里，只更新均值和协方差就能完整保存当前的不确定性。
+\end{quote}
 
 HMM 让隐状态取有限类别。许多跟踪问题的状态却是连续向量：位置、速度、温度或经济因子随时间演化，传感器只给出带噪的局部观察。线性 Gaussian 状态空间模型把动力系统和观测模型写成
 
@@ -22,7 +27,7 @@ V_t\sim\mathcal N(0,R),
 Z_t=T_t+b_t+\varepsilon_t,
 \]
 
-其中 $b_t$ 是缓慢漂移的传感器偏置，$\varepsilon_t$ 是短时测量噪声。若模型把 $b_t$ 固定为零，更多读数只会让 filter 对错误温度越来越自信。可以把偏置加入状态并写成 $b_t=b_{t-1}+\zeta_t$，但温度与偏置能否由现有输入和观测分开，仍取决于后文的可观测性，而不是取决于递推次数够不够多。
+其中 \(b_t\) 是缓慢漂移的传感器偏置，\(\varepsilon_t\) 是短时测量噪声。若模型把 \(b_t\) 固定为零，更多读数只会让 filter 对错误温度越来越自信。可以把偏置加入状态并写成 \(b_t=b_{t-1}+\zeta_t\)，但温度与偏置能否由现有输入和观测分开，仍取决于后文的可观测性，而不是取决于递推次数够不够多。
 
 \subsection{预测步骤把上一时刻 posterior 推过动力学}
 

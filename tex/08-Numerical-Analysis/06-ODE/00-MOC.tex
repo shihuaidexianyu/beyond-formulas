@@ -1,7 +1,6 @@
 微分方程给的是当前位置的变化率，不是未来位置。数值方法必须把局部斜率变成有限步长的时间推进，同时控制局部截断怎样累积、扰动怎样增长，以及快慢时间尺度是否逼迫过小步长。边值问题又打破``从左向右一路推进''的初值思维，需要全区间联立。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Euler 方法：从局部斜率到全局误差
@@ -12,3 +11,21 @@
 \item
   边值问题：从打靶到全局离散
 \end{enumerate}
+
+\subsection{怎么读这一章}
+
+第一次读先问每种方法在相信什么：Euler 相信一步内斜率变化不大，Runge--Kutta 用多次试探改善这份猜测，隐式方法则愿意每步解方程来换取更大的稳定范围。误差阶、稳定区域和计算成本必须放在一起看。边值问题还需要放下``从左向右一路走''的习惯，把整条曲线联立起来求。
+
+前一单元：\hyperref[ch:065]{``数值线性代数：结构、稳定性与规模决定算法''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:08-Numerical-Analysis/06-ODE/01]{``Euler 方法：从局部斜率到全局误差''}；
+\item \hyperref[sec:08-Numerical-Analysis/06-ODE/02]{``Runge--Kutta 与自适应步长''}；
+\item \hyperref[sec:08-Numerical-Analysis/06-ODE/03]{``稳定区域与刚性方程''}；
+\item \hyperref[sec:08-Numerical-Analysis/06-ODE/04]{``边值问题：从打靶到全局离散''}。
+\end{itemize}

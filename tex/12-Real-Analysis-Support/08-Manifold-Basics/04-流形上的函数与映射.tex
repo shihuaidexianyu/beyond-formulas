@@ -1,10 +1,15 @@
 \section{流形上的函数与映射}
+\label{sec:12-Real-Analysis-Support/08-Manifold-Basics/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}流形上的函数是否光滑，要在相容坐标图中表现为普通光滑函数。映射的微分则把源流形的切向量线性送到目标流形的切空间。
+\end{quote}
 
 有了流形、切空间与度量，最后一步是把``函数''和``映射''放到这个舞台上：什么函数算光滑，它的导数是什么，以及本书前面各处出现的``流形''在这套语言里各自对应什么对象。
 
 \subsection{光滑性通过坐标卡定义}
 
-流形 \(M\) 上的函数 \(f:M\to\R\) 称为光滑，如果对每张卡 \((U,\varphi)\)，复合 \(f\circ\varphi^{-1}\)（定义在 \(\R^d\) 的开集上）光滑。流形间映射 \(F:M\to N\) 光滑，如果任意卡的复合 \(\psi\circ F\circ\varphi^{-1}\) 光滑。定义借助卡，但结论与卡无关——转移映射光滑保证了这一点。这就是``流形是局部像欧氏空间的集合''中把光滑性放在转移映射上的回报：一切光滑概念都可以在任意一页地图上检查，而不必发明新的``弯曲微积分''。
+流形 \(M\) 上的函数 \(f:M\to\R\) 称为光滑，如果对每张卡 \((U,\varphi)\)，复合 \(f\circ\varphi^{-1}\)（定义在 \(\R^d\) 的开集上）光滑。流形间映射 \(F:M\to N\) 光滑，如果任意卡的复合 \(\psi\circ F\circ\varphi^{-1}\) 光滑。定义借助卡，但结论与卡无关——转移映射光滑保证了这一点。这就是\hyperref[sec:12-Real-Analysis-Support/08-Manifold-Basics/01]{``流形是局部像欧氏空间的集合''}中把光滑性放在转移映射上的回报：一切光滑概念都可以在任意一页地图上检查，而不必发明新的``弯曲微积分''。
 
 函数的微分是切空间上的线性泛函：对切向量 \(v\)（由曲线 \(\gamma\) 代表），
 
@@ -21,7 +26,7 @@ df_p(v)=\left.\frac{d}{dt}f(\gamma(t))\right|_{t=0}.
 \begin{itemize}
 \tightlist
 \item
-  \textbf{等值面}：\(F^{-1}(c)\) 在 \(dF\) 满秩处是子流形（第一节的正则值判据）。球面、椭球面、``稳定性与 Lyapunov 函数''中 Lyapunov 函数的等高面，都是这样来的。
+  \textbf{等值面}：\(F^{-1}(c)\) 在 \(dF\) 满秩处是子流形（第一节的正则值判据）。球面、椭球面、\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}中 Lyapunov 函数的等高面，都是这样来的。
 \item
   \textbf{参数化像}：光滑映射 \(F:\mathcal A\to\R^n\) 若 \(dF\) 处处单射且 \(F\) 是嵌入（同胚到像），像 \(F(\mathcal A)\) 是子流形。瑞士卷、数据流形的理想化版本属于此类；自交或 \(dF\) 降秩处，像会出尖点或粘连，``流形假设''在那里失效。
 \item

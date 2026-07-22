@@ -1,4 +1,9 @@
 \section{在对数域中稳定计算概率}
+\label{sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}softmax 只关心分数之间的差，却会在朴素实现中先计算巨大的指数。先减去最大分数，答案完全不变，中间量却回到浮点数能承受的范围。需要对数概率时，更不要先把小概率舍入成零。
+\end{quote}
 
 设一个三分类模型给出的 logits（送入 softmax 之前的原始打分）是
 

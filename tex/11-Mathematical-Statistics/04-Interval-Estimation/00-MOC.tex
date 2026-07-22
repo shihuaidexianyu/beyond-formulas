@@ -3,7 +3,6 @@
 本单元按构造逻辑推进：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   置信度属于程序，而非这次参数从重复抽样定义 coverage，并用 Bernoulli Wald 区间的失败说明近似不能只看公式。
@@ -14,3 +13,18 @@
 \end{enumerate}
 
 区间宽度只是结果的一部分。覆盖率、假设稳健性、选择过程和多重推断共同决定区间能否被正确解释。
+
+\subsection{怎么读这一章}
+
+先牢牢记住：频率置信度描述的是区间构造程序在重复抽样中的覆盖率，不是观测后参数落入这次区间的概率。随后看枢轴量怎样给出有限样本区间，再比较渐近区间与 Bayesian 可信区间回答的问题有何不同。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:11-Mathematical-Statistics/04-Interval-Estimation/01]{``置信度属于程序，而非这次参数''}；
+\item \hyperref[sec:11-Mathematical-Statistics/04-Interval-Estimation/02]{``枢轴量把未知参数隔离出来''}；
+\item \hyperref[sec:11-Mathematical-Statistics/04-Interval-Estimation/03]{``渐近区间与 Bayesian 可信区间''}。
+\end{itemize}

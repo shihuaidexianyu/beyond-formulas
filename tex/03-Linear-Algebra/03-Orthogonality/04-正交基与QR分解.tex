@@ -1,4 +1,9 @@
 \section{正交基、Gram--Schmidt 与 QR 分解}
+\label{sec:03-Linear-Algebra/03-Orthogonality/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}QR 分解把列空间的几何与坐标尺度分开：\(Q\) 提供正交方向，\(R\) 记录原列怎样组合。这也是它比正规方程更可靠的根源。
+\end{quote}
 
 普通基能够表示子空间，却不一定让表示过程简单。若基向量彼此倾斜，从一个向量中提取某个基方向的坐标时，其他方向也会同时参与，通常需要解一个方程组。
 
@@ -11,7 +16,7 @@ Q=\begin{pmatrix}q_1&\cdots&q_n\end{pmatrix}
 的列满足
 
 \[
-q_i^{\mathsf T}q_j=
+q_i^{\trans}q_j=
 \begin{cases}
 1,&i=j,\\
 0,&i\ne j.
@@ -21,51 +26,51 @@ q_i^{\mathsf T}q_j=
 那么
 
 \[
-Q^{\mathsf T}Q=I.
+Q^{\trans}Q=I.
 \]
 
-对列空间中的向量 \(p=Qx\)，两边左乘 \(Q^{\mathsf T}\) 就得到
+对列空间中的向量 \(p=Qx\)，两边左乘 \(Q^{\trans}\) 就得到
 
 \[
-x=Q^{\mathsf T}p.
+x=Q^{\trans}p.
 \]
 
 有了正交基，逐列计算点积便能得到坐标，无须再求解联立方程。投影矩阵也从
 
 \[
-A(A^{\mathsf T}A)^{-1}A^{\mathsf T}
+A(A^{\trans}A)^{-1}A^{\trans}
 \]
 
 简化为
 
 \[
-P=QQ^{\mathsf T}.
+P=QQ^{\trans}.
 \]
 
 这说明一个实用目标：如果手中的基不正交，就把它变成张成同一子空间的正交归一基。
 
 \subsection{``正交矩阵''与``正交归一列''}
 
-矩形矩阵也可以满足 \(Q^{\mathsf T}Q=I\)，这表示它的列正交归一。但只有当 \(Q\) 是方阵时，通常才称它为正交矩阵。此时
+矩形矩阵也可以满足 \(Q^{\trans}Q=I\)，这表示它的列正交归一。但只有当 \(Q\) 是方阵时，通常才称它为正交矩阵。此时
 
 \[
-Q^{-1}=Q^{\mathsf T},
+Q^{-1}=Q^{\trans},
 \]
 
 并且
 
 \[
-QQ^{\mathsf T}=Q^{\mathsf T}Q=I.
+QQ^{\trans}=Q^{\trans}Q=I.
 \]
 
 方形正交矩阵保持长度与夹角：
 
 \[
-\|Qx\|_2^2=x^{\mathsf T}Q^{\mathsf T}Qx=\|x\|_2^2,
+\|Qx\|_2^2=x^{\trans}Q^{\trans}Qx=\|x\|_2^2,
 \]
 
 \[
-(Qx)^{\mathsf T}(Qy)=x^{\mathsf T}y.
+(Qx)^{\trans}(Qy)=x^{\trans}y.
 \]
 
 旋转和镜像都是典型例子。矩形 \(Q\) 不会把整个 \(\R^m\) 变换回自身，但它仍然把低维坐标 \(x\) 等距嵌入列空间：\(\|Qx\|_2=\|x\|_2\)。
@@ -83,7 +88,7 @@ q_1=\frac{u_1}{\|u_1\|_2}.
 处理 \(a_2\) 时，先减去它在 \(q_1\) 方向上的投影：
 
 \[
-u_2=a_2-(q_1^{\mathsf T}a_2)q_1,
+u_2=a_2-(q_1^{\trans}a_2)q_1,
 \qquad
 q_2=\frac{u_2}{\|u_2\|_2}.
 \]
@@ -93,7 +98,7 @@ q_2=\frac{u_2}{\|u_2\|_2}.
 一般地，在得到 \(q_1,\ldots,q_{k-1}\) 后，令
 
 \[
-u_k=a_k-\sum_{j=1}^{k-1}(q_j^{\mathsf T}a_k)q_j,
+u_k=a_k-\sum_{j=1}^{k-1}(q_j^{\trans}a_k)q_j,
 \qquad
 q_k=\frac{u_k}{\|u_k\|_2}.
 \]
@@ -122,7 +127,7 @@ q_1=\frac1{\sqrt3}
 \(a_2\) 在 \(q_1\) 方向上的坐标是
 
 \[
-q_1^{\mathsf T}a_2
+q_1^{\trans}a_2
 =\frac{1+0+2}{\sqrt3}
 =\sqrt3.
 \]
@@ -130,14 +135,14 @@ q_1^{\mathsf T}a_2
 所以对应投影为
 
 \[
-(q_1^{\mathsf T}a_2)q_1
+(q_1^{\trans}a_2)q_1
 =\begin{pmatrix}1\\1\\1\end{pmatrix}.
 \]
 
 减去它：
 
 \[
-u_2=a_2-(q_1^{\mathsf T}a_2)q_1
+u_2=a_2-(q_1^{\trans}a_2)q_1
 =\begin{pmatrix}0\\-1\\1\end{pmatrix},
 \]
 
@@ -148,7 +153,7 @@ q_2=\frac1{\sqrt2}
 \begin{pmatrix}0\\-1\\1\end{pmatrix}.
 \]
 
-现在 \(q_1^{\mathsf T}q_2=0\)，二者长度都为 \(1\)，并且它们与原来的 \(a_1,a_2\) 张成同一个平面。
+现在 \(q_1^{\trans}q_2=0\)，二者长度都为 \(1\)，并且它们与原来的 \(a_1,a_2\) 张成同一个平面。
 
 注意这个例子首先要问：\(a_2\) 中有多少已经被 \(a_1\) 的方向解释？减掉这一部分后，剩余方向才是新的信息。公式在这个问题明确后才登场。
 
@@ -174,10 +179,10 @@ a_k=r_{1k}q_1+\cdots+r_{kk}q_k.
 A=QR.
 \]
 
-由于 \(Q^{\mathsf T}Q=I\)，
+由于 \(Q^{\trans}Q=I\)，
 
 \[
-R=Q^{\mathsf T}A.
+R=Q^{\trans}A.
 \]
 
 在刚才的例子中，
@@ -223,31 +228,31 @@ A=
 把 \(b\) 分解为列空间中的部分和正交残差：
 
 \[
-b=QQ^{\mathsf T}b+(I-QQ^{\mathsf T})b.
+b=QQ^{\trans}b+(I-QQ^{\trans})b.
 \]
 
 于是
 
 \[
 QRx-b
-=Q(Rx-Q^{\mathsf T}b)-(I-QQ^{\mathsf T})b.
+=Q(Rx-Q^{\trans}b)-(I-QQ^{\trans})b.
 \]
 
 右边两项正交，因此
 
 \[
 \|QRx-b\|_2^2
-=\|Rx-Q^{\mathsf T}b\|_2^2
-+\|(I-QQ^{\mathsf T})b\|_2^2.
+=\|Rx-Q^{\trans}b\|_2^2
++\|(I-QQ^{\trans})b\|_2^2.
 \]
 
 第二项与 \(x\) 无关。要让第一项最小，只需解上三角方程
 
 \[
-R\hat x=Q^{\mathsf T}b.
+R\hat x=Q^{\trans}b.
 \]
 
-这条路径没有显式形成 \(A^{\mathsf T}A\)，也没有求逆。它先用正交变换提取 \(b\) 在列空间中的坐标，再通过三角回代求参数，因此通常比正规方程更稳定。上一节末尾关于``形成 \(A^{\mathsf T}A\) 会平方条件数''的警告，正是由这条路径回应的。
+这条路径没有显式形成 \(A^{\trans}A\)，也没有求逆。它先用正交变换提取 \(b\) 在列空间中的坐标，再通过三角回代求参数，因此通常比正规方程更稳定。上一节末尾关于``形成 \(A^{\trans}A\) 会平方条件数''的警告，正是由这条路径回应的。
 
 \subsection{数学上的 Gram--Schmidt 与数值计算中的 QR}
 
@@ -273,10 +278,4 @@ R\hat x=Q^{\mathsf T}b.
 
 这些概念由同一个问题逐层展开，彼此形成递进关系。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06 Lecture 17：Orthogonal Matrices and Gram--Schmidt
-\end{itemize}
+延伸阅读：MIT 18.06 Lecture 17：Orthogonal Matrices and Gram--Schmidt。

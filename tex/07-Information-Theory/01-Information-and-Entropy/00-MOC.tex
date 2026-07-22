@@ -1,7 +1,6 @@
 一条必然发生的消息几乎不带新信息，极少发生的消息一旦出现却很惊讶。信息论从这个直觉出发，把单个结果的惊讶度定义为对数概率，再对结果取平均得到熵。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   从惊讶到 Bit 与自信息：为什么信息量必须是概率的负对数，以及底数怎样决定单位。
@@ -14,3 +13,21 @@
 \end{enumerate}
 
 熵不是``知识''\,``语义价值''或``数据质量''的通用分数。它精确衡量给定概率模型下结果编码所需的平均信息量。
+
+\subsection{怎么读这一章}
+
+若只想获得随手可用的直觉，先读四篇开头的``核心洞见''，再记住三句话：自信息衡量一次结果有多意外，熵是这种意外的模型内平均，最大熵是在明确约束与参考测度下减少额外承诺。微分熵不能脱离坐标和单位单独解释。
+
+若要继续学习编码、互信息与 KL，再细读长块编码解释、量化极限和最大熵的约束推导。证明可以按需回看，但每次使用一个信息量时，都应先说明随机变量、概率分布、对数底和连续情形的参考测度。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/01]{``从惊讶到 Bit 与自信息''}；
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/02]{``Shannon 熵与二元熵''}；
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/03]{``微分熵为何不是离散熵的直接复制''}；
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/04]{``最大熵原理：从约束到分布''}。
+\end{itemize}

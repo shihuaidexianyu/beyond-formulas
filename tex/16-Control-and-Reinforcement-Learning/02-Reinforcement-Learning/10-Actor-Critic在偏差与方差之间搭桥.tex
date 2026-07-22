@@ -1,4 +1,9 @@
 \section{Actor--Critic 在偏差与方差之间搭桥}
+\label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/10}
+
+\begin{quote}
+\textbf{先抓住这一点：}Actor--Critic 用学习到的价值估计换取较低方差的策略更新。Critic 的偏差因此会进入 Actor，两个学习过程必须在时间尺度与数据分布上协调。
+\end{quote}
 
 REINFORCE 等到未来回报实现后再更新策略，目标无须依赖当前价值估计，却有很大方差。价值方法能用 Bellman bootstrap 快速传播信息，却只间接产生策略。Actor--Critic 同时维护两者：Actor 表示策略，Critic 估计当前策略下的价值并为 Actor 提供低方差方向。
 
@@ -60,7 +65,7 @@ Critic 希望评估当前策略，但 Actor 每次更新都改变当前策略及
 
 \subsection{离策略数据需要修正分布}
 
-前文“Off-policy 校正用权重交换分布偏差与方差”已经推导了轨迹权重、per-decision 权重和支持条件；这里仅说明它们怎样进入 Actor--Critic。若数据由行为策略 \(\mu\) 产生，却想优化 \(\pi_\theta\)，动作概率不再来自目标策略。重要性比率
+前文\hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/08]{``Off-policy 校正用权重交换分布偏差与方差''}已经推导了轨迹权重、per-decision 权重和支持条件；这里仅说明它们怎样进入 Actor--Critic。若数据由行为策略 \(\mu\) 产生，却想优化 \(\pi_\theta\)，动作概率不再来自目标策略。重要性比率
 
 \[
 \rho_t=

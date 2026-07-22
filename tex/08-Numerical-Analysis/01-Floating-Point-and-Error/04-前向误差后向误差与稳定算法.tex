@@ -1,4 +1,9 @@
 \section{前向误差、后向误差与稳定算法}
+\label{sec:08-Numerical-Analysis/01-Floating-Point-and-Error/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}除了问``答案离真值多远''，还可以问``这个答案是不是某个邻近输入的精确答案''。后一个问题常更容易验证，也更符合浮点计算的现实。但后向误差很小，遇上病态问题时仍可能产生很大的答案误差。
+\end{quote}
 
 \subsection{``答案错了多少''不是唯一的评价方式}
 
@@ -74,10 +79,10 @@ x_{1,2}=\frac{-b\pm\sqrt{b^2-4ac}}{2a}
 在 \(b^2\gg4ac\) 时，其中一个符号会让两个近似相等的大数相减，丢失有效位。可先稳定计算绝对值较大的根
 
 \[
-q=-\frac12\left(b+\operatorname{sign}(b)\sqrt{b^2-4ac}\right),
+q=-\frac12\left(b+\sign(b)\sqrt{b^2-4ac}\right),
 \]
 
-再用根的乘积求
+其中实现时应令 \(\sign(0)=1\)（或显式选择不会相消的分支），避免 \(b=0\) 时把 \(q\) 错算成零。再用根的乘积求
 
 \[
 x_1=\frac qa,\qquad x_2=\frac cq.
@@ -92,7 +97,7 @@ m\sqrt{(a/m)^2+(b/m)^2},
 \qquad m=\max(|a|,|b|),
 \]
 
-能控制中间尺度。高质量库函数 hypot 就体现了这种思想。
+能控制中间尺度；若 \(m=0\)，应直接返回零，避免出现 \(0/0\)。高质量库函数 hypot 就体现了这种思想。
 
 \subsection{稳定不等于收敛，也不等于没有误差}
 
@@ -117,7 +122,6 @@ m\sqrt{(a/m)^2+(b/m)^2},
 面对算法输出，可以按顺序问：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   问题采用什么输入与扰动模型，条件数多大？

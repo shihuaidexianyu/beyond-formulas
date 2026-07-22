@@ -1,4 +1,9 @@
 \section{随机向量与协方差矩阵}
+\label{sec:05-Probability/05-Joint-Distributions/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}协方差矩阵告诉我们，数据云沿哪个方向伸得长、沿哪个方向挤得窄。但它只记录线性和二阶波动。两个变量即使协方差为零，也可能有很强的非线性关系。
+\end{quote}
 
 单个变量的方差只说清它自己波动多大；要知道两项资产会不会一起跌、数据沿哪个方向变化最强，得把变量放在一起看。把多个随机变量收集成列向量
 
@@ -17,66 +22,68 @@ X_d
 \]
 而各方向的共同波动由协方差矩阵描述：
 
+以下讨论假设各分量具有有限二阶矩；否则某些均值、方差或协方差可能不存在，因而不能组成普通的有限协方差矩阵。
+
 \[
 \Sigma
-=\operatorname{Cov}(X)
-=\E[(X-\mu)(X-\mu)^\mathsf T].
+=\Cov(X)
+=\E[(X-\mu)(X-\mu)^{\trans}].
 \]
 \subsection{矩阵中的每个元素是什么}
 
-第 $(i,j)$ 个元素为
+第 \((i,j)\) 个元素为
 
 \[
 \Sigma_{ij}
-=\operatorname{Cov}(X_i,X_j).
+=\Cov(X_i,X_j).
 \]
 对角线是各分量方差，非对角线是成对协方差。因此
 
 \[
 \Sigma=
 \begin{bmatrix}
-\operatorname{Var}(X_1)&\operatorname{Cov}(X_1,X_2)&\cdots\\
-\operatorname{Cov}(X_2,X_1)&\operatorname{Var}(X_2)&\cdots\\
+\Var(X_1)&\Cov(X_1,X_2)&\cdots\\
+\Cov(X_2,X_1)&\Var(X_2)&\cdots\\
 \vdots&\vdots&\ddots
 \end{bmatrix}.
 \]
-协方差对称，所以 $\Sigma^\mathsf T=\Sigma$。
+协方差对称，所以 \(\Sigma^{\trans}=\Sigma\)。
 
-但不是任意对称矩阵都能作为协方差矩阵。对任意向量 $a$，线性组合 $a^\mathsf TX$ 的方差为
+但不是任意对称矩阵都能作为协方差矩阵。对任意向量 \(a\)，线性组合 \(a^{\trans}X\) 的方差为
 
 \[
-\operatorname{Var}(a^\mathsf TX)
-=\E\bigl[(a^\mathsf T(X-\mu))^2\bigr]
-=\E\bigl[a^\mathsf T(X-\mu)(X-\mu)^\mathsf Ta\bigr]
-=a^\mathsf T\Sigma a\ge0,
+\Var(a^{\trans}X)
+=\E\bigl[(a^{\trans}(X-\mu))^2\bigr]
+=\E\bigl[a^{\trans}(X-\mu)(X-\mu)^{\trans}a\bigr]
+=a^{\trans}\Sigma a\ge0,
 \]
-这里用到常数因子 $a$ 可以提出期望；方差恒非负，因此协方差矩阵必须半正定。
+这里用到常数因子 \(a\) 可以提出期望；方差恒非负，因此协方差矩阵必须半正定。
 
 \subsection{任意方向上的波动}
 
-向量 $a$ 选择了一个投影方向。标量
+向量 \(a\) 选择了一个投影方向。标量
 
 \[
-a^\mathsf TX
+a^{\trans}X
 \]
 是随机向量在该方向的线性组合，其方差
 
 \[
-a^\mathsf T\Sigma a
+a^{\trans}\Sigma a
 \]
 告诉我们分布沿该方向有多宽。
 
-$\Sigma$ 是实对称矩阵，必可作正交特征分解
+\(\Sigma\) 是实对称矩阵，必可作正交特征分解
 
 \[
-\Sigma=Q\Lambda Q^\mathsf T,
+\Sigma=Q\Lambda Q^{\trans},
 \]
 特征向量给出互相正交的主方向，特征值给出这些方向上的方差。二维 Gaussian 的等密度椭圆、PCA 的主成分以及误差椭球都来自这套几何。
 
-若某个特征值为零，说明存在非零方向 $a$ 使
+若某个特征值为零，说明存在非零方向 \(a\) 使
 
 \[
-a^\mathsf TX
+a^{\trans}X
 \]
 几乎必然为常数，分布被限制在低维仿射子空间中。
 
@@ -93,24 +100,24 @@ Y=AX+b.
 \E[Y]=A\mu+b,
 \]
 \[
-\operatorname{Cov}(Y)=A\Sigma A^\mathsf T.
+\Cov(Y)=A\Sigma A^{\trans}.
 \]
 第二条从
 
 \[
 Y-\E[Y]=A(X-\mu)
 \]
-直接推出。右侧必须是 $A\Sigma A^\mathsf T$，不能只在一边乘 $A$，否则维度和对称性都不对。
+直接推出。右侧必须是 \(A\Sigma A^{\trans}\)，不能只在一边乘 \(A\)，否则维度和对称性都不对。
 
-例如两个资产收益组成 $X$，投资权重为 $w$，组合收益为
+例如两个资产收益组成 \(X\)，投资权重为 \(w\)，组合收益为
 
 \[
-R=w^\mathsf TX.
+R=w^{\trans}X.
 \]
 组合方差是
 
 \[
-\operatorname{Var}(R)=w^\mathsf T\Sigma w.
+\Var(R)=w^{\trans}\Sigma w.
 \]
 分散化能否降低风险取决于非对角协方差，而不只是每项资产自己的波动。
 
@@ -121,20 +128,20 @@ R=w^\mathsf TX.
 \[
 Z_i=\frac{X_i-\mu_i}{\sigma_i}.
 \]
-变量之间仍可能相关。白化则寻找线性变换 $W$，使
+变量之间仍可能相关。白化则寻找线性变换 \(W\)，使
 
 \[
-\operatorname{Cov}(W(X-\mu))=I.
+\Cov(W(X-\mu))=I.
 \]
-若 $\Sigma$ 正定，可取
+若 \(\Sigma\) 正定，可取
 
 \[
 W=\Sigma^{-1/2}.
 \]
-白化消除二阶线性相关，却一般不制造独立；只有在联合 Gaussian 等特殊情形中，单位协方差的分量才同时独立。这与``随机变量的独立与依赖''一节的结论一致：协方差层面的条件远弱于独立。
+白化消除二阶线性相关，却一般不制造独立；若原向量联合 Gaussian，线性变换后的向量仍联合 Gaussian，此时单位协方差才进一步推出各分量独立。这与\hyperref[sec:05-Probability/05-Joint-Distributions/02]{``随机变量的独立与依赖''}一节的结论一致：协方差层面的条件远弱于独立。
 
 \subsection{协方差矩阵仍只是二阶摘要}
 
-两个多维分布可以拥有同样 $\mu,\Sigma$，形状却完全不同：一个椭圆单峰，另一个可能是多峰或环形。协方差矩阵适合描述线性尺度和方向，但不能替代联合分布。
+两个多维分布可以拥有同样 \(\mu,\Sigma\)，形状却完全不同：一个椭圆单峰，另一个可能是多峰或环形。协方差矩阵适合描述线性尺度和方向，但不能替代联合分布。
 
 下一节会研究一般非线性坐标变换。线性变换只需更新矩与协方差；要得到完整密度，则必须用 Jacobian 补偿局部体积变化。

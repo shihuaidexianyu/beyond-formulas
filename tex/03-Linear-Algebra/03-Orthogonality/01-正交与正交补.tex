@@ -1,49 +1,54 @@
 \section{正交与正交补：把空间分成互不干扰的方向}
+\label{sec:03-Linear-Algebra/03-Orthogonality/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}内积把线性空间升级成几何空间。正交补把``不能由某子空间解释的方向''组织成另一个子空间。
+\end{quote}
 
 向量空间告诉我们哪些对象可以相加、哪些集合对线性组合封闭，却还没有告诉我们向量有多长、两个方向有多接近。没有这些几何信息，我们知道一个向量可以由某组基表示，却不知道这种表示是否便于计算，也无法说一个近似``离目标有多远''。
 
 在 \(\R^n\) 中，几何从点积开始。对
 
 \[
-x=(x_1,\ldots,x_n)^{\mathsf T},\qquad
-y=(y_1,\ldots,y_n)^{\mathsf T},
+x=(x_1,\ldots,x_n)^{\trans},\qquad
+y=(y_1,\ldots,y_n)^{\trans},
 \]
 
 定义
 
 \[
-\langle x,y\rangle=x^{\mathsf T}y
+\langle x,y\rangle=x^{\trans}y
 =x_1y_1+\cdots+x_ny_n.
 \]
 
 这个数把两个向量的方向联系起来。取 \(x=y\)，就得到长度的平方：
 
 \[
-\|x\|_2^2=x^{\mathsf T}x,
+\|x\|_2^2=x^{\trans}x,
 \qquad
-\|x\|_2=\sqrt{x^{\mathsf T}x}.
+\|x\|_2=\sqrt{x^{\trans}x}.
 \]
 
 于是两个点之间的欧氏距离是 \(\|x-y\|_2\)。当 \(x,y\) 都非零时，夹角 \(\theta\) 由
 
 \[
-\cos\theta=\frac{x^{\mathsf T}y}{\|x\|_2\|y\|_2}
+\cos\theta=\frac{x^{\trans}y}{\|x\|_2\|y\|_2}
 \]
 
 确定。分母把长度影响去掉，剩下的只反映方向。这个表达式不会超出 \([-1,1]\)，背后是 Cauchy--Schwarz 不等式
 
 \[
-|x^{\mathsf T}y|\leq \|x\|_2\|y\|_2.
+|x^{\trans}y|\leq \|x\|_2\|y\|_2.
 \]
 
 这个不等式不需要单独承认。对任意实数 \(t\)，长度平方给出
 
 \[
 0\leq \|x-ty\|_2^2
-=\|x\|_2^2-2t\,x^{\mathsf T}y+t^2\|y\|_2^2.
+=\|x\|_2^2-2t\,x^{\trans}y+t^2\|y\|_2^2.
 \]
 
-右端是关于 \(t\) 的恒非负二次式，其判别式不能为正，即 \((x^{\mathsf T}y)^2\leq\|x\|_2^2\|y\|_2^2\)（\(y=0\) 时两端都是零，结论显然）。两边开方便得 Cauchy--Schwarz 不等式。
+右端是关于 \(t\) 的恒非负二次式，其判别式不能为正，即 \((x^{\trans}y)^2\leq\|x\|_2^2\|y\|_2^2\)（\(y=0\) 时两端都是零，结论显然）。两边开方便得 Cauchy--Schwarz 不等式。
 
 本单元主要使用欧氏点积。更一般的内积可以改变``长度''和``垂直''的含义，但只要满足线性、对称和正定等条件，下面的推理仍然保留相同结构。
 
@@ -60,15 +65,15 @@ y=(y_1,\ldots,y_n)^{\mathsf T},
 \[
 \begin{aligned}
 \|x+y\|_2^2
-&=(x+y)^{\mathsf T}(x+y)\\
-&=x^{\mathsf T}x+2x^{\mathsf T}y+y^{\mathsf T}y.
+&=(x+y)^{\trans}(x+y)\\
+&=x^{\trans}x+2x^{\trans}y+y^{\trans}y.
 \end{aligned}
 \]
 
-它与勾股关系相等，当且仅当中间项 \(2x^{\mathsf T}y\) 消失。因此我们把
+它与勾股关系相等，当且仅当中间项 \(2x^{\trans}y\) 消失。因此我们把
 
 \[
-x^{\mathsf T}y=0
+x^{\trans}y=0
 \]
 
 作为正交的代数判据，记作 \(x\perp y\)。它是``直角三角形中的长度平方可以相加''的代数版本，所以可以从几何上理解，无须孤立记忆。
@@ -81,7 +86,7 @@ x=\begin{pmatrix}1\\2\\2\end{pmatrix},
 y=\begin{pmatrix}2\\-1\\0\end{pmatrix}
 \]
 
-满足 \(x^{\mathsf T}y=2-2+0=0\)。因此
+满足 \(x^{\trans}y=2-2+0=0\)。因此
 
 \[
 \|x+y\|_2^2=\|x\|_2^2+\|y\|_2^2=9+5=14.
@@ -114,7 +119,7 @@ v=c_1q_1+\cdots+c_kq_k,
 直接与 \(q_j\) 做点积便得到
 
 \[
-c_j=q_j^{\mathsf T}v.
+c_j=q_j^{\trans}v.
 \]
 
 普通基中的坐标通常需要解一个方程组；正交归一基中的每个坐标只需一次点积。这正是后面要主动构造正交基的原因。
@@ -123,14 +128,14 @@ c_j=q_j^{\mathsf T}v.
 
 \subsection{从正交向量到正交子空间}
 
-设 \(S,T\subseteq\R^n\) 是两个子空间。若任意 \(s\in S\) 与任意 \(t\in T\) 都满足 \(s^{\mathsf T}t=0\)，我们称 \(S\) 与 \(T\) 正交。
+设 \(S,T\subseteq\R^n\) 是两个子空间。若任意 \(s\in S\) 与任意 \(t\in T\) 都满足 \(s^{\trans}t=0\)，我们称 \(S\) 与 \(T\) 正交。
 
 这里``任意''不能省略。两个平面相交成一条直线，并不意味着两个平面作为子空间彼此正交；只要能够在两个平面中找到一对点积非零的向量，定义就不成立。
 
 给定子空间 \(S\)，与其中所有向量都正交的向量组成另一个子空间：
 
 \[
-S^\perp=\{x\in\R^n:x^{\mathsf T}s=0
+S^\perp=\{x\in\R^n:x^{\trans}s=0
 \text{ 对所有 }s\in S\}.
 \]
 
@@ -140,7 +145,7 @@ S^\perp=\{x\in\R^n:x^{\mathsf T}s=0
 \R^n=S\oplus S^\perp.
 \]
 
-这条结论可以由已有工具推出，无需增加新假设。若 \(v\) 同时属于 \(S\) 与 \(S^\perp\)，那么 \(v^{\mathsf T}v=0\)，即 \(v=0\)：两个子空间只交于零向量。再取 \(S\) 的一组基作为行构成矩阵，\(S^\perp\) 正是该矩阵的零空间，由秩---零度定理，两者维数之和为 \(n\)。只交于零向量、维数又恰好补满 \(n\)，说明它们把 \(\R^n\) 完整地分成了两部分。
+这条结论可以由已有工具推出，无需增加新假设。若 \(v\) 同时属于 \(S\) 与 \(S^\perp\)，那么 \(v^{\trans}v=0\)，即 \(v=0\)：两个子空间只交于零向量。再取 \(S\) 的一组基作为行构成矩阵，\(S^\perp\) 正是该矩阵的零空间，由秩---零度定理，两者维数之和为 \(n\)。只交于零向量、维数又恰好补满 \(n\)，说明它们把 \(\R^n\) 完整地分成了两部分。
 
 因此每个 \(b\in\R^n\) 都能唯一写成
 
@@ -153,10 +158,10 @@ b=p+e,
 
 \subsection{矩阵的四个基本子空间为何成对正交}
 
-设 \(A\) 是 \(m\times n\) 实矩阵。若 \(x\in\mathcal N(A)\)，那么 \(Ax=0\)。把 \(A\) 的第 \(i\) 行记为 \(r_i^{\mathsf T}\)，方程 \(Ax=0\) 的第 \(i\) 个分量就是
+设 \(A\) 是 \(m\times n\) 实矩阵。若 \(x\in\mathcal N(A)\)，那么 \(Ax=0\)。把 \(A\) 的第 \(i\) 行记为 \(r_i^{\trans}\)，方程 \(Ax=0\) 的第 \(i\) 个分量就是
 
 \[
-r_i^{\mathsf T}x=0.
+r_i^{\trans}x=0.
 \]
 
 所以 \(x\) 与 \(A\) 的每一行都正交，自然也与这些行的任意线性组合正交。于是
@@ -165,10 +170,10 @@ r_i^{\mathsf T}x=0.
 \mathcal N(A)=\operatorname{Row}(A)^\perp.
 \]
 
-同样，把上述结论用于 \(A^{\mathsf T}\)，可得
+同样，把上述结论用于 \(A^{\trans}\)，可得
 
 \[
-\mathcal N(A^{\mathsf T})=\operatorname{Col}(A)^\perp.
+\mathcal N(A^{\trans})=\operatorname{Col}(A)^\perp.
 \]
 
 这两对关系把之前学习的四个基本子空间重新组织成两个完整分解：
@@ -178,7 +183,7 @@ r_i^{\mathsf T}x=0.
 \]
 
 \[
-\R^m=\operatorname{Col}(A)\oplus\mathcal N(A^{\mathsf T}).
+\R^m=\operatorname{Col}(A)\oplus\mathcal N(A^{\trans}).
 \]
 
 第一组发生在输入空间 \(\R^n\)，第二组发生在输出空间 \(\R^m\)。把两者混在一起，是初学时很常见的错误。
@@ -189,7 +194,7 @@ r_i^{\mathsf T}x=0.
 A=\begin{pmatrix}1&2&2\end{pmatrix}.
 \]
 
-它的行空间是直线 \(\operatorname{span}\{(1,2,2)^{\mathsf T}\}\)；零空间由
+它的行空间是直线 \(\operatorname{span}\{(1,2,2)^{\trans}\}\)；零空间由
 
 \[
 x_1+2x_2+2x_3=0
@@ -203,31 +208,25 @@ u=\begin{pmatrix}-2\\1\\0\end{pmatrix},
 v=\begin{pmatrix}-2\\0\\1\end{pmatrix},
 \]
 
-二者都在零空间中，并且都与 \((1,2,2)^{\mathsf T}\) 正交；本节开头验证过勾股关系的 \((2,-1,0)^{\mathsf T}\) 也躺在这个平面里。这个平面正好包含所有垂直于行向量的方向，而不只是其中几个碰巧垂直的向量。
+二者都在零空间中，并且都与 \((1,2,2)^{\trans}\) 正交；本节开头验证过勾股关系的 \((2,-1,0)^{\trans}\) 也躺在这个平面里。这个平面正好包含所有垂直于行向量的方向，而不只是其中几个碰巧垂直的向量。
 
 \subsection{把一个向量拆成沿线与垂直两部分}
 
-设 \(S=\operatorname{span}\{(1,1,0)^{\mathsf T}\}\subseteq\R^3\)。
+设 \(S=\operatorname{span}\{(1,1,0)^{\trans}\}\subseteq\R^3\)。
 
-若 \(x=(x_1,x_2,x_3)^{\mathsf T}\)，则 \(x\in S^\perp\) 当且仅当 \(x_1+x_2=0\)，所以 \(S^\perp\) 是二维平面。现在把 \(b=(2,0,1)^{\mathsf T}\) 写成 \(p+e\)，其中 \(p=t(1,1,0)^{\mathsf T}\in S\)。残差
+若 \(x=(x_1,x_2,x_3)^{\trans}\)，则 \(x\in S^\perp\) 当且仅当 \(x_1+x_2=0\)，所以 \(S^\perp\) 是二维平面。现在把 \(b=(2,0,1)^{\trans}\) 写成 \(p+e\)，其中 \(p=t(1,1,0)^{\trans}\in S\)。残差
 
 \[
-e=b-p=(2-t,-t,1)^{\mathsf T}
+e=b-p=(2-t,-t,1)^{\trans}
 \]
 
 要落在 \(S^\perp\)，必须满足 \((1,1,0)e=2-2t=0\)，因此 \(t=1\)。于是
 
 \[
-b=\underbrace{(1,1,0)^{\mathsf T}}_{p\in S}
-+\underbrace{(1,-1,1)^{\mathsf T}}_{e\in S^\perp}.
+b=\underbrace{(1,1,0)^{\trans}}_{p\in S}
++\underbrace{(1,-1,1)^{\trans}}_{e\in S^\perp}.
 \]
 
 这次可以直接解出分量；下一节的投影会把同一个动作推广成系统方法，并说明为何 \(p\) 还是 \(S\) 中离 \(b\) 最近的点。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06 Lecture 14：Orthogonal Vectors and Subspaces
-\end{itemize}
+延伸阅读：MIT 18.06 Lecture 14：Orthogonal Vectors and Subspaces。

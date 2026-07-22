@@ -1,4 +1,9 @@
 \section{Gaussian 与自适应求积}
+\label{sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}Gaussian 求积把采样点也当成设计变量，用很少的点精确处理尽可能高次的多项式。自适应求积则把更多采样留给困难区间。两者都很高效，却都可能漏掉节点没有碰到的尖峰或奇性。
+\end{quote}
 
 \subsection{节点也可以成为待优化变量}
 
@@ -15,11 +20,11 @@ Newton--Cotes 类规则（上一节的梯形法与 Simpson 法都属此类）先
 
 \subsection{为什么正交多项式的根如此有效}
 
-令 \(\pi_n\) 是关于权重 \(w\) 的 \(n\) 次正交多项式，并记 \(\mathbb P_k\) 为次数不超过 \(k\) 的多项式全体。任意 \(p\in\mathbb P_{2n-1}\) 可除以 \(\pi_n\) 写成
+令 \(\pi_n\) 是关于权重 \(w\) 的 \(n\) 次正交多项式，并记 \(P_k\) 为次数不超过 \(k\) 的多项式全体。任意 \(p\in P_{2n-1}\) 可除以 \(\pi_n\) 写成
 
 \[
 p=q\pi_n+r,
-\qquad q,r\in\mathbb P_{n-1}.
+\qquad q,r\in P_{n-1}.
 \]
 
 积分中 \(q\pi_n\) 因正交性为零；节点处 \(\pi_n(x_i)=0\)，求积和中这部分也为零。只需选择权重使规则对余式 \(r\) 精确，就能对整个 \(p\) 精确。

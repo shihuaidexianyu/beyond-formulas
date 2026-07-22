@@ -1,17 +1,21 @@
 \section{Poisson 过程与独立增量}
+\label{sec:06-Random-Processes/02-Counting-Processes/02}
 
-连续时间计数过程 $\{N(t):t\ge0\}$ 记录到时刻 $t$ 为止的事件总数。一个速率为 $\lambda>0$ 的齐次 Poisson 过程满足：
+\begin{quote}
+\textbf{先抓住这一点：}Poisson 过程的力量不只在 \(N(t)\) 服从 Poisson 分布，而在于局部稀疏到达与独立平稳增量共同生成整条计数路径。只检查单个窗口的直方图远远不够。
+\end{quote}
+
+连续时间计数过程 \(\{N(t):t\ge0\}\) 记录到时刻 \(t\) 为止的事件总数。一个速率为 \(\lambda>0\) 的齐次 Poisson 过程满足：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \item
-  $N(0)=0$；
+  \(N(0)=0\)；
 \item
   不重叠区间的增量独立；
 \item
   长度相同的区间具有相同增量分布；
 \item
-  长度 $h$ 的极短区间中
+  长度 \(h\) 的极短区间中
 
   \[
   P(N(h)=1)=\lambda h+o(h),
@@ -22,11 +26,11 @@
   \]
 \end{enumerate}
 
-其中 $o(h)$ 表示比 $h$ 更快趋于零的项（除以 $h$ 后极限为零）。局部速率与独立平稳增量共同决定全局计数分布。
+其中 \(o(h)\) 表示比 \(h\) 更快趋于零的项（除以 \(h\) 后极限为零）。局部速率与独立平稳增量共同决定全局计数分布。
 
 \subsection{为什么增量是 Poisson}
 
-把长度 $t$ 的区间分成 $n$ 个小段，每段长度 $t/n$。每段发生一次事件的概率约为
+把长度 \(t\) 的区间分成 \(n\) 个小段，每段长度 \(t/n\)。每段发生一次事件的概率约为
 
 \[
 \lambda\frac{t}{n},
@@ -37,7 +41,7 @@
 \mathrm{Binomial}
 \left(n,\lambda\frac{t}{n}\right).
 \]
-这一步是取到首项的近似：``每段至多一次''只忽略 $o(h)$ 阶的可能，小段独立来自独立增量假设，误差在 $n\to\infty$ 时消失。固定 $k$，
+这一步是取到首项的近似：``每段至多一次''只忽略 \(o(h)\) 阶的可能，小段独立来自独立增量假设，误差在 \(n\to\infty\) 时消失。固定 \(k\)，
 
 \[
 \binom{n}{k}\left(\lambda\frac{t}{n}\right)^k
@@ -46,7 +50,7 @@
 \left(1-\lambda\frac{t}{n}\right)^{n-k}
 \to e^{-\lambda t},
 \]
-两式相乘，令 $n\to\infty$ 得到
+两式相乘，令 \(n\to\infty\) 得到
 
 \[
 P(N(t)=k)
@@ -79,7 +83,7 @@ P(N(h)\ge2)=o(h)
 
 \subsection{叠加：独立流的速率相加}
 
-若 $N_1,N_2$ 是独立 Poisson 过程，速率分别为 $\lambda_1,\lambda_2$，则
+若 \(N_1,N_2\) 是独立 Poisson 过程，速率分别为 \(\lambda_1,\lambda_2\)，则
 
 \[
 N(t)=N_1(t)+N_2(t)
@@ -95,26 +99,26 @@ N(t)=N_1(t)+N_2(t)
 
 \subsection{稀疏化：随机保留仍为 Poisson}
 
-对速率 $\lambda$ 的 Poisson 流，每个到达独立以概率 $p$ 标为 A，否则标为 B。则 A 流与 B 流分别是速率
+对速率 \(\lambda\) 的 Poisson 流，每个到达独立以概率 \(p\) 标为 A，否则标为 B。则 A 流与 B 流分别是速率
 
 \[
 p\lambda,\qquad(1-p)\lambda
 \]
 的独立 Poisson 过程。
 
-固定 $t$ 条件于总数 $N(t)=n$，A 事件数服从 $\mathrm{Binomial}(n,p)$；对总数再边缘化便得到 Poisson。写出联合概率可以看到结论为何更强：
+固定 \(t\) 条件于总数 \(N(t)=n\)，A 事件数服从 \(\mathrm{Binomial}(n,p)\)；对总数再边缘化便得到 Poisson。写出联合概率可以看到结论为何更强：
 
 \[
 P(N_A(t)=k,N_B(t)=m)
 =P(N(t)=k+m)\binom{k+m}{k}p^k(1-p)^m,
 \]
-右端的 Poisson 质量函数与二项系数相乘后，恰好分解为速率 $p\lambda$ 与 $(1-p)\lambda$ 的两个 Poisson 质量函数之积。这同时给出两个边缘分布和固定 $t$ 处的独立性；再结合增量独立，两个流作为过程独立。因此两类流不仅计数边缘为 Poisson，而且彼此独立——这才是该结论真正惊人的部分。
+右端的 Poisson 质量函数与二项系数相乘后，恰好分解为速率 \(p\lambda\) 与 \((1-p)\lambda\) 的两个 Poisson 质量函数之积。这同时给出两个边缘分布和固定 \(t\) 处的独立性；再结合增量独立，两个流作为过程独立。因此两类流不仅计数边缘为 Poisson，而且彼此独立——这才是该结论真正惊人的部分。
 
 该性质用于呼叫路由、粒子检测和网络流分类。若标记概率依赖历史或到达时刻，两类流的简单独立结论可能失效。
 
 \subsection{非齐次 Poisson 过程}
 
-若速率随时间变化为 $\lambda(t)$，定义累计强度
+若确定性速率随时间变化为 \(\lambda(t)\ge0\)，并且它局部可积，定义累计强度
 
 \[
 \Lambda(t)=\int_0^t\lambda(u)\,du.
@@ -126,7 +130,7 @@ N(t)-N(s)
 \sim\mathrm{Poisson}
 \left(\int_s^t\lambda(u)\,du\right).
 \]
-它可描述昼夜周期，但仍不能处理事件聚集或自抑制。Poisson 假设的核心是条件于强度后独立增量。
+它可描述昼夜周期，但仍不能处理由历史事件触发的聚集或自抑制。这里的 \(\lambda(t)\) 是预先给定的确定性函数，因此不相交区间仍有独立增量；若强度本身随机或依赖事件历史，通常就进入 Cox 过程或点过程条件强度模型，不能直接沿用上述独立增量结论。
 
 \subsection{如何检查 Poisson 模型}
 

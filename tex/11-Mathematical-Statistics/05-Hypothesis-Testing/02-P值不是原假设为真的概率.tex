@@ -1,9 +1,14 @@
 \section{\texorpdfstring{\(p\) 值不是原假设为真的概率}{p 值不是原假设为真的概率}}
+\label{sec:11-Mathematical-Statistics/05-Hypothesis-Testing/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}P 值假定原假设成立，再问出现当前或更极端数据的概率有多大。它不是原假设为真的概率，也不直接表示效应大小、结果重要性或研究可重复性。
+\end{quote}
 
 选定检验统计量 \(T(X)\)，且越大的 \(T\) 越不利于 \(H_0\)。观察到 \(t_{\mathrm{obs}}\) 后，简单原假设下的 \(p\) 值定义为
 
 \[
-p = \Pr_{H_0}
+p = P_{H_0}
 (T(X)\ge t_{\mathrm{obs}}).
 \]
 它问的是：
@@ -26,7 +31,7 @@ H_0:\theta\in\Theta_0
 
 \[
 p = \sup_{\theta\in\Theta_0}
-\Pr_\theta
+P_\theta
 (T(X)\ge t_{\mathrm{obs}}).
 \]
 这样保证对所有原假设参数都控制第一类错误。用某个方便参数代替最不利值，可能使 \(p\) 值反保守。
@@ -66,7 +71,7 @@ p = \sup_{\theta\in\Theta_0}
 由于标准正态分布对称，此处双侧 \(p\) 值恰为单侧尾概率的两倍：
 
 \[
-p = 2\Pr(Z\ge2)
+p = 2P(Z\ge2)
 \approx0.0455.
 \]
 在预先固定的 level 0.05 检验中会拒绝，在 level 0.01 中不会。\(p\) 值可以理解为``使当前结果刚好进入拒绝域的最小常用显著性水平''，但它不是一个研究结论的连续可信度刻度。
@@ -79,7 +84,7 @@ p = 2\Pr(Z\ge2)
 
 合法的 sequential test、alpha spending、always-valid \(p\) value 或 e-value 可以允许中途查看，但必须从设计阶段采用相应理论。不能事后把固定样本检验当成序贯检验。
 
-同样，先尝试多种排除规则、协变量、终点和模型，再只报告最小 \(p\) 值，也相当于隐形多重比较，其计量与校正见``多重比较改变错误的计量单位''一节。
+同样，先尝试多种排除规则、协变量、终点和模型，再只报告最小 \(p\) 值，也相当于隐形多重比较，其计量与校正见\hyperref[sec:11-Mathematical-Statistics/05-Hypothesis-Testing/04]{``多重比较改变错误的计量单位''}一节。
 
 \subsection{\texorpdfstring{\(p\) 值与置信区间的联系}{p 值与置信区间的联系}}
 
@@ -93,4 +98,3 @@ H_0:\theta=\theta_0
 \]
 
 区间还能显示效应大小与精度，因此比一个阈值化 \(p\) 值提供更多信息。不过若区间方法与检验方法不同，例如一个用 Wald、另一个用 likelihood ratio，数值上可能不完全对应。
-

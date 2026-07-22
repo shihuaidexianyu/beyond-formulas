@@ -1,7 +1,6 @@
 一个正方形旋转四分之一圈后，看起来仍是同一个正方形；但连续旋转两次、把旋转撤销、先翻折再旋转，都产生新的操作关系。若只把对称性当成一组图片，就看不见这些操作怎样组合。群把注意力从``对象长什么样''转到``保持结构的操作怎样复合''。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   对称操作引出群：从正方形的旋转与翻折逼出封闭性、结合律、单位元与逆元，比较循环群、置换群和矩阵群，并用非交换性说明操作顺序为何属于结构本身。
@@ -9,6 +8,38 @@
   子群、陪集与群作用：从一部分仍能自洽复合的操作得到子群，由陪集划分推出 Lagrange 定理，再让抽象群作用到具体对象上，用轨道、稳定子与不变函数表达``忽略对称差异''。
 \item
   Burnside 与 Pólya 计数：把群作用中的轨道真正用于去重，先平均每个对称操作固定的对象数，再用循环指标同时处理多种颜色。
+\item
+  不变函数与等变映射：把``对称版本应视作同类''翻译成函数约束，并看卷积、置换不变模型与几何深度学习怎样利用这些约束。
 \end{enumerate}
 
-本单元只建立有限群与群作用的第一层语言，并把它落实到对称去重。它不展开群分类、表示论或 Galois 理论；目标是让读者遇到不变性时，能先识别操作、复合与轨道，而不是把对称性理解成一张静止图案。
+本单元只建立有限群与群作用的第一层语言，并把它落实到对称去重与等变计算。最后一篇会使用群的矩阵表示来写等变条件，但不系统展开表示论、群分类或 Galois 理论；目标是让读者遇到不变性时，能先识别操作、复合与轨道，而不是把对称性理解成一张静止图案。
+
+\subsection{怎么读这一章}
+
+可以按自己想回答的问题选择入口：
+
+\begin{itemize}
+\tightlist
+\item
+  若第一次接触群，读\hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/01]{``对称操作引出群''}，只需先抓住``可逆操作在复合下封闭''；四条公理是在保证操作可以稳定组合，而不是一份待背清单。
+\item
+  若关心对象怎样按对称性分组，读\hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/02]{``子群、陪集与群作用''}；重点区分群本身、群所作用的集合、轨道与稳定子。
+\item
+  若问题是``旋转或翻折后相同的图案有多少种''，直接读\hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/03]{``Burnside 与 Pólya：从轨道数到着色计数''}，并按需回看\hyperref[ch:027]{``组合计数：先描述对象怎样生成，再决定怎样数''}。
+\item
+  若从卷积网络、点云或分子模型进入，读\hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/04]{``不变函数与等变映射：对称性怎样进入计算''}；先问输出应当保持不变还是随输入一起变化。
+\end{itemize}
+
+第一次阅读可以在能回答三件事时停下：允许哪些操作？它们作用在什么对象上？任务要保留轨道内的位置差异，还是主动忽略它？
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/01]{``对称操作引出群''}；
+\item \hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/02]{``子群、陪集与群作用''}；
+\item \hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/03]{``Burnside 与 Pólya：从轨道数到着色计数''}；
+\item \hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/04]{``不变函数与等变映射：对称性怎样进入计算''}。
+\end{itemize}

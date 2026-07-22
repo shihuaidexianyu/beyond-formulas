@@ -1,4 +1,9 @@
 \section{线性方程为何分解而不求逆}
+\label{sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}公式写成 \(x=A^{-1}b\)，不代表程序应该先把整个逆矩阵算出来。把 \(A\) 分解后做两次三角求解，通常更省也更稳。但矩阵本身若接近奇异，再好的算法也会受限于输入精度。
+\end{quote}
 
 \subsection{\texorpdfstring{公式 \(x=A^{-1}b\) 隐藏了真正的计算任务}{公式 x=A\^{}\{-1\}b 隐藏了真正的计算任务}}
 
@@ -100,7 +105,7 @@ x-\hat x=A^{-1}r.
 \item
   长方形最小二乘：QR 比正规方程更稳定；
 \item
-  对称不定：使用保持对称结构的带主元 \(LDL^T\)；
+  对称不定：使用保持对称结构的带主元 \(LDL^{\trans}\)；
 \item
   带状、稀疏或块结构：选择对应专用分解；
 \item

@@ -3,3 +3,18 @@
 本单元将沿三条数学线索展开：决策树用不纯度下降选择分裂，并通过叶节点样本量与剪枝控制方差；Bagging 和随机森林利用重抽样与去相关降低不稳定学习器的方差；Boosting 把函数估计写成逐步加法优化；KNN 则直接用度量定义局部性，并暴露尺度选择和维数灾难。
 
 这些方法不以可微目标为共同核心。理解重点应放在分区几何、条件均值估计、偏差---方差、重抽样和高维距离集中，而不是把每一种算法硬改写成梯度下降。
+
+\subsection{怎么读这一章}
+
+快速阅读时，为三篇各保留一个判断：树的每次分裂是局部贪心选择，集成是通过平均或逐步加法改变误差结构，KNN 则把度量与局部样本量直接变成模型假设。首次阅读不必记住所有不纯度或 boosting 变体；应优先能解释为什么树深、基学习器相关或距离集中会让方法失效。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/03-Trees-Ensembles-and-Neighbors/01]{``决策树把预测写成递归分区''}；
+\item \hyperref[sec:13-Machine-Learning/03-Trees-Ensembles-and-Neighbors/02]{``集成用平均与逐步加法改变误差''}；
+\item \hyperref[sec:13-Machine-Learning/03-Trees-Ensembles-and-Neighbors/03]{``KNN 把度量直接变成归纳偏置''}。
+\end{itemize}

@@ -1,6 +1,11 @@
 \section{最大熵从约束中选择最少承诺的分布}
+\label{sec:13-Machine-Learning/11-Information-Theoretic-Learning/02}
 
 假设我们只知道一个离散变量的若干统计事实，例如骰子点数 \(X\in\{1,\ldots,6\}\) 的长期均值为 \(c\)。无数分布都可能满足这一条件。若没有其他证据，应该怎样选择？
+
+\begin{quote}
+\textbf{先抓住这一点：}最大熵不是断言现实“最随机”，而是在明确的支持、基准测度和约束集合内拒绝添加额外结构。约束一变，最大熵分布就会变。约束来自有限样本时，把估计值写成精确等式本身也是建模选择。
+\end{quote}
 
 最大熵原则会在所有满足已知约束的分布中，选择不额外集中概率的一个；它没有声称世界本身``最随机''：
 
@@ -26,48 +31,48 @@ p(x)\ge0.
 
 \[
 -(\log p(x)+1)
-+\lambda^\top f(x)+\alpha=0.
++\lambda^{\trans} f(x)+\alpha=0.
 \]
 
 整理并归一化：
 
 \[
 p_\lambda(x)
-=\exp\{\lambda^\top f(x)-A(\lambda)\},
+=\exp\{\lambda^{\trans} f(x)-A(\lambda)\},
 \]
 
 其中
 
 \[
 A(\lambda)
-=\log\sum_xe^{\lambda^\top f(x)}
+=\log\sum_xe^{\lambda^{\trans} f(x)}
 \]
 
 是 log-partition function。直接对 \(\lambda_j\) 求导：
 
 \[
 \frac{\partial A}{\partial\lambda_j}
-=\frac{\sum_xf_j(x)e^{\lambda^\top f(x)}}{\sum_xe^{\lambda^\top f(x)}}
-=\mathbb E_{p_\lambda}[f_j(X)];
+=\frac{\sum_xf_j(x)e^{\lambda^{\trans} f(x)}}{\sum_xe^{\lambda^{\trans} f(x)}}
+=\E_{p_\lambda}[f_j(X)];
 \]
 
 再求一次导数，得到 \(f(X)\) 在 \(p_\lambda\) 下的协方差矩阵。所以 \(A\) 不只负责让概率和为 1，还生成 moments：
 
 \[
 \nabla A(\lambda)
-=\mathbb E_{p_\lambda}[f(X)],
+=\E_{p_\lambda}[f(X)],
 \]
 
 \[
 \nabla^2A(\lambda)
-=\operatorname{Cov}_{p_\lambda}(f(X))
+=\Cov_{p_\lambda}(f(X))
 \succeq0.
 \]
 
 因此对偶问题
 
 \[
-\min_\lambda A(\lambda)-\lambda^\top c
+\min_\lambda A(\lambda)-\lambda^{\trans} c
 \]
 
 是凸的；其梯度正是模型 moment 与目标 moment 的差。
@@ -84,7 +89,7 @@ p_\lambda(x)\propto e^{\lambda x}.
 
 在有限离散空间，entropy 有清楚含义。连续情形使用 differential entropy，它会随坐标变换改变，甚至可为负；必须明确相对于什么基准测度和支持讨论。只固定实数变量的均值与方差时，Gaussian 最大化 differential entropy，但若再加入非负支持，答案会改变。
 
-若约束不可行，当然没有解；若目标 moment 落在可行 moment 集边界，最优分布可能把某些点概率置零，前面的内部求导需要修改；若连续空间中的 partition function 发散，形式上的 \(e^{\lambda^\top f(x)}\) 也不能定义概率分布。
+若约束不可行，当然没有解；若目标 moment 落在可行 moment 集边界，最优分布可能把某些点概率置零，前面的内部求导需要修改；若连续空间中的 partition function 发散，形式上的 \(e^{\lambda^{\trans} f(x)}\) 也不能定义概率分布。
 
 特征约束冗余时，\(\lambda\) 可能不唯一，但诱导的分布仍可唯一。参数可识别性与分布可识别性应分开。数值实现要用稳定 log-sum-exp 计算 \(A(\lambda)\)（与上一节 softmax 损失中减最大值的技巧同理），并检查概率归一、moment residual、Hessian 半正定性和 primal-dual gap。
 
@@ -94,11 +99,11 @@ p_\lambda(x)\propto e^{\lambda x}.
 
 \[
 p_\lambda(y\mid x)
-\propto\exp\{\lambda^\top f(x,y)\}.
+\propto\exp\{\lambda^{\trans} f(x,y)\}.
 \]
 
 二分类 Logistic 回归与多分类 softmax 都可放在这一族中——上一节用 cross-entropy 训练的 softmax 分类器，其形式正来自这里。线性 logits 是线性 moment 约束下最大条件熵的自然形式，选择它有明确的建模来源。
 
-\subsubsection{从约束看模型，而不是从名字看模型}
+\subsection{约束怎样改变答案}
 
-在六点支持上分别只约束均值、约束均值与二阶矩，数值求解最大熵分布。比较增加约束前后 entropy 与分布形状，并检查每个 moment 是否匹配。再故意指定一个超出可能范围的均值，观察对偶优化器的行为，解释为什么数值不收敛可能是在揭示约束不可行。
+在六点支持上，只约束均值时，答案属于 \(p(x)\propto e^{\lambda_1x}\)；再约束二阶矩后，答案扩展为 \(p(x)\propto e^{\lambda_1x+\lambda_2x^2}\)。新增约束通常降低可达到的最大 entropy，并改变分布形状。若指定超出 \([1,6]\) 的均值，可行集为空；此时对偶优化不收敛可能是在揭示约束矛盾，而不只是优化器需要换参数。

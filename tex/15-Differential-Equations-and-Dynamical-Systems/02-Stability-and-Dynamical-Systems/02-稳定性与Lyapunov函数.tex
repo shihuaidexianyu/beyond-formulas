@@ -1,4 +1,9 @@
 \section{稳定性与 Lyapunov 函数}
+\label{sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}Lyapunov 函数是一张无需解出轨迹的稳定性证书。证书覆盖多大区域、导数是非正还是严格负，决定结论究竟有多强。
+\end{quote}
 
 \subsection{线性化沉默的地方}
 
@@ -89,7 +94,7 @@ E(\theta,\omega)=\frac12\omega^2+(1-\cos\theta)
 
 且严格下降，除非到达驻点。目标函数 \(f\) 本身就是 Lyapunov 函数：运动方向与最速下降方向重合，系统只能一路下坡。若 \(f\) 在极小点 \(u^\ast\) 附近严格凸，则 \(u^\ast\) 是渐近稳定不动点。
 
-这把优化算法与动力系统接成一件事：``梯度下降真正难在步长''一节中的迭代
+这把优化算法与动力系统接成一件事：\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/01]{``梯度下降真正难在步长''}一节中的迭代
 
 \[
 u_{k+1}=u_k-\alpha\nabla f(u_k)
@@ -115,4 +120,3 @@ u_{k+1}=u_k-\alpha\nabla f(u_k)
 \subsection{这门手艺的真实边界}
 
 Lyapunov 直接法没有通用构造法。能量类系统有机械能，梯度流有目标函数，其余系统靠物理直觉、守恒量改造、或已知例子的拼装。定理是单向的：找到 \(V\) 则稳定成立；找不到时什么都断言不了——既可能是没找到，也可能是真不稳定。此外，本节的结论都是局部的；要断言全局渐近稳定，还需 \(V\) 的等高线在所有方向上封住（径向无界性）等额外条件。承认``找 Lyapunov 函数是一门手艺''，是使用它的前提。
-

@@ -1,7 +1,6 @@
 逻辑公式可以判断一组条件是否成立，却还留下两个计算问题。第一，同一个真假函数能写成许多公式，怎样确认两个表达式等价、怎样删掉不必要的条件？第二，当输入以符号流的方式逐个到来时，系统要记住多少历史才能判断整串是否合法？
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   布尔代数与逻辑化简：把命题真值视为 \(0,1\) 上的代数，先由集合与开关直觉理解运算律，再用 DNF/CNF、吸收律和 De Morgan 律化简逻辑与电路，并说明真值表穷举的指数边界。
@@ -10,3 +9,31 @@
 \end{enumerate}
 
 布尔代数处理``同一时刻多个条件怎样组合''，自动机处理``信息沿序列到来时怎样更新有限状态''。二者在数字电路中分别对应组合逻辑与时序逻辑；本单元只建立离散数学骨架，不展开硬件时序、编译器实现或完整形式语言层级。
+
+\subsection{怎么读这一章}
+
+这个单元只有两篇，可以顺读，也可以按问题直接进入：
+
+\begin{itemize}
+\tightlist
+\item
+  若问题是``两个条件表达式是否始终等价''或``怎样减少逻辑门''，读\hyperref[sec:04-Discrete-Mathematics/07-Boolean-Algebra-and-Automata/01]{``布尔代数与逻辑化简''}；若对命题、连接词与真值表尚不熟悉，可先回看\hyperref[ch:005]{``逻辑：把含混判断变成可检验命题''}。
+\item
+  若输入逐个到达，问题变成``过去需要保留多少信息''，直接读\hyperref[sec:04-Discrete-Mathematics/07-Boolean-Algebra-and-Automata/02]{``有限自动机识别正则语言''}；把每个状态理解成对已读前缀的充分摘要，而不是流程图上的任意圆圈。
+\item
+  若从电路进入，先区分组合逻辑与时序逻辑：前者输出只依赖当前输入，后者必须有状态。本章解释抽象结构，不处理门延迟、时钟与竞争冒险。
+\item
+  若从正则表达式进入，先区分语言类别与执行引擎：语言可由有限自动机识别，不代表某个回溯实现不会指数变慢。
+\end{itemize}
+
+第一次阅读可以在能回答两个问题时停下：当前计算是否需要记忆历史？若需要，哪些前缀对所有未来后缀都可以视为等价？
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/07-Boolean-Algebra-and-Automata/01]{``布尔代数与逻辑化简''}；
+\item \hyperref[sec:04-Discrete-Mathematics/07-Boolean-Algebra-and-Automata/02]{``有限自动机识别正则语言''}。
+\end{itemize}

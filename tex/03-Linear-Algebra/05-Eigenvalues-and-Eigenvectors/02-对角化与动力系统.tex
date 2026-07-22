@@ -1,4 +1,9 @@
 \section{对角化与动力系统：把耦合演化变成独立缩放}
+\label{sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}对角化就是找到一组完整的不变方向，把耦合演化拆成独立标量演化。能否做到取决于是否有足够多线性无关的特征向量。
+\end{quote}
 
 找到一个特征向量，只能简化一个方向。若 \(n\times n\) 矩阵 \(A\) 拥有 \(n\) 个线性无关特征向量 \(v_1,\ldots,v_n\)，它们构成整个空间的一组基，任意状态都能分解到这些独立模式上。
 
@@ -11,7 +16,7 @@ S=\begin{pmatrix}v_1&\cdots&v_n\end{pmatrix},
 把特征值放在对角线上：
 
 \[
-\Lambda=\operatorname{diag}(\lambda_1,\ldots,\lambda_n).
+\Lambda=\diag(\lambda_1,\ldots,\lambda_n).
 \]
 
 各列满足 \(Av_i=\lambda_i v_i\)，合在一起就是
@@ -46,7 +51,7 @@ A^k
 
 \[
 \Lambda^k
-=\operatorname{diag}(\lambda_1^k,\ldots,\lambda_n^k).
+=\diag(\lambda_1^k,\ldots,\lambda_n^k).
 \]
 
 矩阵指数由幂级数定义：
@@ -65,7 +70,7 @@ e^{At}=Se^{\Lambda t}S^{-1},
 
 \[
 e^{\Lambda t}
-=\operatorname{diag}(e^{\lambda_1t},\ldots,e^{\lambda_nt}).
+=\diag(e^{\lambda_1t},\ldots,e^{\lambda_nt}).
 \]
 
 特征值因此直接控制重复作用和连续时间演化的增长速度。
@@ -107,7 +112,7 @@ x_k=A^kx_0
 =\frac12 3^k v_1+\frac12 1^k v_2.
 \]
 
-当 \(k\) 很大时，第一项占主导，状态越来越接近 \((1,1)^{\mathsf T}\) 的方向。我们无需逐次相乘，就能看见长期行为。
+当 \(k\) 很大时，第一项占主导，状态越来越接近 \((1,1)^{\trans}\) 的方向。我们无需逐次相乘，就能看见长期行为。
 
 \subsection{离散动力系统}
 
@@ -242,17 +247,11 @@ A=S\Lambda S^{-1}.
 有时这也被宽泛地称为 eigendecomposition。若 \(A\) 是实对称矩阵，会得到更强的形式
 
 \[
-A=Q\Lambda Q^{\mathsf T},
+A=Q\Lambda Q^{\trans},
 \]
 
 其中 \(Q\) 正交。后者通常称为谱定理或正交谱分解，具有更好的几何和数值性质。
 
-不能把一般的 \(S^{-1}\) 随意替换成 \(S^{\mathsf T}\)。只有特征向量能够选成正交归一组时才成立，下一单元将专门解释为什么对称矩阵拥有这一优势。
+不能把一般的 \(S^{-1}\) 随意替换成 \(S^{\trans}\)。只有特征向量能够选成正交归一组时才成立，下一单元将专门解释为什么对称矩阵拥有这一优势。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06：Diagonalization and Powers of \(A\)
-\end{itemize}
+延伸阅读：MIT 18.06：Diagonalization and Powers of \(A\)。

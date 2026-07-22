@@ -1,4 +1,9 @@
 \section{置信度属于程序，而非这次参数}
+\label{sec:11-Mathematical-Statistics/04-Interval-Estimation/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}参数固定后，这一次算出的频率置信区间要么覆盖它，要么没有覆盖。所谓百分之九十五，指同一程序在重复抽样中约有百分之九十五的区间覆盖真值。
+\end{quote}
 
 频率学派置信区间是一个由随机样本生成随机集合的程序：
 
@@ -9,7 +14,7 @@ C(X)=[L(X),U(X)].
 若对每个参数值 \(\theta\)，
 
 \[
-\Pr_\theta\{\theta\in C(X)\}
+P_\theta\{\theta\in C(X)\}
 \ge1-\alpha,
 \]
 
@@ -113,4 +118,3 @@ z_{1-\alpha/2}
 \end{itemize}
 
 这些问题都发生在``这次区间是多少''之前。
-

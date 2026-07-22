@@ -1,4 +1,9 @@
 \section{抽样分布连接数据与推断}
+\label{sec:11-Mathematical-Statistics/01-Statistical-Models/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}同一个统计量换一批样本就会得到不同数值。它在重复抽样中的分布告诉我们典型误差有多大，也是标准误、置信区间和检验阈值的共同来源。
+\end{quote}
 
 继续上一节的合格率例子：观测到样本均值 \(0.92\) 后，我们还不知道它离真实合格率有多远。要回答这个问题，需要想象在同一个参数 \(\theta\) 下反复抽取大小为 \(n\) 的样本，观察估计量怎样变化。估计量在这种重复抽样下的概率分布称为抽样分布。
 
@@ -25,19 +30,19 @@ S=\sum_iX_i\sim\operatorname{Binomial}(n,\theta),
 \hat\theta=\bar X=\frac Sn.
 \]
 
-由二项分布的均值与方差 \(\mathbb E_\theta[S]=n\theta\)、\(\operatorname{Var}_\theta(S)=n\theta(1-\theta)\)，分别除以 \(n\) 与 \(n^2\)，得
+由二项分布的均值与方差 \(\E_\theta[S]=n\theta\)、\(\Var_\theta(S)=n\theta(1-\theta)\)，分别除以 \(n\) 与 \(n^2\)，得
 
 \[
-\mathbb E_\theta[\hat\theta]=\theta,
+\E_\theta[\hat\theta]=\theta,
 \]
 
 \[
-\operatorname{Var}_\theta(\hat\theta) = \frac{\theta(1-\theta)}n.
+\Var_\theta(\hat\theta) = \frac{\theta(1-\theta)}n.
 \]
 下标 \(\theta\) 提醒我们：抽样分布是一族随未知参数变化的分布。标准差
 
 \[
-\operatorname{SE}_\theta(\hat\theta) = \sqrt{\frac{\theta(1-\theta)}n}
+\SE_\theta(\hat\theta) = \sqrt{\frac{\theta(1-\theta)}n}
 \]
 称为估计量的标准误。由于 \(\theta\) 未知，实践中常代入 \(\hat\theta\) 得到估计标准误；这又引入了近似。
 
@@ -107,4 +112,3 @@ N(0,1).
 \end{itemize}
 
 没有一种视角在所有任务中自动正确。实验设计固定剂量时，条件分析自然；希望推广到新用户特征分布时，无条件变化也可能重要。
-

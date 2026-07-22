@@ -1,6 +1,11 @@
 \section{DQN 用慢目标与回放缓和训练耦合}
+\label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/07}
 
-Deep Q Network 用神经网络表示动作价值。离散动作下，网络通常输入状态 \(s\)，一次输出所有 \(Q(s,a;\theta)\)。对经验
+\begin{quote}
+\textbf{先抓住这一点：}经验回放减弱样本相关性，目标网络减慢标签漂移。它们是针对训练耦合的工程稳定器，不是一般收敛定理。
+\end{quote}
+
+Deep Q Network 用神经网络表示动作价值。离散动作下，网络通常输入状态 \(s\)，一次输出所有 \(Q(s,a;\theta)\)。先完整写出它的训练目标。这个写法明确暴露三种耦合：数据由变化中的行为策略产生，监督目标来自另一个价值网络，当前参数又同时决定未来行为。对经验
 
 \[
 e_t=(S_t,A_t,R_{t+1},S_{t+1},D_{t+1}),
@@ -27,7 +32,7 @@ Y(e;\theta^-)-Q(S,A;\theta)
 \right].
 \]
 
-\(\mathcal B\) 是 replay buffer 的采样分布，\(\theta^-\) 是 target network 参数。这个写法已明确暴露三种耦合：数据由变化中的行为策略产生，监督目标来自另一个价值网络，当前参数又同时决定未来行为。
+\(\mathcal B\) 是 replay buffer 的采样分布，\(\theta^-\) 是 target network 参数。
 
 \subsection{经验回放改变相关性，也改变了学习分布}
 
@@ -42,7 +47,7 @@ Y(e;\theta^-)-Q(S,A;\theta)
 
 第三点同时也是风险。缓冲区混合了许多旧策略，DQN 因此天然是 off-policy；容量太小会迅速遗忘稀有经验，容量太大又可能让大量过时数据拖慢适应。均匀回放没有恢复 iid 数据，也没有保证覆盖目标策略需要的状态动作，只是减弱局部时间相关。
 
-Prioritized replay 更常抽取绝对 TD error 大的经验，能集中计算在当前“惊讶”样本上，却改变了经验分布。若希望校正这项偏差，需要使用基于采样概率的 importance weight；实际中常把校正指数逐步调大，以偏差换早期效率。大 TD error 还可能来自噪声、异常值或错误奖励，并不总是更有学习价值。
+Prioritized replay 更常抽取绝对 TD error 大的经验，能集中计算在当前``惊讶''样本上，却改变了经验分布。若希望校正这项偏差，需要使用基于采样概率的 importance weight；实际中常把校正指数逐步调大，以偏差换早期效率。大 TD error 还可能来自噪声、异常值或错误奖励，并不总是更有学习价值。
 
 \subsection{目标网络把追逐自己的速度降下来}
 

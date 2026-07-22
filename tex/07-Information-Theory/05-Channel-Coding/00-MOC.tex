@@ -3,7 +3,6 @@
 建议依次阅读：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   信道模型与一次传输的信息量
@@ -15,4 +14,20 @@
   高斯信道：功率约束与连续容量
 \end{enumerate}
 
-前一单元：无损信源编码
+\subsection{怎么读这一章}
+
+第一次读，先把三个量分开：翻转概率描述一次传输有多吵，互信息描述某种输入用法能传多少，容量则是在所有允许用法中能做到的最好值。编码定理谈的是越来越长的整块消息，不是说每一位都不会错；读公式时也要同时核对输入约束和 bit/use、bit/s 等单位。
+
+前一单元：\hyperref[ch:057]{``无损信源编码：熵为什么是压缩极限''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:07-Information-Theory/05-Channel-Coding/01]{``信道模型与一次传输的信息量''}；
+\item \hyperref[sec:07-Information-Theory/05-Channel-Coding/02]{``二元对称信道：从翻转概率到容量''}；
+\item \hyperref[sec:07-Information-Theory/05-Channel-Coding/03]{``信道容量与有噪编码定理''}；
+\item \hyperref[sec:07-Information-Theory/05-Channel-Coding/04]{``高斯信道：功率约束与连续容量''}。
+\end{itemize}

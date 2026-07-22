@@ -1,7 +1,6 @@
 图把对象压缩成顶点，把成对关系压缩成边。它刻意忽略对象内部细节，以便研究连通、路径、环、匹配和冲突。关键问题是：只知道谁与谁相邻，能对整个网络推出什么？
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   图的语言与度数
@@ -28,3 +27,42 @@
 \end{enumerate}
 
 画图适合建立直觉，证明则要回到顶点、边和路径的定义。一张看似不同的图可能只是顶点重命名；一张好看的布局也不能改变连通性。最后两篇正面处理这条边界：先认清哪些量不随画法改变，再问移除多少节点或边才会让网络真正断开。
+
+\subsection{怎么读这一章}
+
+这一章不必顺序读完。先读第一篇，固定``顶点、边、方向、权重与重边''的建模约定，然后可按问题进入四条路线：
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{连通骨架：}路径与连通性 \(\rightarrow\) 树与生成树 \(\rightarrow\) 割与连通度，理解``至少有一条路''、``刚好连通''和``有多少独立备用路''的区别；
+\item
+  \textbf{配对与冲突：}二分图与匹配 \(\rightarrow\) 图着色 \(\rightarrow\) 稳定匹配，分清数量最大、资源不冲突和没有阻塞对是三种目标；
+\item
+  \textbf{走遍与可画：}欧拉回路 \(\rightarrow\) 哈密顿回路 \(\rightarrow\) 平面图，对比局部奇偶判据、计算困难与全局嵌入约束；
+\item
+  \textbf{结构与不变量：}图同构与可达性 \(\rightarrow\) 割与覆盖参数，先忽略画法和命名，再选择与容错、服务覆盖或责任分配相匹配的量。
+\end{itemize}
+
+第一遍的停点是：面对一个网络问题，能先说清边表示什么，再指出所求是可行解、最优解、存在性证书还是不可能性障碍。细长定理的完整证明可在需要时回补。
+
+本章主要是组合图论。若要把邻接关系变成特征向量，继续读\hyperref[sec:13-Machine-Learning/05-Clustering-and-Data-Geometry/02]{``谱聚类把连通性变成特征向量''}；若要在图上传播局部概率信息，读\hyperref[ch:115]{``概率图与序列模型''}或\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/04]{``稀疏图码与消息传递''}。Laplacian 和消息传递使用本章的图结构，但加入了额外的线性代数或概率语义。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/01]{``图的语言与度数''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/02]{``路径、环与连通性''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/03]{``树与生成树''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/04]{``二分图与匹配''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/05]{``图着色与冲突安排''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/06]{``稳定匹配与延迟接受''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/07]{``欧拉回路与一笔画''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/08]{``哈密顿回路与旅行商''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/09]{``平面图与 Euler 公式''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/10]{``图同构与可达性：结构不依赖画法''}；
+\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/11]{``割与覆盖参数：网络脆弱性不只看是否连通''}。
+\end{itemize}

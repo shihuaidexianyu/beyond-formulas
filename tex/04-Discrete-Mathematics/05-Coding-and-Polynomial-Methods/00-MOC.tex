@@ -11,7 +11,6 @@
 建议按下面的顺序阅读：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   有限域与多项式插值：先建立后续编码真正依赖的代数工具。
@@ -37,4 +36,35 @@
   不同信道需要不同结构：错误、擦除和软噪声不能被当成同一种问题。
 \end{itemize}
 
-学完后，可以继续阅读信息论部分的``有噪信道编码''，在那里我们会问另一个层次的问题：可靠传输的极限究竟在哪里，而不只是某个具体码怎样工作。
+学完后，可以继续阅读信息论部分的\hyperref[ch:058]{``有噪信道编码：噪声中为什么仍能可靠通信''}，在那里我们会问另一个层次的问题：可靠传输的极限究竟在哪里，而不只是某个具体码怎样工作。
+
+\subsection{怎么读这一章}
+
+不必每次都从有限域顺读到 Fountain 码。可以先按眼前的问题选择入口：
+
+\begin{itemize}
+\tightlist
+\item
+  若想知道``冗余为什么真的能够纠错''，读\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/02]{``码距决定检测与纠错能力''}；先抓住 Hamming 球互不相交这幅图景，再决定是否回补线性码公式。
+\item
+  若想看一个确定、可手算的代数方案，依次读\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/01]{``有限域与多项式插值''}与\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/03]{``Reed--Solomon 编码''}；主线只是``低次多项式不能拥有太多根''。
+\item
+  若关心现代长码怎样在现实成本下解码，直接读\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/04]{``稀疏图码与消息传递''}；其中的 Tanner 图建立在\hyperref[ch:029]{``图论：局部邻接怎样形成全局网络''}的二分图语言上。
+\item
+  若问题是丢包率未知、广播反馈昂贵，读\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/05]{``Fountain 码与无速率传输''}；这里处理的是已知丢失位置的擦除，而不是未被发现的篡改。
+\end{itemize}
+
+第一次阅读可以在能回答下面的问题时停下：信道究竟造成错误、擦除还是软噪声？当前结论描述的是存在性边界、确定性保证还是高概率表现？把这两件事说清，比记住具体码名更重要。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/01]{``有限域与多项式插值''}；
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/02]{``码距决定检测与纠错能力''}；
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/03]{``Reed--Solomon 编码''}；
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/04]{``稀疏图码与消息传递''}；
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/05]{``Fountain 码与无速率传输''}。
+\end{itemize}

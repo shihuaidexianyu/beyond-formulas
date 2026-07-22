@@ -1,4 +1,9 @@
 \section{约束几何与 Lagrange 乘子}
+\label{sec:02-Calculus/06-Multivariable-Calculus/06}
+
+\begin{quote}
+\textbf{先抓住这一点：}受约束时，你只能沿着可行的方向移动。在极值点，沿这些方向都不能继续改进目标，所以目标函数的梯度只能指向约束面外。Lagrange 乘子就是把这件几何事实写成方程。
+\end{quote}
 
 \subsection{受约束时不能沿任意方向移动}
 
@@ -8,7 +13,7 @@
 g(x,y)=c
 \]
 
-上优化 \(f(x,y)\)，可行的小移动必须沿约束曲线切向。约束曲线是 \(g\) 的水平集，由``梯度与方向导数''一节的结论，若 \(\nabla g\ne0\)，\(\nabla g\) 垂直于可行切向。
+上优化 \(f(x,y)\)，可行的小移动必须沿约束曲线切向。约束曲线是 \(g\) 的水平集，由\hyperref[sec:02-Calculus/06-Multivariable-Calculus/03]{``梯度与方向导数''}一节的结论，若 \(\nabla g\ne0\)，\(\nabla g\) 垂直于可行切向。
 
 在约束上的光滑局部极值处，\(f\) 沿所有可行切向的方向导数都为零，所以 \(\nabla f\) 也垂直于同一切线。二维中两个法向量因此平行：
 

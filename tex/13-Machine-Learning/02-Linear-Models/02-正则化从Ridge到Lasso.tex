@@ -1,4 +1,9 @@
 \section{正则化从 Ridge 到 Lasso}
+\label{sec:13-Machine-Learning/02-Linear-Models/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}Ridge 连续收缩所有系数，Lasso 的尖角还能把部分系数推到精确零。两者都用偏差换稳定性，但结果对特征尺度和相关性十分敏感。
+\end{quote}
 
 上一节留下了一个刻意的失败：两列特征几乎相同，最小二乘仍能把训练数据拟合得很好，系数却可能随着一点测量噪声剧烈变化。这是因为数据几乎没有提供足够信息去区分这两个方向，不能简单归咎于算法。若继续追求训练误差的最小值，模型会把噪声也解释成精确结构。
 
@@ -21,19 +26,19 @@ Ridge 回归求解
 第一项要求解释数据，第二项不允许系数过大。其一阶条件为
 
 \[
-(X^\top X+\lambda I)\widehat\beta_\lambda=X^\top y.
+(X^{\trans} X+\lambda I)\widehat\beta_\lambda=X^{\trans} y.
 \]
 
 当 \(\lambda>0\) 时，即使 \(X\) 不满列秩，目标也会在被惩罚坐标上变成强凸，因此解唯一。
 
-SVD 最能揭示它究竟做了什么。若 \(X=U\Sigma V^\top\)，则
+SVD 最能揭示它究竟做了什么。若 \(X=U\Sigma V^{\trans}\)，则
 
 \[
 \widehat\beta_\lambda
-=V\operatorname{diag}
+=V\diag
 \left(
 \frac{\sigma_j}{\sigma_j^2+\lambda}
-\right)U^\top y.
+\right)U^{\trans} y.
 \]
 
 普通最小二乘会沿奇异方向除以 \(\sigma_j\)。当 \(\sigma_j\) 很小时，噪声被巨大放大；Ridge 把这一因子改为 \(\sigma_j/(\sigma_j^2+\lambda)\)，对信息最弱的方向收缩得最强。它以一点偏差换取更小方差，目标是让未见数据上的预测更稳定，即使训练拟合因此略差一些。
@@ -64,7 +69,7 @@ SVD 最能揭示它究竟做了什么。若 \(X=U\Sigma V^\top\)，则
 
 \[
 S_\lambda(z)
-=\operatorname{sign}(z)(|z|-\lambda)_+.
+=\sign(z)(|z|-\lambda)_+.
 \]
 
 在正交设计下，每个坐标都独立执行这一操作。几何上，\(\ell_1\) 约束集合在坐标轴上有尖角，损失等高线较容易在尖角处相切；优化上，近端算子直接把一段范围内的坐标送到零。

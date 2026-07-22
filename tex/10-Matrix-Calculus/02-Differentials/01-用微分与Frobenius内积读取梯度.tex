@@ -1,10 +1,15 @@
 \section{用微分与 Frobenius 内积读取梯度}
+\label{sec:10-Matrix-Calculus/02-Differentials/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}对标量函数，把一阶变化整理成 \(df=\langle G,dX\rangle\) 后，与扰动 \(dX\) 配对的 \(G\) 就是梯度。微分法的核心是整理线性项，而不是逐元素展开。
+\end{quote}
 
 微分 \(df\) 是函数一阶变化的符号表示。若 \(f\) 是标量、\(X\) 是矩阵，我们希望把 \(df\) 整理成
 
 \[
 df = \langle\nabla_Xf,dX\rangle_F
-=\operatorname{tr}\bigl((\nabla_Xf)^TdX\bigr).
+=\trace\bigl((\nabla_Xf)^{\trans}dX\bigr).
 \]
 一旦 \(dX\) 被孤立出来，其 Frobenius 内积前的系数就是梯度。整个 trace calculus 都围绕这个目标服务。
 
@@ -21,7 +26,7 @@ d(AB)=(dA)B+A(dB),
 \]
 
 \[
-d(A^T)=(dA)^T.
+d(A^{\trans})=(dA)^{\trans}.
 \]
 
 这些规则来自把 \(A+dA\)、\(B+dB\) 代入并忽略二阶小量 \((dA)(dB)\)。它们是提取一阶项的简写，不能把 \(d\) 当作普通数理解。
@@ -29,13 +34,13 @@ d(A^T)=(dA)^T.
 例如
 
 \[
-Y=X^TX.
+Y=X^{\trans}X.
 \]
 
 有
 
 \[
-dY=(dX)^TX+X^TdX.
+dY=(dX)^{\trans}X+X^{\trans}dX.
 \]
 
 结果对 \(dX\) 线性，正是上一章中用方向导数求得的答案（把 \(H\) 换成 \(dX\)）。
@@ -46,22 +51,22 @@ Frobenius 内积
 
 \[
 \langle A,B\rangle_F = \sum_{ij}A_{ij}B_{ij}
-=\operatorname{tr}(A^TB)
+=\trace(A^{\trans}B)
 \]
 把矩阵空间变成欧氏空间。它满足``移动因子''关系，例如
 
 \[
 \langle A,BC\rangle_F
-=\operatorname{tr}(A^TBC)
-=\operatorname{tr}(CA^TB)
-=\operatorname{tr}\bigl((AC^T)^TB\bigr)
-=\langle AC^T,B\rangle_F,
+=\trace(A^{\trans}BC)
+=\trace(CA^{\trans}B)
+=\trace\bigl((AC^{\trans})^{\trans}B\bigr)
+=\langle AC^{\trans},B\rangle_F,
 \]
 中间一步就是 trace 的循环性质：
 
 \[
-\operatorname{tr}(ABC) = \operatorname{tr}(BCA)
-=\operatorname{tr}(CAB).
+\trace(ABC) = \trace(BCA)
+=\trace(CAB).
 \]
 循环不等于任意交换。一般不能把 \(ABC\) 改成 \(ACB\)；只有整段循环移动，且矩阵形状相容。
 
@@ -70,7 +75,7 @@ Frobenius 内积
 令
 
 \[
-f(X) = \frac12\lVert AX-B\rVert_F^2.
+f(X) = \frac12\norm{ AX-B}_F^2.
 \]
 先设残差
 
@@ -81,18 +86,18 @@ R=AX-B.
 则
 
 \[
-f=\frac12\operatorname{tr}(R^TR).
+f=\frac12\trace(R^{\trans}R).
 \]
 
 微分为
 
 \[
-df = \frac12\operatorname{tr}\bigl((dR)^TR+R^TdR\bigr).
+df = \frac12\trace\bigl((dR)^{\trans}R+R^{\trans}dR\bigr).
 \]
-两个标量项相等——迹在转置下不变，\(\operatorname{tr}\bigl((dR)^TR\bigr)=\operatorname{tr}(R^TdR)\)——所以
+两个标量项相等——迹在转置下不变，\(\trace\bigl((dR)^{\trans}R\bigr)=\trace(R^{\trans}dR)\)——所以
 
 \[
-df=\operatorname{tr}(R^TdR).
+df=\trace(R^{\trans}dR).
 \]
 
 又因为
@@ -104,13 +109,13 @@ dR=A\,dX,
 得到
 
 \[
-df = \operatorname{tr}(R^TA\,dX)
-=\operatorname{tr}\bigl((A^TR)^TdX\bigr).
+df = \trace(R^{\trans}A\,dX)
+=\trace\bigl((A^{\trans}R)^{\trans}dX\bigr).
 \]
 因此
 
 \[
-\nabla_Xf = A^T(AX-B).
+\nabla_Xf = A^{\trans}(AX-B).
 \]
 每一步都有明确目的：把所有依赖写成微分，把 \(dX\) 移到 trace 最后，再使前面的矩阵转置形式与梯度定义匹配。
 
@@ -119,10 +124,10 @@ df = \operatorname{tr}(R^TA\,dX)
 对平方范数
 
 \[
-\lVert R\rVert_F^2,
+\norm{ R}_F^2,
 \]
 
-微分会产生因子 2。写成 \(\frac12\lVert R\rVert_F^2\) 只是为了让梯度更简洁，不改变最优解。这是建模者选择的归一化，无须把它当成求导定理。
+微分会产生因子 2。写成 \(\frac12\norm{ R}_F^2\) 只是为了让梯度更简洁，不改变最优解。这是建模者选择的归一化，无须把它当成求导定理。
 
 损失取样本和还是样本平均也会改变梯度尺度，从而影响学习率和正则化参数解释。两个公式若只差 \(1/n\)，可能都正确，却对应不同目标定义。
 
@@ -131,34 +136,33 @@ df = \operatorname{tr}(R^TA\,dX)
 若
 
 \[
-df=\operatorname{tr}(A\,dX\,B),
+df=\trace(A\,dX\,B),
 \]
 
 循环移动得
 
 \[
-df=\operatorname{tr}(BA\,dX).
+df=\trace(BA\,dX).
 \]
 
 要与
 
 \[
-\operatorname{tr}\bigl((\nabla_Xf)^TdX\bigr)
+\trace\bigl((\nabla_Xf)^{\trans}dX\bigr)
 \]
 
 比较，所以
 
 \[
-\nabla_Xf=(BA)^T=A^TB^T.
+\nabla_Xf=(BA)^{\trans}=A^{\trans}B^{\trans}.
 \]
 
 直接把 \(dX\) 前面的 \(BA\) 称为梯度会漏掉转置。最可靠的做法是每次明确写出梯度定义，而不是依赖视觉记忆。
 
-若 \(X\) 被要求对称，只有对称 \(dX\) 可行。此时环境梯度 \(G\) 的反对称部分与任何对称扰动的内积为零（设 \(K^T=-K\)、\(H^T=H\)，则 \(\operatorname{tr}(KH)=\operatorname{tr}\bigl((KH)^T\bigr)=-\operatorname{tr}(HK)=-\operatorname{tr}(KH)\)，故 \(\langle K,H\rangle_F=0\)），自然表示是上一章引入的对称化
+若 \(X\) 被要求对称，只有对称 \(dX\) 可行。此时环境梯度 \(G\) 的反对称部分与任何对称扰动的内积为零（设 \(K^{\trans}=-K\)、\(H^{\trans}=H\)，则 \(\trace(KH)=\trace\bigl((KH)^{\trans}\bigr)=-\trace(HK)=-\trace(KH)\)，故 \(\langle K,H\rangle_F=0\)），自然表示是上一章引入的对称化
 
 \[
-\operatorname{sym}(G)=\frac12(G+G^T).
+\operatorname{sym}(G)=\frac12(G+G^{\trans}).
 \]
 
 是否需要这一步取决于变量空间，不能从公式本身猜测。
-

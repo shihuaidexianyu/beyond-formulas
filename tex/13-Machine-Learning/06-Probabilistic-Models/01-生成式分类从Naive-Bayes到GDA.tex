@@ -1,4 +1,9 @@
 \section{生成式分类从 Naive Bayes 到 GDA}
+\label{sec:13-Machine-Learning/06-Probabilistic-Models/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}生成式分类先建模 \(p(x\mid y)p(y)\)，再由 Bayes 规则得到后验。Naive Bayes 与 GDA 的分类能力和置信度都受类条件分布假设约束。
+\end{quote}
 
 Logistic 回归直接描述 \(P(Y\mid X)\)。生成式分类换一个方向：先描述每个类别多常见，以及该类别会产生怎样的特征，
 
@@ -48,18 +53,18 @@ X\mid Y=k\sim\mathcal N(\mu_k,\Sigma_k).
 
 每个类别在特征空间中形成一个椭球云。分类不仅取决于点离均值多远，还取决于 covariance 所规定的方向尺度和类别先验。
 
-若各类共享同一个 covariance \(\Sigma\)，比较两类 log density 时，把二次型 \((x-\mu_k)^\top\Sigma^{-1}(x-\mu_k)\) 展开：其中 \(x\) 的二次项
+若各类共享同一个 covariance \(\Sigma\)，比较两类 log density 时，把二次型 \((x-\mu_k)^{\trans}\Sigma^{-1}(x-\mu_k)\) 展开：其中 \(x\) 的二次项
 
 \[
--\frac12x^\top\Sigma^{-1}x
+-\frac12x^{\trans}\Sigma^{-1}x
 \]
 
 以及 \(-\frac12\log|\Sigma|\) 等与 \(k\) 无关的项都会抵消，剩下
 
 \[
 \delta_k(x)
-=x^\top\Sigma^{-1}\mu_k
--\frac12\mu_k^\top\Sigma^{-1}\mu_k
+=x^{\trans}\Sigma^{-1}\mu_k
+-\frac12\mu_k^{\trans}\Sigma^{-1}\mu_k
 +\log\pi_k.
 \]
 

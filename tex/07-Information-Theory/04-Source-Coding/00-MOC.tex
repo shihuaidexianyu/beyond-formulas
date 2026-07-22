@@ -3,7 +3,6 @@
 本单元依次解决六个问题：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   什么样的变长码能够即时、唯一地译码？
@@ -19,4 +18,22 @@
   分布未知时，怎样边编码边学习重复模式？
 \end{enumerate}
 
-前一单元：分布之间的差异
+\subsection{怎么读这一章}
+
+第一次读，可以先抓住一条主线：短码是一种有限资源，Kraft 不等式管资源够不够，Huffman 决定怎样分配，算术编码与长块编码则把逐符号的整数浪费摊薄。如果更关心实际压缩，可先读算术编码和 LZ；如果想知道``理论上还能压多短''，再读 AEP 与率失真。
+
+前一单元：\hyperref[ch:056]{``分布之间的差异：从错误编码到散度''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/01]{``前缀码与 Kraft 不等式''}；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/02]{``Huffman 编码与贪心最优性''}；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/03]{``算术编码：从符号码到序列区间''}；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/04]{``AEP、典型集与信源编码定理''}；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/05]{``率失真：允许失真时的压缩极限''}；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/06]{``LZ 编码：不假设分布的通用压缩''}。
+\end{itemize}

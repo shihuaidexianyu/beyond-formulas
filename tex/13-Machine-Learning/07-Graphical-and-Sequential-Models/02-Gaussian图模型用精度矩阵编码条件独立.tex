@@ -1,4 +1,9 @@
 \section{Gaussian 图模型用精度矩阵编码条件独立}
+\label{sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}在非退化联合 Gaussian 模型中，covariance 的零对应边缘独立，precision 的非对角零对应给定其余变量后的条件独立。离开 Gaussian，零相关通常不够。
+\end{quote}
 
 相关矩阵常被用来画网络：两个变量相关系数大，就在它们之间连边。但相关反映的是边缘关系，可能由共同变量或间接路径产生。Gaussian 图模型提供一个少见的精确对应：在联合 Gaussian 假设下，协方差的零表示边缘独立，精度矩阵的零表示给定其余变量后的条件独立。
 
@@ -25,7 +30,7 @@ X_i\perp X_j
 \mid X_{-\set{i,j}}.
 \]
 
-第一个等价依赖 Gaussian 中“不相关即独立”；第二个才是无向图缺边使用的关系。
+第一个等价依赖 Gaussian 中``不相关即独立''；第二个才是无向图缺边使用的关系。
 
 \subsection{条件 Gaussian 来自 Schur complement}
 
@@ -166,7 +171,7 @@ DAG 中一条有向边描述局部条件均值对父节点的依赖；无向 Gau
 \ell(K)
 \propto
 \log\det K
--\operatorname{tr}(SK),
+-\trace(SK),
 \qquad K\succ0.
 \]
 
@@ -180,13 +185,13 @@ Graphical lasso 解
 \argmax_{K\succ0}
 \left[
 \log\det K
--\operatorname{tr}(SK)
+-\trace(SK)
 -\lambda
 \sum_{i\ne j}\abs{K_{ij}}
 \right].
 \]
 
-off-diagonal \(L_1\) penalty 鼓励稀疏条件依赖图。\(\lambda\) 越大，图通常越稀疏；它代表偏差---方差选择，不是发现“真实边数”的客观刻度。变量尺度会影响 penalty，因此通常需要先标准化或使用加权 penalty。
+off-diagonal \(L_1\) penalty 鼓励稀疏条件依赖图。\(\lambda\) 越大，图通常越稀疏；它代表偏差---方差选择，不是发现``真实边数''的客观刻度。变量尺度会影响 penalty，因此通常需要先标准化或使用加权 penalty。
 
 计算时不应显式形成 \(S^{-1}\) 来再做修补。Cholesky factorization、log-determinant 和线性系统求解能更稳定地利用正定结构；估计结果还应检查最小 eigenvalue、条件数和不同 \(\lambda\) 下边集稳定性。
 

@@ -1,4 +1,9 @@
 \section{不动点与 Newton 法}
+\label{sec:08-Numerical-Analysis/02-Root-Finding/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}Newton 法用当前切线猜根，离简单根足够近时会快得惊人，但切线只是局部模型。导数太小、初值太远或函数形状复杂时，这一步可能跳到错误位置，所以可靠实现通常还需要括区或步长保护。
+\end{quote}
 
 \subsection{同一个方程，改写方式会决定收敛还是发散}
 
@@ -146,7 +151,7 @@ x_{k+1}=x_k-\alpha_k\frac{f(x_k)}{f'(x_k)},\qquad0<\alpha_k\le1,
 
 或线搜索控制步长。真正可靠的求根器通常组合全局保证与局部快步，单一教科书公式很难同时兼顾两者。
 
-多元 Newton 法每步解一个线性系统，其中 \(J_f(x_k)\) 是 \(f\) 在 \(x_k\) 处的 Jacobi 矩阵（一阶偏导数矩阵）：
+多元 Newton 法每步解一个线性系统，其中 \(J_f(x_k)\) 是 \(f\) 在 \(x_k\) 处的 Jacobian 矩阵（一阶偏导数矩阵）：
 
 \[
 J_f(x_k)s_k=-f(x_k),\qquad x_{k+1}=x_k+s_k.

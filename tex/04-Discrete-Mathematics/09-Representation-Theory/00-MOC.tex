@@ -3,7 +3,6 @@
 本单元回答三个问题：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   表示把群变成矩阵群：表示是群到线性变换群的同态，群的乘法变成矩阵乘法，抽象对称变成可计算的结构。
@@ -14,3 +13,32 @@
 \end{enumerate}
 
 这三个问题共用一条主线：表示论把``对称''从集合上的置换，变成向量空间上的线性代数。Fourier 分析中的正交函数系、等变神经网络中的参数共享，都是表示论在特定群上的应用。
+
+\subsection{怎么读这一章}
+
+本单元依赖群论与线性代数，但可以按目的选择深度：
+
+\begin{itemize}
+\tightlist
+\item
+  若只想理解``表示''是什么，读\hyperref[sec:04-Discrete-Mathematics/09-Representation-Theory/01]{``表示把群变成矩阵群''}；先区分集合上的群作用与向量空间上的线性表示，并把等价表示理解为统一换基。
+\item
+  若想知道怎样为对称找到基本模式，读\hyperref[sec:04-Discrete-Mathematics/09-Representation-Theory/02]{``不可约表示是基本构建块''}；Maschke 定理的关键边界是有限群且底域特征不整除群阶。
+\item
+  若要实际判断某个表示含有哪些模式，读\hyperref[sec:04-Discrete-Mathematics/09-Representation-Theory/03]{``特征标是表示的指纹''}；迹丢掉了基坐标，却在有限群复表示的半单环境中保留分解所需的信息。
+\item
+  若从 Fourier 分析或等变网络进入，可先看第二篇的应用段，再回补定义；相关背景分别见\hyperref[ch:068]{``Fourier 与谱方法：把函数换到频率坐标中''}与\hyperref[sec:04-Discrete-Mathematics/06-Groups-and-Symmetry/04]{``不变函数与等变映射：对称性怎样进入计算''}。
+\end{itemize}
+
+第一次阅读可以在能回答三件事时停下：群怎样作用在向量空间上？哪些子空间在所有群元素下共同不变？当前结论依赖有限群、复数域还是完全可约性？
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/09-Representation-Theory/01]{``表示把群变成矩阵群''}；
+\item \hyperref[sec:04-Discrete-Mathematics/09-Representation-Theory/02]{``不可约表示是基本构建块''}；
+\item \hyperref[sec:04-Discrete-Mathematics/09-Representation-Theory/03]{``特征标是表示的指纹''}。
+\end{itemize}

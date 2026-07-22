@@ -3,7 +3,6 @@
 解决办法是先回到导数的第一性定义：导数是输入微小变化到输出一阶变化之间的线性映射。再背一套布局规则会绕过根本问题。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   导数是最佳线性映射：从 Fréchet 导数出发，统一标量、向量与矩阵输入。
@@ -12,3 +11,17 @@
 \end{enumerate}
 
 后续推导会尽量先写微分或线性作用，再把它读成梯度。这样，即使换了一套布局约定，数学映射本身也不会改变。
+
+\subsection{怎么读这一章}
+
+先暂时放下矩阵求导公式表。第一篇把导数还原成“输入扰动怎样线性地传到输出”，第二篇再讨论这张线性映射写成矩阵时为何会出现布局差异。每得到一个结果，先核对输入、输出和扰动的形状，再核对数值。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:10-Matrix-Calculus/01-Derivative-Conventions/01]{``导数是最佳线性映射''}；
+\item \hyperref[sec:10-Matrix-Calculus/01-Derivative-Conventions/02]{``形状先于公式，布局必须声明''}。
+\end{itemize}

@@ -1,4 +1,9 @@
 \section{标准形式与线性规划}
+\label{sec:09-Convex-Optimization/04-Convex-Problems/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}判断一个优化问题是否凸，要同时检查目标和可行域。线性规划是最透明的情形：目标是线性的，约束切出的也是凸多面体，所以局部最优不会藏在错误的角落。
+\end{quote}
 
 一个凸优化问题通常写成
 
@@ -41,7 +46,7 @@
 
 \[
 \begin{aligned}
-\text{minimize}\quad &c^Tx\\
+\text{minimize}\quad &c^{\trans}x\\
 \text{subject to}\quad
 &Gx\le h,\\
 &Ax=b.
@@ -50,7 +55,7 @@
 
 目标仿射，可行域是半空间与超平面的交，也就是多面体。从几何上看，求解线性规划就是把目标的等值超平面沿 \(-c\) 方向平移，直至与可行域最后接触。
 
-本部分第一单元``把现实选择翻译成优化问题''中的工厂例子，其最大化问题就是线性规划。若改写成最小化负利润，
+本部分第一单元\hyperref[sec:09-Convex-Optimization/01-Optimization-Foundations/01]{``把现实选择翻译成优化问题''}中的工厂例子，其最大化问题就是线性规划。若改写成最小化负利润，
 
 \[
 \min_{x_A,x_B}-3x_A-5x_B,
@@ -65,7 +70,7 @@
 假设希望最小化若干仿射误差中的最大值：
 
 \[
-\min_x\max_i(a_i^Tx+b_i).
+\min_x\max_i(a_i^{\trans}x+b_i).
 \]
 
 引入变量 \(t\)，要求它不小于每一项：
@@ -73,7 +78,7 @@
 \[
 \begin{aligned}
 \text{minimize}\quad&t\\
-\text{subject to}\quad&a_i^Tx+b_i\le t,\quad i=1,\ldots,m.
+\text{subject to}\quad&a_i^{\trans}x+b_i\le t,\quad i=1,\ldots,m.
 \end{aligned}
 \]
 
@@ -82,14 +87,14 @@
 同样，绝对值约束
 
 \[
-|a^Tx-b|\le t
+|a^{\trans}x-b|\le t
 \]
 
 等价于
 
 \[
-a^Tx-b\le t,\qquad
--(a^Tx-b)\le t.
+a^{\trans}x-b\le t,\qquad
+-(a^{\trans}x-b)\le t.
 \]
 
 由此，\(L_1\) 拟合和 \(L_\infty\) 最坏误差常能写成线性规划。
@@ -117,4 +122,3 @@ a^Tx-b\le t,\qquad
 在线性规划中，约束右端 \(h\) 的微小变化会改变最优值。每条资源约束都可能有一个``边际价格''：多给一单位资源最多能改善多少目标。Lagrange 对偶会把这些价格系统化，并在适当条件下产生与原问题相同的最优值。
 
 这也是线性规划的重要教学价值。集合、函数、分离、对偶与算法在这里都能以最清楚的形式看见，后续二次和锥规划只是把几何对象扩大。
-

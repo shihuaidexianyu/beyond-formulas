@@ -1,7 +1,6 @@
-概率模型常把答案写成一个期望、一个归一化常数或一个 posterior，但“定义清楚”并不意味着“能够解析计算”。这一单元研究六种彼此相连、却不能混用的随机计算任务：
+概率模型常把答案写成一个期望、一个归一化常数或一个 posterior，但``定义清楚''并不意味着``能够解析计算''。这一单元研究六种彼此相连、却不能混用的随机计算任务：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Monte Carlo 用随机样本逼近期望：可以从目标分布独立采样时，用样本平均估计积分，并显式报告随机计算误差。
@@ -17,4 +16,22 @@
   能量模型把相对相容性变成概率：局部能量容易计算时，配分函数与模型期望仍会让全局学习依赖采样或变分近似。
 \end{enumerate}
 
-这些方法都可能产生“许多样本”或“一个分布”，但样本来自哪里、近似哪个对象、误差怎样定义完全不同。Monte Carlo 与 MCMC 先提供通用计算语言，变分推断给出优化路线，Bootstrap 回到重复抽样；粒子滤波把重要性采样接入状态空间，能量模型则展示归一化常数怎样把局部得分重新变成全局问题。读者应先识别任务，再选择方法，而不是看到不确定性就机械调用某种采样器。
+这些方法都可能产生``许多样本''或``一个分布''，但样本来自哪里、近似哪个对象、误差怎样定义完全不同。Monte Carlo 与 MCMC 先提供通用计算语言，变分推断给出优化路线，Bootstrap 回到重复抽样；粒子滤波把重要性采样接入状态空间，能量模型则展示归一化常数怎样把局部得分重新变成全局问题。读者应先识别任务，再选择方法，而不是看到不确定性就机械调用某种采样器。
+
+\subsection{怎么读这一章}
+
+首次阅读先区分四类误差：Monte Carlo 的有限样本误差、MCMC 的混合与自相关、变分族造成的近似偏差、Bootstrap 对重采样机制的依赖。粒子滤波与能量模型是这三类工具的组合应用，可第二遍进入。阅读任何结果时都问：目标分布是什么，样本是否来自它，近似族排除了什么，以及报告的区间究竟描述统计不确定性还是数值计算误差。ELBO 上升、链看似平稳或重构变好都不是充分的正确性证明。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/01]{``Monte Carlo 用随机样本逼近期望''}；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/02]{``MCMC 在无法独立采样时构造平稳链''}；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/03]{``变分推断把后验近似变成优化''}；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/04]{``Bootstrap 重建分析流程的不确定性''}；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/05]{``粒子滤波用带权样本追踪非线性状态''}；
+\item \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/06]{``配分函数把能量变成全局概率''}。
+\end{itemize}

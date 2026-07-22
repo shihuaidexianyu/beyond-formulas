@@ -1,4 +1,9 @@
 \section{切空间把``方向''还给弯曲空间}
+\label{sec:12-Real-Analysis-Support/08-Manifold-Basics/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}流形上的点不能随任意环境方向移动，切空间收集所有可由流形内曲线产生的瞬时速度。梯度和微分真正作用的方向都属于这个局部线性空间。
+\end{quote}
 
 平面上，``从 \(p\) 点沿方向 \(v\) 走''就是 \(p+tv\)。球面上没有全局加法：从北极``往东走''，走一段就离开了球面。方向必须重新定义，而定义的结果——切空间——是流形上一切微积分的起点。
 
@@ -6,9 +11,9 @@
 
 设 \(M\) 是 \(d\) 维光滑流形，\(p\in M\)。过 \(p\) 的光滑曲线是光滑映射 \(\gamma:(-\varepsilon,\varepsilon)\to M\)，\(\gamma(0)=p\)。两条曲线若在坐标卡下的一阶导数相同，就在 \(p\) 点``同速同向''——这个等价关系与卡的选择无关（转移映射光滑保证）。一个等价类称为 \(p\) 点的一个切向量，直觉是：沿流形路过 \(p\) 时允许具有的瞬时速度。所有切向量的集合记为 \(T_pM\)，称为 \(p\) 点的切空间。
 
-在坐标卡 \((U,\varphi)\) 下，每条曲线变成 \(\R^d\) 中的曲线 \(\varphi\circ\gamma\)，其速度是普通向量。这让 \(T_pM\) 自然成为 \(d\) 维向量空间：坐标方向 \(\partial/\partial x_i\)（第 \(i\) 个坐标曲线在 \(p\) 点的速度）构成一组基。切空间永远是平直的向量空间——弯曲的是流形，不是它的切空间。这正是``流形假设与非线性降维''中``局部邻域近似一个低维线性块''的严格含义。
+在坐标卡 \((U,\varphi)\) 下，每条曲线变成 \(\R^d\) 中的曲线 \(\varphi\circ\gamma\)，其速度是普通向量。这让 \(T_pM\) 自然成为 \(d\) 维向量空间：坐标方向 \(\partial/\partial x_i\)（第 \(i\) 个坐标曲线在 \(p\) 点的速度）构成一组基。切空间永远是平直的向量空间——弯曲的是流形，不是它的切空间。这正是\hyperref[sec:13-Machine-Learning/04-Dimensionality-Reduction/04]{``流形假设与非线性降维''}中``局部邻域近似一个低维线性块''的严格含义。
 
-\subsection{\texorpdfstring{球面的切平面：$T_pM$ 不等于 $M$}{球面的切平面：TpM 不等于 M}}
+\subsection{\texorpdfstring{球面的切平面：\(T_pM\) 不等于 \(M\)}{球面的切平面：TpM 不等于 M}}
 
 在 \(\R^3\) 中看 \(S^2\)。过 \(p\) 的球面曲线 \(\gamma(t)\) 满足 \(\norm{\gamma(t)}=1\)，对 \(t\) 求导：
 
@@ -41,13 +46,13 @@ T_pS^2=\{v\in\R^3:\langle v,p\rangle=0\}.
 dF_p:T_pM\to T_{F(p)}N,
 \]
 
-定义方式是沿曲线推：切向量由曲线 \(\gamma\) 代表，\(dF_p\) 把它送到曲线 \(F\circ\gamma\) 的速度。这正是多元微积分中``Jacobian 是最佳线性映射''（``导数是最佳线性映射''）在弯曲空间上的形态：\(F\) 在一阶上把 \(p\) 附近的流形几何线性化。若 \(M\subseteq\R^n\) 是子流形、\(F\) 是环境映射的限制，\(dF_p\) 就是环境 Jacobi 在切子空间上的限制。
+定义方式是沿曲线推：切向量由曲线 \(\gamma\) 代表，\(dF_p\) 把它送到曲线 \(F\circ\gamma\) 的速度。这正是多元微积分中``Jacobian 是最佳线性映射''（\hyperref[sec:10-Matrix-Calculus/01-Derivative-Conventions/01]{``导数是最佳线性映射''}）在弯曲空间上的形态：\(F\) 在一阶上把 \(p\) 附近的流形几何线性化。若 \(M\subseteq\R^n\) 是子流形、\(F\) 是环境映射的限制，\(dF_p\) 就是环境 Jacobi 在切子空间上的限制。
 
-链式法则 \(d(G\circ F)_p=dG_{F(p)}\circ dF_p\) 逐字成立——Part 10 的``链式法则就是线性映射复合''在流形上不需要改动一个字。
+链式法则 \(d(G\circ F)_p=dG_{F(p)}\circ dF_p\) 逐字成立——Part 10 的\hyperref[sec:10-Matrix-Calculus/02-Differentials/02]{``链式法则就是线性映射复合''}在流形上不需要改动一个字。
 
 \subsection{流形假设的精确版本}
 
-``流形假设与非线性降维''中的生成映射 \(F:\mathcal A\to\mathcal X\)（从少量自由度 \(\mathcal A\) 到观测空间 \(\mathcal X\)）若在 \(\mathbf a\) 处可微，则
+\hyperref[sec:13-Machine-Learning/04-Dimensionality-Reduction/04]{``流形假设与非线性降维''}中的生成映射 \(F:\mathcal A\to\mathcal X\)（从少量自由度 \(\mathcal A\) 到观测空间 \(\mathcal X\)）若在 \(\mathbf a\) 处可微，则
 
 \[
 F(\mathbf a+\mathbf h)

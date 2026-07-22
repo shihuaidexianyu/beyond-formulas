@@ -1,9 +1,14 @@
 \section{二次型与正定性：每个方向上的能量是否为正}
+\label{sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}二次型 \(x^{\trans}Ax\) 测量矩阵在方向 \(x\) 上给出的能量或曲率。对称矩阵正定等价于所有非零方向都得到正值，也等价于全部特征值为正。
+\end{quote}
 
 对称矩阵不仅作用在向量上，还自然地产生一个标量函数
 
 \[
-q(x)=x^{\mathsf T}Ax.
+q(x)=x^{\trans}Ax.
 \]
 
 它称为二次型。在力学中可以表示能量，在优化中表示二次曲率，在统计中表示经协方差加权的距离。正定性要回答的是：离开原点以后，这个量是否始终为正？
@@ -13,27 +18,27 @@ q(x)=x^{\mathsf T}Ax.
 任意实方阵都能分解为
 
 \[
-A=\frac{A+A^{\mathsf T}}2+
-\frac{A-A^{\mathsf T}}2,
+A=\frac{A+A^{\trans}}2+
+\frac{A-A^{\trans}}2,
 \]
 
-即对称部分加反对称部分。若 \(K^{\mathsf T}=-K\)，则标量
+即对称部分加反对称部分。若 \(K^{\trans}=-K\)，则标量
 
 \[
-x^{\mathsf T}Kx
+x^{\trans}Kx
 \]
 
 转置后等于自身，又等于
 
 \[
-x^{\mathsf T}K^{\mathsf T}x=-x^{\mathsf T}Kx,
+x^{\trans}K^{\trans}x=-x^{\trans}Kx,
 \]
 
 所以只能为零。因此
 
 \[
-x^{\mathsf T}Ax
-=x^{\mathsf T}\left(\frac{A+A^{\mathsf T}}2\right)x.
+x^{\trans}Ax
+=x^{\trans}\left(\frac{A+A^{\trans}}2\right)x.
 \]
 
 二次型只看见矩阵的对称部分。讨论正定性时假设矩阵对称，不会丢失任何二次型信息。
@@ -43,7 +48,7 @@ x^{\mathsf T}Ax
 实对称矩阵 \(A\) 称为正定，记作 \(A\succ0\)，若
 
 \[
-x^{\mathsf T}Ax>0
+x^{\trans}Ax>0
 \]
 
 对所有非零 \(x\) 成立。
@@ -51,7 +56,7 @@ x^{\mathsf T}Ax>0
 若只要求
 
 \[
-x^{\mathsf T}Ax\ge0,
+x^{\trans}Ax\ge0,
 \]
 
 则称为半正定，记作 \(A\succeq0\)。
@@ -63,14 +68,14 @@ x^{\mathsf T}Ax\ge0,
 利用谱分解
 
 \[
-A=Q\Lambda Q^{\mathsf T},
+A=Q\Lambda Q^{\trans},
 \]
 
-令 \(y=Q^{\mathsf T}x\)。因为 \(Q\) 正交，\(x\ne0\) 当且仅当 \(y\ne0\)，并且
+令 \(y=Q^{\trans}x\)。因为 \(Q\) 正交，\(x\ne0\) 当且仅当 \(y\ne0\)，并且
 
 \[
-x^{\mathsf T}Ax
-=y^{\mathsf T}\Lambda y
+x^{\trans}Ax
+=y^{\trans}\Lambda y
 =\lambda_1y_1^2+\cdots+\lambda_ny_n^2.
 \]
 
@@ -98,10 +103,10 @@ A\succeq0
 A=\begin{pmatrix}2&-1\\-1&2\end{pmatrix}.
 \]
 
-其特征方向为 \((1,1)^{\mathsf T}\) 与 \((1,-1)^{\mathsf T}\)，特征值分别为 \(1\) 与 \(3\)。在特征坐标 \(y\) 中，等高线
+其特征方向为 \((1,1)^{\trans}\) 与 \((1,-1)^{\trans}\)，特征值分别为 \(1\) 与 \(3\)。在特征坐标 \(y\) 中，等高线
 
 \[
-x^{\mathsf T}Ax=c
+x^{\trans}Ax=c
 \]
 
 变成
@@ -122,10 +127,10 @@ y_1^2+3y_2^2=c.
 B=\begin{pmatrix}1&2\\2&1\end{pmatrix}
 \]
 
-对角元都为正，但特征值为 \(3\) 和 \(-1\)，所以不是正定矩阵。取 \(x=(1,-1)^{\mathsf T}\)：
+对角元都为正，但特征值为 \(3\) 和 \(-1\)，所以不是正定矩阵。取 \(x=(1,-1)^{\trans}\)：
 
 \[
-x^{\mathsf T}Bx=-2<0.
+x^{\trans}Bx=-2<0.
 \]
 
 正定性是关于所有方向的整体条件，不能只检查坐标轴方向。
@@ -134,16 +139,16 @@ x^{\mathsf T}Bx=-2<0.
 
 半正定的主子式判据更细致，不能只把``顺序主子式大于零''机械改成``大于等于零''。
 
-\subsection{\texorpdfstring{\(A^{\mathsf T}A\) 为什么总半正定}{A^{\mathsf T}A 为什么总半正定}}
+\subsection{\texorpdfstring{\(A^{\trans}A\) 为什么总半正定}{A^{\trans}A 为什么总半正定}}
 
 对任意矩阵 \(A\)，
 
 \[
-x^{\mathsf T}A^{\mathsf T}Ax
+x^{\trans}A^{\trans}Ax
 =\|Ax\|_2^2\ge0.
 \]
 
-所以 \(A^{\mathsf T}A\) 总是半正定。它何时正定？只有当
+所以 \(A^{\trans}A\) 总是半正定。它何时正定？只有当
 
 \[
 Ax=0\Longrightarrow x=0,
@@ -151,14 +156,14 @@ Ax=0\Longrightarrow x=0,
 
 也就是 \(A\) 的列线性无关时。
 
-这重新解释了最小二乘中的事实：若设计矩阵满列秩，\(A^{\mathsf T}A\) 正定，二次目标具有唯一最小点；若列相关，只能保证半正定，目标沿零空间方向保持不变，参数解不唯一。
+这重新解释了最小二乘中的事实：若设计矩阵满列秩，\(A^{\trans}A\) 正定，二次目标具有唯一最小点；若列相关，只能保证半正定，目标沿零空间方向保持不变，参数解不唯一。
 
 \subsection{Hessian 与凸性}
 
 二次函数
 
 \[
-f(x)=\frac12x^{\mathsf T}Ax-b^{\mathsf T}x+c
+f(x)=\frac12x^{\trans}Ax-b^{\trans}x+c
 \]
 
 在 \(A\) 对称时满足
@@ -182,25 +187,19 @@ x^*=A^{-1}b.
 随机向量 \(X\) 的协方差矩阵为
 
 \[
-\Sigma=\E[(X-\mu)(X-\mu)^{\mathsf T}],
+\Sigma=\E[(X-\mu)(X-\mu)^{\trans}],
 \]
 
 其中 \(\mu=\E X\) 是均值向量。对任意 \(a\)，把常数向量移入期望得
 
 \[
-a^{\mathsf T}\Sigma a
-=\E\bigl[\bigl(a^{\mathsf T}(X-\mu)\bigr)^2\bigr]
-=\Var(a^{\mathsf T}X)\ge0.
+a^{\trans}\Sigma a
+=\E\bigl[\bigl(a^{\trans}(X-\mu)\bigr)^2\bigr]
+=\Var(a^{\trans}X)\ge0.
 \]
 
-所以协方差矩阵必半正定。若某个非零 \(a\) 使 \(a^{\mathsf T}X\) 几乎处处为常数，对应方向方差为零，\(\Sigma\) 就不是正定。
+所以协方差矩阵必半正定。若某个非零 \(a\) 使 \(a^{\trans}X\) 几乎处处为常数，对应方向方差为零，\(\Sigma\) 就不是正定。
 
-这把抽象二次型翻译成了统计意义：\(a^{\mathsf T}\Sigma a\) 是沿方向 \(a\) 观察数据时的方差。
+这把抽象二次型翻译成了统计意义：\(a^{\trans}\Sigma a\) 是沿方向 \(a\) 观察数据时的方差。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06：Positive Definite Matrices and Minima
-\end{itemize}
+延伸阅读：MIT 18.06：Positive Definite Matrices and Minima。

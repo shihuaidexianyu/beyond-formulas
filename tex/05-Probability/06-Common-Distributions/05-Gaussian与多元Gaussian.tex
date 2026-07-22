@@ -1,6 +1,11 @@
 \section{Gaussian 与多元 Gaussian}
+\label{sec:05-Probability/06-Common-Distributions/05}
 
-Gaussian 分布之所以无处不在，一个重要原因是许多近似独立的小扰动相加后，标准化的和常趋近 Gaussian（这一直觉将在后面的极限定理部分严格化），并不意味着所有数据都天然呈钟形。它还在线性变换、边缘化和条件化下保持封闭，使推导与计算格外方便。
+\begin{quote}
+\textbf{先抓住这一点：}Gaussian 的力量来自加和极限与线性运算封闭性。多元情形中均值定位中心、协方差给出椭圆几何，但方便计算不等于数据必然 Gaussian。
+\end{quote}
+
+Gaussian 分布之所以无处不在，一个重要原因是许多近似独立的小扰动相加后，标准化的和常趋近 Gaussian（\hyperref[sec:05-Probability/08-Limit-Theorems/03]{``中心极限定理与 Gaussian 近似''}会说明准确条件），并不意味着所有数据都天然呈钟形。它还在线性变换、边缘化和条件化下保持封闭，使推导与计算格外方便。
 
 方便并不等于普适。明显偏斜、有边界、多峰或重尾的数据可能不适合 Gaussian 模型。
 
@@ -19,31 +24,31 @@ f_X(x)
 =\frac1{\sqrt{2\pi\sigma^2}}
 \exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right].
 \]
-$\mu$ 决定中心，$\sigma$ 决定水平尺度：
+\(\mu\) 决定中心，\(\sigma\) 决定水平尺度：
 
 \[
 \E[X]=\mu,\qquad
-\operatorname{Var}(X)=\sigma^2.
+\Var(X)=\sigma^2.
 \]
 标准化
 
 \[
 Z=\frac{X-\mu}{\sigma}
 \]
-得到 $Z\sim\mathcal N(0,1)$，因此
+得到 \(Z\sim\mathcal N(0,1)\)，因此
 
 \[
 P(a\le X\le b)
 =\Phi\left(\frac{b-\mu}{\sigma}\right)
 -\Phi\left(\frac{a-\mu}{\sigma}\right),
 \]
-其中 $\Phi$ 是标准 Gaussian CDF。
+其中 \(\Phi\) 是标准 Gaussian CDF。
 
-密度关于 $\mu$ 对称，因此均值、中位数和众数相同。约 $68\%$、$95\%$、$99.7\%$ 的概率分别位于 $\mu$ 的一、二、三个标准差内，这只是常用近似记忆，不应替代精确 CDF 或在非 Gaussian 数据上滥用。
+密度关于 \(\mu\) 对称，因此均值、中位数和众数相同。约 \(68\%\)、\(95\%\)、\(99.7\%\) 的概率分别位于 \(\mu\) 的一、二、三个标准差内，这只是常用近似记忆，不应替代精确 CDF 或在非 Gaussian 数据上滥用。
 
 \subsection{线性组合保持 Gaussian}
 
-若 $X_i$ 独立 Gaussian，则任意线性组合
+若 \(X_i\) 独立 Gaussian，则任意线性组合
 
 \[
 \sum_i a_iX_i
@@ -54,13 +59,13 @@ P(a\le X\le b)
 \sum_i a_i\mu_i,\qquad
 \sum_i a_i^2\sigma_i^2.
 \]
-更一般的``联合 Gaussian''定义是：随机向量 $X$ 的每个线性组合 $a^\mathsf TX$ 都是一维 Gaussian（允许退化为常数）。
+更一般的``联合 Gaussian''定义是：随机向量 \(X\) 的每个线性组合 \(a^{\trans}X\) 都是一维 Gaussian（允许退化为常数）。
 
-仅仅每个分量各自为 Gaussian，并不能保证联合 Gaussian。可以构造 $X\sim\mathcal N(0,1)$，再令 $Y=S X$，其中随机符号 $S$ 独立于 $X$ 且等概率为 $\pm1$。由标准 Gaussian 密度的对称性，$Y$ 也是标准 Gaussian；又 $\E[XY]=\E[S]\,\E[X^2]=0$，故二者不相关；但 $(X,Y)$ 集中在直线 $y=x$ 与 $y=-x$ 上，并非二维 Gaussian。
+仅仅每个分量各自为 Gaussian，并不能保证联合 Gaussian。可以构造 \(X\sim\mathcal N(0,1)\)，再令 \(Y=S X\)，其中随机符号 \(S\) 独立于 \(X\) 且等概率为 \(\pm1\)。由标准 Gaussian 密度的对称性，\(Y\) 也是标准 Gaussian；又 \(\E[XY]=\E[S]\,\E[X^2]=0\)，故二者不相关；但 \((X,Y)\) 集中在直线 \(y=x\) 与 \(y=-x\) 上，并非二维 Gaussian。
 
 \subsection{多元 Gaussian 的几何}
 
-若 $X\in\R^d$ 服从均值 $\mu$、正定协方差 $\Sigma$ 的多元 Gaussian，记为
+若 \(X\in\R^d\) 服从均值 \(\mu\)、正定协方差 \(\Sigma\) 的多元 Gaussian，记为
 
 \[
 X\sim\mathcal N(\mu,\Sigma),
@@ -71,14 +76,14 @@ X\sim\mathcal N(\mu,\Sigma),
 f_X(x)
 =\frac1{(2\pi)^{d/2}|\Sigma|^{1/2}}
 \exp\left[
--\frac12(x-\mu)^\mathsf T
+-\frac12(x-\mu)^{\trans}
 \Sigma^{-1}(x-\mu)
 \right].
 \]
 二次型
 
 \[
-(x-\mu)^\mathsf T\Sigma^{-1}(x-\mu)
+(x-\mu)^{\trans}\Sigma^{-1}(x-\mu)
 \]
 是平方 Mahalanobis 距离。等密度面是椭球：
 
@@ -89,10 +94,10 @@ f_X(x)
 \item
   特征值平方根决定各主轴尺度；
 \item
-  行列式 $|\Sigma|^{1/2}$ 控制总体积尺度。
+  行列式 \(|\Sigma|^{1/2}\) 控制总体积尺度。
 \end{itemize}
 
-若 $\Sigma$ 仅半正定而奇异，分布仍可定义，但集中在低维仿射子空间，没有相对于整个 $\R^d$ 的普通密度。
+若 \(\Sigma\) 仅半正定而奇异，分布仍可定义，但集中在低维仿射子空间，没有相对于整个 \(\R^d\) 的普通密度。
 
 \subsection{线性变换、边缘与条件仍为 Gaussian}
 
@@ -105,7 +110,7 @@ X\sim\mathcal N(\mu,\Sigma),
 则
 
 \[
-Y\sim\mathcal N(A\mu+b,A\Sigma A^\mathsf T).
+Y\sim\mathcal N(A\mu+b,A\Sigma A^{\trans}).
 \]
 因此任意子向量的边缘分布仍为 Gaussian。
 
@@ -122,7 +127,7 @@ Y\sim\mathcal N(A\mu+b,A\Sigma A^\mathsf T).
 \end{bmatrix}
 \right).
 \]
-若 $\Sigma_{22}$ 可逆，则
+若 \(\Sigma_{22}\) 可逆，则
 
 \[
 X_1\mid X_2=x_2
@@ -138,11 +143,11 @@ X_1\mid X_2=x_2
 \Sigma_{11}
 -\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}.
 \]
-条件均值是 $x_2$ 的仿射函数，条件协方差不依赖具体观测值。这解释了 Gaussian 模型中线性最小均方预测为何就是完整条件期望。
+条件均值是 \(x_2\) 的仿射函数，条件协方差不依赖具体观测值。这解释了 Gaussian 模型中线性最小均方预测为何就是完整条件期望。
 
 \subsection{联合 Gaussian 中不相关才推出独立}
 
-一般变量协方差为零不能推出独立。但若 $X_1,X_2$ 联合 Gaussian 且
+一般变量协方差为零不能推出独立。但若 \(X_1,X_2\) 联合 Gaussian 且
 
 \[
 \Sigma_{12}=0,
@@ -171,4 +176,4 @@ X_1\mid X_2=x_2
   变量是离散计数且均值不大。
 \end{itemize}
 
-可以通过变换、混合模型、Gamma/Poisson/Student $t$ 等替代分布，或直接使用非参数方法。Gaussian 是有力基准，不是默认真理。
+可以通过变换、混合模型、Gamma/Poisson/Student \(t\) 等替代分布，或直接使用非参数方法。Gaussian 是有力基准，不是默认真理。

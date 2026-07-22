@@ -1,6 +1,11 @@
 \section{卷积把平移结构写进线性映射}
+\label{sec:14-Deep-Learning/04-Convolutional-Networks/01}
 
 一张 \(H\times W\) 图像若被摊平成向量，再接一个任意线性层，模型会为每个输出位置和每个输入像素学习独立权重。它可以表达局部边缘检测，却不知道左上角的竖边和右下角的竖边应由同一规则识别。卷积仍然可以写成矩阵乘法，它的作用是给这个巨大矩阵施加一种重复结构。
+
+\begin{quote}
+\textbf{先抓住这一点：}卷积的关键不是滑动窗口本身，而是把局部性和平移参数共享写进线性映射。它减少自由度的同时，也明确排除了不符合这些结构的函数。
+\end{quote}
 
 \subsection{从一维局部加权和开始}
 
@@ -32,13 +37,13 @@ T_{\mathrm{out}}
 对二维输入
 
 \[
-X\in\mathbb R^{C_{\mathrm{in}}\times H\times W},
+X\in\R^{C_{\mathrm{in}}\times H\times W},
 \]
 
 卷积核写成
 
 \[
-W\in\mathbb R^{C_{\mathrm{out}}\times C_{\mathrm{in}}\times K_h\times K_w}.
+W\in\R^{C_{\mathrm{out}}\times C_{\mathrm{in}}\times K_h\times K_w}.
 \]
 
 忽略 stride 和 padding 时，输出为

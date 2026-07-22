@@ -1,7 +1,6 @@
 数值方法默认解在那里，问题只是怎样算准。这一单元退后一步，问三个更靠前的问题：变化规律怎样翻译成方程，什么样的方程能完全解出，以及解是否一定存在、是否唯一。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   从增长、衰减与振动说起：三个经典模型说明``微分方程是变化规律的精确化''，方向场给出不解方程也能看见解的几何眼光。
@@ -14,3 +13,19 @@
 \end{enumerate}
 
 这四节的主线是：先用可解的例子建立直觉，再把能彻底解出的线性系统做成样板，用地基性的定理划清``问题提对了''的边界，最后在无法精确求解时利用尺度差异构造有适用范围的近似。后面讨论稳定性与相图时，默认的存在唯一性前提都出自本单元；控制模型中的快慢分解则会再次用到渐近观点。
+
+\subsection{怎么读这一章}
+
+首次阅读抓住前三篇的判断链即可：变化规律怎样变成初值问题，线性系统怎样由谱读出行为，连续性与 Lipschitz 条件分别能保证什么。``尺度分离与渐近近似''适合第二遍阅读；重点不是记摄动展开，而是学会先无量纲化，并检查小参数是否乘在最高阶导数前。存在唯一性定理的完整证明也可以后置，但反例与条件不能跳过。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/01]{``从增长、衰减与振动说起''}；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/02]{``线性系统与矩阵指数''}；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/03]{``存在唯一性为什么需要 Lipschitz''}；
+\item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/04]{``尺度分离与渐近近似''}。
+\end{itemize}

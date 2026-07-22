@@ -3,7 +3,6 @@
 这一单元不把期望、方差和协方差当作孤立公式，而把它们视为逐步丰富的分布摘要：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   期望、线性性与指示变量：从长期平均和加权平均理解期望，并用线性性绕开复杂分布。
@@ -16,3 +15,33 @@
 \end{enumerate}
 
 这些摘要不会唯一确定一般分布。均值与方差相同的两个变量可以拥有完全不同尾部；相关系数为零也可能存在强非线性关系。学习时要同时知道每个量告诉了我们什么，以及它刻意忽略了什么。
+
+\subsection{怎么读这一章}
+
+可以按希望保留的分布信息进入：
+
+\begin{itemize}
+\tightlist
+\item
+  若要计算平均总量而完整分布很复杂，读\hyperref[sec:05-Probability/04-Expectation-and-Moments/01]{``期望、线性性与指示变量''}；期望线性性不要求独立，指示变量常把计数问题化成概率之和。
+\item
+  若均值相同却风险不同，读\hyperref[sec:05-Probability/04-Expectation-and-Moments/02]{``方差、矩与尺度''}；方差是平方损失下最佳常数预测仍无法消除的误差，但会对重尾和异常值敏感。
+\item
+  若多个变量共同变化，读\hyperref[sec:05-Probability/04-Expectation-and-Moments/03]{``协方差、相关性与条件波动''}；相关系数消除了单位，却只描述线性关联，也会受混合群体影响。
+\item
+  若已经观察到信息 \(Y\)，读\hyperref[sec:05-Probability/04-Expectation-and-Moments/04]{``条件期望是利用信息的最佳预测''}；全期望负责分层再平均，全方差把层内与层间波动分开。
+\end{itemize}
+
+第一次阅读可以在能回答三件事时停下：这个摘要服务于什么损失或任务？所需的一阶、二阶或更高阶矩是否存在？被摘要丢掉的尾部、非线性依赖或条件结构是否会影响结论？
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:05-Probability/04-Expectation-and-Moments/01]{``期望、线性性与指示变量''}；
+\item \hyperref[sec:05-Probability/04-Expectation-and-Moments/02]{``方差、矩与尺度''}；
+\item \hyperref[sec:05-Probability/04-Expectation-and-Moments/03]{``协方差、相关性与条件波动''}；
+\item \hyperref[sec:05-Probability/04-Expectation-and-Moments/04]{``条件期望是利用信息的最佳预测''}。
+\end{itemize}

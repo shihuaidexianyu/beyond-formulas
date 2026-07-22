@@ -1,38 +1,43 @@
 \section{条件异方差的统计特征}
+\label{sec:11-Mathematical-Statistics/10-GARCH-and-Volatility/01}
 
-标准时间序列模型假设弱平稳：均值恒定，协方差函数 $\gamma_k=\Cov(X_t,X_{t-k})$ 只依赖滞后 $k$，不依赖时间 $t$。但许多实际序列违反这个假设：方差本身随时间变化，形成``波动率聚集''——大波动后跟大波动，小波动后跟小波动。
+\begin{quote}
+\textbf{先抓住这一点：}金融收益的方向往往难预测，但大波动后仍容易出现大波动，小波动也会成段聚集。GARCH 建模的是给定过去信息后的条件方差，不是把未来收益本身变得确定。
+\end{quote}
+
+标准时间序列模型假设弱平稳：均值恒定，协方差函数 \(\gamma_k=\Cov(X_t,X_{t-k})\) 只依赖滞后 \(k\)，不依赖时间 \(t\)。但许多实际序列违反这个假设：方差本身随时间变化，形成``波动率聚集''——大波动后跟大波动，小波动后跟小波动。
 
 \subsection{一个可计算的对比：两个序列}
 
-设 $\varepsilon_t$ 是独立同分布的标准正态序列。构造两个过程：
+设 \(\varepsilon_t\) 是独立同分布的标准正态序列。构造两个过程：
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{同方差}：$X_t=\varepsilon_t$，方差恒为 1；
+  \textbf{同方差}：\(X_t=\varepsilon_t\)，方差恒为 1；
 \item
-  \textbf{条件异方差}：$Y_t=\sigma_t\varepsilon_t$，其中 $\sigma_t^2=0.1+0.8Y_{t-1}^2$（ARCH(1) 的特殊形式）。
+  \textbf{条件异方差}：\(Y_t=\sigma_t\varepsilon_t\)，其中 \(\sigma_t^2=0.1+0.8Y_{t-1}^2\)（ARCH(1) 的特殊形式）。
 \end{itemize}
 
-两个序列的均值都是零，$X_t$ 的 ACF 在所有滞后都是零。$Y_t$ 的 ACF 在所有滞后也是零（因为 $\E[Y_tY_{t-k}]=\E[\sigma_t\sigma_{t-k}]\E[\varepsilon_t]\E[\varepsilon_{t-k}]=0$），但 $|Y_t|$ 和 $Y_t^2$ 的 ACF 显著为正且缓慢衰减。
+两个序列的均值都是零，\(X_t\) 的 ACF 在所有滞后都是零。\(Y_t\) 的 ACF 在所有滞后也是零（因为 \(\E[Y_tY_{t-k}]=\E[\sigma_t\sigma_{t-k}]\E[\varepsilon_t]\E[\varepsilon_{t-k}]=0\)），但 \(|Y_t|\) 和 \(Y_t^2\) 的 ACF 显著为正且缓慢衰减。
 
 这个对比揭示了条件异方差的指纹：\textbf{原序列不相关，但平方或绝对值序列相关}。方差本身有可预测结构，即使均值没有。
 
 \subsection{条件异方差的定义}
 
-设 $\mathcal F_{t-1}$ 是截至 $t-1$ 的信息集（通常是由 $\{X_s:s<t\}$ 生成的 $\sigma$-代数）。过程 $X_t$ 是条件异方差的，如果
+设 \(\mathcal F_{t-1}\) 是截至 \(t-1\) 的信息集（通常是由 \(\{X_s:s<t\}\) 生成的 \(\sigma\)-代数）。过程 \(X_t\) 是条件异方差的，如果
 
 \[
 \Var(X_t\mid\mathcal F_{t-1})=\sigma_t^2
 \]
 
-是时间变化的，且与 $\mathcal F_{t-1}$ 相关。标准 ARMA 模型假设 $\sigma_t^2$ 恒定（同方差），条件异方差模型允许它随时间变化。
+是时间变化的，且与 \(\mathcal F_{t-1}\) 相关。标准 ARMA 模型假设 \(\sigma_t^2\) 恒定（同方差），条件异方差模型允许它随时间变化。
 
-弱平稳要求 $\Var(X_t)$ 恒定。条件异方差不违反弱平稳（$\sigma_t^2$ 可以是平稳过程），但它意味着条件方差可预测——这与 ARMA 的``创新不可预测''形成对照。
+弱平稳要求 \(\Var(X_t)\) 恒定。条件异方差不违反弱平稳（\(\sigma_t^2\) 可以是平稳过程），但它意味着条件方差可预测——这与 ARMA 的``创新不可预测''形成对照。
 
 \subsection{为什么标准 ARMA 失效}
 
-ARMA 模型 $X_t=\mu+\varepsilon_t$ 假设 $\varepsilon_t$ 是白噪声：零均值、恒定方差、不相关。这给出
+ARMA 模型 \(X_t=\mu+\varepsilon_t\) 假设 \(\varepsilon_t\) 是白噪声：零均值、恒定方差、不相关。这给出
 
 \[
 \Var(X_t\mid\mathcal F_{t-1})=\sigma^2,
@@ -58,7 +63,7 @@ X_t=\sigma_tz_t,
 z_t\sim\text{iid}(0,1),
 \]
 
-其中 $\sigma_t^2$ 是 $\mathcal F_{t-1}$-可测的，依赖历史信息。$z_t$ 是标准化创新（均值为零、方差为 1），可以是 Gaussian、Student-t 或其他分布。
+其中 \(\sigma_t^2\) 是 \(\mathcal F_{t-1}\)-可测的，依赖历史信息。\(z_t\) 是标准化创新（均值为零、方差为 1），可以是 Gaussian、Student-t 或其他分布。
 
 ARCH（自回归条件异方差）由 Engle（1982）提出，GARCH（广义 ARCH）由 Bollerslev（1986）推广。两者共享核心：条件方差依赖历史冲击和历史方差，形成自回归结构。
 

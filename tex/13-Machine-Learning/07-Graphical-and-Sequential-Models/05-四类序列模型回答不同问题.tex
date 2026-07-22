@@ -1,6 +1,11 @@
 \section{四类序列模型回答不同问题}
+\label{sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/05}
 
-HMM、线性状态空间模型、CRF 和 self-attention 都接收序列，但“输入是什么、随机变量是什么、需要归一化什么”并不相同。把它们按网络结构或年代排列，容易掩盖真正的建模选择。
+\begin{quote}
+\textbf{先抓住这一点：}序列方法不能只按网络外形比较。HMM、状态空间模型、CRF 与 attention 分别侧重生成、连续状态估计、结构化条件预测和内容相关表示。
+\end{quote}
+
+HMM、线性状态空间模型、CRF 和 self-attention 都接收序列，但``输入是什么、随机变量是什么、需要归一化什么''并不相同。把它们按网络结构或年代排列，容易掩盖真正的建模选择。
 
 \subsection{先问是生成、滤波、标注还是表示}
 
@@ -27,11 +32,11 @@ self-attention &
 \bottomrule
 \end{longtable}
 
-表中最重要的一列是“主要分布或映射”。HMM 与状态空间模型为观测和状态写联合分布，所以能够讨论缺失观测、未来生成和状态 posterior。CRF 只比较同一个输入下的标签序列，避免为复杂输入建立生成模型。self-attention 本身只是一个确定性可微映射；只有接上 softmax likelihood、自回归分解或潜变量模型后，才获得相应概率解释。
+表中最重要的一列是``主要分布或映射''。HMM 与状态空间模型为观测和状态写联合分布，所以能够讨论缺失观测、未来生成和状态 posterior。CRF 只比较同一个输入下的标签序列，避免为复杂输入建立生成模型。self-attention 本身只是一个确定性可微映射；只有接上 softmax likelihood、自回归分解或潜变量模型后，才获得相应概率解释。
 
-\subsection{同叫“状态”，语义也可能不同}
+\subsection{同叫``状态''，语义也可能不同}
 
-HMM 的 \(Z_t\) 和 Kalman filter 的 \(X_t\) 是随机潜状态，观察数据后仍有 posterior uncertainty。循环网络或 attention 的 hidden representation 通常是输入和参数的确定性函数。把 hidden vector 称为“隐状态”不等于已经定义
+HMM 的 \(Z_t\) 和 Kalman filter 的 \(X_t\) 是随机潜状态，观察数据后仍有 posterior uncertainty。循环网络或 attention 的 hidden representation 通常是输入和参数的确定性函数。把 hidden vector 称为``隐状态''不等于已经定义
 
 \[
 p(z_t\mid x_{1:t})
@@ -53,7 +58,7 @@ p(z_t\mid x_{1:t})
 \item attention 直接形成内容相关的加权和，标准实现的两两交互通常需要 \(O(T^2)\) 时间和存储。
 \end{itemize}
 
-“能处理长序列”因此不是单一性质。链式动态规划对 \(T\) 线性，但表达的是局部 Markov 因子；attention 能一步连接远距离位置，却付出二次交互代价，也不自动提供 filtering posterior。
+``能处理长序列''因此不是单一性质。链式动态规划对 \(T\) 线性，但表达的是局部 Markov 因子；attention 能一步连接远距离位置，却付出二次交互代价，也不自动提供 filtering posterior。
 
 \subsection{混合模型时要保留清楚的接口}
 
@@ -67,4 +72,4 @@ p(z_t\mid x_{1:t})
 \text{推断算法}.
 \]
 
-排查失败时也应沿这三层检查。训练损失差可能是表示不足或优化失败；似然正常而滤波漂移，可能是状态转移错设或近似退化；token 得分合理而标签序列非法，可能是输出结构没有被建模。知道一个方法属于哪一层，比记住它“适合序列”更能指导选择。
+排查失败时也应沿这三层检查。训练损失差可能是表示不足或优化失败；似然正常而滤波漂移，可能是状态转移错设或近似退化；token 得分合理而标签序列非法，可能是输出结构没有被建模。知道一个方法属于哪一层，比记住它``适合序列''更能指导选择。

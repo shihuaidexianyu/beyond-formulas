@@ -1,7 +1,6 @@
 在线性代数课上，\(A^{-1}b\)、LU、QR、SVD 都可以描述同一个解；在计算机上，它们的成本与误差却完全不同。数值线性代数的核心是根据问题结构选择不会放大不必要误差的表示；``会分解矩阵''只是基础：一般方阵用带主元 LU，最小二乘用 QR，正定系统用 Cholesky，大型稀疏问题用 Krylov，谱与低秩问题则需要特征值算法或 SVD。
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   线性方程为何分解而不求逆
@@ -20,3 +19,24 @@
 \end{enumerate}
 
 前六篇按矩阵整体结构选择分解或 Krylov 子空间；最后一篇换到数据访问结构：当内存一次只能容纳一行观测时，Kaczmarz 把解线性系统变成连续的几何投影，并说明随机抽行何时带来可量化的收敛速度。
+
+\subsection{怎么读这一章}
+
+第一次读先完成前三篇，建立最实用的对应：一般方阵用带主元 LU，最小二乘优先 QR，正定系统用 Cholesky。随后读 SVD，看看哪些方向几乎被矩阵压没了。若矩阵大到不能完整分解，再按数据能怎样访问来选择 Krylov、特征值迭代或 Kaczmarz。无论用哪种方法，都不要只看残差；方程几乎满足，不代表求出的未知量一定准确。
+
+前一单元：\hyperref[ch:064]{``数值微分与积分：同一份采样，为何难度相反''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/01]{``线性方程为何分解而不求逆''}；
+\item \hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/02]{``QR 与最小二乘的稳定解法''}；
+\item \hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/03]{``Cholesky：利用正定结构''}；
+\item \hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/04]{``大型稀疏系统与 Krylov 迭代''}；
+\item \hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/05]{``从幂迭代到 QR 特征值算法''}；
+\item \hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/06]{``SVD、低秩与数值秩''}；
+\item \hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/07]{``Kaczmarz：逐行投影大型线性系统''}。
+\end{itemize}

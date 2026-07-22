@@ -1,15 +1,14 @@
 Trace 方法不是一张公式表。它的核心任务只有一个：把标量微分整理成
 
 \[
-df=\operatorname{tr}(G^TdX),
+df=\trace(G^{\trans}dX),
 \]
 
-从而读出 \(\nabla_Xf=G\)（即以 Frobenius 内积 \(\langle G,H\rangle_F=\operatorname{tr}(G^TH)\) 定义梯度）。二次型、逆矩阵和 log-determinant 都可以从各自的基本恒等式推导，不需要凭记忆猜转置。
+从而读出 \(\nabla_Xf=G\)（即以 Frobenius 内积 \(\langle G,H\rangle_F=\trace(G^{\trans}H)\) 定义梯度）。二次型、逆矩阵和 log-determinant 都可以从各自的基本恒等式推导，不需要凭记忆猜转置。
 
 本章分三节：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Trace 怎样整理二次型微分：练习循环移动、转置和矩阵二次型。
@@ -20,3 +19,18 @@ df=\operatorname{tr}(G^TdX),
 \end{enumerate}
 
 每次应用公式前，都要检查矩阵是否可逆、是否对称正定、变量是否受对称约束，以及数值实现是否应复用分解而非显式求逆。
+
+\subsection{怎么读这一章}
+
+Trace 技巧的目的不是把式子转得更花，而是把所有扰动整理到统一位置，从而直接读出梯度。先掌握二次型，再看逆矩阵和 log-determinant；后两者在实现中都要同时考虑数值线性代数，而不能只停在符号求导。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:10-Matrix-Calculus/03-Trace-Calculus/01]{``Trace 怎样整理二次型微分''}；
+\item \hyperref[sec:10-Matrix-Calculus/03-Trace-Calculus/02]{``逆矩阵求导应写成线性求解''}；
+\item \hyperref[sec:10-Matrix-Calculus/03-Trace-Calculus/03]{``行列式与 log-determinant 的微分''}。
+\end{itemize}

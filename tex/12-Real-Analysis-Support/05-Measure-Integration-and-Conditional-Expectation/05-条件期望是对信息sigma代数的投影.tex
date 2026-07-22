@@ -1,41 +1,45 @@
-\section{条件期望是对信息 $\sigma$-代数的投影}
+\section{条件期望是对信息 \(\sigma\)-代数的投影}
+\label{sec:12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/05}
 
-概率论中已经从离散分层理解了 $\E[X\mid Y]$，并证明它是使用 $Y$ 的最佳均方预测。这个计算形式依赖``给定 $Y=y$''容易解释。若 $Y$ 连续，每个单点通常满足 $\Prob(Y=y)=0$，事件公式
+\begin{quote}
+\textbf{先抓住这一点：}条件期望不是简单把某个事件代进公式，而是在给定信息 sigma 代数下寻找一个可观察随机变量，使所有已知事件上的平均都与原变量一致。
+\end{quote}
+
+概率论中已经从离散分层理解了 \(\E[X\mid Y]\)，并证明它是使用 \(Y\) 的最佳均方预测。这个计算形式依赖``给定 \(Y=y\)''容易解释。若 \(Y\) 连续，每个单点通常满足 \(P(Y=y)=0\)，事件公式
 
 \[
-\frac{\E[X\ind_{\set{Y=y}}]}{\Prob(Y=y)}
+\frac{\E[X\ind_{\set{Y=y}}]}{P(Y=y)}
 \]
 
-变成 $0/0$，不能作为定义。一般条件期望改为对一整个信息 $\sigma$-代数进行平均，从而避开对单个零概率事件做除法。
+变成 \(0/0\)，不能作为定义。一般条件期望改为对一整个信息 \(\sigma\)-代数进行平均，从而避开对单个零概率事件做除法。
 
 \subsection{定义由可观测性与局部平均共同决定}
 
-设 $X$ 可积，$\mathcal G\subseteq\mathcal F$ 是已有信息。随机变量 $Z$ 若满足：
+设 \(X\) 可积，\(\mathcal G\subseteq\mathcal F\) 是已有信息。随机变量 \(Z\) 若满足：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  $Z$ 对 $\mathcal G$ 可测，即它只使用 $\mathcal G$ 中的信息；
+  \(Z\) 对 \(\mathcal G\) 可测，即它只使用 \(\mathcal G\) 中的信息；
 \item
-  对每个 $A\in\mathcal G$，都有
+  对每个 \(A\in\mathcal G\)，都有
   \[
-  \int_A Z\,d\Prob=\int_A X\,d\Prob,
+  \int_A Z\,dP=\int_A X\,dP,
   \]
 \end{enumerate}
 
-就称 $Z$ 是给定 $\mathcal G$ 的条件期望，记作
+就称 \(Z\) 是给定 \(\mathcal G\) 的条件期望，记作
 
 \[
 Z=\E[X\mid\mathcal G].
 \]
 
-第一条限制答案能看见什么，第二条要求答案在每个可由现有信息识别的区域上保持 $X$ 的平均质量。只匹配全空间上的均值远远不够；必须对每个 $A\in\mathcal G$ 都匹配。
+第一条限制答案能看见什么，第二条要求答案在每个可由现有信息识别的区域上保持 \(X\) 的平均质量。只匹配全空间上的均值远远不够；必须对每个 \(A\in\mathcal G\) 都匹配。
 
 定义也解释了条件概率：
 
 \[
-\Prob(B\mid\mathcal G)
+P(B\mid\mathcal G)
 =\E[\ind_B\mid\mathcal G].
 \]
 
@@ -43,44 +47,44 @@ Z=\E[X\mid\mathcal G].
 
 \subsection{Radon--Nikodym 定理保证存在}
 
-先设 $X\ge0$，在 $\mathcal G$ 上定义测度
+先设 \(X\ge0\)，在 \(\mathcal G\) 上定义测度
 
 \[
-\nu(A)=\int_A X\,d\Prob,
+\nu(A)=\int_A X\,dP,
 \qquad A\in\mathcal G.
 \]
 
-显然 $\nu\ll\Prob|_{\mathcal G}$。Radon--Nikodym 定理给出一个 $\mathcal G$-可测函数 $Z$，使
+显然 \(\nu\ll P|_{\mathcal G}\)。Radon--Nikodym 定理给出一个 \(\mathcal G\)-可测函数 \(Z\)，使
 
 \[
-\nu(A)=\int_A Z\,d\Prob,
+\nu(A)=\int_A Z\,dP,
 \qquad A\in\mathcal G.
 \]
 
-这正是条件期望的定义。一般可积 $X$ 再通过正负部分构造。由此可见，条件期望不是先猜一个条件密度再积分；它的存在来自测度相对于已有信息的导数。
+这正是条件期望的定义。一般可积 \(X\) 再通过正负部分构造。由此可见，条件期望不是先猜一个条件密度再积分；它的存在来自测度相对于已有信息的导数。
 
-若 $Z_1,Z_2$ 都满足定义，则它们只保证几乎处处相等。零概率集合上的取值无法被任何积分条件识别，因此条件期望是一个等价类，而不是每个样本点上唯一指定的函数。
+若 \(Z_1,Z_2\) 都满足定义，则它们只保证几乎处处相等。零概率集合上的取值无法被任何积分条件识别，因此条件期望是一个等价类，而不是每个样本点上唯一指定的函数。
 
 \subsection{有限分割退回熟悉的分层平均}
 
-若 $\mathcal G$ 由有限分割 $B_1,\ldots,B_m$ 生成，并且 $\Prob(B_j)>0$，那么
+若 \(\mathcal G\) 由有限分割 \(B_1,\ldots,B_m\) 生成，并且 \(P(B_j)>0\)，那么
 
 \[
 \E[X\mid\mathcal G]
 =\sum_{j=1}^m
-\frac{\E[X\ind_{B_j}]}{\Prob(B_j)}\ind_{B_j}.
+\frac{\E[X\ind_{B_j}]}{P(B_j)}\ind_{B_j}.
 \]
 
 答案在每个无法进一步区分的块上为常数，常数正是块内平均。若某块概率为零，该块上的取值任意，不影响条件期望的几乎处处等价类。
 
-对随机变量 $Y$，记
+对随机变量 \(Y\)，记
 
 \[
 \E[X\mid Y]
 \eqdef\E[X\mid\sigma(Y)].
 \]
 
-因为答案对 $\sigma(Y)$ 可测，在常见可测空间中可写成某个可测函数 $g(Y)$。符号 $\E[X\mid Y=y]=g(y)$ 选择了这个函数的一个版本，但 $g$ 只在 $P_Y$-几乎处处意义下确定。若某个 $y$ 从不出现，条件期望定义通常不会规定该点必须取什么值。
+因为答案对 \(\sigma(Y)\) 可测，在常见可测空间中可写成某个可测函数 \(g(Y)\)。符号 \(\E[X\mid Y=y]=g(y)\) 选择了这个函数的一个版本，但 \(g\) 只在 \(P_Y\)-几乎处处意义下确定。若某个 \(y\) 从不出现，条件期望定义通常不会规定该点必须取什么值。
 
 \subsection{常用性质都能从定义读出}
 
@@ -89,30 +93,30 @@ Z=\E[X\mid\mathcal G].
 \begin{itemize}
 \item
   \textbf{线性：}
-  $\E[aX+bY\mid\mathcal G]
-  =a\E[X\mid\mathcal G]+b\E[Y\mid\mathcal G]$；
+  \(\E[aX+bY\mid\mathcal G]
+  =a\E[X\mid\mathcal G]+b\E[Y\mid\mathcal G]\)；
 \item
-  \textbf{保持次序：}若 $X\le Y$ 几乎处处，则
-  $\E[X\mid\mathcal G]\le\E[Y\mid\mathcal G]$ 几乎处处；
+  \textbf{保持次序：}若 \(X\le Y\) 几乎处处，则
+  \(\E[X\mid\mathcal G]\le\E[Y\mid\mathcal G]\) 几乎处处；
 \item
-  \textbf{已知量可以提出：}若 $H$ 有界且对 $\mathcal G$ 可测，则
+  \textbf{已知量可以提出：}若 \(H\) 有界且对 \(\mathcal G\) 可测，则
   \[
   \E[HX\mid\mathcal G]=H\E[X\mid\mathcal G];
   \]
 \item
-  \textbf{独立信息不改变平均：}若 $X$ 与 $\mathcal G$ 独立，则
-  $\E[X\mid\mathcal G]=\E[X]$；
+  \textbf{独立信息不改变平均：}若 \(X\) 与 \(\mathcal G\) 独立，则
+  \(\E[X\mid\mathcal G]=\E[X]\)；
 \item
-  \textbf{塔式性质：}若 $\mathcal G\subseteq\mathcal H$，则
+  \textbf{塔式性质：}若 \(\mathcal G\subseteq\mathcal H\)，则
   \[
   \E[\E[X\mid\mathcal H]\mid\mathcal G]
   =\E[X\mid\mathcal G].
   \]
 \end{itemize}
 
-``已知量可以提出''中的可测性不能省略。若 $H$ 仍包含 $\mathcal G$ 看不见的随机性，它就不是条件下的常数。塔式性质也要求信息族嵌套；对两个互不包含的 $\sigma$-代数，连续条件化一般不能随意交换。
+``已知量可以提出''中的可测性不能省略。若 \(H\) 仍包含 \(\mathcal G\) 看不见的随机性，它就不是条件下的常数。塔式性质也要求信息族嵌套；对两个互不包含的 \(\sigma\)-代数，连续条件化一般不能随意交换。
 
-若 $\varphi$ 为凸函数，并且 $X$ 与 $\varphi(X)$ 可积，则还满足条件 Jensen 不等式
+若 \(\varphi\) 为凸函数，并且 \(X\) 与 \(\varphi(X)\) 可积，则还满足条件 Jensen 不等式
 
 \[
 \varphi\bigl(\E[X\mid\mathcal G]\bigr)
@@ -120,11 +124,11 @@ Z=\E[X\mid\mathcal G].
 \E[\varphi(X)\mid\mathcal G].
 \]
 
-取 $\varphi(x)=x^2$ 可以看出，条件平均会消除当前信息无法解释的波动，而不会制造更多二次波动。
+取 \(\varphi(x)=x^2\) 可以看出，条件平均会消除当前信息无法解释的波动，而不会制造更多二次波动。
 
-\subsection{$L^2$ 中的正交投影}
+\subsection{\(L^2\) 中的正交投影}
 
-若 $X\in L^2$，所有平方可积且 $\mathcal G$-可测的随机变量组成 $L^2$ 的闭子空间。条件期望是 $X$ 到这个子空间的正交投影：
+若 \(X\in L^2\)，所有平方可积且 \(\mathcal G\)-可测的随机变量组成 \(L^2\) 的闭子空间。条件期望是 \(X\) 到这个子空间的正交投影：
 
 \[
 \E\left[
@@ -132,7 +136,7 @@ Z=\E[X\mid\mathcal G].
 \right]=0
 \]
 
-对每个平方可积的 $\mathcal G$-可测 $H$ 成立。因此
+对每个平方可积的 \(\mathcal G\)-可测 \(H\) 成立。因此
 
 \[
 \E[(X-H)^2]
@@ -142,11 +146,11 @@ Z=\E[X\mid\mathcal G].
 \E[(\E[X\mid\mathcal G]-H)^2].
 \]
 
-这严格化了概率论中``利用信息的最佳预测''，也把条件期望与最小二乘投影放进同一几何结构。注意，正交投影视角需要二阶矩；条件期望本身只要求 $X\in L^1$。
+这严格化了概率论中``利用信息的最佳预测''，也把条件期望与最小二乘投影放进同一几何结构。注意，正交投影视角需要二阶矩；条件期望本身只要求 \(X\in L^1\)。
 
 \subsection{随机过程与序贯决策都在更新信息}
 
-给定 filtration $(\mathcal F_t)$，若
+给定 filtration \((\mathcal F_t)\)，若
 
 \[
 M_t=\E[X\mid\mathcal F_t],

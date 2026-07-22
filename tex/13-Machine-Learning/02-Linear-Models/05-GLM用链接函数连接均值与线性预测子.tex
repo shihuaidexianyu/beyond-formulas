@@ -1,4 +1,9 @@
 \section{GLM 用链接函数连接均值与线性预测子}
+\label{sec:13-Machine-Learning/02-Linear-Models/05}
+
+\begin{quote}
+\textbf{先抓住这一点：}GLM 让响应分布来自指数族，并用链接函数把条件均值接到线性预测子。线性发生在链接后的尺度上，不代表原始响应与特征呈直线关系。
+\end{quote}
 
 \subsection{线性不必意味着直接预测响应值}
 
@@ -18,7 +23,7 @@ g(\mu)=\eta,
 \mu=\E[Y\mid X=x].
 \]
 
-“广义”改变的是响应分布与均值尺度，不是把 \(x^\trans\beta\) 换成任意非线性黑箱。
+``广义''改变的是响应分布与均值尺度，不是把 \(x^\trans\beta\) 换成任意非线性黑箱。
 
 \subsection{指数族提供统一的似然骨架}
 

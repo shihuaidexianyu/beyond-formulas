@@ -1,4 +1,9 @@
 \section{多重比较改变错误的计量单位}
+\label{sec:11-Mathematical-Statistics/05-Hypothesis-Testing/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}同时尝试很多假设时，即使每次误报概率很低，整组分析出现至少一次误报的机会也会升高。校正方法的差别首先在于控制的是家族错误率、错误发现率还是别的错误单位。
+\end{quote}
 
 单个 level 0.05 检验把一次第一类错误控制在 5\%。若同时做 100 个相互独立且都为真的原假设检验，每个仍用 0.05，至少出现一个假阳性的概率是
 
@@ -14,7 +19,7 @@
 FWER 定义为
 
 \[
-\Pr(V\ge1),
+P(V\ge1),
 \]
 
 其中 \(V\) 是被错误拒绝的真原假设数。Bonferroni 方法要控制 FWER 不超过 \(\alpha\)，就对 \(m\) 个检验分别使用
@@ -26,10 +31,10 @@ FWER 定义为
 因为 union bound 给
 
 \[
-\Pr(\text{至少一个假阳性})
+P(\text{至少一个假阳性})
 \le
 \sum_{j=1}^m
-\Pr(\text{第 }j\text{ 个假阳性})
+P(\text{第 }j\text{ 个假阳性})
 \le\alpha.
 \]
 
@@ -42,7 +47,7 @@ FWER 适合任何一个假阳性都代价很高的确认性研究。
 大规模探索中，可能愿意容忍少量假发现，以换取更多真发现。FDR 定义为
 
 \[
-\mathbb E
+\E
 \left[
 \frac{V}{\max(R,1)}
 \right],
@@ -125,4 +130,3 @@ p_{(1)}\le\cdots\le p_{(m)}
 \end{itemize}
 
 多重校正不是对``坏数据挖掘''的万能惩罚。若假设由同一数据无限适应性生成，简单把最终数量代入 Bonferroni 也未必覆盖完整选择过程。
-

@@ -3,7 +3,6 @@
 因此选择分布时，先问``数据是怎样产生的''，再看参数和公式：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   成败试验中的 Bernoulli、二项与等待分布：固定试验次数与固定成功次数是两种不同停止规则。
@@ -12,11 +11,11 @@
 \item
   Poisson 计数、Exponential 等待与 Gamma 时间：把事件数和等待时间看成同一到达过程的两面。
 \item
-  Uniform、Beta 与 Dirichlet 分布：区间或概率单纯形上的分布怎样表达无偏好与不同形状的先验。
+  Uniform、Beta 与 Dirichlet 分布：区间或概率单纯形上的分布怎样表达相对于指定坐标与基准测度的均匀性，以及不同形状的先验。
 \item
   Gaussian 与多元 Gaussian：为什么许多小扰动的和会形成钟形，以及协方差怎样决定椭圆几何。
 \item
-  从 Gaussian 到卡方与 Student $t$：估计均值与方差时为什么自然出现新的分布。
+  从 Gaussian 到卡方与 Student \(t\)：估计均值与方差时为什么自然出现新的分布。
 \item
   重尾分布：Cauchy 的样本均值为何永不收敛，尾指数怎样决定哪些矩存在。
 \item
@@ -24,3 +23,23 @@
 \end{enumerate}
 
 学习每个分布时至少保留五件事：随机机制、支撑集、参数含义、均值与方差（先确认它们存在）、失效边界。只记密度公式，往往最先忘掉的恰好是决定能否使用它的条件。
+
+\subsection{怎么读这一章}
+
+首次阅读以机制配对为主：固定次数与等待次数、不放回与独立重复、计数与等待时间、单变量 Gaussian 与协方差几何。第二遍再进入 Beta--Dirichlet 共轭、卡方与 Student \(t\) 的构造。重尾与极值两篇不是附录：当风险由少数极端观测主导时，应优先阅读它们，并在计算均值、方差或重现水平前先检查矩存在性、平稳性与独立性。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:05-Probability/06-Common-Distributions/01]{``成败试验中的 Bernoulli、二项与等待分布''}；
+\item \hyperref[sec:05-Probability/06-Common-Distributions/02]{``不放回抽样与 Hypergeometric 分布''}；
+\item \hyperref[sec:05-Probability/06-Common-Distributions/03]{``Poisson 计数、Exponential 等待与 Gamma 时间''}；
+\item \hyperref[sec:05-Probability/06-Common-Distributions/04]{``Uniform、Beta 与 Dirichlet 分布''}；
+\item \hyperref[sec:05-Probability/06-Common-Distributions/05]{``Gaussian 与多元 Gaussian''}；
+\item \hyperref[sec:05-Probability/06-Common-Distributions/06]{``从 Gaussian 到卡方与 Student \(t\)''}；
+\item \hyperref[sec:05-Probability/06-Common-Distributions/07]{``重尾分布：当均值与方差失效时''}；
+\item \hyperref[sec:05-Probability/06-Common-Distributions/08]{``极值分布与尾部风险''}。
+\end{itemize}

@@ -1,4 +1,9 @@
 \section{函数与可逆性}
+\label{sec:01-Mathematical-Language/02-Sets-Relations-Functions/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}函数不仅是一条计算公式，还包括定义域和陪域。单射保证输入不会合并，满射保证目标都有来源，两者同时成立才存在从整个陪域返回定义域的逆函数。
+\end{quote}
 
 \subsection{函数是``每个输入恰好一个输出''的关系}
 
@@ -61,7 +66,11 @@ g\circ f:A\to C,\qquad(g\circ f)(a)=g(f(a)).
 
 先算 \(f\) 再算 \(g\)，所以记号是从右往左读的。中间的类型必须对上：\(f\) 的输出得能当 \(g\) 的输入。
 
-这个方向初看别扭：数据的实际流向是 \(a\mapsto f(a)\mapsto g(f(a))\)，从左向右；记号 \(g\circ f\) 却把先执行的 \(f\) 写在右边。原因在于函数作用的写法本身——\(f(a)\) 已经把函数写在输入左边，复合 \(g(f(a))\) 自然让后执行的 \(g\) 出现在最外层。嵌套写法 \(g(f(a))\) 本身没有歧义：内层先算、外层后算，不需要任何约定；需要约定的只是缩写 \(\circ\) 的读法。不确定顺序时，把它展开回嵌套形式就能消歧。本书与绝大多数数学文献保持一致，始终采用``右端先执行''的约定；后面矩阵乘法、链式法则 \(J_{g\circ f}=J_gJ_f\)（列向量约定下，先作用的矩阵靠右、先乘到向量上）用的也是同一方向。少数教材（尤其部分代数书）按动作顺序从左向右写复合，读那些书时要把乘积方向整个反过来；同一本书、同一段推导里不能混用两种约定。
+这个方向初看别扭：数据的实际流向是 \(a\mapsto f(a)\mapsto g(f(a))\)，从左向右；记号 \(g\circ f\) 却把先执行的 \(f\) 写在右边。原因在于函数作用的写法本身——\(f(a)\) 已经把函数写在输入左边，复合 \(g(f(a))\) 自然让后执行的 \(g\) 出现在最外层。
+
+嵌套写法 \(g(f(a))\) 本身没有歧义：内层先算、外层后算，不需要任何约定；需要约定的只是缩写 \(\circ\) 的读法。不确定顺序时，把它展开回嵌套形式就能消歧。
+
+本书与绝大多数数学文献保持一致，始终采用``右端先执行''的约定；后面矩阵乘法、链式法则 \(J_{g\circ f}=J_gJ_f\)（列向量约定下，先作用的矩阵靠右、先乘到向量上）用的也是同一方向。少数教材（尤其部分代数书）按动作顺序从左向右写复合，读那些书时要把乘积方向整个反过来；同一本书、同一段推导里不能混用两种约定。
 
 复合满足结合律：
 
@@ -132,10 +141,12 @@ f^{-1}(T_1\cup T_2)=f^{-1}(T_1)\cup f^{-1}(T_2),
 验证方法跟之前证 De Morgan 律一样，展开成元素语言推一遍：
 
 \[
+\begin{aligned}
 x\in f^{-1}(T_1\cup T_2)
-\Longleftrightarrow f(x)\in T_1\cup T_2
-\Longleftrightarrow f(x)\in T_1\text{ 或 }f(x)\in T_2
-\Longleftrightarrow x\in f^{-1}(T_1)\cup f^{-1}(T_2).
+&\Longleftrightarrow f(x)\in T_1\cup T_2\\
+&\Longleftrightarrow f(x)\in T_1\text{ 或 }f(x)\in T_2\\
+&\Longleftrightarrow x\in f^{-1}(T_1)\cup f^{-1}(T_2).
+\end{aligned}
 \]
 
 交和补也都成立。像的话，并集是保持的，但交集不一定保持——不同输入可能撞到同一个输出上。只有额外加上单射性，才能避免这种信息合并。
@@ -148,8 +159,4 @@ x\in f^{-1}(T_1\cup T_2)
 
 \subsection{参考来源}
 
-\begin{itemize}
-\tightlist
-\item
-  Discrete Mathematics: An Open Introduction 的 Functions and Relations 部分。
-\end{itemize}
+Discrete Mathematics: An Open Introduction 的 Functions and Relations 部分。

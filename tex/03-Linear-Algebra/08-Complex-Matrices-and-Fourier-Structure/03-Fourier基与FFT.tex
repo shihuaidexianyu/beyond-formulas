@@ -1,4 +1,9 @@
 \section{Fourier 基与 FFT}
+\label{sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}Fourier 基不是一组偶然好用的波形，而是循环平移的正交特征基。在有限周期序列上，线性平移不变算子因此在该坐标中变成逐频率乘法。
+\end{quote}
 
 \subsection{从循环移位寻找``最自然的坐标''}
 
@@ -63,10 +68,10 @@ x_j=\frac1{\sqrt n}\sum_{k=0}^{n-1}\widehat x_k e^{2\pi i k j/n}.
 
 即总能量在时域和频域中相同。
 
-以 \(n=4\)、\(x=(1,0,-1,0)^\top\) 为例，直接代入得到
+以 \(n=4\)、\(x=(1,0,-1,0)^{\trans}\) 为例，直接代入得到
 
 \[
-\widehat x=(0,1,0,1)^\top.
+\widehat x=(0,1,0,1)^{\trans}.
 \]
 
 时域中它表现为正负交替的两个脉冲，频域中只有一对共轭频率。两边平方范数都为 \(2\)。对于实信号，\(\widehat x_{n-k}=\overline{\widehat x_k}\)，因此正负频率成共轭对。这种成对出现源于实信号在复指数坐标中的必然对称性，并不表示数据冗余或记录有误。
@@ -90,6 +95,10 @@ F(x*y)=\sqrt n\,(Fx)\odot(Fy),
 这条结论的第一性原理很简单：卷积是平移不变算子，而复指数是平移的特征向量；特征坐标把线性算子变成逐坐标乘法。微分方程、滤波和图像处理中的频域方法都在反复使用这一思想。
 
 循环卷积隐含周期边界。要用 DFT 计算普通的有限线性卷积，必须补足够多的零，避免尾部绕回开头。忘记零填充会产生环绕伪影。
+
+\subsection{与卷积网络的连接在哪里断开}
+
+单个周期线性卷积可以被 DFT 精确对角化；这与\hyperref[ch:126]{``卷积网络''}中的参数共享有同一个平移结构根源。但 CNN 还包含通道混合、非线性激活、stride、padding 和 pooling。非线性在频域中会混合频率，有限边界与下采样也会破坏理想的循环平移对称。因此，``卷积在频域是乘法''可以解释一个线性层，却不能直接对角化整个深度网络。
 
 \subsection{FFT 快在哪里}
 
@@ -133,5 +142,5 @@ T(n)=2T(n/2)+O(n),
 \item
   MIT 18.06SC：Complex Matrices; Fast Fourier Transform
 \item
-  Fourier 与谱方法继续讨论离散计算、谱微分和数值边界。
+  \hyperref[ch:068]{``Fourier 与谱方法''}继续讨论连续变换、谱微分和数值边界。
 \end{itemize}

@@ -1,4 +1,9 @@
 \section{Fermat 与 Euler 定理}
+\label{sec:04-Discrete-Mathematics/04-Number-Theory/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}与模数互素的余数类组成一个可逆乘法系统。乘以其中任一元素只会重新排列它们。Euler 定理来自这个置换不变量，给出指数周期的通用上界，却未必给出最小周期。
+\end{quote}
 
 \subsection{乘法会置换互素余数类}
 
@@ -50,3 +55,5 @@ ed\equiv1\pmod{\varphi(n)}.
 加密近似为 \(c\equiv m^e\pmod n\)，解密 \(c^d\equiv m^{ed}\equiv m\) 的正确性来自 Euler/中国剩余结构：\(ed=1+k\varphi(n)\)，当 \(\gcd(m,n)=1\) 时 \(m^{ed}=m\,(m^{\varphi(n)})^k\equiv m\pmod n\)；一般情形分别在模 \(p\)、模 \(q\) 下验证，再用中国剩余定理（下一节）拼回。安全性则依赖从公开 \(n\) 恢复因子困难，不是因为模幂本身难算。
 
 这里只解释数学骨架。真实密码系统还需要安全填充、密钥长度、侧信道防护等工程条件，不能直接用``教科书 RSA''处理真实消息。
+
+若希望把``可逆余数类''进一步理解成抽象结构，可继续阅读\hyperref[ch:032]{``群与对称：可逆操作怎样组织不变性''}；本节的置换证明正是有限群中 Lagrange 型周期现象的具体版本。

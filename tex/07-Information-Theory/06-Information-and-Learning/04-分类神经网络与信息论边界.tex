@@ -1,4 +1,9 @@
 \section{分类、神经网络与信息论边界}
+\label{sec:07-Information-Theory/06-Information-and-Learning/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}交叉熵、准确率、校准和互信息是在问不同的问题。一个数字变好，不能替另外几个数字作保证。尤其是高维神经网络里的互信息，往往还会随着加噪、量化和估计方法改变。
+\end{quote}
 
 \subsection{交叉熵训练到底在优化什么}
 
@@ -6,7 +11,7 @@
 
 \[
 \mathcal R(\theta)
-=\mathbb E_{(X,Y)\sim P}
+=\E_{(X,Y)\sim P}
 [-\log q_\theta(Y\mid X)].
 \]
 
@@ -16,7 +21,7 @@
 \boxed{
 \mathcal R(\theta)
 =H_P(Y\mid X)
-+\mathbb E_XD\bigl(P_{Y\mid X}\|q_{\theta}(\cdot\mid X)\bigr).
++\E_XD\bigl(P_{Y\mid X}\|q_{\theta}(\cdot\mid X)\bigr).
 }
 \]
 
@@ -54,7 +59,7 @@ P_e\ge
 \frac{H(Y\mid X)-1}{\log_2K}.
 \]
 
-它给出的是不可达区域：若特征留下很大的条件熵，任何算法都不可能把错误率压得任意低。它不是某个分类器一定能达到的误差公式，也通常不是紧界；完整 Bayes 错误取决于后验分布的具体形状，而不只取决于一个互信息标量。
+当右端为正时，它给出不可达区域：若特征留下很大的条件熵，任何算法都不可能把错误率压得任意低。若右端为负，这个放松后的下界只退化成平凡事实 \(P_e\ge0\)。它不是某个分类器一定能达到的误差公式，也通常不是紧界；完整 Bayes 错误取决于后验分布的具体形状，而不只取决于一个互信息标量。
 
 \subsubsection{Fano 的关键想法}
 
@@ -62,7 +67,7 @@ P_e\ge
 
 \subsection{深层表示不会创造标签信息}
 
-对前馈表示
+对评价时参数已经固定、且每层表示只由上一层生成的前馈网络，
 
 \[
 X\to T_1\to T_2\to\cdots\to T_L,

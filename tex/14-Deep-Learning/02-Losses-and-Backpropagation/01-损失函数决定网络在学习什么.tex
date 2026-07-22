@@ -1,6 +1,11 @@
 \section{损失函数决定网络在学习什么}
+\label{sec:14-Deep-Learning/02-Losses-and-Backpropagation/01}
 
 网络架构只规定``能够表示哪些函数''。真正告诉优化器哪些预测更好的，是损失函数。若目标定义错了，再精确的反向传播也只会更高效地优化错误问题。
+
+\begin{quote}
+\textbf{先抓住这一点：}损失函数不是训练的技术细节，而是把概率预测、行动代价和评价目标连接起来的决策声明。
+\end{quote}
 
 对样本 \((x_i,y_i)\)，经验风险通常写成
 
@@ -28,13 +33,13 @@
 \E[|Y-a|\mid X=x]
 \]
 
-对 \(a\) 的次导数为 \(\Prob(Y<a\mid X=x)-\Prob(Y>a\mid X=x)\)，零点要求小于与大于 \(a\) 的概率各占一半，所以最优预测是条件中位数。二者在偏斜或重尾分布下会给出不同预测。Huber loss 在小残差附近二次、大残差附近线性，是对效率与抗离群性的折中，但其阈值也在定义什么误差算``大''。
+对 \(a\) 的次导数为 \(P(Y<a\mid X=x)-P(Y>a\mid X=x)\)，零点要求小于与大于 \(a\) 的概率各占一半，所以最优预测是条件中位数。二者在偏斜或重尾分布下会给出不同预测。Huber loss 在小残差附近二次、大残差附近线性，是对效率与抗离群性的折中，但其阈值也在定义什么误差算``大''。
 
 如果业务关心完整条件分布或多个分位数，单一 MSE 网络无法凭空表达这些信息；需要分位数损失、显式概率分布或其他适合的 scoring rule。
 
 \subsection{分类交叉熵来自概率模型}
 
-对真实阳性概率 \(p=\Prob(Y=1\mid x)\) 和预测 \(q\)，binary log loss 的条件风险为
+对真实阳性概率 \(p=P(Y=1\mid x)\) 和预测 \(q\)，binary log loss 的条件风险为
 
 \[
 -p\log q-(1-p)\log(1-q).
@@ -50,7 +55,7 @@ H(p)+\KL
 
 其中 \(H(p)\) 是真实分布的 Bernoulli 熵，不依赖 \(q\)。KL 非负且等号仅在 \(q=p\) 时成立，所以风险在 \(q=p\) 处唯一最小。log loss 因而是严格 proper scoring rule：诚实报告真实概率在期望上最好。
 
-互斥多分类时，softmax 与 categorical negative log-likelihood 给出 cross-entropy。实现中应直接把 logits 交给融合的稳定损失，而不是先算可能下溢的概率再取对数（稳定公式见``训练动力学与数值稳定''一节）。对于 logits \(z\) 与 one-hot 标签 \(y\)，梯度为
+互斥多分类时，softmax 与 categorical negative log-likelihood 给出 cross-entropy。实现中应直接把 logits 交给融合的稳定损失，而不是先算可能下溢的概率再取对数（稳定公式见\hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/01]{``训练动力学与数值稳定''}一节）。对于 logits \(z\) 与 one-hot 标签 \(y\)，梯度为
 
 \[
 \frac{\partial\ell}{\partial z}=p-y.

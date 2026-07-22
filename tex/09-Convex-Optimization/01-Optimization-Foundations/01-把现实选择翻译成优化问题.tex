@@ -1,4 +1,9 @@
 \section{把现实选择翻译成优化问题}
+\label{sec:09-Convex-Optimization/01-Optimization-Foundations/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}优化的第一步不是选算法，而是把问题写对。变量漏掉一个现实限制，目标写错一种偏好，求解器都可能给出非常精确、却根本不能使用的答案。
+\end{quote}
 
 一家小工厂生产两种产品。产品 A 每件利润 3，产品 B 每件利润 5。两道工序每天分别只能使用 100 和 90 个工时；生产一件 A 需要 \((2,1)\) 个工时，生产一件 B 需要 \((1,3)\) 个工时。
 
@@ -152,7 +157,6 @@ p^\star=\inf_{x\in C}f_0(x).
 在调用算法前，先做一轮不依赖求解器的核对通常最划算：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   为变量和每个约束写出单位，确认相加的量维度一致。
@@ -169,4 +173,3 @@ p^\star=\inf_{x\in C}f_0(x).
 \end{enumerate}
 
 这些动作看似朴素，却能发现比更换优化算法更常见、更昂贵的错误。
-

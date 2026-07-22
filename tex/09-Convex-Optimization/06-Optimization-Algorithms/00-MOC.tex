@@ -3,7 +3,6 @@
 本单元从最便宜的一阶信息逐步走向更强的结构：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   梯度下降真正难在步长用光滑性推导下降条件，并比较固定步长、回溯线搜索与缩放。
@@ -18,3 +17,20 @@
 \end{enumerate}
 
 没有脱离问题结构的``最佳优化器''。每节都会同时讨论每步成本、收敛速度、存储、可行性和证书；这些维度共同决定算法选择。
+
+\subsection{怎么读这一章}
+
+不要按公式复杂程度给算法排队。读每一篇时都问三个问题：它使用梯度、曲率还是可分结构；每步最贵的计算是什么；收敛保证依赖哪些光滑性和凸性条件。先读梯度与 Newton 建立基准，再看不可微问题如何改用次梯度、近端和障碍方法。最优性证书可回看 \hyperref[ch:075]{``对偶：为最优性建立下界证书''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/01]{``梯度下降真正难在步长''}；
+\item \hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/02]{``Newton 法用曲率校正方向''}；
+\item \hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/03]{``不可微时次梯度为何仍能前进''}；
+\item \hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/04]{``近端与坐标方法利用可分结构''}；
+\item \hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/05]{``从障碍函数到原始---对偶内点法''}。
+\end{itemize}

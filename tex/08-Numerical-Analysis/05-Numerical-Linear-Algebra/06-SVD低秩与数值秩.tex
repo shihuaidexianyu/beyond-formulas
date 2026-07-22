@@ -1,4 +1,9 @@
 \section{SVD、低秩与数值秩}
+\label{sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/06}
+
+\begin{quote}
+\textbf{先抓住这一点：}SVD 会找出矩阵最能放大和最容易压扁的方向。一个方向若几乎被压成零，反过来求解时就会把噪声放得很大。因此现实数据里的``秩''必须连同尺度、噪声和容差一起说。
+\end{quote}
 
 \subsection{任意矩阵都有一组最自然的输入输出方向}
 
@@ -11,7 +16,7 @@ A=U\Sigma V^*,
 其中 \(U,V\) 正交或酉，
 
 \[
-\Sigma=\operatorname{diag}(\sigma_1,\ldots,\sigma_r),
+\Sigma=\diag(\sigma_1,\ldots,\sigma_r),
 \qquad
 \sigma_1\ge\cdots\ge\sigma_r\ge0.
 \]
@@ -28,7 +33,7 @@ A=U\Sigma V^*,
 
 很小的奇异值平方后更接近舍入尺度，可能完全丢失。标准稠密 SVD 算法先用稳定正交变换把 \(A\) 双对角化，再在双对角矩阵上迭代；还包括 divide-and-conquer、Jacobi 等变体。
 
-计算 SVD 的正确方式是调用可靠库，而不是自己拼 \(A^TA\) 的 eig。
+计算 SVD 的正确方式是调用可靠库，而不是自己拼 \(A^{\trans}A\) 的 eig。
 
 \subsection{截断 SVD 为什么是最佳低秩近似}
 

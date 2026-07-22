@@ -1,4 +1,9 @@
 \section{形状先于公式，布局必须声明}
+\label{sec:10-Matrix-Calculus/01-Derivative-Conventions/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}两本书里的 Jacobian 互为转置，可能只是布局约定不同。不要先争哪张公式正确，先声明向量按列还是按行、线性映射如何作用，再检查乘法后的形状。
+\end{quote}
 
 同一个表达式在两本资料中相差一个转置，未必有人算错。矩阵微积分存在两种常见布局：
 
@@ -37,17 +42,17 @@ J_f\in\R^{m\times n}.
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\(f:\mathbb R\to\mathbb R\) & 标量到标量 & \(f'(x)\) \\
-\(f:\mathbb R\to\mathbb R^m\) & 标量到向量 & \(dy/dx\in\mathbb R^m\) \\
-\(f:\mathbb R^n\to\mathbb R\) & 向量到标量 & 梯度 \(\nabla f\in\mathbb R^n\)，且 \(df=\nabla f^Tdx\) \\
-\(f:\mathbb R^n\to\mathbb R^m\) & 向量到向量 & Jacobian \(J_f\in\mathbb R^{m\times n}\) \\
+\(f:\R\to\R\) & 标量到标量 & \(f'(x)\) \\
+\(f:\R\to\R^m\) & 标量到向量 & \(dy/dx\in\R^m\) \\
+\(f:\R^n\to\R\) & 向量到标量 & 梯度 \(\nabla f\in\R^n\)，且 \(df=\nabla f^{\trans}dx\) \\
+\(f:\R^n\to\R^m\) & 向量到向量 & Jacobian \(J_f\in\R^{m\times n}\) \\
 \end{longtable}
 }
 
 对标量输出，Jacobian 若按``输出行''严格写是一个 \(1\times n\) 行向量：
 
 \[
-J_f=\nabla f^T.
+J_f=\nabla f^{\trans}.
 \]
 
 但优化中通常把梯度保留为与输入同形的列向量。两种形状分别对应``导数映射的矩阵表示''与``由内积识别出的梯度''，因此并不矛盾（见上一节``梯度来自内积，而不只是偏导排列''）。
@@ -68,27 +73,27 @@ A\in\R^{m\times n}.
 dy=A\,dx.
 \]
 
-所以 Jacobian 必须是 \(A\)，形状 \(m\times n\)。若某公式给出 \(A^T\)，它要么使用了转置布局，要么确实错误。
+所以 Jacobian 必须是 \(A\)，形状 \(m\times n\)。若某公式给出 \(A^{\trans}\)，它要么使用了转置布局，要么确实错误。
 
-再设标量损失 \(\ell(y)\) 的梯度 \(\nabla_y\ell\in\mathbb R^m\)。把 \(dy=A\,dx\) 代入微分：
+再设标量损失 \(\ell(y)\) 的梯度 \(\nabla_y\ell\in\R^m\)。把 \(dy=A\,dx\) 代入微分：
 
 \[
-d\ell=(\nabla_y\ell)^Tdy
-=(\nabla_y\ell)^TA\,dx
-=(A^T\nabla_y\ell)^Tdx,
+d\ell=(\nabla_y\ell)^{\trans}dy
+=(\nabla_y\ell)^{\trans}A\,dx
+=(A^{\trans}\nabla_y\ell)^{\trans}dx,
 \]
 
 读出与 \(x\) 同形的梯度，即链式法则
 
 \[
-\nabla_x\ell = A^T\nabla_y\ell
+\nabla_x\ell = A^{\trans}\nabla_y\ell
 \in\R^n.
 \]
-\(A\) 把输入方向向前推到输出空间，\(A^T\) 把输出的敏感度向后拉回输入空间。转置由线性映射的伴随自然产生，其作用远不止凑齐形状。
+\(A\) 把输入方向向前推到输出空间，\(A^{\trans}\) 把输出的敏感度向后拉回输入空间。转置由线性映射的伴随自然产生，其作用远不止凑齐形状。
 
 \subsection{JVP 与 VJP 比完整 Jacobian 更接近实际需求}
 
-给定输入方向 \(v\in\mathbb R^n\)，
+给定输入方向 \(v\in\R^n\)，
 
 \[
 J_f(x)v
@@ -96,13 +101,13 @@ J_f(x)v
 
 称为 Jacobian-vector product，简称 JVP。它回答``沿输入方向 \(v\) 轻微移动，所有输出怎样变化''。
 
-给定输出余向量（对输出作线性评价的行向量）\(u\in\mathbb R^m\)，
+给定输出余向量（对输出作线性评价的行向量）\(u\in\R^m\)，
 
 \[
-u^TJ_f(x)
+u^{\trans}J_f(x)
 \]
 
-称为 vector-Jacobian product，简称 VJP；以列向量表示梯度时常写成 \(J_f(x)^Tu\)。它回答``输出的某个线性评价怎样反传到输入''。
+称为 vector-Jacobian product，简称 VJP；以列向量表示梯度时常写成 \(J_f(x)^{\trans}u\)。它回答``输出的某个线性评价怎样反传到输入''。
 
 很多应用只需要这两种作用，而不需要存储 \(mn\) 个 Jacobian 元素：
 
@@ -130,7 +135,6 @@ u^TJ_f(x)
 适合核对某个条目、处理复杂索引或广播。但它容易掩盖线性结构，并产生大量求和指标。推荐顺序是：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   先写输入与输出形状；
@@ -149,10 +153,9 @@ u^TJ_f(x)
 若 \(X\) 被限制为对称矩阵，允许扰动 \(H\) 也必须对称。环境空间中的两个矩阵梯度，只要它们在所有对称 \(H\) 上给出相同 Frobenius 内积，就代表同一个受约束导数。通常取对称化
 
 \[
-\operatorname{sym}(G)=\frac12(G+G^T)
+\operatorname{sym}(G)=\frac12(G+G^{\trans})
 \]
 
 作为代表元：它自身对称，且斜对称部分与任何对称矩阵的 Frobenius 内积为零，故对对称 \(H\) 有 \(\langle G,H\rangle_F=\langle\operatorname{sym}(G),H\rangle_F\)。
 
 同样，正交矩阵、概率单纯形或低秩流形上的变量，其可行扰动不再填满整个环境空间。普通欧氏梯度仍可计算，但真正的可行下降方向需要投影到切空间。布局正确并不等于已经处理约束几何。
-

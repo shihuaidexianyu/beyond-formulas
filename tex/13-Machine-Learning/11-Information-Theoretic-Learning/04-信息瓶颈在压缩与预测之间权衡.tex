@@ -1,4 +1,5 @@
 \section{信息瓶颈在压缩与预测之间权衡}
+\label{sec:13-Machine-Learning/11-Information-Theoretic-Learning/04}
 
 图像中有对象形状、背景纹理、相机噪声和拍摄时间。若任务只是识别对象，好的表示 \(Z\) 似乎应忘掉与标签无关的细节，同时保留预测 \(Y\) 所需的信息。Information bottleneck 把这两个愿望写成
 
@@ -9,6 +10,10 @@ I(X;Z)-\beta I(Z;Y),
 \]
 
 并要求 \(Z-X-Y\) 构成 Markov chain：表示由输入生成，给定输入后不再直接读取标签。
+
+\begin{quote}
+\textbf{先抓住这一点：}信息瓶颈压缩的是给定联合分布下 \(X\) 与表示 \(Z\) 的统计依赖，不是自动删除“无意义细节”。训练分布里与标签相关的捷径同样属于任务信息。从 IB 目标到语义、鲁棒性或泛化，仍需要额外假设。
+\end{quote}
 
 \(I(X;Z)\) 衡量表示保留多少输入信息，\(I(Z;Y)\) 衡量表示与任务的相关信息。\(\beta\) 控制二者权衡。若只追求压缩，常数表示使 \(I(X;Z)=0\)，却完全失去预测；若表示可逆，则几乎保留输入全部信息，未必去除了无关细节。
 
@@ -43,13 +48,13 @@ I(Z;Y)
 
 高维连续变量的 mutual information 需要未知密度。更棘手的是，若 \(Z=f(X)\) 是确定性连续映射，在常见理想化条件下 \(I(X;Z)\) 可能无穷或出现与量化精度有关的病态行为。表示维数下降也不等于 mutual information 必然按直觉减少。
 
-Variational information bottleneck 常使用随机 encoder \(q_\phi(z\mid x)\) 和简单 prior \(r(z)\)。记聚合表示分布 \(q_\phi(z)=\int q_\phi(z\mid x)p(x)\,\mathrm dx\)，则 rate 项可写成 \(I(X;Z)=\mathbb E_xD_{\mathrm{KL}}(q_\phi(z\mid x)\|q_\phi(z))\)，并且
+Variational information bottleneck 常使用随机 encoder \(q_\phi(z\mid x)\) 和简单 prior \(r(z)\)。记聚合表示分布 \(q_\phi(z)=\int q_\phi(z\mid x)p(x)\,\mathrm dx\)，则 rate 项可写成 \(I(X;Z)=\E_x\KL(q_\phi(z\mid x)\|q_\phi(z))\)，并且
 
 \[
-\mathbb E_x
-D_{\mathrm{KL}}
+\E_x
+\KL
 \bigl(q_\phi(z\mid x)\|r(z)\bigr)
-=I(X;Z)+D_{\mathrm{KL}}\bigl(q_\phi(z)\|r(z)\bigr)
+=I(X;Z)+\KL\bigl(q_\phi(z)\|r(z)\bigr)
 \ge I(X;Z),
 \]
 
@@ -77,8 +82,8 @@ D_{\mathrm{KL}}
 
 它最有价值的地方，是迫使我们把表示学习写成两个冲突目标：保留任务相关信息，同时限制输入细节进入表示。这一语言连接了有损压缩、充分统计量、隐私和多视图学习。但从目标到``泛化更好''\,``学到语义''\,``更抗干扰''，中间都需要额外条件和实证检验。
 
-\subsubsection{从精确小问题走向近似大模型}
+\subsection{一个离散例子揭示三种表示}
 
-构造离散 \(X=(Y,N)\)，其中 \(N\) 是与 \(Y\) 独立的噪声。枚举三种表示：保留全部 \(X\)、只保留 \(Y\)、输出常数，计算各自的 \(I(X;Z)\) 与 \(I(Z;Y)\)。再让 \(N\) 在训练分布中与 \(Y\) 相关、测试分布中独立，观察训练 IB 目标为何不自动保证测试鲁棒。最后用一个 variational upper bound 估计 rate，比较它与精确值之间的 gap。
+令离散输入 \(X=(Y,N)\)，且 \(N\) 与 \(Y\) 独立。保留全部 \(X\) 的表示拥有最大的 \(I(X;Z)\)，只保留 \(Y\) 的表示以更小 rate 保留全部任务信息，常数表示则把二者都降为零。若改成训练时 \(N\) 与 \(Y\) 相关、测试时独立，保留 \(N\) 会提高训练分布上的 \(I(Z;Y)\)，却可能损害部署表现。这说明精确 IB 目标本身也受训练联合分布限制；variational upper bound 还会再引入一层近似差距。
 
-更完整的信息论基础见``信息瓶颈与任务相关表示''。
+更完整的信息论基础见\hyperref[sec:07-Information-Theory/06-Information-and-Learning/03]{``信息瓶颈与任务相关表示''}。

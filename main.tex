@@ -1,6 +1,7 @@
 \documentclass[UTF8,openany]{ctexbook}
 \usepackage[a4paper,margin=2.5cm]{geometry}
 \usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
 \usepackage{booktabs,longtable,array}
 \usepackage{enumitem}
 \usepackage{xcolor}
@@ -13,6 +14,7 @@
   linkcolor=black,
   urlcolor=blue,
   citecolor=blue,
+  bookmarksdepth=1,
   psdextra=true,
   pdftitle={Beyond Formulas},
   pdfsubject={从公式到结构、判断与可信计算}
@@ -30,6 +32,15 @@
 \setlist{nosep}
 \setcounter{secnumdepth}{0}
 \setcounter{tocdepth}{0}
+% 无编号定理类环境（与全书无编号风格一致；用法见 STYLE_GUIDE.md 第 4 节）
+\theoremstyle{definition}
+\newtheorem*{definition}{定义}
+\newtheorem*{example}{例}
+\newtheorem*{remark}{注记}
+\theoremstyle{plain}
+\newtheorem*{theorem}{定理}
+\newtheorem*{proposition}{命题}
+\newtheorem*{lemma}{引理}
 \providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \newcounter{none}
 \title{Beyond Formulas\\[0.8em]\large 从公式到结构、判断与可信计算}
@@ -40,22 +51,37 @@
 \tableofcontents
 \clearpage
 \chapter*{为什么是 Beyond Formulas}
+\phantomsection\label{ch:001}
 \addcontentsline{toc}{chapter}{为什么是 Beyond Formulas}
 \input{tex/00-MOC.tex}
 \clearpage
 \chapter*{全书知识地图：从对象到决策}
+\phantomsection\label{ch:002}
 \addcontentsline{toc}{chapter}{全书知识地图：从对象到决策}
 \input{tex/知识地图.tex}
 \clearpage
 \chapter*{怎样选择学习路线}
+\phantomsection\label{ch:003}
 \addcontentsline{toc}{chapter}{怎样选择学习路线}
 \input{tex/学习路线.tex}
 \clearpage
-\part{Mathematical-Language}
-\chapter*{01-Mathematical-Language}
+\chapter*{按问题查找：从一次困惑进入数学}
+\phantomsection\label{ch:138}
+\addcontentsline{toc}{chapter}{按问题查找：从一次困惑进入数学}
+\input{tex/问题索引.tex}
+\clearpage
+\chapter*{按洞见查找：同一种结构怎样跨越学科}
+\phantomsection\label{ch:139}
+\addcontentsline{toc}{chapter}{按洞见查找：同一种结构怎样跨越学科}
+\input{tex/洞见索引.tex}
+\clearpage
+\part{数学语言}
+\chapter*{数学语言：读清一句话究竟断言了什么}
+\phantomsection\label{ch:004}
 \input{tex/01-Mathematical-Language/00-MOC.tex}
 \clearpage
 \chapter*{逻辑：把含混判断变成可检验命题}
+\phantomsection\label{ch:005}
 \addcontentsline{toc}{chapter}{逻辑：把含混判断变成可检验命题}
 \input{tex/01-Mathematical-Language/01-Logic/00-MOC.tex}
 \input{tex/01-Mathematical-Language/01-Logic/01-命题与逻辑连接词.tex}
@@ -63,6 +89,7 @@
 \input{tex/01-Mathematical-Language/01-Logic/03-量词与否定.tex}
 \clearpage
 \chapter*{集合、关系与函数：怎样组织数学对象}
+\phantomsection\label{ch:006}
 \addcontentsline{toc}{chapter}{集合、关系与函数：怎样组织数学对象}
 \input{tex/01-Mathematical-Language/02-Sets-Relations-Functions/00-MOC.tex}
 \input{tex/01-Mathematical-Language/02-Sets-Relations-Functions/01-集合与集合运算.tex}
@@ -71,6 +98,7 @@
 \input{tex/01-Mathematical-Language/02-Sets-Relations-Functions/04-函数与可逆性.tex}
 \clearpage
 \chapter*{证明：让结论从已知条件中不得不成立}
+\phantomsection\label{ch:007}
 \addcontentsline{toc}{chapter}{证明：让结论从已知条件中不得不成立}
 \input{tex/01-Mathematical-Language/03-Proof-Techniques/00-MOC.tex}
 \input{tex/01-Mathematical-Language/03-Proof-Techniques/01-从命题形状开始证明.tex}
@@ -79,6 +107,7 @@
 \input{tex/01-Mathematical-Language/03-Proof-Techniques/04-怎样发现并修复错误证明.tex}
 \clearpage
 \chapter*{归纳、递归与不变量：用局部规则控制无限过程}
+\phantomsection\label{ch:008}
 \addcontentsline{toc}{chapter}{归纳、递归与不变量：用局部规则控制无限过程}
 \input{tex/01-Mathematical-Language/04-Induction-and-Recursion/00-MOC.tex}
 \input{tex/01-Mathematical-Language/04-Induction-and-Recursion/01-数学归纳法为何成立.tex}
@@ -86,11 +115,13 @@
 \input{tex/01-Mathematical-Language/04-Induction-and-Recursion/03-递归定义与结构归纳.tex}
 \input{tex/01-Mathematical-Language/04-Induction-and-Recursion/04-不变量与算法正确性.tex}
 \clearpage
-\part{Calculus}
-\chapter*{02-Calculus}
+\part{微积分}
+\chapter*{微积分：局部变化怎样累积成整体}
+\phantomsection\label{ch:009}
 \input{tex/02-Calculus/00-MOC.tex}
 \clearpage
 \chapter*{函数与预备知识：先看清什么量依赖什么量}
+\phantomsection\label{ch:010}
 \addcontentsline{toc}{chapter}{函数与预备知识：先看清什么量依赖什么量}
 \input{tex/02-Calculus/01-Functions-and-Precalculus/00-MOC.tex}
 \input{tex/02-Calculus/01-Functions-and-Precalculus/01-从实数轴到函数.tex}
@@ -100,6 +131,7 @@
 \input{tex/02-Calculus/01-Functions-and-Precalculus/05-三角函数与周期.tex}
 \clearpage
 \chapter*{极限与连续：不必到达，也能控制趋势}
+\phantomsection\label{ch:011}
 \addcontentsline{toc}{chapter}{极限与连续：不必到达，也能控制趋势}
 \input{tex/02-Calculus/02-Limits-and-Continuity/00-MOC.tex}
 \input{tex/02-Calculus/02-Limits-and-Continuity/01-为什么需要极限.tex}
@@ -108,6 +140,7 @@
 \input{tex/02-Calculus/02-Limits-and-Continuity/04-连续性与整体保证.tex}
 \clearpage
 \chapter*{导数：用局部直线理解瞬时变化}
+\phantomsection\label{ch:012}
 \addcontentsline{toc}{chapter}{导数：用局部直线理解瞬时变化}
 \input{tex/02-Calculus/03-Differentiation/00-MOC.tex}
 \input{tex/02-Calculus/03-Differentiation/01-从平均变化率到导数.tex}
@@ -117,6 +150,7 @@
 \input{tex/02-Calculus/03-Differentiation/05-线性近似与极值问题.tex}
 \clearpage
 \chapter*{积分：把无数微小贡献累积起来}
+\phantomsection\label{ch:013}
 \addcontentsline{toc}{chapter}{积分：把无数微小贡献累积起来}
 \input{tex/02-Calculus/04-Integration/00-MOC.tex}
 \input{tex/02-Calculus/04-Integration/01-从小块求和到定积分.tex}
@@ -126,6 +160,7 @@
 \input{tex/02-Calculus/04-Integration/05-面积体积概率与累积量.tex}
 \clearpage
 \chapter*{数列与级数：无限过程何时产生有限结果}
+\phantomsection\label{ch:014}
 \addcontentsline{toc}{chapter}{数列与级数：无限过程何时产生有限结果}
 \input{tex/02-Calculus/05-Sequences-and-Series/00-MOC.tex}
 \input{tex/02-Calculus/05-Sequences-and-Series/01-数列怎样收敛.tex}
@@ -136,6 +171,7 @@
 \input{tex/02-Calculus/05-Sequences-and-Series/06-Taylor展开与余项.tex}
 \clearpage
 \chapter*{多元微积分：变化有方向，累积有几何}
+\phantomsection\label{ch:015}
 \addcontentsline{toc}{chapter}{多元微积分：变化有方向，累积有几何}
 \input{tex/02-Calculus/06-Multivariable-Calculus/00-MOC.tex}
 \input{tex/02-Calculus/06-Multivariable-Calculus/01-多元函数极限与连续.tex}
@@ -148,11 +184,13 @@
 \input{tex/02-Calculus/06-Multivariable-Calculus/08-向量场曲线积分与势函数.tex}
 \input{tex/02-Calculus/06-Multivariable-Calculus/09-通量散度旋度与边界定理.tex}
 \clearpage
-\part{Linear-Algebra}
-\chapter*{03-Linear-Algebra}
+\part{线性代数}
+\chapter*{线性代数：寻找让问题变简单的坐标}
+\phantomsection\label{ch:016}
 \input{tex/03-Linear-Algebra/00-MOC.tex}
 \clearpage
 \chapter*{线性方程组与矩阵}
+\phantomsection\label{ch:017}
 \addcontentsline{toc}{chapter}{线性方程组与矩阵}
 \input{tex/03-Linear-Algebra/01-Linear-Systems-and-Matrices/00-MOC.tex}
 \input{tex/03-Linear-Algebra/01-Linear-Systems-and-Matrices/01-从方程到矩阵.tex}
@@ -160,6 +198,7 @@
 \input{tex/03-Linear-Algebra/01-Linear-Systems-and-Matrices/03-逆矩阵与LU分解.tex}
 \clearpage
 \chapter*{向量空间、基与线性变换}
+\phantomsection\label{ch:018}
 \addcontentsline{toc}{chapter}{向量空间、基与线性变换}
 \input{tex/03-Linear-Algebra/02-Vector-Spaces/00-MOC.tex}
 \input{tex/03-Linear-Algebra/02-Vector-Spaces/01-为什么需要向量空间.tex}
@@ -168,6 +207,7 @@
 \input{tex/03-Linear-Algebra/02-Vector-Spaces/04-线性变换与换基.tex}
 \clearpage
 \chapter*{正交、投影与最小二乘}
+\phantomsection\label{ch:019}
 \addcontentsline{toc}{chapter}{正交、投影与最小二乘}
 \input{tex/03-Linear-Algebra/03-Orthogonality/00-MOC.tex}
 \input{tex/03-Linear-Algebra/03-Orthogonality/01-正交与正交补.tex}
@@ -176,12 +216,14 @@
 \input{tex/03-Linear-Algebra/03-Orthogonality/04-正交基与QR分解.tex}
 \clearpage
 \chapter*{行列式：一个数怎样概括线性变换}
+\phantomsection\label{ch:020}
 \addcontentsline{toc}{chapter}{行列式：一个数怎样概括线性变换}
 \input{tex/03-Linear-Algebra/04-Determinants/00-MOC.tex}
 \input{tex/03-Linear-Algebra/04-Determinants/01-行列式与体积.tex}
 \input{tex/03-Linear-Algebra/04-Determinants/02-计算规则与推论.tex}
 \clearpage
 \chapter*{特征值、对角化与动力系统}
+\phantomsection\label{ch:021}
 \addcontentsline{toc}{chapter}{特征值、对角化与动力系统}
 \input{tex/03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/00-MOC.tex}
 \input{tex/03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/01-不变方向与特征值.tex}
@@ -190,6 +232,7 @@
 \input{tex/03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/04-矩阵函数从多项式到指数.tex}
 \clearpage
 \chapter*{对称矩阵、二次型与正定性}
+\phantomsection\label{ch:022}
 \addcontentsline{toc}{chapter}{对称矩阵、二次型与正定性}
 \input{tex/03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/00-MOC.tex}
 \input{tex/03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/01-对称矩阵与谱定理.tex}
@@ -198,6 +241,7 @@
 \input{tex/03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/04-二次曲面用谱分解显露几何形状.tex}
 \clearpage
 \chapter*{SVD：从任意矩阵到数据中的主要方向}
+\phantomsection\label{ch:023}
 \addcontentsline{toc}{chapter}{SVD：从任意矩阵到数据中的主要方向}
 \input{tex/03-Linear-Algebra/07-SVD-and-Data-Applications/00-MOC.tex}
 \input{tex/03-Linear-Algebra/07-SVD-and-Data-Applications/01-任意矩阵的奇异值分解.tex}
@@ -206,6 +250,7 @@
 \input{tex/03-Linear-Algebra/07-SVD-and-Data-Applications/04-从数据矩阵到PCA.tex}
 \clearpage
 \chapter*{复数、谱与 Fourier 结构}
+\phantomsection\label{ch:024}
 \addcontentsline{toc}{chapter}{复数、谱与 Fourier 结构}
 \input{tex/03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/00-MOC.tex}
 \input{tex/03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/01-为什么线性代数需要复数.tex}
@@ -213,16 +258,19 @@
 \input{tex/03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/03-Fourier基与FFT.tex}
 \clearpage
 \chapter*{张量：多模结构怎样保留与压缩}
+\phantomsection\label{ch:025}
 \addcontentsline{toc}{chapter}{张量：多模结构怎样保留与压缩}
 \input{tex/03-Linear-Algebra/09-Tensors/00-MOC.tex}
 \input{tex/03-Linear-Algebra/09-Tensors/01-张量是多线性映射也是多维数组.tex}
 \input{tex/03-Linear-Algebra/09-Tensors/02-张量分解初步CP与Tucker与SVD的关系.tex}
 \clearpage
-\part{Discrete-Mathematics}
-\chapter*{04-Discrete-Mathematics}
+\part{离散数学}
+\chapter*{离散数学：在有限结构中寻找必然性}
+\phantomsection\label{ch:026}
 \input{tex/04-Discrete-Mathematics/00-MOC.tex}
 \clearpage
 \chapter*{组合计数：先描述对象怎样生成，再决定怎样数}
+\phantomsection\label{ch:027}
 \addcontentsline{toc}{chapter}{组合计数：先描述对象怎样生成，再决定怎样数}
 \input{tex/04-Discrete-Mathematics/01-Combinatorics/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/01-Combinatorics/01-加法乘法与排列组合.tex}
@@ -231,6 +279,7 @@
 \input{tex/04-Discrete-Mathematics/01-Combinatorics/04-容斥原理与重复计数.tex}
 \clearpage
 \chapter*{递推关系：从局部生成规则恢复整体公式}
+\phantomsection\label{ch:028}
 \addcontentsline{toc}{chapter}{递推关系：从局部生成规则恢复整体公式}
 \input{tex/04-Discrete-Mathematics/02-Recurrences/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/02-Recurrences/01-递推建模与递归树.tex}
@@ -238,6 +287,7 @@
 \input{tex/04-Discrete-Mathematics/02-Recurrences/03-生成函数把递推变成代数.tex}
 \clearpage
 \chapter*{图论：局部邻接怎样形成全局网络}
+\phantomsection\label{ch:029}
 \addcontentsline{toc}{chapter}{图论：局部邻接怎样形成全局网络}
 \input{tex/04-Discrete-Mathematics/03-Graph-Theory/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/03-Graph-Theory/01-图的语言与度数.tex}
@@ -253,6 +303,7 @@
 \input{tex/04-Discrete-Mathematics/03-Graph-Theory/11-割与覆盖参数衡量网络脆弱性.tex}
 \clearpage
 \chapter*{初等数论：整除结构怎样变成可计算算法}
+\phantomsection\label{ch:030}
 \addcontentsline{toc}{chapter}{初等数论：整除结构怎样变成可计算算法}
 \input{tex/04-Discrete-Mathematics/04-Number-Theory/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/04-Number-Theory/01-整除最大公约数与Euclid算法.tex}
@@ -261,6 +312,7 @@
 \input{tex/04-Discrete-Mathematics/04-Number-Theory/04-中国剩余定理.tex}
 \clearpage
 \chapter*{编码与多项式方法：用结构化冗余对抗丢失和错误}
+\phantomsection\label{ch:031}
 \addcontentsline{toc}{chapter}{编码与多项式方法：用结构化冗余对抗丢失和错误}
 \input{tex/04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/01-有限域与多项式插值.tex}
@@ -270,6 +322,7 @@
 \input{tex/04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/05-Fountain码与无速率传输.tex}
 \clearpage
 \chapter*{群与对称：可逆操作怎样组织不变性}
+\phantomsection\label{ch:032}
 \addcontentsline{toc}{chapter}{群与对称：可逆操作怎样组织不变性}
 \input{tex/04-Discrete-Mathematics/06-Groups-and-Symmetry/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/06-Groups-and-Symmetry/01-对称操作引出群.tex}
@@ -278,12 +331,14 @@
 \input{tex/04-Discrete-Mathematics/06-Groups-and-Symmetry/04-不变函数与等变映射.tex}
 \clearpage
 \chapter*{布尔代数与自动机：有限规则怎样处理逻辑与序列}
+\phantomsection\label{ch:033}
 \addcontentsline{toc}{chapter}{布尔代数与自动机：有限规则怎样处理逻辑与序列}
 \input{tex/04-Discrete-Mathematics/07-Boolean-Algebra-and-Automata/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/07-Boolean-Algebra-and-Automata/01-布尔代数与逻辑化简.tex}
 \input{tex/04-Discrete-Mathematics/07-Boolean-Algebra-and-Automata/02-有限自动机识别正则语言.tex}
 \clearpage
 \chapter*{环与格：两种运算怎样组织代数与次序}
+\phantomsection\label{ch:034}
 \addcontentsline{toc}{chapter}{环与格：两种运算怎样组织代数与次序}
 \input{tex/04-Discrete-Mathematics/08-Rings-and-Lattices/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/08-Rings-and-Lattices/01-环把两种运算放进同一结构.tex}
@@ -291,17 +346,20 @@
 \input{tex/04-Discrete-Mathematics/08-Rings-and-Lattices/03-格在语义约束与Galois连接中的角色.tex}
 \clearpage
 \chapter*{群表示论：对称的线性结构}
+\phantomsection\label{ch:035}
 \addcontentsline{toc}{chapter}{群表示论：对称的线性结构}
 \input{tex/04-Discrete-Mathematics/09-Representation-Theory/00-MOC.tex}
 \input{tex/04-Discrete-Mathematics/09-Representation-Theory/01-表示把群变成矩阵群.tex}
 \input{tex/04-Discrete-Mathematics/09-Representation-Theory/02-不可约表示是基本构建块.tex}
 \input{tex/04-Discrete-Mathematics/09-Representation-Theory/03-特征标是表示的指纹.tex}
 \clearpage
-\part{Probability}
-\chapter*{05-Probability}
+\part{概率论}
+\chapter*{概率论：在不确定性中进行可检验的推理}
+\phantomsection\label{ch:036}
 \input{tex/05-Probability/00-MOC.tex}
 \clearpage
 \chapter*{概率空间：先说清楚``什么可能发生''}
+\phantomsection\label{ch:037}
 \addcontentsline{toc}{chapter}{概率空间：先说清楚``什么可能发生''}
 \input{tex/05-Probability/01-Probability-Spaces/00-MOC.tex}
 \input{tex/05-Probability/01-Probability-Spaces/01-随机实验样本空间与事件.tex}
@@ -309,6 +367,7 @@
 \input{tex/05-Probability/01-Probability-Spaces/03-从现实问题到概率模型.tex}
 \clearpage
 \chapter*{条件概率、Bayes 与独立性：新信息怎样改变判断}
+\phantomsection\label{ch:038}
 \addcontentsline{toc}{chapter}{条件概率、Bayes 与独立性：新信息怎样改变判断}
 \input{tex/05-Probability/02-Conditional-Probability/00-MOC.tex}
 \input{tex/05-Probability/02-Conditional-Probability/01-条件概率与乘法法则.tex}
@@ -317,6 +376,7 @@
 \input{tex/05-Probability/02-Conditional-Probability/04-条件独立与信息结构.tex}
 \clearpage
 \chapter*{随机变量与分布：把复杂结果压缩成可研究的数值}
+\phantomsection\label{ch:039}
 \addcontentsline{toc}{chapter}{随机变量与分布：把复杂结果压缩成可研究的数值}
 \input{tex/05-Probability/03-Random-Variables/00-MOC.tex}
 \input{tex/05-Probability/03-Random-Variables/01-随机变量是样本空间上的函数.tex}
@@ -325,6 +385,7 @@
 \input{tex/05-Probability/03-Random-Variables/04-随机变量变换与逆变换抽样.tex}
 \clearpage
 \chapter*{期望与矩：怎样用少量数字概括一个分布}
+\phantomsection\label{ch:040}
 \addcontentsline{toc}{chapter}{期望与矩：怎样用少量数字概括一个分布}
 \input{tex/05-Probability/04-Expectation-and-Moments/00-MOC.tex}
 \input{tex/05-Probability/04-Expectation-and-Moments/01-期望线性性与指示变量.tex}
@@ -333,6 +394,7 @@
 \input{tex/05-Probability/04-Expectation-and-Moments/04-条件期望是利用信息的最佳预测.tex}
 \clearpage
 \chapter*{联合分布：单个分布之外，变量怎样一起变化}
+\phantomsection\label{ch:041}
 \addcontentsline{toc}{chapter}{联合分布：单个分布之外，变量怎样一起变化}
 \input{tex/05-Probability/05-Joint-Distributions/00-MOC.tex}
 \input{tex/05-Probability/05-Joint-Distributions/01-联合边缘与条件分布.tex}
@@ -342,6 +404,7 @@
 \input{tex/05-Probability/05-Joint-Distributions/05-多维变量变换与Jacobian.tex}
 \clearpage
 \chapter*{常见分布：不要背表，要先辨认随机机制}
+\phantomsection\label{ch:042}
 \addcontentsline{toc}{chapter}{常见分布：不要背表，要先辨认随机机制}
 \input{tex/05-Probability/06-Common-Distributions/00-MOC.tex}
 \input{tex/05-Probability/06-Common-Distributions/01-成败试验中的Bernoulli二项与等待分布.tex}
@@ -354,6 +417,7 @@
 \input{tex/05-Probability/06-Common-Distributions/08-极值分布与尾部风险.tex}
 \clearpage
 \chapter*{变换与概率界：不知道完整分布时还能说什么}
+\phantomsection\label{ch:043}
 \addcontentsline{toc}{chapter}{变换与概率界：不知道完整分布时还能说什么}
 \input{tex/05-Probability/07-Transforms-and-Bounds/00-MOC.tex}
 \input{tex/05-Probability/07-Transforms-and-Bounds/01-生成函数矩母函数与特征函数.tex}
@@ -362,19 +426,22 @@
 \input{tex/05-Probability/07-Transforms-and-Bounds/04-Chernoff方法与Hoeffding集中界.tex}
 \clearpage
 \chapter*{极限定理：重复随机性为何会产生稳定规律}
+\phantomsection\label{ch:044}
 \addcontentsline{toc}{chapter}{极限定理：重复随机性为何会产生稳定规律}
 \input{tex/05-Probability/08-Limit-Theorems/00-MOC.tex}
 \input{tex/05-Probability/08-Limit-Theorems/01-随机变量的多种收敛.tex}
 \input{tex/05-Probability/08-Limit-Theorems/02-大数定律与长期平均.tex}
 \input{tex/05-Probability/08-Limit-Theorems/03-中心极限定理与Gaussian近似.tex}
-\input{tex/05-Probability/08-Limit-Theorems/03b-特征函数怎样证明中心极限定理.tex}
-\input{tex/05-Probability/08-Limit-Theorems/04-Monte-Carlo从随机样本到数值答案.tex}
+\input{tex/05-Probability/08-Limit-Theorems/04-特征函数怎样证明中心极限定理.tex}
+\input{tex/05-Probability/08-Limit-Theorems/05-Monte-Carlo从随机样本到数值答案.tex}
 \clearpage
-\part{Random-Processes}
-\chapter*{06-Random-Processes}
+\part{随机过程}
+\chapter*{随机过程：给不确定性加上时间}
+\phantomsection\label{ch:045}
 \input{tex/06-Random-Processes/00-MOC.tex}
 \clearpage
 \chapter*{随机过程基础：从一个随机数到一整条随机轨迹}
+\phantomsection\label{ch:046}
 \addcontentsline{toc}{chapter}{随机过程基础：从一个随机数到一整条随机轨迹}
 \input{tex/06-Random-Processes/01-Foundations/00-MOC.tex}
 \input{tex/06-Random-Processes/01-Foundations/01-随机过程时间指标与样本路径.tex}
@@ -382,6 +449,7 @@
 \input{tex/06-Random-Processes/01-Foundations/03-均值相关与平稳性.tex}
 \clearpage
 \chapter*{计数过程：事件何时到来、到来了多少}
+\phantomsection\label{ch:047}
 \addcontentsline{toc}{chapter}{计数过程：事件何时到来、到来了多少}
 \input{tex/06-Random-Processes/02-Counting-Processes/00-MOC.tex}
 \input{tex/06-Random-Processes/02-Counting-Processes/01-Bernoulli过程与离散到达.tex}
@@ -390,6 +458,7 @@
 \input{tex/06-Random-Processes/02-Counting-Processes/04-更新过程与长期更新率.tex}
 \clearpage
 \chapter*{离散时间 Markov 链：状态足够好，历史就可以被压缩}
+\phantomsection\label{ch:048}
 \addcontentsline{toc}{chapter}{离散时间 Markov 链：状态足够好，历史就可以被压缩}
 \input{tex/06-Random-Processes/03-Markov-Chains/00-MOC.tex}
 \input{tex/06-Random-Processes/03-Markov-Chains/01-Markov性质转移矩阵与多步演化.tex}
@@ -399,6 +468,7 @@
 \input{tex/06-Random-Processes/03-Markov-Chains/05-首步分析击中时间与吸收链.tex}
 \clearpage
 \chapter*{随机过程的四种典型用法}
+\phantomsection\label{ch:049}
 \addcontentsline{toc}{chapter}{随机过程的四种典型用法}
 \input{tex/06-Random-Processes/04-Applications/00-MOC.tex}
 \input{tex/06-Random-Processes/04-Applications/01-随机游走从局部步进到整体尺度.tex}
@@ -407,6 +477,7 @@
 \input{tex/06-Random-Processes/04-Applications/04-Hidden-Markov-Model从观测反推状态.tex}
 \clearpage
 \chapter*{连续时间 Markov 链与排队：不仅要知道跳到哪，还要知道何时跳}
+\phantomsection\label{ch:050}
 \addcontentsline{toc}{chapter}{连续时间 Markov 链与排队：不仅要知道跳到哪，还要知道何时跳}
 \input{tex/06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/00-MOC.tex}
 \input{tex/06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/01-连续时间Markov链与生成矩阵.tex}
@@ -415,6 +486,7 @@
 \input{tex/06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/04-排队系统与M-M-1模型.tex}
 \clearpage
 \chapter*{扩散与随机微分方程：路径不可微时怎样写微分方程}
+\phantomsection\label{ch:051}
 \addcontentsline{toc}{chapter}{扩散与随机微分方程：路径不可微时怎样写微分方程}
 \input{tex/06-Random-Processes/06-Diffusion-and-SDE/00-MOC.tex}
 \input{tex/06-Random-Processes/06-Diffusion-and-SDE/01-从随机游走到布朗运动.tex}
@@ -424,6 +496,7 @@
 \input{tex/06-Random-Processes/06-Diffusion-and-SDE/05-得分匹配怎样从样本学习得分.tex}
 \clearpage
 \chapter*{ARMA 与 ARIMA：时间序列的经典模型族}
+\phantomsection\label{ch:052}
 \addcontentsline{toc}{chapter}{ARMA 与 ARIMA：时间序列的经典模型族}
 \input{tex/06-Random-Processes/06-ARMA-and-ARIMA/00-MOC.tex}
 \input{tex/06-Random-Processes/06-ARMA-and-ARIMA/01-AR模型用历史预测未来.tex}
@@ -432,11 +505,13 @@
 \input{tex/06-Random-Processes/06-ARMA-and-ARIMA/04-ARMA与其他方法的连接什么时候用什么.tex}
 \input{tex/06-Random-Processes/06-ARMA-and-ARIMA/05-滞后回归与ARDL把回归变成动态模型.tex}
 \clearpage
-\part{Information-Theory}
-\chapter*{07-Information-Theory}
+\part{信息论}
+\chapter*{信息论：从不确定性到可通信、可学习的边界}
+\phantomsection\label{ch:053}
 \input{tex/07-Information-Theory/00-MOC.tex}
 \clearpage
 \chapter*{信息与熵：怎样把``不确定''变成可计算的量}
+\phantomsection\label{ch:054}
 \addcontentsline{toc}{chapter}{信息与熵：怎样把``不确定''变成可计算的量}
 \input{tex/07-Information-Theory/01-Information-and-Entropy/00-MOC.tex}
 \input{tex/07-Information-Theory/01-Information-and-Entropy/01-从惊讶到Bit与自信息.tex}
@@ -445,6 +520,7 @@
 \input{tex/07-Information-Theory/01-Information-and-Entropy/04-最大熵原理从约束到分布.tex}
 \clearpage
 \chapter*{联合信息：一个变量能告诉我们另一个变量多少}
+\phantomsection\label{ch:055}
 \addcontentsline{toc}{chapter}{联合信息：一个变量能告诉我们另一个变量多少}
 \input{tex/07-Information-Theory/02-Joint-Information/00-MOC.tex}
 \input{tex/07-Information-Theory/02-Joint-Information/01-联合熵条件熵与链式法则.tex}
@@ -453,6 +529,7 @@
 \input{tex/07-Information-Theory/02-Joint-Information/04-数据处理不等式与充分表示.tex}
 \clearpage
 \chapter*{分布之间的差异：从错误编码到散度}
+\phantomsection\label{ch:056}
 \addcontentsline{toc}{chapter}{分布之间的差异：从错误编码到散度}
 \input{tex/07-Information-Theory/03-Divergences/00-MOC.tex}
 \input{tex/07-Information-Theory/03-Divergences/01-错误模型的代价从交叉熵到KL散度.tex}
@@ -460,6 +537,7 @@
 \input{tex/07-Information-Theory/03-Divergences/03-Jensen-Shannon散度与尺度选择.tex}
 \clearpage
 \chapter*{无损信源编码：熵为什么是压缩极限}
+\phantomsection\label{ch:057}
 \addcontentsline{toc}{chapter}{无损信源编码：熵为什么是压缩极限}
 \input{tex/07-Information-Theory/04-Source-Coding/00-MOC.tex}
 \input{tex/07-Information-Theory/04-Source-Coding/01-前缀码与Kraft不等式.tex}
@@ -470,6 +548,7 @@
 \input{tex/07-Information-Theory/04-Source-Coding/06-LZ编码不假设分布的通用压缩.tex}
 \clearpage
 \chapter*{有噪信道编码：噪声中为什么仍能可靠通信}
+\phantomsection\label{ch:058}
 \addcontentsline{toc}{chapter}{有噪信道编码：噪声中为什么仍能可靠通信}
 \input{tex/07-Information-Theory/05-Channel-Coding/00-MOC.tex}
 \input{tex/07-Information-Theory/05-Channel-Coding/01-信道模型与一次传输的信息量.tex}
@@ -478,6 +557,7 @@
 \input{tex/07-Information-Theory/05-Channel-Coding/04-高斯信道功率约束与连续容量.tex}
 \clearpage
 \chapter*{信息与学习：哪些数据值得看，哪些表示值得保留}
+\phantomsection\label{ch:059}
 \addcontentsline{toc}{chapter}{信息与学习：哪些数据值得看，哪些表示值得保留}
 \input{tex/07-Information-Theory/06-Information-and-Learning/00-MOC.tex}
 \input{tex/07-Information-Theory/06-Information-and-Learning/01-信息增益从提问到实验设计.tex}
@@ -485,11 +565,13 @@
 \input{tex/07-Information-Theory/06-Information-and-Learning/03-信息瓶颈与任务相关表示.tex}
 \input{tex/07-Information-Theory/06-Information-and-Learning/04-分类神经网络与信息论边界.tex}
 \clearpage
-\part{Numerical-Analysis}
-\chapter*{08-Numerical-Analysis}
+\part{数值分析}
+\chapter*{数值分析：从公式成立到计算可信}
+\phantomsection\label{ch:060}
 \input{tex/08-Numerical-Analysis/00-MOC.tex}
 \clearpage
 \chapter*{浮点数与误差：计算机为什么不等于实数系统}
+\phantomsection\label{ch:061}
 \addcontentsline{toc}{chapter}{浮点数与误差：计算机为什么不等于实数系统}
 \input{tex/08-Numerical-Analysis/01-Floating-Point-and-Error/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/01-Floating-Point-and-Error/01-从实数到浮点数.tex}
@@ -498,6 +580,7 @@
 \input{tex/08-Numerical-Analysis/01-Floating-Point-and-Error/04-前向误差后向误差与稳定算法.tex}
 \clearpage
 \chapter*{非线性方程求根：可靠性、速度与信息成本}
+\phantomsection\label{ch:062}
 \addcontentsline{toc}{chapter}{非线性方程求根：可靠性、速度与信息成本}
 \input{tex/08-Numerical-Analysis/02-Root-Finding/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/02-Root-Finding/01-括区与二分法.tex}
@@ -505,6 +588,7 @@
 \input{tex/08-Numerical-Analysis/02-Root-Finding/03-割线法收敛阶与混合策略.tex}
 \clearpage
 \chapter*{插值与逼近：通过数据点，不等于理解点之间}
+\phantomsection\label{ch:063}
 \addcontentsline{toc}{chapter}{插值与逼近：通过数据点，不等于理解点之间}
 \input{tex/08-Numerical-Analysis/03-Interpolation-and-Approximation/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/03-Interpolation-and-Approximation/01-一个插值多项式的两种构造.tex}
@@ -513,6 +597,7 @@
 \input{tex/08-Numerical-Analysis/03-Interpolation-and-Approximation/04-三次样条用局部性换稳定.tex}
 \clearpage
 \chapter*{数值微分与积分：同一份采样，为何难度相反}
+\phantomsection\label{ch:064}
 \addcontentsline{toc}{chapter}{数值微分与积分：同一份采样，为何难度相反}
 \input{tex/08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/01-数值微分为何不能无限缩小步长.tex}
@@ -520,6 +605,7 @@
 \input{tex/08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/03-Gaussian与自适应求积.tex}
 \clearpage
 \chapter*{数值线性代数：结构、稳定性与规模决定算法}
+\phantomsection\label{ch:065}
 \addcontentsline{toc}{chapter}{数值线性代数：结构、稳定性与规模决定算法}
 \input{tex/08-Numerical-Analysis/05-Numerical-Linear-Algebra/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/05-Numerical-Linear-Algebra/01-线性方程为何分解而不求逆.tex}
@@ -531,6 +617,7 @@
 \input{tex/08-Numerical-Analysis/05-Numerical-Linear-Algebra/07-Kaczmarz逐行投影大型线性系统.tex}
 \clearpage
 \chapter*{常微分方程数值方法：沿局部斜率走完整条轨迹}
+\phantomsection\label{ch:066}
 \addcontentsline{toc}{chapter}{常微分方程数值方法：沿局部斜率走完整条轨迹}
 \input{tex/08-Numerical-Analysis/06-ODE/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/06-ODE/01-Euler方法从局部斜率到全局误差.tex}
@@ -539,6 +626,7 @@
 \input{tex/08-Numerical-Analysis/06-ODE/04-边值问题从打靶到全局离散.tex}
 \clearpage
 \chapter*{机器学习中的稳定计算}
+\phantomsection\label{ch:067}
 \addcontentsline{toc}{chapter}{机器学习中的稳定计算}
 \input{tex/08-Numerical-Analysis/07-Numerical-Methods-for-ML/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/07-Numerical-Methods-for-ML/01-在对数域中稳定计算概率.tex}
@@ -546,6 +634,7 @@
 \input{tex/08-Numerical-Analysis/07-Numerical-Methods-for-ML/03-需要的是解而不是逆矩阵.tex}
 \clearpage
 \chapter*{Fourier 与谱方法：把函数换到频率坐标中}
+\phantomsection\label{ch:068}
 \addcontentsline{toc}{chapter}{Fourier 与谱方法：把函数换到频率坐标中}
 \input{tex/08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01-从Fourier级数到连续变换.tex}
@@ -556,23 +645,27 @@
 \input{tex/08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/06-小波与多尺度分解.tex}
 \clearpage
 \chapter*{复分析与留数：奇点决定函数的深层结构}
+\phantomsection\label{ch:069}
 \addcontentsline{toc}{chapter}{复分析与留数：奇点决定函数的深层结构}
 \input{tex/08-Numerical-Analysis/09-Complex-Analysis-and-Residues/00-MOC.tex}
 \input{tex/08-Numerical-Analysis/09-Complex-Analysis-and-Residues/01-解析延拓与Fourier衰减.tex}
 \input{tex/08-Numerical-Analysis/09-Complex-Analysis-and-Residues/02-留数定理计算实积分.tex}
 \input{tex/08-Numerical-Analysis/09-Complex-Analysis-and-Residues/03-特征函数反演与Laplace变换.tex}
 \clearpage
-\part{Convex-Optimization}
-\chapter*{09-Convex-Optimization}
+\part{凸优化}
+\chapter*{凸优化：让局部信息获得全局意义}
+\phantomsection\label{ch:070}
 \input{tex/09-Convex-Optimization/00-MOC.tex}
 \clearpage
 \chapter*{从现实选择到优化问题}
+\phantomsection\label{ch:071}
 \addcontentsline{toc}{chapter}{从现实选择到优化问题}
 \input{tex/09-Convex-Optimization/01-Optimization-Foundations/00-MOC.tex}
 \input{tex/09-Convex-Optimization/01-Optimization-Foundations/01-把现实选择翻译成优化问题.tex}
 \input{tex/09-Convex-Optimization/01-Optimization-Foundations/02-局部更好为何还不够.tex}
 \clearpage
 \chapter*{凸集合：可行方案能否安全混合}
+\phantomsection\label{ch:072}
 \addcontentsline{toc}{chapter}{凸集合：可行方案能否安全混合}
 \input{tex/09-Convex-Optimization/02-Convex-Sets/00-MOC.tex}
 \input{tex/09-Convex-Optimization/02-Convex-Sets/01-线段凸组合与凸包.tex}
@@ -580,6 +673,7 @@
 \input{tex/09-Convex-Optimization/02-Convex-Sets/03-从方向的集合到半正定锥.tex}
 \clearpage
 \chapter*{凸函数：局部信息为何能控制全局}
+\phantomsection\label{ch:073}
 \addcontentsline{toc}{chapter}{凸函数：局部信息为何能控制全局}
 \input{tex/09-Convex-Optimization/03-Convex-Functions/00-MOC.tex}
 \input{tex/09-Convex-Optimization/03-Convex-Functions/01-弦在图像上方意味着什么.tex}
@@ -588,6 +682,7 @@
 \input{tex/09-Convex-Optimization/03-Convex-Functions/04-怎样识别和构造凸函数.tex}
 \clearpage
 \chapter*{识别凸优化问题}
+\phantomsection\label{ch:074}
 \addcontentsline{toc}{chapter}{识别凸优化问题}
 \input{tex/09-Convex-Optimization/04-Convex-Problems/00-MOC.tex}
 \input{tex/09-Convex-Optimization/04-Convex-Problems/01-标准形式与线性规划.tex}
@@ -596,6 +691,7 @@
 \input{tex/09-Convex-Optimization/04-Convex-Problems/04-半正定规划优化矩阵不等式.tex}
 \clearpage
 \chapter*{对偶：为最优性建立下界证书}
+\phantomsection\label{ch:075}
 \addcontentsline{toc}{chapter}{对偶：为最优性建立下界证书}
 \input{tex/09-Convex-Optimization/05-Duality/00-MOC.tex}
 \input{tex/09-Convex-Optimization/05-Duality/01-Lagrangian怎样制造全局下界.tex}
@@ -604,6 +700,7 @@
 \input{tex/09-Convex-Optimization/05-Duality/04-对偶变量是约束的影子价格.tex}
 \clearpage
 \chapter*{优化算法：怎样把局部模型变成全局进展}
+\phantomsection\label{ch:076}
 \addcontentsline{toc}{chapter}{优化算法：怎样把局部模型变成全局进展}
 \input{tex/09-Convex-Optimization/06-Optimization-Algorithms/00-MOC.tex}
 \input{tex/09-Convex-Optimization/06-Optimization-Algorithms/01-梯度下降真正难在步长.tex}
@@ -613,6 +710,7 @@
 \input{tex/09-Convex-Optimization/06-Optimization-Algorithms/05-从障碍函数到原始对偶内点法.tex}
 \clearpage
 \chapter*{建模案例：凸性怎样改变真实问题}
+\phantomsection\label{ch:077}
 \addcontentsline{toc}{chapter}{建模案例：凸性怎样改变真实问题}
 \input{tex/09-Convex-Optimization/07-Applications/00-MOC.tex}
 \input{tex/09-Convex-Optimization/07-Applications/01-光滑经验风险与L2正则化.tex}
@@ -621,6 +719,7 @@
 \input{tex/09-Convex-Optimization/07-Applications/04-风险收益与投资组合.tex}
 \clearpage
 \chapter*{非凸与随机优化：能下降不等于找到全局解}
+\phantomsection\label{ch:078}
 \addcontentsline{toc}{chapter}{非凸与随机优化：能下降不等于找到全局解}
 \input{tex/09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/00-MOC.tex}
 \input{tex/09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/01-下降引理在非凸地形中只保证接近驻点.tex}
@@ -631,22 +730,26 @@
 \input{tex/09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/06-优化误差统计误差与泛化不能混为一谈.tex}
 \clearpage
 \chapter*{计算复杂度与近似算法：当最优在计算上不可及}
+\phantomsection\label{ch:079}
 \addcontentsline{toc}{chapter}{计算复杂度与近似算法：当最优在计算上不可及}
 \input{tex/09-Convex-Optimization/09-Complexity-and-Approximation/00-MOC.tex}
 \input{tex/09-Convex-Optimization/09-Complexity-and-Approximation/01-P-NP与NP-hard给问题按计算难度分类.tex}
 \input{tex/09-Convex-Optimization/09-Complexity-and-Approximation/02-凸松弛把NP-hard问题变成可解问题.tex}
 \clearpage
-\part{Matrix-Calculus}
-\chapter*{10-Matrix-Calculus}
+\part{矩阵微积分}
+\chapter*{矩阵微积分：把复杂求导还原为线性传播}
+\phantomsection\label{ch:080}
 \input{tex/10-Matrix-Calculus/00-MOC.tex}
 \clearpage
 \chapter*{导数的对象与记号}
+\phantomsection\label{ch:081}
 \addcontentsline{toc}{chapter}{导数的对象与记号}
 \input{tex/10-Matrix-Calculus/01-Derivative-Conventions/00-MOC.tex}
 \input{tex/10-Matrix-Calculus/01-Derivative-Conventions/01-导数是最佳线性映射.tex}
 \input{tex/10-Matrix-Calculus/01-Derivative-Conventions/02-形状先于公式布局必须声明.tex}
 \clearpage
 \chapter*{微分、链式法则与二阶信息}
+\phantomsection\label{ch:082}
 \addcontentsline{toc}{chapter}{微分、链式法则与二阶信息}
 \input{tex/10-Matrix-Calculus/02-Differentials/00-MOC.tex}
 \input{tex/10-Matrix-Calculus/02-Differentials/01-用微分与Frobenius内积读取梯度.tex}
@@ -654,6 +757,7 @@
 \input{tex/10-Matrix-Calculus/02-Differentials/03-Hessian是二阶线性算子.tex}
 \clearpage
 \chapter*{Trace 方法与常用矩阵导数}
+\phantomsection\label{ch:083}
 \addcontentsline{toc}{chapter}{Trace 方法与常用矩阵导数}
 \input{tex/10-Matrix-Calculus/03-Trace-Calculus/00-MOC.tex}
 \input{tex/10-Matrix-Calculus/03-Trace-Calculus/01-Trace怎样整理二次型微分.tex}
@@ -661,17 +765,20 @@
 \input{tex/10-Matrix-Calculus/03-Trace-Calculus/03-行列式与LogDet的微分.tex}
 \clearpage
 \chapter*{从梯度推导到反向传播}
+\phantomsection\label{ch:084}
 \addcontentsline{toc}{chapter}{从梯度推导到反向传播}
 \input{tex/10-Matrix-Calculus/04-Applications/00-MOC.tex}
 \input{tex/10-Matrix-Calculus/04-Applications/01-从最小二乘到Logistic回归梯度.tex}
 \input{tex/10-Matrix-Calculus/04-Applications/02-Softmax交叉熵为何化简为p减y.tex}
 \input{tex/10-Matrix-Calculus/04-Applications/03-计算图上的反向传播与自动微分.tex}
 \clearpage
-\part{Mathematical-Statistics}
-\chapter*{11-Mathematical-Statistics}
+\part{数理统计}
+\chapter*{数理统计：从有限样本推断未知机制}
+\phantomsection\label{ch:085}
 \input{tex/11-Mathematical-Statistics/00-MOC.tex}
 \clearpage
 \chapter*{从一次数据到重复抽样}
+\phantomsection\label{ch:086}
 \addcontentsline{toc}{chapter}{从一次数据到重复抽样}
 \input{tex/11-Mathematical-Statistics/01-Statistical-Models/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/01-Statistical-Models/01-数据来自怎样的生成机制.tex}
@@ -679,6 +786,7 @@
 \input{tex/11-Mathematical-Statistics/01-Statistical-Models/03-抽样分布连接数据与推断.tex}
 \clearpage
 \chapter*{点估计：构造规则并评价其长期表现}
+\phantomsection\label{ch:087}
 \addcontentsline{toc}{chapter}{点估计：构造规则并评价其长期表现}
 \input{tex/11-Mathematical-Statistics/02-Point-Estimation/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/02-Point-Estimation/01-偏差方差与均方误差.tex}
@@ -687,6 +795,7 @@
 \input{tex/11-Mathematical-Statistics/02-Point-Estimation/04-MAP把先验与似然合在一个点上.tex}
 \clearpage
 \chapter*{数据压缩与可估计信息}
+\phantomsection\label{ch:088}
 \addcontentsline{toc}{chapter}{数据压缩与可估计信息}
 \input{tex/11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/01-充分统计量保留了哪些参数信息.tex}
@@ -694,6 +803,7 @@
 \input{tex/11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/03-Cramer-Rao界给无偏估计设下限.tex}
 \clearpage
 \chapter*{区间估计：让不确定性进入答案}
+\phantomsection\label{ch:089}
 \addcontentsline{toc}{chapter}{区间估计：让不确定性进入答案}
 \input{tex/11-Mathematical-Statistics/04-Interval-Estimation/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/04-Interval-Estimation/01-置信度属于程序而非这次参数.tex}
@@ -701,6 +811,7 @@
 \input{tex/11-Mathematical-Statistics/04-Interval-Estimation/03-渐近区间与Bayesian可信区间.tex}
 \clearpage
 \chapter*{假设检验：在两类错误之间设计规则}
+\phantomsection\label{ch:090}
 \addcontentsline{toc}{chapter}{假设检验：在两类错误之间设计规则}
 \input{tex/11-Mathematical-Statistics/05-Hypothesis-Testing/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/05-Hypothesis-Testing/01-两类错误与功效共同定义检验.tex}
@@ -709,6 +820,7 @@
 \input{tex/11-Mathematical-Statistics/05-Hypothesis-Testing/04-多重比较改变错误的计量单位.tex}
 \clearpage
 \chapter*{重采样与模型选择：让数据评估整个流程}
+\phantomsection\label{ch:091}
 \addcontentsline{toc}{chapter}{重采样与模型选择：让数据评估整个流程}
 \input{tex/11-Mathematical-Statistics/06-Resampling-and-Model-Selection/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/06-Resampling-and-Model-Selection/01-Bootstrap近似估计量的抽样波动.tex}
@@ -717,6 +829,7 @@
 \input{tex/11-Mathematical-Statistics/06-Resampling-and-Model-Selection/04-偏差方差正则化与模型选择.tex}
 \clearpage
 \chapter*{统计决策与可信预测：模型给出概率之后怎样行动}
+\phantomsection\label{ch:092}
 \addcontentsline{toc}{chapter}{统计决策与可信预测：模型给出概率之后怎样行动}
 \input{tex/11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/01-状态行动损失与风险构成决策问题.tex}
@@ -727,12 +840,14 @@
 \input{tex/11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/06-拒绝预测与容量约束把概率变成行动.tex}
 \clearpage
 \chapter*{回归与方差分析：把变异拆成可检验结构}
+\phantomsection\label{ch:093}
 \addcontentsline{toc}{chapter}{回归与方差分析：把变异拆成可检验结构}
 \input{tex/11-Mathematical-Statistics/08-Regression-and-ANOVA/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/08-Regression-and-ANOVA/01-经典线性回归把系数估计接到抽样分布.tex}
 \input{tex/11-Mathematical-Statistics/08-Regression-and-ANOVA/02-ANOVA用平方和分解比较多组均值.tex}
 \clearpage
 \chapter*{随机矩阵理论：高维协方差的谱失真}
+\phantomsection\label{ch:094}
 \addcontentsline{toc}{chapter}{随机矩阵理论：高维协方差的谱失真}
 \input{tex/11-Mathematical-Statistics/09-Random-Matrix-Theory/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/09-Random-Matrix-Theory/01-样本协方差在高维为何会失真.tex}
@@ -740,29 +855,34 @@
 \input{tex/11-Mathematical-Statistics/09-Random-Matrix-Theory/03-谱偏差怎样影响PCA与随机投影.tex}
 \clearpage
 \chapter*{GARCH 与波动率建模：金融时间序列的条件异方差}
+\phantomsection\label{ch:095}
 \addcontentsline{toc}{chapter}{GARCH 与波动率建模：金融时间序列的条件异方差}
 \input{tex/11-Mathematical-Statistics/10-GARCH-and-Volatility/00-MOC.tex}
 \input{tex/11-Mathematical-Statistics/10-GARCH-and-Volatility/01-波动率聚集与条件异方差.tex}
 \input{tex/11-Mathematical-Statistics/10-GARCH-and-Volatility/02-ARCH与GARCH模型.tex}
 \input{tex/11-Mathematical-Statistics/10-GARCH-and-Volatility/03-GARCH的估计诊断与扩展.tex}
 \clearpage
-\part{Real-Analysis-Support}
-\chapter*{12-Real-Analysis-Support}
+\part{实分析支撑}
+\chapter*{实分析支撑：为极限操作建立合法条件}
+\phantomsection\label{ch:096}
 \input{tex/12-Real-Analysis-Support/00-MOC.tex}
 \clearpage
 \chapter*{实数为什么需要完备}
+\phantomsection\label{ch:097}
 \addcontentsline{toc}{chapter}{实数为什么需要完备}
 \input{tex/12-Real-Analysis-Support/01-Real-Numbers-and-Completeness/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/01-Real-Numbers-and-Completeness/01-上确界填补有理数的空洞.tex}
 \input{tex/12-Real-Analysis-Support/01-Real-Numbers-and-Completeness/02-Cauchy判据无需预知极限.tex}
 \clearpage
 \chapter*{从数列到函数列的收敛}
+\phantomsection\label{ch:098}
 \addcontentsline{toc}{chapter}{从数列到函数列的收敛}
 \input{tex/12-Real-Analysis-Support/02-Convergence/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/02-Convergence/01-用量词精确刻画数列趋近.tex}
 \input{tex/12-Real-Analysis-Support/02-Convergence/02-点态与一致收敛只差一个量词顺序.tex}
 \clearpage
 \chapter*{度量、紧致与完备}
+\phantomsection\label{ch:099}
 \addcontentsline{toc}{chapter}{度量、紧致与完备}
 \input{tex/12-Real-Analysis-Support/03-Topology-Basics/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/03-Topology-Basics/01-距离怎样产生开集与闭集.tex}
@@ -770,6 +890,7 @@
 \input{tex/12-Real-Analysis-Support/03-Topology-Basics/03-完备性让逼近留在空间内.tex}
 \clearpage
 \chapter*{什么时候可以交换极限与运算}
+\phantomsection\label{ch:100}
 \addcontentsline{toc}{chapter}{什么时候可以交换极限与运算}
 \input{tex/12-Real-Analysis-Support/04-Limits-and-Integration/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/04-Limits-and-Integration/01-点态极限为何不能直接穿过积分号.tex}
@@ -777,6 +898,7 @@
 \input{tex/12-Real-Analysis-Support/04-Limits-and-Integration/03-求导穿过积分号需要控制差商.tex}
 \clearpage
 \chapter*{测度、积分与条件期望：为现代概率回填地基}
+\phantomsection\label{ch:101}
 \addcontentsline{toc}{chapter}{测度、积分与条件期望：为现代概率回填地基}
 \input{tex/12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/01-sigma代数把可观察事件组织成封闭系统.tex}
@@ -787,6 +909,7 @@
 \input{tex/12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/06-一致可积性阻止期望质量逃逸.tex}
 \clearpage
 \chapter*{乘积测度与 Fubini：独立性是测度的因式分解}
+\phantomsection\label{ch:102}
 \addcontentsline{toc}{chapter}{乘积测度与 Fubini：独立性是测度的因式分解}
 \input{tex/12-Real-Analysis-Support/06-Product-Measures-and-Fubini/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/06-Product-Measures-and-Fubini/01-为什么独立性需要乘积测度.tex}
@@ -794,6 +917,7 @@
 \input{tex/12-Real-Analysis-Support/06-Product-Measures-and-Fubini/03-独立随机变量与联合密度.tex}
 \clearpage
 \chapter*{Lp 空间与函数几何：把函数当点需要什么结构}
+\phantomsection\label{ch:103}
 \addcontentsline{toc}{chapter}{Lp 空间与函数几何：把函数当点需要什么结构}
 \input{tex/12-Real-Analysis-Support/07-Lp-Spaces-and-Function-Geometry/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/07-Lp-Spaces-and-Function-Geometry/01-Lp范数把积分变成距离.tex}
@@ -802,6 +926,7 @@
 \input{tex/12-Real-Analysis-Support/07-Lp-Spaces-and-Function-Geometry/04-条件期望与线性回归是两种投影.tex}
 \clearpage
 \chapter*{流形初步：弯曲空间上的微积分语言}
+\phantomsection\label{ch:104}
 \addcontentsline{toc}{chapter}{流形初步：弯曲空间上的微积分语言}
 \input{tex/12-Real-Analysis-Support/08-Manifold-Basics/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/08-Manifold-Basics/01-流形是局部像欧氏空间的集合.tex}
@@ -810,6 +935,7 @@
 \input{tex/12-Real-Analysis-Support/08-Manifold-Basics/04-流形上的函数与映射.tex}
 \clearpage
 \chapter*{信息几何：参数空间中的分布几何}
+\phantomsection\label{ch:105}
 \addcontentsline{toc}{chapter}{信息几何：参数空间中的分布几何}
 \input{tex/12-Real-Analysis-Support/09-Information-Geometry/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/09-Information-Geometry/01-统计流形把参数族变成几何对象.tex}
@@ -817,6 +943,7 @@
 \input{tex/12-Real-Analysis-Support/09-Information-Geometry/03-KL散度与Fisher度量的局部关系.tex}
 \clearpage
 \chapter*{本质结构：对称性、低维性、信息几何与因果}
+\phantomsection\label{ch:106}
 \addcontentsline{toc}{chapter}{本质结构：对称性、低维性、信息几何与因果}
 \input{tex/12-Real-Analysis-Support/10-Essential-Structures/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/10-Essential-Structures/01-对称性怎样产生守恒律.tex}
@@ -825,25 +952,29 @@
 \input{tex/12-Real-Analysis-Support/10-Essential-Structures/04-因果结构的代数形式.tex}
 \clearpage
 \chapter*{曲线与曲面几何：弯曲怎样从内蕴被感知}
+\phantomsection\label{ch:107}
 \addcontentsline{toc}{chapter}{曲线与曲面几何：弯曲怎样从内蕴被感知}
 \input{tex/12-Real-Analysis-Support/11-Curve-and-Surface-Geometry/00-MOC.tex}
 \input{tex/12-Real-Analysis-Support/11-Curve-and-Surface-Geometry/01-曲线弧长参数化与曲率.tex}
 \input{tex/12-Real-Analysis-Support/11-Curve-and-Surface-Geometry/02-曲面第一与第二基本形式.tex}
 \input{tex/12-Real-Analysis-Support/11-Curve-and-Surface-Geometry/03-从Gauss曲率到统计与数据流形.tex}
 \clearpage
-\part{Machine-Learning}
-\chapter*{13-Machine-Learning}
+\part{机器学习}
+\chapter*{机器学习：从有限数据到尚未见过的世界}
+\phantomsection\label{ch:108}
 \input{tex/13-Machine-Learning/00-MOC.tex}
 \clearpage
 \chapter*{学习问题与可信评价：先确定究竟要学什么}
+\phantomsection\label{ch:109}
 \addcontentsline{toc}{chapter}{学习问题与可信评价：先确定究竟要学什么}
 \input{tex/13-Machine-Learning/01-Learning-Problems-and-Evaluation/00-MOC.tex}
 \input{tex/13-Machine-Learning/01-Learning-Problems-and-Evaluation/01-从现实决策到学习问题.tex}
 \input{tex/13-Machine-Learning/01-Learning-Problems-and-Evaluation/02-损失风险目标与指标不是同一个量.tex}
-\input{tex/13-Machine-Learning/01-Learning-Problems-and-Evaluation/02b-目标函数与噪声模型的对应.tex}
-\input{tex/13-Machine-Learning/01-Learning-Problems-and-Evaluation/03-数据划分泄漏与分布偏移.tex}
+\input{tex/13-Machine-Learning/01-Learning-Problems-and-Evaluation/03-目标函数与噪声模型的对应.tex}
+\input{tex/13-Machine-Learning/01-Learning-Problems-and-Evaluation/04-数据划分泄漏与分布偏移.tex}
 \clearpage
 \chapter*{线性模型：先让假设透明，再让模型复杂}
+\phantomsection\label{ch:110}
 \addcontentsline{toc}{chapter}{线性模型：先让假设透明，再让模型复杂}
 \input{tex/13-Machine-Learning/02-Linear-Models/00-MOC.tex}
 \input{tex/13-Machine-Learning/02-Linear-Models/01-线性回归从投影到概率模型.tex}
@@ -853,6 +984,7 @@
 \input{tex/13-Machine-Learning/02-Linear-Models/05-GLM用链接函数连接均值与线性预测子.tex}
 \clearpage
 \chapter*{树、集成与邻域：用局部结构代替全局公式}
+\phantomsection\label{ch:111}
 \addcontentsline{toc}{chapter}{树、集成与邻域：用局部结构代替全局公式}
 \input{tex/13-Machine-Learning/03-Trees-Ensembles-and-Neighbors/00-MOC.tex}
 \input{tex/13-Machine-Learning/03-Trees-Ensembles-and-Neighbors/01-决策树把预测写成递归分区.tex}
@@ -860,34 +992,38 @@
 \input{tex/13-Machine-Learning/03-Trees-Ensembles-and-Neighbors/03-KNN把度量直接变成归纳偏置.tex}
 \clearpage
 \chapter*{降维与低秩建模：数据为何看似高维}
+\phantomsection\label{ch:112}
 \addcontentsline{toc}{chapter}{降维与低秩建模：数据为何看似高维}
 \input{tex/13-Machine-Learning/04-Dimensionality-Reduction/00-MOC.tex}
 \input{tex/13-Machine-Learning/04-Dimensionality-Reduction/01-PCA从最大方差到最小重构误差.tex}
 \input{tex/13-Machine-Learning/04-Dimensionality-Reduction/02-SVD给出最佳低秩近似.tex}
 \input{tex/13-Machine-Learning/04-Dimensionality-Reduction/03-矩阵补全从缺失条目到低秩正则.tex}
 \input{tex/13-Machine-Learning/04-Dimensionality-Reduction/04-流形假设与非线性降维.tex}
-\input{tex/13-Machine-Learning/04-Dimensionality-Reduction/04b-降维与升维的对偶.tex}
-\input{tex/13-Machine-Learning/04-Dimensionality-Reduction/05-因子分析与概率PCA把低秩变成生成模型.tex}
-\input{tex/13-Machine-Learning/04-Dimensionality-Reduction/06-ICA与CCA选择不同的可辨认结构.tex}
+\input{tex/13-Machine-Learning/04-Dimensionality-Reduction/05-降维与升维的对偶.tex}
+\input{tex/13-Machine-Learning/04-Dimensionality-Reduction/06-因子分析与概率PCA把低秩变成生成模型.tex}
+\input{tex/13-Machine-Learning/04-Dimensionality-Reduction/07-ICA与CCA选择不同的可辨认结构.tex}
 \clearpage
 \chapter*{聚类与数据几何：没有标签时结构从何而来}
+\phantomsection\label{ch:113}
 \addcontentsline{toc}{chapter}{聚类与数据几何：没有标签时结构从何而来}
 \input{tex/13-Machine-Learning/05-Clustering-and-Data-Geometry/00-MOC.tex}
 \input{tex/13-Machine-Learning/05-Clustering-and-Data-Geometry/01-K-means在交替下降中制造簇.tex}
 \input{tex/13-Machine-Learning/05-Clustering-and-Data-Geometry/02-谱聚类把连通性变成特征向量.tex}
 \clearpage
 \chapter*{概率模型与隐变量：从``预测标签''到``解释数据怎样产生''}
+\phantomsection\label{ch:114}
 \addcontentsline{toc}{chapter}{概率模型与隐变量：从``预测标签''到``解释数据怎样产生''}
 \input{tex/13-Machine-Learning/06-Probabilistic-Models/00-MOC.tex}
 \input{tex/13-Machine-Learning/06-Probabilistic-Models/01-生成式分类从Naive-Bayes到GDA.tex}
-\input{tex/13-Machine-Learning/06-Probabilistic-Models/01b-LDA与收缩判别方向的几何与高维失效.tex}
-\input{tex/13-Machine-Learning/06-Probabilistic-Models/02-Gaussian混合模型让类别成为隐变量.tex}
-\input{tex/13-Machine-Learning/06-Probabilistic-Models/03-EM用下界交替完成隐变量学习.tex}
-\input{tex/13-Machine-Learning/06-Probabilistic-Models/04-HMM把隐变量排列成时间链.tex}
-\input{tex/13-Machine-Learning/06-Probabilistic-Models/05-指数族把归一化矩与似然连接起来.tex}
-\input{tex/13-Machine-Learning/06-Probabilistic-Models/06-共轭先验让Bayesian更新保持同一形式.tex}
+\input{tex/13-Machine-Learning/06-Probabilistic-Models/02-LDA与收缩判别方向的几何与高维失效.tex}
+\input{tex/13-Machine-Learning/06-Probabilistic-Models/03-Gaussian混合模型让类别成为隐变量.tex}
+\input{tex/13-Machine-Learning/06-Probabilistic-Models/04-EM用下界交替完成隐变量学习.tex}
+\input{tex/13-Machine-Learning/06-Probabilistic-Models/05-HMM把隐变量排列成时间链.tex}
+\input{tex/13-Machine-Learning/06-Probabilistic-Models/06-指数族把归一化矩与似然连接起来.tex}
+\input{tex/13-Machine-Learning/06-Probabilistic-Models/07-共轭先验让Bayesian更新保持同一形式.tex}
 \clearpage
 \chapter*{概率图与序列模型：用条件独立压缩联合分布}
+\phantomsection\label{ch:115}
 \addcontentsline{toc}{chapter}{概率图与序列模型：用条件独立压缩联合分布}
 \input{tex/13-Machine-Learning/07-Graphical-and-Sequential-Models/00-MOC.tex}
 \input{tex/13-Machine-Learning/07-Graphical-and-Sequential-Models/01-图结构把联合分布拆成局部因子.tex}
@@ -897,6 +1033,7 @@
 \input{tex/13-Machine-Learning/07-Graphical-and-Sequential-Models/05-四类序列模型回答不同问题.tex}
 \clearpage
 \chapter*{采样与近似推断：当目标量写得出却算不出}
+\phantomsection\label{ch:116}
 \addcontentsline{toc}{chapter}{采样与近似推断：当目标量写得出却算不出}
 \input{tex/13-Machine-Learning/08-Sampling-and-Inference/00-MOC.tex}
 \input{tex/13-Machine-Learning/08-Sampling-and-Inference/01-Monte-Carlo用随机样本逼近期望.tex}
@@ -907,6 +1044,7 @@
 \input{tex/13-Machine-Learning/08-Sampling-and-Inference/06-配分函数把能量变成全局概率.tex}
 \clearpage
 \chapter*{核方法与 Gaussian process：把函数当作随机对象}
+\phantomsection\label{ch:117}
 \addcontentsline{toc}{chapter}{核方法与 Gaussian process：把函数当作随机对象}
 \input{tex/13-Machine-Learning/09-Kernel-Methods-and-Gaussian-Processes/00-MOC.tex}
 \input{tex/13-Machine-Learning/09-Kernel-Methods-and-Gaussian-Processes/01-把数据升到高维为什么有用.tex}
@@ -916,6 +1054,7 @@
 \input{tex/13-Machine-Learning/09-Kernel-Methods-and-Gaussian-Processes/05-Gaussian-process把核变成函数先验.tex}
 \clearpage
 \chapter*{统计学习理论：训练误差对真风险有多乐观}
+\phantomsection\label{ch:118}
 \addcontentsline{toc}{chapter}{统计学习理论：训练误差对真风险有多乐观}
 \input{tex/13-Machine-Learning/10-Learning-Theory/00-MOC.tex}
 \input{tex/13-Machine-Learning/10-Learning-Theory/01-训练误差为何总是乐观.tex}
@@ -924,6 +1063,7 @@
 \input{tex/13-Machine-Learning/10-Learning-Theory/04-泛化界的解释力与边界.tex}
 \clearpage
 \chapter*{信息论学习：把预测、约束、复杂度与表示放到同一尺度}
+\phantomsection\label{ch:119}
 \addcontentsline{toc}{chapter}{信息论学习：把预测、约束、复杂度与表示放到同一尺度}
 \input{tex/13-Machine-Learning/11-Information-Theoretic-Learning/00-MOC.tex}
 \input{tex/13-Machine-Learning/11-Information-Theoretic-Learning/01-交叉熵训练其实在最小化KL差异.tex}
@@ -932,6 +1072,7 @@
 \input{tex/13-Machine-Learning/11-Information-Theoretic-Learning/04-信息瓶颈在压缩与预测之间权衡.tex}
 \clearpage
 \chapter*{因果推断：预测世界不等于改变世界}
+\phantomsection\label{ch:120}
 \addcontentsline{toc}{chapter}{因果推断：预测世界不等于改变世界}
 \input{tex/13-Machine-Learning/12-Causal-Inference/00-MOC.tex}
 \input{tex/13-Machine-Learning/12-Causal-Inference/01-观察干预与反事实回答不同问题.tex}
@@ -942,29 +1083,34 @@
 \input{tex/13-Machine-Learning/12-Causal-Inference/06-可识别不等于可外推也不等于可决策.tex}
 \clearpage
 \chapter*{统计物理与自由能：平均场近似的来源与边界}
+\phantomsection\label{ch:121}
 \addcontentsline{toc}{chapter}{统计物理与自由能：平均场近似的来源与边界}
 \input{tex/13-Machine-Learning/13-Statistical-Physics-and-Free-Energy/00-MOC.tex}
 \input{tex/13-Machine-Learning/13-Statistical-Physics-and-Free-Energy/01-自由能把配分函数变成热力学量.tex}
 \input{tex/13-Machine-Learning/13-Statistical-Physics-and-Free-Energy/02-平均场近似用独立性换可计算性.tex}
 \input{tex/13-Machine-Learning/13-Statistical-Physics-and-Free-Energy/03-相变与涨落平均场在临界点附近失效.tex}
 \clearpage
-\part{Deep-Learning}
-\chapter*{14-Deep-Learning}
+\part{深度学习}
+\chapter*{深度学习：让表示、梯度与数据结构在复合函数中相遇}
+\phantomsection\label{ch:122}
 \input{tex/14-Deep-Learning/00-MOC.tex}
 \clearpage
 \chapter*{表示与逼近：深度和非线性究竟增加了什么}
+\phantomsection\label{ch:123}
 \addcontentsline{toc}{chapter}{表示与逼近：深度和非线性究竟增加了什么}
 \input{tex/14-Deep-Learning/01-Representation-and-Approximation/00-MOC.tex}
 \input{tex/14-Deep-Learning/01-Representation-and-Approximation/01-神经网络为何需要非线性.tex}
 \input{tex/14-Deep-Learning/01-Representation-and-Approximation/02-通用逼近定理说清了什么又没说什么.tex}
 \clearpage
 \chapter*{损失与反向传播：目标怎样沿计算图返回参数}
+\phantomsection\label{ch:124}
 \addcontentsline{toc}{chapter}{损失与反向传播：目标怎样沿计算图返回参数}
 \input{tex/14-Deep-Learning/02-Losses-and-Backpropagation/00-MOC.tex}
 \input{tex/14-Deep-Learning/02-Losses-and-Backpropagation/01-损失函数决定网络在学习什么.tex}
 \input{tex/14-Deep-Learning/02-Losses-and-Backpropagation/02-一次完整的前向与反向传播.tex}
 \clearpage
 \chapter*{优化与训练：梯度正确之后为何仍会失败}
+\phantomsection\label{ch:125}
 \addcontentsline{toc}{chapter}{优化与训练：梯度正确之后为何仍会失败}
 \input{tex/14-Deep-Learning/03-Optimization-and-Training/00-MOC.tex}
 \input{tex/14-Deep-Learning/03-Optimization-and-Training/01-训练动力学与数值稳定.tex}
@@ -972,21 +1118,25 @@
 \input{tex/14-Deep-Learning/03-Optimization-and-Training/03-归一化与Dropout改变训练时的随机系统.tex}
 \clearpage
 \chapter*{卷积网络：把局部性与平移结构写进模型}
+\phantomsection\label{ch:126}
 \addcontentsline{toc}{chapter}{卷积网络：把局部性与平移结构写进模型}
 \input{tex/14-Deep-Learning/04-Convolutional-Networks/00-MOC.tex}
 \input{tex/14-Deep-Learning/04-Convolutional-Networks/01-卷积把平移结构写进线性映射.tex}
 \clearpage
 \chapter*{注意力与序列：让内容决定从哪里读取信息}
+\phantomsection\label{ch:127}
 \addcontentsline{toc}{chapter}{注意力与序列：让内容决定从哪里读取信息}
 \input{tex/14-Deep-Learning/05-Attention-and-Sequence-Models/00-MOC.tex}
 \input{tex/14-Deep-Learning/05-Attention-and-Sequence-Models/01-自注意力是内容决定的加权读取.tex}
 \clearpage
 \chapter*{变分自编码器：把潜变量模型接到随机梯度}
+\phantomsection\label{ch:128}
 \addcontentsline{toc}{chapter}{变分自编码器：把潜变量模型接到随机梯度}
 \input{tex/14-Deep-Learning/06-Variational-Autoencoders/00-MOC.tex}
 \input{tex/14-Deep-Learning/06-Variational-Autoencoders/01-VAE把不可积后验变成可训练下界.tex}
 \clearpage
 \chapter*{AI 可解释性的数学基础：理解高维数据的流动}
+\phantomsection\label{ch:129}
 \addcontentsline{toc}{chapter}{AI 可解释性的数学基础：理解高维数据的流动}
 \input{tex/14-Deep-Learning/07-Interpretability-Mathematics/00-MOC.tex}
 \input{tex/14-Deep-Learning/07-Interpretability-Mathematics/01-神经网络的函数空间视角.tex}
@@ -994,11 +1144,13 @@
 \input{tex/14-Deep-Learning/07-Interpretability-Mathematics/03-高维数据的低维结构检验.tex}
 \input{tex/14-Deep-Learning/07-Interpretability-Mathematics/04-模型解释的数学形式化.tex}
 \clearpage
-\part{Differential-Equations-and-Dynamical-Systems}
-\chapter*{15-Differential-Equations-and-Dynamical-Systems}
+\part{微分方程与动力系统}
+\chapter*{微分方程与动力系统：从局部变化规律到整体行为}
+\phantomsection\label{ch:130}
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/00-MOC.tex}
 \clearpage
 \chapter*{常微分方程理论：解是否存在、是否唯一}
+\phantomsection\label{ch:131}
 \addcontentsline{toc}{chapter}{常微分方程理论：解是否存在、是否唯一}
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/00-MOC.tex}
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/01-从增长衰减与振动说起.tex}
@@ -1007,6 +1159,7 @@
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/04-尺度分离与渐近近似.tex}
 \clearpage
 \chapter*{稳定性与动力系统：长期行为的几何与能量}
+\phantomsection\label{ch:132}
 \addcontentsline{toc}{chapter}{稳定性与动力系统：长期行为的几何与能量}
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/00-MOC.tex}
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/01-相平面把解画成几何.tex}
@@ -1014,6 +1167,7 @@
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/03-离散动力系统分岔与混沌.tex}
 \clearpage
 \chapter*{偏微分方程初步：场随时间与空间一起变化}
+\phantomsection\label{ch:133}
 \addcontentsline{toc}{chapter}{偏微分方程初步：场随时间与空间一起变化}
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/00-MOC.tex}
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/01-从ODE到PDE未知量从曲线变成场.tex}
@@ -1022,11 +1176,13 @@
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/04-分离变量把PDE还原为一族ODE.tex}
 \input{tex/15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/05-Sobolev空间与半群弱解的严格框架.tex}
 \clearpage
-\part{Control-and-Reinforcement-Learning}
-\chapter*{16-Control-and-Reinforcement-Learning}
+\part{控制与强化学习}
+\chapter*{控制与强化学习：让系统按我们的意愿演化}
+\phantomsection\label{ch:134}
 \input{tex/16-Control-and-Reinforcement-Learning/00-MOC.tex}
 \clearpage
 \chapter*{最优控制：从反馈稳定到全局最优}
+\phantomsection\label{ch:135}
 \addcontentsline{toc}{chapter}{最优控制：从反馈稳定到全局最优}
 \input{tex/16-Control-and-Reinforcement-Learning/01-Optimal-Control/00-MOC.tex}
 \input{tex/16-Control-and-Reinforcement-Learning/01-Optimal-Control/01-从开环到闭环反馈.tex}
@@ -1037,6 +1193,7 @@
 \input{tex/16-Control-and-Reinforcement-Learning/01-Optimal-Control/06-系统辨识从输入输出数据估计动力学.tex}
 \clearpage
 \chapter*{强化学习：模型未知时怎样逼近最优决策}
+\phantomsection\label{ch:136}
 \addcontentsline{toc}{chapter}{强化学习：模型未知时怎样逼近最优决策}
 \input{tex/16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/00-MOC.tex}
 \input{tex/16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/01-MDP把决策问题写成随机过程.tex}
@@ -1050,8 +1207,9 @@
 \input{tex/16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/09-策略梯度直接优化动作分布.tex}
 \input{tex/16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/10-Actor-Critic在偏差与方差之间搭桥.tex}
 \clearpage
-\part{References}
-\chapter*{17-References}
+\part{参考资料}
+\chapter*{参考资料：课程给顺序，教材给边界，讲义给解释}
+\phantomsection\label{ch:137}
 \input{tex/17-References/00-MOC.tex}
 \clearpage
 \end{document}

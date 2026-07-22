@@ -1,4 +1,9 @@
 \section{交叉验证评估的是完整训练流程}
+\label{sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}交叉验证要在每个训练折内重新完成特征处理、调参和拟合。若先用全体数据挑特征或归一化，验证折的信息已经泄漏，得到的误差会过于乐观。
+\end{quote}
 
 训练误差总偏向已经用于拟合的数据。要估计模型面对新数据的预测表现，必须让评价样本在训练时保持未见。
 
@@ -30,7 +35,6 @@ y_i,
 正确流程是在每个折中：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   仅用训练折拟合预处理；
@@ -93,4 +97,3 @@ Nested cross-validation 使用：
 平方误差、绝对误差、log loss、AUC 与校准误差衡量不同目标。若先看结果再选择最有利指标，又产生多重选择。
 
 训练损失、调参指标和最终业务代价可以不同，但关系应预先说明。例如不平衡分类中准确率可能很高却没有价值；概率模型只看 AUC 会忽略校准。
-

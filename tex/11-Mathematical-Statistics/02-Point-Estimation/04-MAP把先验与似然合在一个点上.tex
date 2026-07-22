@@ -1,4 +1,9 @@
 \section{MAP 把先验与似然合在一个点上}
+\label{sec:11-Mathematical-Statistics/02-Point-Estimation/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}MAP 选择后验密度最高的一个参数点，把先验偏好与数据证据合在一起。它只保留后验的峰值，不等于完整 Bayesian 推断，而且会受参数化和密度尺度影响。
+\end{quote}
 
 Bayesian 模型把参数也纳入概率系统：
 
@@ -82,14 +87,14 @@ w\sim N(0,\tau^2I)
 贡献
 
 \[
--\log\pi(w) = \frac{1}{2\tau^2}\lVert w\rVert_2^2+\text{常数},
+-\log\pi(w) = \frac{1}{2\tau^2}\norm{ w}_2^2+\text{常数},
 \]
 而 Gaussian 似然贡献残差平方和，所以 Gaussian 似然下的 MAP 等价于 Ridge。
 
 独立 Laplace 先验贡献与
 
 \[
-\lVert w\rVert_1
+\norm{ w}_1
 \]
 
 成正比，对应 Lasso 型 MAP。这个联系解释了正则项的一种概率来源，也明确了正则强度与噪声、先验尺度的关系。
@@ -118,4 +123,3 @@ MAP 依赖选择什么参数坐标和基准测度。相比之下，MLE 对一一
 若先用同一数据选择先验超参数，再把该先验当作独立信息进行普通后验计算，可能低估不确定性。经验 Bayes 可以有严格方法，但应把超参数估计层纳入分析或说明近似。
 
 在大样本、固定维且正则条件下，似然常逐渐压过温和先验，MAP 与 MLE 接近；在小样本、弱可识别或高维问题中，先验可以主导结果。这时敏感性分析尤为重要：改变合理先验后，结论是否稳定？
-

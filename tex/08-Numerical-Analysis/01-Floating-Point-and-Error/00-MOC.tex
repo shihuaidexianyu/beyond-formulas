@@ -3,7 +3,6 @@
 建议依次阅读：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   从实数到浮点数
@@ -14,3 +13,21 @@
 \item
   前向误差、后向误差与稳定算法
 \end{enumerate}
+
+\subsection{怎么读这一章}
+
+第一次读，不必先背 binary64 的每个字段。更重要的是学会把一次错误分成三问：输入稍微变一点，正确答案会不会大变；所用公式是否省略了某些项；浮点算法又额外丢了多少信息。前三问分别指向条件性、截断误差和舍入传播，只有分开以后，才知道提高精度是否真的有用。
+
+前一单元：\hyperref[ch:059]{``信息与学习：哪些数据值得看，哪些表示值得保留''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/01]{``从实数到浮点数''}；
+\item \hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/02]{``误差如何产生与放大''}；
+\item \hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/03]{``条件数衡量问题本身的敏感性''}；
+\item \hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/04]{``前向误差、后向误差与稳定算法''}。
+\end{itemize}

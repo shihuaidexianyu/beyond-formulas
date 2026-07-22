@@ -3,7 +3,6 @@
 主线由两个问题组成：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   神经网络为何需要非线性先证明没有激活函数时再深也只是一层线性映射，再讨论 ReLU、sigmoid 等怎样同时改变表示和梯度。
@@ -12,3 +11,17 @@
 \end{enumerate}
 
 读完后应能把三种陈述分开：某个函数存在于网络类中，某个参数能由训练算法找到，以及找到的函数能推广到新数据。通用逼近只触及第一种，而且必须连同定义域、激活函数和近似范数一起陈述。
+
+\subsection{怎么读这一章}
+
+先看没有非线性时多层网络为何仍等价于一层线性映射，再读通用逼近定理。重点区分“存在一个能逼近的网络”和“训练能找到、数据能识别、模型能泛化”这几件不同的事。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:14-Deep-Learning/01-Representation-and-Approximation/01]{``神经网络为何需要非线性''}；
+\item \hyperref[sec:14-Deep-Learning/01-Representation-and-Approximation/02]{``通用逼近定理说清了什么又没说什么''}。
+\end{itemize}

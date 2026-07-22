@@ -1,4 +1,9 @@
 \section{线性递推与特征根}
+\label{sec:04-Discrete-Mathematics/02-Recurrences/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}特征根不是解题猜测，而是在寻找被递推平移后仍保持形状的指数模式。根的模控制增长或衰减，辐角控制振荡，重根带来的多项式因子则记录模式不能被完全分离。
+\end{quote}
 
 \subsection{指数序列是常系数递推的自然模式}
 
@@ -57,7 +62,7 @@ r^n,\qquad nr^n.
 p\,(n-1)r^{n-1}+q\,(n-2)r^{n-2}=\bigl(2(n-1)-(n-2)\bigr)r^n=nr^n.
 \]
 
-重数更高时出现 \(n^jr^n\)。这与矩阵 Jordan 块导致``指数乘多项式''完全对应。
+重数更高时出现 \(n^jr^n\)。这与\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/03]{``对角化失败与 Jordan 形''}中 Jordan 块导致``指数乘多项式''完全对应。
 
 复根成共轭对 \(r=\rho e^{\pm i\theta}\) 时（\(\rho\) 是模长、\(\theta\) 是辐角），实序列可改写为
 

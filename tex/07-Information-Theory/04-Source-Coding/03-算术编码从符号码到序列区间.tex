@@ -1,4 +1,9 @@
 \section{算术编码：从符号码到序列区间}
+\label{sec:07-Information-Theory/04-Source-Coding/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}Huffman 必须给每个符号一个整数长度的码，算术编码却把整段消息放进一个小区间。每读一个符号，区间就按它的条件概率缩小。最后区间有多窄，就决定大约需要多少 bit。
+\end{quote}
 
 \subsection{不再给每个符号单独发码字}
 

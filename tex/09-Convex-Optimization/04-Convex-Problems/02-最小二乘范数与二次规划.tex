@@ -1,4 +1,9 @@
 \section{最小二乘、范数与二次规划}
+\label{sec:09-Convex-Optimization/04-Convex-Problems/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}平方误差、范数和二次目标外形相似，却不一定都凸。真正决定二次目标是否凸的是二次项矩阵是否半正定，而不是公式里有没有平方。
+\end{quote}
 
 给定超定线性方程 \(Ax\approx b\)，我们无法让所有方程同时精确成立，只能定义``误差小''意味着什么。选择不同范数等于对误差形态作出不同的建模选择，远超过计算细节。
 
@@ -7,37 +12,37 @@
 最小二乘问题写成
 
 \[
-\min_x\lVert Ax-b\rVert_2^2.
+\min_x\norm{ Ax-b}_2^2.
 \]
 
 它是凸二次函数：展开得
 
 \[
-\lVert Ax-b\rVert_2^2=x^TA^TAx-2b^TAx+b^Tb,
+\norm{ Ax-b}_2^2=x^{\trans}A^{\trans}Ax-2b^{\trans}Ax+b^{\trans}b,
 \]
 
 其 Hessian 为
 
 \[
-2A^TA\succeq0.
+2A^{\trans}A\succeq0.
 \]
 
-若 \(A\) 满列秩，\(A^TA\succ0\)，目标严格凸并有唯一解；若 \(A\) 秩亏，仍是凸问题，但可能有多组同样的预测结果。最小范数解需要额外选择。
+若 \(A\) 满列秩，\(A^{\trans}A\succ0\)，目标严格凸并有唯一解；若 \(A\) 秩亏，仍是凸问题，但可能有多组同样的预测结果。最小范数解需要额外选择。
 
 一阶条件给出正规方程
 
 \[
-A^TAx=A^Tb,
+A^{\trans}Ax=A^{\trans}b,
 \]
 
-它有清楚的几何意义：残差 \(b-Ax\) 与 \(A\) 的列空间正交。但数值实现不应机械计算 \((A^TA)^{-1}A^Tb\)。QR 或 SVD 能避免条件数平方，并正确处理秩亏。凸建模告诉我们最优点满足什么，数值线性代数决定怎样可靠地算到那里。
+它有清楚的几何意义：残差 \(b-Ax\) 与 \(A\) 的列空间正交。但数值实现不应机械计算 \((A^{\trans}A)^{-1}A^{\trans}b\)。QR 或 SVD 能避免条件数平方，并正确处理秩亏。凸建模告诉我们最优点满足什么，数值线性代数决定怎样可靠地算到那里。
 
 \subsection{范数改变``最重要的误差''}
 
 一般范数拟合写成
 
 \[
-\min_x\lVert Ax-b\rVert.
+\min_x\norm{ Ax-b}.
 \]
 
 由于范数凸、仿射复合保凸，这始终是凸问题。不同选择体现不同偏好：
@@ -55,7 +60,7 @@ A^TAx=A^Tb,
 \(L_1\) 和 \(L_\infty\) 拟合都可以用上一节的辅助变量技巧写成线性规划。\(L_2\) 范数约束则自然属于二阶锥规划：
 
 \[
-\lVert Ax-b\rVert_2\le t.
+\norm{ Ax-b}_2\le t.
 \]
 
 同一个数据拟合故事因此连接了 LP、SOCP 与二次优化。
@@ -67,7 +72,7 @@ A^TAx=A^Tb,
 \[
 \begin{aligned}
 \text{minimize}\quad&
-\frac12x^TPx+q^Tx+r\\
+\frac12x^{\trans}Px+q^{\trans}x+r\\
 \text{subject to}\quad&
 Gx\le h,\quad Ax=b,
 \end{aligned}
@@ -87,14 +92,14 @@ Ridge 回归
 
 \[
 \min_w
-\frac12\lVert Xw-y\rVert_2^2
-+\frac\lambda2\lVert w\rVert_2^2
+\frac12\norm{ Xw-y}_2^2
++\frac\lambda2\norm{ w}_2^2
 \]
 
 是典型凸二次问题。\(\lambda>0\) 使 Hessian
 
 \[
-X^TX+\lambda I
+X^{\trans}X+\lambda I
 \]
 
 正定，即使 \(X\) 秩亏也获得唯一解。正则化在这里同时具有统计与优化作用：限制模型复杂度，并抬高平坦方向的曲率。
@@ -104,7 +109,7 @@ X^TX+\lambda I
 范数目标
 
 \[
-\min_x\lVert Ax-b\rVert_2
+\min_x\norm{ Ax-b}_2
 \]
 
 可写成
@@ -112,7 +117,7 @@ X^TX+\lambda I
 \[
 \begin{aligned}
 \text{minimize}\quad&t\\
-\text{subject to}\quad&\lVert Ax-b\rVert_2\le t.
+\text{subject to}\quad&\norm{ Ax-b}_2\le t.
 \end{aligned}
 \]
 
@@ -137,4 +142,3 @@ X^TX+\lambda I
 \end{itemize}
 
 若一个极小的训练误差来自巨大参数抵消或严重病态设计矩阵，它在数学目标上可能优秀，在预测和数值上却不稳定。优化最优性不是完整的模型有效性。
-

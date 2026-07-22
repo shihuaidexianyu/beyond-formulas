@@ -3,7 +3,6 @@
 本单元沿``下界---间隙---最优性方程---现实解释''推进：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   Lagrangian 怎样制造全局下界从约束违规项的符号出发推导对偶函数和弱对偶。
@@ -16,3 +15,19 @@
 \end{enumerate}
 
 符号在不同教材中可能因约束方向而改变。本单元统一使用最小化问题和 \(f_i(x)\le0\)；在这个约定下，不等式乘子必须非负。若改用 \(\ge0\)，相应符号也必须一起改变。
+
+\subsection{怎么读这一章}
+
+先把对偶看成一种证明办法：原问题在寻找尽可能小的可行值，对偶问题则努力制造一个任何可行解都不可能低于的下界。第一篇说明下界从哪里来，第二篇讨论上下界何时相遇，第三篇把相遇条件写成 KKT，最后一篇解释乘子为何能衡量放宽约束的价值。标准问题形式可回看 \hyperref[ch:074]{``识别凸优化问题''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/05-Duality/01]{``Lagrangian 怎样制造全局下界''}；
+\item \hyperref[sec:09-Convex-Optimization/05-Duality/02]{``对偶间隙何时闭合''}；
+\item \hyperref[sec:09-Convex-Optimization/05-Duality/03]{``KKT 把最优性写成一组方程''}；
+\item \hyperref[sec:09-Convex-Optimization/05-Duality/04]{``对偶变量是约束的影子价格''}。
+\end{itemize}

@@ -3,7 +3,6 @@
 本单元用三层模型逐步增加复杂度：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   从最小二乘到 logistic 回归梯度：在统一的线性预测骨架上比较平方损失和对数似然。
@@ -14,3 +13,18 @@
 \end{enumerate}
 
 每个例子都会先声明张量形状，再从微分或 VJP 推导。这样，最终公式不仅能被记住，还能在模型结构变化后重新生成。
+
+\subsection{怎么读这一章}
+
+这一章适合拿纸逐行核对形状。先手推最小二乘和 Logistic 回归，再看 softmax 中看似复杂的 Jacobian 为何在交叉熵下消掉，最后把同一过程放回计算图，就能理解反向传播只是伴随量沿图反向传递。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:10-Matrix-Calculus/04-Applications/01]{``从最小二乘到 logistic 回归梯度''}；
+\item \hyperref[sec:10-Matrix-Calculus/04-Applications/02]{``\texorpdfstring{Softmax 交叉熵为何化简为 \(p-y\)}{Softmax 交叉熵为何化简为 p-y}''}；
+\item \hyperref[sec:10-Matrix-Calculus/04-Applications/03]{``计算图上的反向传播与自动微分''}。
+\end{itemize}

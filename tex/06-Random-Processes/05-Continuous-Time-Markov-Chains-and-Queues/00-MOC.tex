@@ -11,16 +11,33 @@
 \end{itemize}
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   连续时间 Markov 链与生成矩阵：从 Exponential 驻留时间和跳链构造过程。
 \item
   Kolmogorov 方程与矩阵指数：局部速率怎样生成有限时间转移概率。
 \item
-  连续时间平稳分布与流量平衡：用 $\pi Q=0$ 和局部流量理解长期占比。
+  连续时间平稳分布与流量平衡：用 \(\pi Q=0\) 和局部流量理解长期占比。
 \item
   排队系统与 M/M/1 模型：把 Poisson 到达和 Exponential 服务组合成生灭链，并解释负载接近一时延为何爆炸。
 \end{enumerate}
 
 连续时间不再有离散链那种纯粹的周期振荡问题，因为随机 Exponential 驻留打散了统一节拍；但稳定性、正常返和非爆炸性仍必须检查。
+
+\subsection{怎么读这一章}
+
+若只想抓住可复用的判断，先读四篇开头的``核心洞见''，再记住一条主线：生成矩阵 \(Q\) 描述瞬时速率，矩阵指数 \(e^{tQ}\) 描述有限时间转移，\(\pi Q=0\) 描述平稳流量，而能否把形式解规范化决定无限状态系统是否稳定。
+
+若要实际计算，再读前向方程、uniformization、生灭递推与 Little 定律；若要分析真实服务系统，则还必须检查非爆炸性、到达与服务假设、系统边界和尾延迟。矩阵指数推导可以在需要瞬态概率时细读，不能只关心长期均值时也可先略过。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/01]{``连续时间 Markov 链与生成矩阵''}；
+\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/02]{``Kolmogorov 方程与矩阵指数''}；
+\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/03]{``连续时间平稳分布与流量平衡''}；
+\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/04]{``排队系统与 M/M/1 模型''}。
+\end{itemize}

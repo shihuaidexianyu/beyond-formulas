@@ -1,4 +1,9 @@
 \section{最大似然选择最能解释数据的参数}
+\label{sec:11-Mathematical-Statistics/02-Point-Estimation/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}最大似然固定已经观察到的数据，比较不同参数会给这份数据多大密度或概率。它不是参数为真的概率；其良好性质也依赖模型可辨认、正则条件和样本规模。
+\end{quote}
 
 给定观测 \(x=(x_1,\ldots,x_n)\)，似然函数把联合密度（离散情形为联合概率质量）视为参数的函数：
 
@@ -97,7 +102,7 @@ score 为
 \sum_i(X_i-\bar X)^2=\sum_i(X_i-\mu)^2-n(\bar X-\mu)^2
 \]
 
-取期望得 \(n\sigma^2-\sigma^2=(n-1)\sigma^2\)，即 \(\mathbb E\hat\sigma^2_{\mathrm{MLE}}=(n-1)\sigma^2/n\)，有限样本略向下偏；使用 \(n-1\) 得无偏估计，但不再是原似然的最大点。
+取期望得 \(n\sigma^2-\sigma^2=(n-1)\sigma^2\)，即 \(\E\hat\sigma^2_{\mathrm{MLE}}=(n-1)\sigma^2/n\)，有限样本略向下偏；使用 \(n-1\) 得无偏估计，但不再是原似然的最大点。
 
 ``MLE''和``无偏''是不同评价原则，不能用一个术语替另一个。
 
@@ -156,4 +161,3 @@ N(0,I(\theta_0)^{-1}),
 \item
   区分算法误差与模型不确定性。
 \end{itemize}
-

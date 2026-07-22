@@ -5,7 +5,6 @@
 六节依次完成这条链：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   观察、干预与反事实回答不同问题：区分条件概率、干预分布和个体反事实，先固定 estimand 再谈计算。
@@ -22,3 +21,21 @@
 \end{enumerate}
 
 这里主要讨论二元处理与平均处理效应，因为它足以暴露因果推断的核心结构。连续处理、纵向干预、工具变量、断点回归和因果发现都可在同一框架中继续展开，但每一种设计都需要自己的识别论证，不能只把二元公式换一个符号。
+
+\subsection{怎么读这一章}
+
+随手阅读时，先看每篇开头的“核心洞见”，再沿“问题—识别—估计—迁移—决策”五道门前进：第一篇确定要问什么，第二至第四篇判断观察数据能否回答，第五篇才讨论怎样估计，第六篇检查结论能否用于目标环境。想理解公式来源，再读机制替换、后门调整、潜在结果与 AIPW。实际分析时，不妨从第六篇的报告清单倒着检查；任何一项说不清，都不应由更复杂的估计器代替。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/01]{``观察、干预与反事实回答不同问题''}；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/02]{``结构因果模型把干预写成机制替换''}；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/03]{``混杂、碰撞点与后门调整''}；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/04]{``潜在结果把处理效应定义在替代世界之间''}；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/05]{``回归、加权与双重稳健估计各自依赖什么''}；
+\item \hyperref[sec:13-Machine-Learning/12-Causal-Inference/06]{``可识别不等于可外推也不等于可决策''}。
+\end{itemize}

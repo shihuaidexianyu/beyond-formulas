@@ -1,46 +1,51 @@
 \section{留数定理计算实积分}
+\label{sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}围道积分不需要把整条路径上的函数逐点算完。只要知道闭合路径圈住了哪些孤立奇点，以及每个奇点的留数，就能得到总积分。真正费判断的地方通常是选什么围道，以及远处那段积分能不能忽略。
+\end{quote}
 
 许多实积分没有初等原函数，或原函数极其复杂。留数定理提供了一条绕过原函数的路径：把实积分变成复平面上的围道积分，答案由围道内奇点的留数决定。
 
 \subsection{奇点与留数}
 
-解析函数 $f$ 在孤立奇点 $z_0$ 附近的 Laurent 展开为
+解析函数 \(f\) 在孤立奇点 \(z_0\) 附近的 Laurent 展开为
 
 \[
 f(z)=\sum_{n=-\infty}^{\infty}a_n(z-z_0)^n,
 \]
 
-其中 $a_{-1}$ 称为 $f$ 在 $z_0$ 的留数，记为 $\operatorname{Res}(f,z_0)$。
+其中 \(a_{-1}\) 称为 \(f\) 在 \(z_0\) 的留数，记为 \(\operatorname{Res}(f,z_0)\)。
 
 奇点分三类：
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{可去奇点}：$a_{-1}=0$，极限存在（如 $\sin z/z$ 在 $z=0$）；
+  \textbf{可去奇点}：\(a_{-1}=0\)，极限存在（如 \(\sin z/z\) 在 \(z=0\)）；
 \item
-  \textbf{极点}：有限个负幂项（如 $1/(z-z_0)^m$），留数由 Laurent 系数或极限公式给出；
+  \textbf{极点}：有限个负幂项（如 \(1/(z-z_0)^m\)），留数由 Laurent 系数或极限公式给出；
 \item
   \textbf{本性奇点}：无穷多负幂项，行为任意（Picard 定理）。
 \end{itemize}
 
-一阶极点 $z_0$ 的留数有快捷公式：若 $f(z)=g(z)/(z-z_0)$ 且 $g$ 解析，则 $\operatorname{Res}(f,z_0)=g(z_0)$；若 $f=g/h$ 且 $h$ 在 $z_0$ 有一阶零点，则 $\operatorname{Res}(f,z_0)=g(z_0)/h'(z_0)$。
+一阶极点 \(z_0\) 的留数有快捷公式：若 \(f(z)=g(z)/(z-z_0)\) 且 \(g\) 解析，则 \(\operatorname{Res}(f,z_0)=g(z_0)\)；若 \(f=g/h\) 且 \(h\) 在 \(z_0\) 有一阶零点，则 \(\operatorname{Res}(f,z_0)=g(z_0)/h'(z_0)\)。
 
 \subsection{留数定理}
 
-设 $\gamma$ 是正向（逆时针）简单闭曲线，$f$ 在 $\gamma$ 内除有限个奇点 $z_1,\ldots,z_k$ 外解析，在 $\gamma$ 上连续。则
+设 \(\gamma\) 是正向（逆时针）简单闭曲线，\(f\) 在 \(\gamma\) 内除有限个奇点 \(z_1,\ldots,z_k\) 外解析，在 \(\gamma\) 上连续。则
 
 \[
 \oint_\gamma f(z)\,dz=2\pi i\sum_{j=1}^k\operatorname{Res}(f,z_j).
 \]
 
-这是 Cauchy 积分定理的推广：无奇点时积分为零，有奇点时每个奇点贡献 $2\pi i$ 乘留数。证明思路是把每个奇点用小圆挖掉，多连通区域上应用 Cauchy 定理，小圆上的积分在半径趋于零时给出留数。
+这是 Cauchy 积分定理的推广：无奇点时积分为零，有奇点时每个奇点贡献 \(2\pi i\) 乘留数。证明思路是把每个奇点用小圆挖掉，多连通区域上应用 Cauchy 定理，小圆上的积分在半径趋于零时给出留数。
 
 留数定理把``计算积分''变成``找奇点、算留数''——后者通常比求原函数简单得多。
 
 \subsection{实积分的围道方法}
 
-计算 $\int_{-\infty}^{\infty}f(x)\,dx$ 的标准策略是：取上半平面的大半圆围道（实轴上从 $-R$ 到 $R$，再沿半圆 $|z|=R$ 回到 $-R$），令 $R\to\infty$。若 $f$ 在上半平面的极点有限，且大半圆弧上的积分趋于零，则实积分等于 $2\pi i$ 乘上半平面极点留数之和。
+计算 \(\int_{-\infty}^{\infty}f(x)\,dx\) 的标准策略是：取上半平面的大半圆围道（实轴上从 \(-R\) 到 \(R\)，再沿半圆 \(|z|=R\) 回到 \(-R\)），令 \(R\to\infty\)。若 \(f\) 在上半平面的极点有限，且大半圆弧上的积分趋于零，则实积分等于 \(2\pi i\) 乘上半平面极点留数之和。
 
 例子：计算
 
@@ -48,32 +53,32 @@ f(z)=\sum_{n=-\infty}^{\infty}a_n(z-z_0)^n,
 I=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}.
 \]
 
-$f(z)=1/(1+z^2)$ 在 $z=i$ 有一阶极点（上半平面），留数为
+\(f(z)=1/(1+z^2)\) 在 \(z=i\) 有一阶极点（上半平面），留数为
 
 \[
 \operatorname{Res}(f,i)=\frac{1}{2i}.
 \]
 
-大半圆弧上的积分按 $O(1/R^2)\cdot\pi R=O(1/R)$ 趋于零。因此
+大半圆弧上的积分按 \(O(1/R^2)\cdot\pi R=O(1/R)\) 趋于零。因此
 
 \[
 I=2\pi i\cdot\frac{1}{2i}=\pi,
 \]
 
-与初等结果一致。这个方法的价值在于它不需要知道 $\arctan$ 是原函数，也不限于有理函数。
+与初等结果一致。这个方法的价值在于它不需要知道 \(\arctan\) 是原函数，也不限于有理函数。
 
-更复杂的例子：$\int_{-\infty}^{\infty}e^{-x^2}\cos(bx)\,dx$ 可以通过把 $e^{-z^2}$ 的围道移动为平行于实轴的矩形，利用 $e^{-z^2}$ 在条带内的衰减，得到 $\sqrt\pi e^{-b^2/4}$。这是 Gaussian 的 Fourier 变换仍是 Gaussian 的严格证明，也是``特征函数''中 $\varphi_Z(t)=e^{-t^2/2}$ 的来源。
+更复杂的例子：\(\int_{-\infty}^{\infty}e^{-x^2}\cos(bx)\,dx\) 可以通过把 \(e^{-z^2}\) 的围道移动为平行于实轴的矩形，利用 \(e^{-z^2}\) 在条带内的衰减，得到 \(\sqrt\pi e^{-b^2/4}\)。这是 Gaussian 的 Fourier 变换仍是 Gaussian 的严格证明，也是``特征函数''中 \(\varphi_Z(t)=e^{-t^2/2}\) 的来源。
 
-Jordan 引理处理含 $e^{iaz}$ 的积分：若 $f(z)\to0$ 在上半平面一致（当 $|z|\to\infty$），则 $\int_{\gamma_R}f(z)e^{iaz}\,dz\to0$ 对 $a>0$ 成立，其中 $\gamma_R$ 是上半圆。这允许计算 $\int_{-\infty}^{\infty}f(x)e^{iax}\,dx$，是 Fourier 变换计算的主力工具。
+Jordan 引理处理含 \(e^{iaz}\) 的积分：若 \(f(z)\to0\) 在上半平面一致（当 \(|z|\to\infty\)），则 \(\int_{\gamma_R}f(z)e^{iaz}\,dz\to0\) 对 \(a>0\) 成立，其中 \(\gamma_R\) 是上半圆。这允许计算 \(\int_{-\infty}^{\infty}f(x)e^{iax}\,dx\)，是 Fourier 变换计算的主力工具。
 
 \subsection{留数定理的边界}
 
-留数定理要求围道内只有孤立奇点。支割（如 $\sqrt z$、$\log z$ 的多值性）需要修改围道，沿支割绕行。本性奇点附近的积分不能用留数计算。
+留数定理要求围道内的奇点是孤立的。支割（如 \(\sqrt z\)、\(\log z\) 的多值性）需要修改围道，沿支割两侧绕行。本性奇点虽然 Laurent 展开含有无穷多个负幂项，仍然有 \((z-z_0)^{-1}\) 项的系数。因此只要它是孤立奇点，照样可以用留数定理；困难通常在于留数未必容易算。
 
 围道方法也不总是最快：有些实积分用参数微分（Feynman 技巧）、级数展开或特殊函数更快。留数定理的优势在于通用性——它把一大类积分统一为代数计算，而不需要为每个积分发明新技巧。
 
 \subsection{与本书已有内容的连接}
 
-``从 Fourier 级数到连续变换''中 Gaussian 的 Fourier 变换仍是 Gaussian，可以用围道移动证明；``解析延拓与 Fourier 衰减''中把积分路径移入条带，合法性由 Cauchy 定理和 Jordan 引理保证；``特征函数''中 $\varphi_Z(t)=e^{-t^2/2}$ 的计算，是留数定理在概率论中的直接应用。
+\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}中 Gaussian 的 Fourier 变换仍是 Gaussian，可以用围道移动证明；\hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/01]{``解析延拓与 Fourier 衰减''}中把积分路径移入条带，合法性由 Cauchy 定理和 Jordan 引理保证；``特征函数''中 \(\varphi_Z(t)=e^{-t^2/2}\) 的计算，是留数定理在概率论中的直接应用。
 
 下一节把这些工具用于特征函数反演和 Laplace 变换，展示复分析在概率论中的具体角色。

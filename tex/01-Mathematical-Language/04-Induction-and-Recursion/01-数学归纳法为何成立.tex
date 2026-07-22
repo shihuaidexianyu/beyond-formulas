@@ -1,11 +1,15 @@
 \section{数学归纳法为何成立}
+\label{sec:01-Mathematical-Language/04-Induction-and-Recursion/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}归纳证明需要一个起点和一条推进规则。起点缺失，推理链没有落脚处；归纳步只说明“若这一项成立，下一项也成立”，不能单独启动整条链。
+\end{quote}
 
 \subsection{无穷多个命题，为什么两步就够}
 
 设 \(P(n)\) 是关于整数 \(n\ge n_0\) 的命题。数学归纳法的套路是两步：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   基例：证明 \(P(n_0)\) 成立；
@@ -60,10 +64,4 @@
 
 归纳法很擅长验证一个已经写清楚的命题，但它一般不会告诉你这个命题是怎么来的。前 n 个奇数之和为什么猜是 \(n^2\)？可能是几何拼图拼出来的，可能是数值实验试出来的，也可能是解递推解出来的。发现和证明是两个阶段——例子帮你猜，归纳负责把猜想推广到全体自然数。
 
-\subsection{参考来源}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT Mathematics for Computer Science 的 Induction 章节。
-\end{itemize}
+延伸阅读：MIT Mathematics for Computer Science 的 Induction 章节。

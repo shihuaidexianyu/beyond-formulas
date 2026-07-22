@@ -1,4 +1,9 @@
 \section{布尔代数与逻辑化简}
+\label{sec:04-Discrete-Mathematics/07-Boolean-Algebra-and-Automata/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}布尔代数把``对所有真假输入行为相同''变成可推导的恒等关系。表达式更短、门更少、延迟更低却是不同优化目标。逻辑等价只保证功能相同，不自动保证实现成本或时序行为相同。
+\end{quote}
 
 一个访问规则可能写成：
 
@@ -208,7 +213,7 @@ x\oplus y
 (\neg x\land y).
 \]
 
-它满足交换与结合，并有 \(x\oplus x=0\)。多个比特的异或为 \(1\) 当且仅当其中有奇数个 \(1\)，这正是编码单元里奇偶校验的代数。
+它满足交换与结合，并有 \(x\oplus x=0\)。多个比特的异或为 \(1\) 当且仅当其中有奇数个 \(1\)，这正是\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/02]{``码距决定检测与纠错能力''}中奇偶校验的代数。
 
 \subsection{化简方法与规模边界}
 

@@ -1,10 +1,15 @@
 \section{二次曲面用谱分解显露几何形状}
+\label{sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}谱分解把二次型旋转到没有交叉项的主轴坐标。特征向量给出椭球方向，特征值决定各轴尺度和曲面沿该方向向上还是向下弯。
+\end{quote}
 
 二维中的圆、椭圆和双曲线，三维中的椭球面、双曲面和抛物面，都可以由同一个二次方程描述：
 
 \[
-x^{\mathsf T}Ax+2b^{\mathsf T}x+c=0,
-\qquad A=A^{\mathsf T}.
+x^{\trans}Ax+2b^{\trans}x+c=0,
+\qquad A=A^{\trans}.
 \]
 
 坐标展开后会出现 \(xy,xz,yz\) 这样的交叉项，图形看起来各不相同；谱分解说明，这些项常常只是坐标轴没有沿着图形的主方向摆放。
@@ -14,15 +19,15 @@ x^{\mathsf T}Ax+2b^{\mathsf T}x+c=0,
 由实对称矩阵的谱定理，存在正交矩阵 \(Q\) 使
 
 \[
-A=Q\Lambda Q^{\mathsf T},
+A=Q\Lambda Q^{\trans},
 \qquad
-\Lambda=\operatorname{diag}(\lambda_1,\ldots,\lambda_n).
+\Lambda=\diag(\lambda_1,\ldots,\lambda_n).
 \]
 
-令 \(z=Q^{\mathsf T}x\)，则
+令 \(z=Q^{\trans}x\)，则
 
 \[
-x^{\mathsf T}Ax=z^{\mathsf T}\Lambda z
+x^{\trans}Ax=z^{\trans}\Lambda z
 =\sum_{i=1}^n\lambda_i z_i^2.
 \]
 
@@ -33,21 +38,21 @@ x^{\mathsf T}Ax=z^{\mathsf T}\Lambda z
 若 \(A\) 可逆，令 \(x_0=-A^{-1}b\) 并写 \(x=x_0+u\)，配方得到
 
 \[
-x^{\mathsf T}Ax+2b^{\mathsf T}x+c
-=u^{\mathsf T}Au+c-b^{\mathsf T}A^{-1}b.
+x^{\trans}Ax+2b^{\trans}x+c
+=u^{\trans}Au+c-b^{\trans}A^{-1}b.
 \]
 
-线性项消失，\(x_0\) 就是曲面的中心。继续令 \(z=Q^{\mathsf T}u\)，原方程化为
+线性项消失，\(x_0\) 就是曲面的中心。继续令 \(z=Q^{\trans}u\)，原方程化为
 
 \[
 \sum_i\lambda_i z_i^2=d,
 \qquad
-d=b^{\mathsf T}A^{-1}b-c.
+d=b^{\trans}A^{-1}b-c.
 \]
 
 此时分类不再依赖想象图形，而只依赖特征值的符号与右端 \(d\)：所有特征值同号且 \(d\) 符号匹配时得到椭球型；既有正又有负时得到双曲型；若某些特征值为零，零方向不能用 \(A^{-1}\) 配方，保留下来的线性项可能产生抛物型，也可能退化成平面、直线、锥面或空集。
 
-因此“看起来像椭圆”不是可靠分类法。方程
+因此``看起来像椭圆''不是可靠分类法。方程
 
 \[
 5x^2+4xy+2y^2=1
@@ -66,7 +71,7 @@ A=\begin{pmatrix}5&2\\2&2\end{pmatrix}
 位置估计常给出一个中心 \(\widehat x\) 和协方差矩阵 \(\Sigma\)。等马氏距离集合
 
 \[
-(x-\widehat x)^{\mathsf T}\Sigma^{-1}(x-\widehat x)=r^2
+(x-\widehat x)^{\trans}\Sigma^{-1}(x-\widehat x)=r^2
 \]
 
 就是误差椭圆或误差椭球。若手机在东西方向定位较准、南北方向较差，椭圆会沿南北拉长；若两个方向的误差相关，椭圆还会倾斜。对 \(\Sigma\) 做谱分解后，特征向量直接给出倾斜方向，特征值的平方根给出各主轴上的典型误差尺度。

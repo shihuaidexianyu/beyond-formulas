@@ -1,4 +1,9 @@
 \section{计算图上的反向传播与自动微分}
+\label{sec:10-Matrix-Calculus/04-Applications/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}反向传播不是另一套求导规则，而是把链式法则组织成一次反向遍历。每个节点只需知道自己的局部导数，并把收到的上游敏感度传给父节点。
+\end{quote}
 
 手推一个复杂模型时，最危险的做法是把整个表达式一次性展开。计算图把模型拆成基本运算，每个节点只需要知道自己的前向值和局部 VJP；反向传播按图的反方向累积敏感度。
 
@@ -21,7 +26,7 @@ b_2\in\R^K.
 前向计算为
 
 \[
-Z_1=XW_1+\mathbf1b_1^T,
+Z_1=XW_1+\mathbf1b_1^{\trans},
 \]
 
 \[
@@ -29,7 +34,7 @@ H=\phi(Z_1),
 \]
 
 \[
-Z_2=HW_2+\mathbf1b_2^T,
+Z_2=HW_2+\mathbf1b_2^{\trans},
 \]
 
 \[
@@ -52,13 +57,13 @@ softmax-cross-entropy 融合节点直接给出上一节的批量梯度
 经过第二个仿射层：
 
 \[
-\bar W_2 = H^T\bar Z_2,
+\bar W_2 = H^{\trans}\bar Z_2,
 \]
 \[
-\bar b_2 = \bar Z_2^T\mathbf1,
+\bar b_2 = \bar Z_2^{\trans}\mathbf1,
 \]
 \[
-\bar H = \bar Z_2W_2^T.
+\bar H = \bar Z_2W_2^{\trans}.
 \]
 若激活函数逐元素作用，
 
@@ -68,13 +73,13 @@ softmax-cross-entropy 融合节点直接给出上一节的批量梯度
 最后：
 
 \[
-\bar W_1 = X^T\bar Z_1,
+\bar W_1 = X^{\trans}\bar Z_1,
 \]
 \[
-\bar b_1 = \bar Z_1^T\mathbf1,
+\bar b_1 = \bar Z_1^{\trans}\mathbf1,
 \]
 \[
-\bar X = \bar Z_1W_1^T.
+\bar X = \bar Z_1W_1^{\trans}.
 \]
 每个式子都只是局部线性映射的伴随。矩阵乘法前向为 \(AB\)，反向对 \(A\) 乘上右因子转置，对 \(B\) 乘上左因子转置；逐元素运算前向逐元素，反向也逐元素；广播前向复制，反向沿复制轴求和。
 
@@ -94,7 +99,7 @@ softmax-cross-entropy 融合节点直接给出上一节的批量梯度
 f:\R^n\to\R^m,
 \]
 
-正向模式一次传播一个输入方向，得到 \(Jv\)；反向模式一次传播一个输出余向量，得到 \(J^Tu\)。
+正向模式一次传播一个输入方向，得到 \(Jv\)；反向模式一次传播一个输出余向量，得到 \(J^{\trans}u\)。
 
 \begin{itemize}
 \tightlist
@@ -125,7 +130,7 @@ Checkpointing 只保存部分节点，在反向阶段重算中间段，以额外
 梯度检查则提供独立证据。对小型、确定、光滑的测试输入，可比较自动微分方向导数
 
 \[
-v^T\nabla f(x)
+v^{\trans}\nabla f(x)
 \]
 
 与中心差分
@@ -153,4 +158,3 @@ v^T\nabla f(x)
 \end{itemize}
 
 自动微分免去了重复手算，却没有免除对函数定义、形状、数值稳定性和可微性的理解。
-

@@ -1,6 +1,11 @@
 \section{适定性与能量方法}
+\label{sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/03}
 
-ODE 的存在唯一性由 Lipschitz 条件一句话给出（``存在唯一性为什么需要 Lipschitz''）。PDE 没有这样统一的定理，Hadamard 提出的三条适定性标准取而代之：解\textbf{存在}、\textbf{唯一}、并\textbf{连续依赖}于数据。三条独立，任何一条失败都是不同的灾难。
+\begin{quote}
+\textbf{先抓住这一点：}存在和唯一还不够。若微小数据误差能造成巨大解误差，问题仍不可可信计算。能量估计常把唯一性与连续依赖压缩成一个不等式。
+\end{quote}
+
+ODE 的存在唯一性由 Lipschitz 条件一句话给出（\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/03]{``存在唯一性为什么需要 Lipschitz''}）。PDE 没有这样统一的定理，Hadamard 提出的三条适定性标准取而代之：解\textbf{存在}、\textbf{唯一}、并\textbf{连续依赖}于数据。三条独立，任何一条失败都是不同的灾难。
 
 \subsection{Hadamard 的反面教材：倒解的热方程}
 
@@ -10,13 +15,13 @@ ODE 的存在唯一性由 Lipschitz 条件一句话给出（``存在唯一性为
 u(t,x)=\frac1n e^{n^2t}\sin(nx).
 \]
 
-在 \(t=-1\)（比如``昨天''），幅度是 \(\frac1n e^{n^2}\)：初始扰动只有 \(1/n\) 大小，倒推一天却放大 \(e^{n^2}\) 倍。取 \(n\to\infty\)，数据误差趋于零，解的差异趋于无穷——连续依赖性彻底失败。这就是``三类典型方程行为迥异''中``抛物方程时间不能反演''的定量含义：倒解热方程把高频衰减机制逆转成高频爆炸，而任何测量都有高频噪声。
+在 \(t=-1\)（比如``昨天''），幅度是 \(\frac1n e^{n^2}\)：初始扰动只有 \(1/n\) 大小，倒推一天却放大 \(e^{n^2}\) 倍。取 \(n\to\infty\)，数据误差趋于零，解的差异趋于无穷——连续依赖性彻底失败。这就是\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/02]{``三类典型方程行为迥异''}中``抛物方程时间不能反演''的定量含义：倒解热方程把高频衰减机制逆转成高频爆炸，而任何测量都有高频噪声。
 
 同样的把戏适用于 Laplace 方程的``初值问题''：对 \(\partial_{xx}u+\partial_{yy}u=0\) 沿 \(y\) 给初始数据，高频成分按 \(e^{ny}\) 放大。Hadamard 正是用这类例子说明：不满足三条标准的问题，在物理与计算上都毫无意义——噪声会把答案淹没。
 
 \subsection{能量方法：一条不等式同时给唯一与稳定}
 
-能量方法是 PDE 中最接近 ODE Lyapunov 函数的工具（``稳定性与 Lyapunov 函数''），而且不需要知道解的公式。以带齐次 Dirichlet 边界的热方程为例，定义能量
+能量方法是 PDE 中最接近 ODE Lyapunov 函数的工具（\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}），而且不需要知道解的公式。以带齐次 Dirichlet 边界的热方程为例，定义能量
 
 \[
 E(t)=\frac12\int_0^L u(t,x)^2\,dx.
@@ -63,9 +68,9 @@ E(t)=\frac12\int\left[(\partial_tu)^2+c^2(\partial_xu)^2\right]dx,
 \qquad\text{对所有试验函数 }v.
 \]
 
-满足这个积分恒等式的 \(u\) 称为弱解。它只需一阶导数在积分意义下存在（Sobolev 空间的对象），允许经典导数不存在的函数入场。变分法与有限元正是建立在弱形式上：``从插值多项式到梯形与 Simpson 求积''一系方法中``有限元通过弱形式控制残差''一句，指的就是这个框架。弱解若额外光滑，自动是经典解；弱形式因此在不损失经典结论的前提下扩大了问题的合法答案集。
+满足这个积分恒等式的 \(u\) 称为弱解。它只需一阶导数在积分意义下存在（Sobolev 空间的对象），允许经典导数不存在的函数入场。变分法与有限元正是建立在弱形式上：\hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/02]{``从插值多项式到梯形与 Simpson 求积''}一系方法中``有限元通过弱形式控制残差''一句，指的就是这个框架。弱解若额外光滑，自动是经典解；弱形式因此在不损失经典结论的前提下扩大了问题的合法答案集。
 
-HJB 方程的黏性解（``HJB 方程与动态规划''末尾提到）是同一思想在非线性一阶方程上的版本：值函数有折角、经典导数不存在时，用检验函数在折角处的单侧条件代替逐点等式，保住唯一性。
+HJB 方程的黏性解（\hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/03]{``HJB 方程与动态规划''}末尾提到）是同一思想在非线性一阶方程上的版本：值函数有折角、经典导数不存在时，用检验函数在折角处的单侧条件代替逐点等式，保住唯一性。
 
 \subsection{落点}
 

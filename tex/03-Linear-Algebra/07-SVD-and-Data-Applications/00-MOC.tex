@@ -5,10 +5,9 @@
 建议按下面的顺序连续阅读：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  任意矩阵的奇异值分解：从单位球的像出发，推导 \(A=U\Sigma V^\top\)。
+  任意矩阵的奇异值分解：从单位球的像出发，推导 \(A=U\Sigma V^{\trans}\)。
 \item
   伪逆与病态问题：哪些信息可以反解，哪些微小误差会被放大。
 \item
@@ -18,3 +17,19 @@
 \end{enumerate}
 
 前置内容是对称矩阵的谱定理和最小二乘。读完本单元后，Fourier 分析会显得很自然：它也是寻找一组能把结构化线性变换变简单的正交坐标。
+
+\subsection{怎么读这一章}
+
+先把 SVD 看成“旋转—按正交方向缩放—再旋转”，随后处理不可逆或病态系统的伪逆，再用截断奇异值获得最佳低秩近似，最后把中心化数据矩阵的 SVD 与 PCA 连接起来。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/01]{``任意矩阵的奇异值分解''}；
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/02]{``伪逆与病态问题''}；
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/03]{``低秩近似：用少数方向保留主要结构''}；
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/04]{``从数据矩阵到 PCA''}。
+\end{itemize}

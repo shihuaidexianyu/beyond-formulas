@@ -1,6 +1,11 @@
 \section{Hessian 是二阶线性算子}
+\label{sec:10-Matrix-Calculus/02-Differentials/03}
 
-对标量函数 \(f:\mathbb R^n\to\mathbb R\)，梯度的一阶变化由 Hessian 控制：
+\begin{quote}
+\textbf{先抓住这一点：}Hessian 描述梯度对输入扰动的一阶变化。实际算法常只需要它作用在某个方向上的结果，而不需要把完整的巨大矩阵显式造出来。
+\end{quote}
+
+对标量函数 \(f:\R^n\to\R\)，梯度的一阶变化由 Hessian 控制：
 
 \[
 d(\nabla f)=\nabla^2f(x)\,dx.
@@ -9,14 +14,14 @@ d(\nabla f)=\nabla^2f(x)\,dx.
 二阶 Taylor 展开为
 
 \[
-f(x+h) = f(x)+\nabla f(x)^Th
-+\frac12h^T\nabla^2f(x)h
-+o(\lVert h\rVert^2).
+f(x+h) = f(x)+\nabla f(x)^{\trans}h
++\frac12h^{\trans}\nabla^2f(x)h
++o(\norm{ h}^2).
 \]
 Hessian 不只是``二阶偏导表''，它是把一个输入方向映成梯度变化的线性算子。二次型
 
 \[
-h^T\nabla^2f(x)h
+h^{\trans}\nabla^2f(x)h
 \]
 
 则测量沿方向 \(h\) 的局部曲率。
@@ -26,13 +31,13 @@ h^T\nabla^2f(x)h
 一阶微分写成
 
 \[
-df=\nabla f^Tdx.
+df=\nabla f^{\trans}dx.
 \]
 
 再次微分，并把 \(dx\) 视为固定方向，得到
 
 \[
-d^2f = dx^T\nabla^2f\,dx.
+d^2f = dx^{\trans}\nabla^2f\,dx.
 \]
 若 \(f\) 二次连续可微，混合偏导相等，Hessian 对称。若光滑性不足，偏导存在也未必能自由交换；对称性有定理条件，不是排版规定。
 
@@ -47,7 +52,7 @@ d^2f = dx^T\nabla^2f\,dx.
 
 \subsection{矩阵变量的 Hessian 更适合看成算子}
 
-若 \(X\in\mathbb R^{m\times n}\)，梯度 \(\nabla_Xf\) 也是矩阵。Hessian 将矩阵扰动 \(H\) 映射成另一个矩阵：
+若 \(X\in\R^{m\times n}\)，梯度 \(\nabla_Xf\) 也是矩阵。Hessian 将矩阵扰动 \(H\) 映射成另一个矩阵：
 
 \[
 \mathcal H_X[H] = D(\nabla_Xf)[H].
@@ -57,24 +62,24 @@ d^2f = dx^T\nabla^2f\,dx.
 以上一节完整推导过的矩阵最小二乘为例：
 
 \[
-f(X)=\frac12\lVert AX-B\rVert_F^2,
+f(X)=\frac12\norm{ AX-B}_F^2,
 \]
 
 梯度是
 
 \[
-\nabla_Xf=A^T(AX-B).
+\nabla_Xf=A^{\trans}(AX-B).
 \]
 
 沿方向 \(H\) 的梯度变化为
 
 \[
-\mathcal H_X[H] = A^TAH.
+\mathcal H_X[H] = A^{\trans}AH.
 \]
 二阶方向量为
 
 \[
-\langle H,\mathcal H_X[H]\rangle_F = \lVert AH\rVert_F^2\ge0,
+\langle H,\mathcal H_X[H]\rangle_F = \norm{ AH}_F^2\ge0,
 \]
 所以目标凸。整个推导无需构造四阶数组。
 
@@ -85,7 +90,7 @@ f(X)=\frac12\lVert AX-B\rVert_F^2,
 \[
 \nabla^2f(x)v = D(\nabla f)(x)[v].
 \]
-可以对梯度做一次 JVP，也可以对方向导数 \(\nabla f(x)^Tv\) 再求梯度。现代自动微分系统用正反模式组合计算 HVP，成本通常与少数次梯度计算同阶，远小于存储完整 \(n\times n\) Hessian。
+可以对梯度做一次 JVP，也可以对方向导数 \(\nabla f(x)^{\trans}v\) 再求梯度。现代自动微分系统用正反模式组合计算 HVP，成本通常与少数次梯度计算同阶，远小于存储完整 \(n\times n\) Hessian。
 
 这使共轭梯度 Newton、曲率诊断和影响函数在高维中成为可能。但 HVP 仍继承原程序的数值误差与不可微约定；它不是抽象 Hessian 的无条件精确 oracle。
 
@@ -94,28 +99,27 @@ f(X)=\frac12\lVert AX-B\rVert_F^2,
 对非线性最小二乘
 
 \[
-f(x)=\frac12\lVert r(x)\rVert_2^2,
+f(x)=\frac12\norm{ r(x)}_2^2,
 \]
 
 梯度为
 
 \[
-\nabla f=J_r^Tr.
+\nabla f=J_r^{\trans}r.
 \]
 
-对它再微分一次：\(d\nabla f=J_r^T\,dr+(dJ_r^T)\,r\)，其中 \(dr=J_r\,dx\)，而 \((dJ_r^T)\,r\) 按分量展开为 \(\sum_i r_i\nabla^2r_i\,dx\)。于是 Hessian 分解为
+对它再微分一次：\(d\nabla f=J_r^{\trans}\,dr+(dJ_r^{\trans})\,r\)，其中 \(dr=J_r\,dx\)，而 \((dJ_r^{\trans})\,r\) 按分量展开为 \(\sum_i r_i\nabla^2r_i\,dx\)。于是 Hessian 分解为
 
 \[
-\nabla^2f = J_r^TJ_r
+\nabla^2f = J_r^{\trans}J_r
 +\sum_i r_i\nabla^2r_i.
 \]
 Gauss--Newton 忽略第二项，使用
 
 \[
-J_r^TJ_r\succeq0.
+J_r^{\trans}J_r\succeq0.
 \]
 
-当残差小或模型近似线性时，这个近似合理，并且天然半正定（\(h^TJ_r^TJ_rh=\lVert J_rh\rVert_2^2\ge0\)）；远离解、残差很大时则可能缺失重要曲率。Levenberg--Marquardt 再加入阻尼以提高稳定性。
+当残差小或模型近似线性时，这个近似合理，并且天然半正定（\(h^{\trans}J_r^{\trans}J_rh=\norm{ J_rh}_2^2\ge0\)）；远离解、残差很大时则可能缺失重要曲率。Levenberg--Marquardt 再加入阻尼以提高稳定性。
 
 这个例子说明二阶近似不是越完整越好。结构化近似可以换取正定性、较低计算成本与更稳健的方向，但必须说明在哪个区域可信。
-

@@ -1,22 +1,26 @@
-\section{$\sigma$-代数把可观察事件组织成封闭系统}
+\section{\(\sigma\)-代数把可观察事件组织成封闭系统}
+\label{sec:12-Real-Analysis-Support/05-Measure-Integration-and-Conditional-Expectation/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}sigma 代数不是把所有子集一律当事件，而是选择一套对补集和可数运算封闭的可观察集合。概率只能稳定地定义在这套事件系统上。
+\end{quote}
 
 在有限样本空间里，把每个子集都当作事件通常没有问题。进入连续空间后，这种直觉需要修正：我们希望为集合分配长度或概率，同时保留平移不变性与可数可加性，但不存在一种办法能把实数轴的\emph{所有}子集都纳入而仍满足这些要求。于是模型必须先说明哪些集合可以被询问和赋值。
 
-这不是纯粹的技术限制。一次观测只能区分某些结果，不能区分另一些结果；统计量还会主动丢弃原始数据中的信息。$\sigma$-代数同时承担两项工作：规定哪些事件可测，也记录当前能够分辨到什么程度。
+这不是纯粹的技术限制。一次观测只能区分某些结果，不能区分另一些结果；统计量还会主动丢弃原始数据中的信息。\(\sigma\)-代数同时承担两项工作：规定哪些事件可测，也记录当前能够分辨到什么程度。
 
 \subsection{三条封闭规则}
 
-给定样本空间 $\Omega$，集合族 $\mathcal F\subseteq 2^\Omega$ 称为 $\Omega$ 上的 $\sigma$-代数，如果：
+给定样本空间 \(\Omega\)，集合族 \(\mathcal F\subseteq 2^\Omega\) 称为 \(\Omega\) 上的 \(\sigma\)-代数，如果：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  $\Omega\in\mathcal F$；
+  \(\Omega\in\mathcal F\)；
 \item
-  若 $A\in\mathcal F$，则 $A^c\in\mathcal F$；
+  若 \(A\in\mathcal F\)，则 \(A^c\in\mathcal F\)；
 \item
-  若 $A_1,A_2,\ldots\in\mathcal F$，则 $\bigcup_{n=1}^{\infty}A_n\in\mathcal F$。
+  若 \(A_1,A_2,\ldots\in\mathcal F\)，则 \(\bigcup_{n=1}^{\infty}A_n\in\mathcal F\)。
 \end{enumerate}
 
 由 De Morgan 律，它也对可数交封闭。规则特意写成``可数''而不是``有限''：概率极限会自然产生
@@ -31,11 +35,11 @@
 
 若事件族只对有限运算封闭，``某事件发生无穷多次''之类的路径事件可能根本不在模型中。另一方面，要求对任意不可数并封闭又过强；测度的可加性也只承诺到可数层级。
 
-最粗的 $\sigma$-代数是 $\set{\varnothing,\Omega}$，它只能回答``是否必然发生''。最细的是幂集 $2^\Omega$，它区分每个子集。有限空间中常直接使用后者，连续空间中通常使用更小的可测集合族。
+最粗的 \(\sigma\)-代数是 \(\set{\varnothing,\Omega}\)，它只能回答``是否必然发生''。最细的是幂集 \(2^\Omega\)，它区分每个子集。有限空间中常直接使用后者，连续空间中通常使用更小的可测集合族。
 
 \subsection{有限分割展示信息分辨率}
 
-设 $\Omega=\set{1,2,3,4}$，但观测设备只能告诉我们结果属于
+设 \(\Omega=\set{1,2,3,4}\)，但观测设备只能告诉我们结果属于
 
 \[
 B_1=\set{1,2}
@@ -49,13 +53,13 @@ B_2=\set{3,4}.
 \mathcal G=\set{\varnothing,B_1,B_2,\Omega}.
 \]
 
-事件 $\set{1}$ 不属于 $\mathcal G$，原因是现有信息无法把它与 $2$ 区分，并不表示结果 $1$ 不会发生。若后来获得完整观测，信息会扩张为 $2^\Omega$。因此
+事件 \(\set{1}\) 不属于 \(\mathcal G\)，原因是现有信息无法把它与 \(2\) 区分，并不表示结果 \(1\) 不会发生。若后来获得完整观测，信息会扩张为 \(2^\Omega\)。因此
 
 \[
 \mathcal G\subseteq\mathcal F
 \]
 
-可以读作``$\mathcal F$ 至少和 $\mathcal G$ 一样精细''。filtration
+可以读作``\(\mathcal F\) 至少和 \(\mathcal G\) 一样精细''。filtration
 
 \[
 \mathcal F_0\subseteq\mathcal F_1\subseteq\cdots
@@ -65,50 +69,50 @@ B_2=\set{3,4}.
 
 \subsection{由少量集合生成完整事件族}
 
-给定一族集合 $\mathcal C$，包含它的最小 $\sigma$-代数记为
+给定一族集合 \(\mathcal C\)，包含它的最小 \(\sigma\)-代数记为
 
 \[
 \sigma(\mathcal C).
 \]
 
-``最小''意味着取所有包含 $\mathcal C$ 的 $\sigma$-代数的交。这样不必手工列出无数次补、并、交之后得到的集合。
+``最小''意味着取所有包含 \(\mathcal C\) 的 \(\sigma\)-代数的交。这样不必手工列出无数次补、并、交之后得到的集合。
 
-实数轴上的 Borel $\sigma$-代数
+实数轴上的 Borel \(\sigma\)-代数
 
 \[
 \mathcal B(\R)=\sigma\bigl(\set{(a,b):a<b}\bigr)
 \]
 
-由开区间生成。它包含开集、闭集、可数集以及通过可数集合运算构造出的常见集合，却不是 $\R$ 的整个幂集。连续概率分布通常先定义在 $\mathcal B(\R)$ 上。
+由开区间生成。它包含开集、闭集、可数集以及通过可数集合运算构造出的常见集合，却不是 \(\R\) 的整个幂集。连续概率分布通常先定义在 \(\mathcal B(\R)\) 上。
 
 \subsection{可测函数不会制造不可询问事件}
 
-从 $(\Omega,\mathcal F)$ 到 $(\R,\mathcal B(\R))$ 的函数 $X$ 若满足
+从 \((\Omega,\mathcal F)\) 到 \((\R,\mathcal B(\R))\) 的函数 \(X\) 若满足
 
 \[
 X^{-1}(B)=\set{\omega:X(\omega)\in B}\in\mathcal F,
 \qquad B\in\mathcal B(\R),
 \]
 
-就称为可测函数。对实值函数，只检查所有半无限区间 $(-\infty,x]$ 的原像已经足够，因为这些区间生成 $\mathcal B(\R)$。
+就称为可测函数。对实值函数，只检查所有半无限区间 \((-\infty,x]\) 的原像已经足够，因为这些区间生成 \(\mathcal B(\R)\)。
 
 随机变量必须可测，即关于其数值的每个 Borel 问题都能拉回成原空间中有概率的事件。可测性不要求函数连续：连续函数一定 Borel 可测，但大量不连续函数同样可测；可测性比连续性弱得多。
 
-随机变量 $X$ 自己生成的信息记为
+随机变量 \(X\) 自己生成的信息记为
 
 \[
 \sigma(X)
 =\set{X^{-1}(B):B\in\mathcal B(\R)}.
 \]
 
-它恰好包含只观察 $X$ 能够判断的事件。若 $Y=g(X)$ 且 $g$ 可测，则
+它恰好包含只观察 \(X\) 能够判断的事件。若 \(Y=g(X)\) 且 \(g\) 可测，则
 
 \[
 \sigma(Y)\subseteq\sigma(X),
 \]
 
-因为对 $X$ 做确定变换不会凭空增加信息。统计量、特征提取和状态表示是否丢失关键信息，都可以从这个包含关系开始理解。
+因为对 \(X\) 做确定变换不会凭空增加信息。统计量、特征提取和状态表示是否丢失关键信息，都可以从这个包含关系开始理解。
 
 \subsection{不要把不可测误读成概率为零}
 
-事件不属于 $\mathcal F$，表示当前模型没有给它定义概率；这与概率已经定义且等于零完全不同。前者是问题不合法，后者是合法事件的测度为零。下一节会看到，概率零事件仍可能包含样本点，甚至可以是不可数集合。
+事件不属于 \(\mathcal F\)，表示当前模型没有给它定义概率；这与概率已经定义且等于零完全不同。前者是问题不合法，后者是合法事件的测度为零。下一节会看到，概率零事件仍可能包含样本点，甚至可以是不可数集合。

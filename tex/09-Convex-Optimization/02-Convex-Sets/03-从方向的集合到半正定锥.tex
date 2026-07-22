@@ -1,4 +1,9 @@
 \section{从方向的集合到半正定锥}
+\label{sec:09-Convex-Optimization/02-Convex-Sets/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}标量非负只需检查一个数，矩阵非负却要检查它在每个方向上产生的二次量。半正定矩阵可以含有负元素，因为这里判断的是所有方向上的整体作用，不是逐个元素的符号。
+\end{quote}
 
 上一节的凸组合要求权重非负且总和为一，因此表达的是``平均''。另一类集合关注的是``方向''：一旦某个方向可行，沿它放大任意非负倍数仍然可行。
 
@@ -34,14 +39,14 @@ x\in K,\ \alpha\ge0
 二阶锥或 Lorentz 锥定义为
 
 \[
-\mathcal Q^{n+1} = \{(t,x):\lVert x\rVert_2\le t\}.
+\mathcal Q^{n+1} = \{(t,x):\norm{ x}_2\le t\}.
 \]
 它像一个冰淇淋锥。范数约束、鲁棒最小二乘和许多不确定性模型都能写成二阶锥约束。任取锥中两点 \((t,x)\) 与 \((s,y)\)，凸性来自三角不等式：
 
 \[
-\lVert\theta x+(1-\theta)y\rVert_2
+\norm{\theta x+(1-\theta)y}_2
 \le
-\theta\lVert x\rVert_2+(1-\theta)\lVert y\rVert_2
+\theta\norm{ x}_2+(1-\theta)\norm{ y}_2
 \le
 \theta t+(1-\theta)s.
 \]
@@ -53,7 +58,7 @@ x\in K,\ \alpha\ge0
 对称矩阵 \(X\) 被称为半正定，记作 \(X\succeq0\)，若
 
 \[
-z^TXz\ge0
+z^{\trans}Xz\ge0
 \qquad\text{对所有 }z\in\R^n.
 \]
 
@@ -65,7 +70,7 @@ z^TXz\ge0
 它确实是凸锥：若 \(X,Y\succeq0\) 且 \(\alpha,\beta\ge0\)，那么
 
 \[
-z^T(\alpha X+\beta Y)z = \alpha z^TXz+\beta z^TYz
+z^{\trans}(\alpha X+\beta Y)z = \alpha z^{\trans}Xz+\beta z^{\trans}Yz
 \ge0.
 \]
 半正定性有几种等价表述：
@@ -75,11 +80,11 @@ z^T(\alpha X+\beta Y)z = \alpha z^TXz+\beta z^TYz
 \item
   \(X\) 的全部特征值非负；
 \item
-  存在矩阵 \(B\) 使 \(X=B^TB\)；
+  存在矩阵 \(B\) 使 \(X=B^{\trans}B\)；
 \item
   \(X\) 是某组向量的 Gram 矩阵；
 \item
-  对所有 \(z\)，二次型 \(z^TXz\) 非负。
+  对所有 \(z\)，二次型 \(z^{\trans}Xz\) 非负。
 \end{itemize}
 
 这些表述连接了谱、几何和优化。若全部特征值严格为正，则 \(X\succ0\)，它位于半正定锥内部；若至少有一个零特征值，则位于边界。
@@ -107,7 +112,7 @@ X\succeq0
 这恰好给出相关系数的合法范围。协方差矩阵必须半正定：设随机向量 \(\xi\) 以 \(\Sigma\) 为协方差矩阵，则对任意向量 \(z\)，
 
 \[
-z^T\Sigma z = \Var(z^T\xi)\ge0,
+z^{\trans}\Sigma z = \Var(z^{\trans}\xi)\ge0,
 \]
 
 其中等号来自方差的双线性展开，不等号是因为方差非负。半正定约束由此自然出现在协方差估计、核方法、控制和矩阵补全中。
@@ -163,26 +168,25 @@ F(x)\succeq0
 半正定锥在 trace 内积
 
 \[
-\langle X,Y\rangle=\operatorname{tr}(XY)
+\langle X,Y\rangle=\trace(XY)
 \]
 
-下还是自对偶的：与所有半正定矩阵内积非负的对称矩阵，恰好仍是半正定矩阵。两个方向各用一次已有工具。若 \(X\succeq0\)，把 \(Y\succeq0\) 谱分解为 \(Y=\sum_i\lambda_iu_iu_i^T\)（\(\lambda_i\ge0\)），则
+下还是自对偶的：与所有半正定矩阵内积非负的对称矩阵，恰好仍是半正定矩阵。两个方向各用一次已有工具。若 \(X\succeq0\)，把 \(Y\succeq0\) 谱分解为 \(Y=\sum_i\lambda_iu_iu_i^{\trans}\)（\(\lambda_i\ge0\)），则
 
 \[
-\langle X,Y\rangle=\sum_i\lambda_i\,u_i^TXu_i\ge0;
+\langle X,Y\rangle=\sum_i\lambda_i\,u_i^{\trans}Xu_i\ge0;
 \]
 
-反过来，若对称矩阵 \(X\) 与所有半正定矩阵内积非负，取 \(Y=zz^T\)，由
+反过来，若对称矩阵 \(X\) 与所有半正定矩阵内积非负，取 \(Y=zz^{\trans}\)，由
 
 \[
-\langle X,zz^T\rangle=z^TXz
+\langle X,zz^{\trans}\rangle=z^{\trans}Xz
 \]
 
-可知每个二次型 \(z^TXz\) 非负，即 \(X\succeq0\)。这一性质会在半正定规划的对偶中再次出现。
+可知每个二次型 \(z^{\trans}Xz\) 非负，即 \(X\succeq0\)。这一性质会在半正定规划的对偶中再次出现。
 
 \subsection{数值判断要带尺度}
 
 理论上，检查全部特征值非负即可判断 PSD；浮点计算中最小特征值可能出现 \(-10^{-12}\) 之类的小负数。它可能只是相对于矩阵范数的舍入误差，也可能是真实不可行。不能脱离矩阵尺度使用固定阈值。
 
 Cholesky 分解适合验证严格正定矩阵，但边界上的半正定矩阵可能因零特征值而分解失败；这不等于它非半正定。投影到半正定锥时，常先对称化，再做特征分解并把负特征值截为零。
-

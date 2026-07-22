@@ -1,4 +1,9 @@
 \section{两类错误与功效共同定义检验}
+\label{sec:11-Mathematical-Statistics/05-Hypothesis-Testing/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}检验不是只控制“误报”就完成了。第一类错误、第二类错误和功效会随样本量、效应大小与阈值共同变化，降低一种错误通常要付出另一种代价。
+\end{quote}
 
 假设检验把参数空间分成原假设与备择假设：
 
@@ -18,7 +23,7 @@ H_1:\theta\in\Theta_1.
 
 \[
 \sup_{\theta\in\Theta_0}
-\Pr_\theta(\text{reject }H_0).
+P_\theta(\text{reject }H_0).
 \]
 
 若 size 不超过 \(\alpha\)，称为 level-\(\alpha\) 检验。
@@ -26,14 +31,14 @@ H_1:\theta\in\Theta_1.
 当某个备择 \(\theta\in\Theta_1\) 真实却不拒绝，发生第二类错误：
 
 \[
-\beta(\theta) = \Pr_\theta(\text{do not reject }H_0).
+\beta(\theta) = P_\theta(\text{do not reject }H_0).
 \]
 功效函数为
 
 \[
-\pi(\theta)=1-\beta(\theta) = \Pr_\theta(\text{reject }H_0).
+\pi(\theta)=1-\beta(\theta) = P_\theta(\text{reject }H_0).
 \]
-第一类错误通常由一个统一上界控制；第二类错误和功效随具体备择参数变化。只说``检验功效是 80%''没有完整意义，必须说明针对多大的效应、何种方差和样本量。
+第一类错误通常由一个统一上界控制；第二类错误和功效随具体备择参数变化。只说``检验功效是 80\%''没有完整意义，必须说明针对多大的效应、何种方差和样本量。
 
 \subsection{已知方差正态均值检验}
 
@@ -72,13 +77,13 @@ Z>z_{1-\alpha}.
 \begin{aligned}
 \pi(\mu_1)
 &=
-\Pr_{\mu_1}
+P_{\mu_1}
 \left(
 \bar X>
 \mu_0+z_{1-\alpha}\frac{\sigma}{\sqrt n}
 \right)\\
 &=
-\Pr_{\mu_1}
+P_{\mu_1}
 \left(
 \frac{\bar X-\mu_1}{\sigma/\sqrt n}>
 z_{1-\alpha}-\frac{\sqrt n(\mu_1-\mu_0)}{\sigma}
@@ -143,4 +148,3 @@ z_{1-\alpha}
 \end{itemize}
 
 ``不显著''不能证明效应为零。若目标是证明差异小到可忽略，应使用 equivalence test 或 non-inferiority design，明确一个实际容忍界，而不是依赖普通检验未拒绝。
-

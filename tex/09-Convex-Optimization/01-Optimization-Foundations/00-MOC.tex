@@ -3,7 +3,6 @@
 本单元先完成一次完整的建模：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   把现实选择翻译成优化问题：把变量、目标、约束、可行域和最优值放回同一个故事中，并区分不可行、无界与最优值不取得。
@@ -12,3 +11,17 @@
 \end{enumerate}
 
 这两节希望帮助读者形成建模时的检查习惯，``标准模板''只是辅助。一个求解器只能回答被写下来的问题；如果变量含义、单位、约束方向或目标本身写错，算法越精确，只会越精确地回答错误问题。
+
+\subsection{怎么读这一章}
+
+这一章适合按真实工作的顺序读。先用第一篇检查问题有没有写对：哪些量能选、哪些规则不能违反、什么才叫更好。再用第二篇检查答案有没有资格被相信：它只是附近走不动，还是已经有全局保证。这里暂时不需要记凸性的所有判别法，先看清建模与认证是两个不同环节。若想回顾上一部分怎样借助额外结构获得更强结论，可回看 \hyperref[ch:069]{``复分析与留数：奇点决定函数的深层结构''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/01-Optimization-Foundations/01]{``把现实选择翻译成优化问题''}；
+\item \hyperref[sec:09-Convex-Optimization/01-Optimization-Foundations/02]{``局部更好为何还不够''}。
+\end{itemize}

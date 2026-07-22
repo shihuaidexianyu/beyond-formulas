@@ -3,7 +3,6 @@
 这一单元先解决概率论的建模地基：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   随机实验、样本空间与事件：把现实中的不确定过程翻译成数学对象。
@@ -13,4 +12,31 @@
   从现实问题到概率模型：辨认``等可能''假设、模型粒度和对称性，避免在错误样本空间上进行正确计算。
 \end{enumerate}
 
-读完后，下一步将学习新信息到来时怎样缩小观察范围：条件概率、Bayes 与独立性。更多公式会随这个问题自然出现。
+读完后，下一步将学习新信息到来时怎样缩小观察范围：\hyperref[ch:038]{``条件概率、Bayes 与独立性：新信息怎样改变判断''}。更多公式会随这个问题自然出现。
+
+\subsection{怎么读这一章}
+
+三篇分别回答``结果是什么、概率怎样分配、模型为何可信''：
+
+\begin{itemize}
+\tightlist
+\item
+  若题目自然语言含混，先读\hyperref[sec:05-Probability/01-Probability-Spaces/01]{``随机实验、样本空间与事件''}；检查样本点是否真是一次完整结果，以及当前粒度能否表达目标事件。
+\item
+  若关心概率规则从哪里来，读\hyperref[sec:05-Probability/01-Probability-Spaces/02]{``概率公理与概率空间''}；重点理解事件族、可数可加性，以及概率为零与逻辑不可能的区别。
+\item
+  若计算步骤会做但答案仍令人怀疑，读\hyperref[sec:05-Probability/01-Probability-Spaces/03]{``从现实问题到概率模型''}；逐项审计等可能、独立、放回方式、观察机制与模型适用范围。
+\end{itemize}
+
+第一次阅读可以在能写出一张``模型卡片''时停下：一次完整结果是什么？哪些事件可观察？概率分配由什么机制产生？若改变样本空间粒度或观察方式，所问概率是否仍表示同一个问题？
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:05-Probability/01-Probability-Spaces/01]{``随机实验、样本空间与事件''}；
+\item \hyperref[sec:05-Probability/01-Probability-Spaces/02]{``概率公理与概率空间''}；
+\item \hyperref[sec:05-Probability/01-Probability-Spaces/03]{``从现实问题到概率模型''}。
+\end{itemize}

@@ -1,4 +1,9 @@
 \section{从数据矩阵到 PCA}
+\label{sec:03-Linear-Algebra/07-SVD-and-Data-Applications/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}PCA 在中心化数据中寻找方差最大的正交方向，也等价于寻找最小平方重构误差的低维子空间。结果依赖变量尺度，而且高方差不必然等于高价值。
+\end{quote}
 
 \subsection{同一个矩阵，现在把它看成一群样本}
 
@@ -15,19 +20,19 @@
 选一个单位方向 \(v\in\R^d\)。所有样本投影到该方向后的坐标是 \(Xv\)，投影平方和为
 
 \[
-\|Xv\|_2^2=v^\top X^\top Xv.
+\|Xv\|_2^2=v^{\trans} X^{\trans} Xv.
 \]
 
 因此第一主方向解决
 
 \[
-\max_{\|v\|=1}v^\top X^\top Xv.
+\max_{\|v\|=1}v^{\trans} X^{\trans} Xv.
 \]
 
-这是对称矩阵 \(X^\top X\) 的 Rayleigh 商 \(v^\top Mv/\|v\|^2\) 在单位向量下的形式。把 \(v\) 在 \(X^\top X\) 的特征基下展开，这个商就是以 \(c_i^2\) 为权的特征值加权平均，故最大值由最大特征值达到，对应特征向量就是第一主方向。若样本协方差定义为
+这是对称矩阵 \(X^{\trans} X\) 的 Rayleigh 商 \(v^{\trans} Mv/\|v\|^2\) 在单位向量下的形式。把 \(v\) 在 \(X^{\trans} X\) 的特征基下展开，这个商就是以 \(c_i^2\) 为权的特征值加权平均，故最大值由最大特征值达到，对应特征向量就是第一主方向。若样本协方差定义为
 
 \[
-S=\frac{1}{N-1}X^\top X,
+S=\frac{1}{N-1}X^{\trans} X,
 \]
 
 主方向就是 \(S\) 的特征向量，沿第 \(i\) 个方向的样本方差为 \(\lambda_i(S)\)。
@@ -35,10 +40,10 @@ S=\frac{1}{N-1}X^\top X,
 现在对 \(X\) 做 SVD：
 
 \[
-X=U\Sigma V^\top.
+X=U\Sigma V^{\trans}.
 \]
 
-因为 \(X^\top X=V\Sigma^2V^\top\)，\(V\) 的列正是 PCA 的主方向，也常称为\textbf{载荷方向}；样本在这些方向上的新坐标是
+因为 \(X^{\trans} X=V\Sigma^2V^{\trans}\)，\(V\) 的列正是 PCA 的主方向，也常称为\textbf{载荷方向}；样本在这些方向上的新坐标是
 
 \[
 Z=XV=U\Sigma,
@@ -51,7 +56,7 @@ Z=XV=U\Sigma,
 \[
 Z_k=XV_k,
 \qquad
-\widehat X=Z_kV_k^\top=X V_kV_k^\top.
+\widehat X=Z_kV_k^{\trans}=X V_kV_k^{\trans}.
 \]
 
 \(\widehat X\) 是每个样本在前 \(k\) 维主子空间上的正交投影。给定任一 \(k\) 维子空间时，逐样本作正交投影已是该子空间上的最优重构；Eckart--Young 定理再从中指出，前 \(k\) 维主子空间在所有 \(k\) 维线性子空间中使总重构平方误差最小。于是``最大化投影方差''和``最小化重构误差''其实是同一个几何事实的两种说法。
@@ -74,7 +79,7 @@ X=
 -2&-1
 \end{bmatrix},
 \qquad
-X^\top X=
+X^{\trans} X=
 \begin{bmatrix}
 8&4\\
 4&2
@@ -87,10 +92,10 @@ X^\top X=
 v_1=\frac1{\sqrt5}\begin{bmatrix}2\\1\end{bmatrix},
 \]
 
-第二方向可取 \(v_2=(-1,2)^\top/\sqrt5\)。投影得分为
+第二方向可取 \(v_2=(-1,2)^{\trans}/\sqrt5\)。投影得分为
 
 \[
-Xv_1=(\sqrt5,0,-\sqrt5)^\top,
+Xv_1=(\sqrt5,0,-\sqrt5)^{\trans},
 \qquad Xv_2=0.
 \]
 

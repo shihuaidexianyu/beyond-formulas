@@ -1,4 +1,9 @@
 \section{求导穿过积分号需要控制差商}
+\label{sec:12-Real-Analysis-Support/04-Limits-and-Integration/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}对参数积分求导，本质上是把差商的极限移进积分号。逐点可导还不够，还需要一个能统一控制差商或偏导数的可积上界。
+\end{quote}
 
 设
 
@@ -32,7 +37,6 @@ f(t+h,x)-f(t,x)
 在 \(t_0\) 的某个邻域中，假设：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \item
   对几乎所有 \(x\)，\(\partial_t f(t,x)\) 存在；
 \item
@@ -193,4 +197,3 @@ L(\theta) = \E_{X\sim P}
 在支持固定和正则条件下成立。这也是 score function（对数导数）技巧的核心恒等式。支持随参数移动时还可能有边界项。
 
 Monte Carlo 自动微分能计算某个采样程序的路径导数，却不自动证明交换期望与导数合法。分析条件仍需独立检查。
-

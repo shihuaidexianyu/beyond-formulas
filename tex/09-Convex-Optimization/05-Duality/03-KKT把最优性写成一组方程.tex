@@ -1,4 +1,9 @@
 \section{KKT 把最优性写成一组方程}
+\label{sec:09-Convex-Optimization/05-Duality/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}KKT 条件把“不能再沿可行方向下降”拆成可行性、驻点、乘子非负和互补松弛。条件成立并不在所有问题里都保证全局最优，但在满足正则条件的凸问题中，它们就是可检验的最优性证书。
+\end{quote}
 
 当强对偶成立且原始、对偶最优点取得时，最优点不仅目标值相等，还必须让 Lagrangian 推导中的每一步不等式都取等号。这些等号条件组合起来，就是 Karush--Kuhn--Tucker 条件。
 
@@ -6,8 +11,8 @@
 
 \[
 \begin{aligned}
-\min_x\quad&f_0(x)\\
-\text{s.t.}\quad&f_i(x)\le0,\quad i=1,\ldots,m,\\
+\text{minimize}\quad&f_0(x)\\
+\text{subject to}\quad&f_i(x)\le0,\quad i=1,\ldots,m,\\
 &h_j(x)=0,\quad j=1,\ldots,p,
 \end{aligned}
 \]
@@ -70,8 +75,10 @@ f_i(x^\star)=0,
 再次考虑
 
 \[
-\min_x x^2
-\quad\text{subject to}\quad1-x\le0.
+\begin{aligned}
+\text{minimize}\quad&x^2\\
+\text{subject to}\quad&1-x\le0.
+\end{aligned}
 \]
 
 KKT 条件为
@@ -97,11 +104,11 @@ KKT 条件为
 \nabla_x L(x^\star,\lambda^\star,\nu^\star)
 =\nabla f_0(x^\star)
 +\sum_i\lambda_i^\star\nabla f_i(x^\star)
-+A^T\nu^\star=0.
++A^{\trans}\nu^\star=0.
 \]
 
 可微凸函数的一阶下界给出
-\(L(y,\lambda^\star,\nu^\star)\ge L(x^\star,\lambda^\star,\nu^\star)+\nabla_x L(x^\star,\lambda^\star,\nu^\star)^T(y-x^\star)\)，故梯度为零处即全局最小：\(x^\star\) 最小化了最优乘子对应的 Lagrangian。于是对任意原始可行 \(y\)，
+\(L(y,\lambda^\star,\nu^\star)\ge L(x^\star,\lambda^\star,\nu^\star)+\nabla_x L(x^\star,\lambda^\star,\nu^\star)^{\trans}(y-x^\star)\)，故梯度为零处即全局最小：\(x^\star\) 最小化了最优乘子对应的 Lagrangian。于是对任意原始可行 \(y\)，
 
 \[
 f_0(x^\star)
@@ -126,7 +133,7 @@ f_0(x^\star)
 0\in
 \partial f_0(x^\star)
 +\sum_i\lambda_i^\star\partial f_i(x^\star)
-+A^T\nu^\star,
++A^{\trans}\nu^\star,
 \]
 
 但次微分和的等式需要适当正则条件。实际使用时应遵守相应定理，而不是把所有梯度简单替换成任意次梯度。
@@ -150,4 +157,3 @@ f_0(x^\star)
 \end{itemize}
 
 这些残差必须结合问题尺度解释。绝对残差 \(10^{-6}\) 对单位为微米和单位为亿元的模型意义不同；变量、约束和目标缩放会直接影响数值判定。
-

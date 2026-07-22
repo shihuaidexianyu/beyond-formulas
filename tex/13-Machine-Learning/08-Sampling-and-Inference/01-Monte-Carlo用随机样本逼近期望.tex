@@ -1,4 +1,9 @@
 \section{Monte Carlo 用随机样本逼近期望}
+\label{sec:13-Machine-Learning/08-Sampling-and-Inference/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}Monte Carlo 把期望变成样本平均，计算误差通常按 \(1/\sqrt n\) 缩小。增加模拟次数只会更精确地回答当前模型的问题。
+\end{quote}
 
 一家电网公司想估计明年的期望停电损失。负载、天气和设备状态共同决定损失函数 \(h(X)\)，即使这些变量的联合分布 \(p(x)\) 已知，积分
 
@@ -22,10 +27,10 @@ X_1,\ldots,X_n\overset{\mathrm{iid}}{\sim}p,
 =\frac1n\sum_{i=1}^nh(X_i).
 \]
 
-它把积分问题转成了平均问题。只要 \(\mathbb E|h(X)|<\infty\)，大数定律给出一致性；记 \(\sigma_h^2=\operatorname{Var}(h(X))\)，若 \(\sigma_h^2<\infty\)，则
+它把积分问题转成了平均问题。只要 \(\E|h(X)|<\infty\)，大数定律给出一致性；记 \(\sigma_h^2=\Var(h(X))\)，若 \(\sigma_h^2<\infty\)，则
 
 \[
-\operatorname{Var}(\widehat\mu_n)
+\Var(\widehat\mu_n)
 =\frac{\sigma_h^2}{n},
 \]
 
@@ -58,7 +63,7 @@ importance sampling 从另一个分布 \(q\) 采样：
 
 \[
 \E_p[h(X)]
-=\mathbb E_q
+=\E_q
 \left[
 h(X)\frac{p(X)}{q(X)}
 \right].
@@ -76,7 +81,7 @@ h(X_i)-c(g(X_i)-\mathbb Eg)
 \right].
 \]
 
-若选择适当 \(c\)，\(g\) 与 \(h\) 的共同波动被抵消。修正项期望为零，估计保持无偏；把方差写成 \(c\) 的函数，即 \(n^{-1}\bigl(\sigma_h^2-2c\operatorname{Cov}(h,g)+c^2\sigma_g^2\bigr)\)，这是关于 \(c\) 的二次函数，在 \(c^*=\operatorname{Cov}(h,g)/\sigma_g^2\) 处取最小，\(g\) 与 \(h\) 相关越强，方差下降越多。分层抽样保证不同区域都被覆盖，antithetic sampling 则利用负相关样本抵消波动。这些方法保持目标期望不变，同时在相同计算预算下减少方差。
+若选择适当 \(c\)，\(g\) 与 \(h\) 的共同波动被抵消。修正项期望为零，估计保持无偏；把方差写成 \(c\) 的函数，即 \(n^{-1}\bigl(\sigma_h^2-2c\Cov(h,g)+c^2\sigma_g^2\bigr)\)，这是关于 \(c\) 的二次函数，在 \(c^*=\Cov(h,g)/\sigma_g^2\) 处取最小，\(g\) 与 \(h\) 相关越强，方差下降越多。分层抽样保证不同区域都被覆盖，antithetic sampling 则利用负相关样本抵消波动。这些方法保持目标期望不变，同时在相同计算预算下减少方差。
 
 \subsection{什么时候中心极限定理不能救场}
 

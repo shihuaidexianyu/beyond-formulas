@@ -1,4 +1,9 @@
 \section{存在唯一性为什么需要 Lipschitz}
+\label{sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}连续性主要帮助保证局部存在，关于状态变量的局部 Lipschitz 条件负责局部唯一。解能否延拓到所有时间还要排除有限时间爆破。
+\end{quote}
 
 \subsection{先承认两个灾难}
 
@@ -158,4 +163,3 @@ x_3(t)=1+t+\frac{t^2}{2}+\frac{t^3}{6},
 \subsection{边界声明}
 
 Lipschitz 条件是充分的，不是必要的：存在不满足它却仍然唯一的方程，只是不再有压缩论证保驾护航。Peano 的存在性与 Picard 的唯一性之间的落差，正是``连续''与``Lipschitz''的落差。本 Part 此后——画相图、谈稳定性、做迭代——都默认所讨论的方程满足 Picard--Lindelöf 的前提；数值方法沿局部斜率推进时能收敛到唯一真解，同样建立在这块地基上。
-

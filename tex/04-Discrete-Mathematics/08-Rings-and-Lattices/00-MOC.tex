@@ -3,7 +3,6 @@
 本单元包含三篇：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   环把两种运算放进同一结构：从整数、模运算、多项式和矩阵出发，区分交换性、单位元、零因子、理想与商环，并说明域为何让除法重新可靠。
@@ -14,3 +13,34 @@
 \end{enumerate}
 
 这里不追求抽象代数分类。目标是补上有限域、布尔代数与偏序之间缺失的桥，让后续遇到多项式编码、约束合并、固定点计算或抽象解释时，知道哪些推理来自共同的代数骨架。
+
+环与格在本章中是两条并列路线：读格论不要求先学环，读环论也不要求使用偏序。它们被放在一起，是因为二者都把原本需要逐次检查的关系压缩成可组合的运算律。
+
+\subsection{怎么读这一章}
+
+可以按遇到的结构选择入口：
+
+\begin{itemize}
+\tightlist
+\item
+  若同一对象上同时有加法和乘法，并且关心能否约分、取商或安全做除法，读\hyperref[sec:04-Discrete-Mathematics/08-Rings-and-Lattices/01]{``环把两种运算放进同一结构''}；可从\hyperref[ch:030]{``初等数论：整除结构怎样变成可计算算法''}中的模运算直觉进入。
+\item
+  若对象只有偏序，问题是怎样合并信息、约束或权限，读\hyperref[sec:04-Discrete-Mathematics/08-Rings-and-Lattices/02]{``格把偏序变成代数运算''}；先验证 meet 与 join 真的存在，而不是看到 Hasse 图便默认它是格。
+\item
+  若关心程序分析、约束传播、概念格或固定点计算，读\hyperref[sec:04-Discrete-Mathematics/08-Rings-and-Lattices/03]{``格在语义、约束与 Galois 连接中的角色''}；重点是可靠近似、精度与终止性的取舍。
+\item
+  若从逻辑进入，可把\hyperref[ch:033]{``布尔代数与自动机：有限规则怎样处理逻辑与序列''}中的 AND/OR 看成分配格上的 meet/join；但不要把分配律与补元误认为所有格自动拥有。
+\end{itemize}
+
+第一次阅读可以在能回答三件事时停下：当前非零元素是否可逆？当前上下界是否真有最优者？当前固定点迭代依赖完整性、有限高度还是额外的加速操作？
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:04-Discrete-Mathematics/08-Rings-and-Lattices/01]{``环把两种运算放进同一结构''}；
+\item \hyperref[sec:04-Discrete-Mathematics/08-Rings-and-Lattices/02]{``格把偏序变成代数运算''}；
+\item \hyperref[sec:04-Discrete-Mathematics/08-Rings-and-Lattices/03]{``格在语义、约束与 Galois 连接中的角色''}。
+\end{itemize}

@@ -5,7 +5,6 @@
 \subsection{阅读顺序}
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \item
   从方程到矩阵\\
   从同一个方程组的行图像和列图像出发，理解 \(Ax=b\)、矩阵的列以及矩阵乘法为什么这样定义。
@@ -29,4 +28,19 @@
   MIT 18.06：课程资源索引
 \item
   MIT 18.06：Spring 2010 课程日历
+\end{itemize}
+
+\subsection{怎么读这一章}
+
+先把矩阵看成线性方程组与线性映射的记录方式，再用消元识别解是否存在、自由度在哪里。最后比较逆矩阵与 LU 分解：公式写 \(A^{-1}b\) 不代表计算时应显式求逆。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:03-Linear-Algebra/01-Linear-Systems-and-Matrices/01]{``\texorpdfstring{从方程到矩阵：\(Ax=b\) 的三种读法}{从方程到矩阵：Ax=b 的三种读法}''}；
+\item \hyperref[sec:03-Linear-Algebra/01-Linear-Systems-and-Matrices/02]{``消元与解的结构：从计算答案到看见约束''}；
+\item \hyperref[sec:03-Linear-Algebra/01-Linear-Systems-and-Matrices/03]{``逆矩阵与 LU 分解：撤销变换并复用消元''}。
 \end{itemize}

@@ -1,4 +1,5 @@
 \section{最小二乘：为无解方程寻找最佳近似}
+\label{sec:03-Linear-Algebra/03-Orthogonality/03}
 
 现实中的方程组经常没有精确解。原因通常在于数据本身带有噪声，或者模型只保留了现实的一部分结构；计算本身即使正确，也未必能产生精确解。
 
@@ -25,6 +26,10 @@ C+3D&=2.
 \]
 
 前两个方程给出 \(D=1,C=0\)，代入第三个方程却得到 \(3=2\)。这个失败不是坏事：它揭示了我们真正面对的问题------两项参数无法精确解释三项彼此不一致的观测。
+
+\begin{quote}
+\textbf{先抓住这一点：}最小二乘不是把无解方程硬改成有解，而是先承认模型只能产生列空间中的向量，再选择离观测最近的那一个。
+\end{quote}
 
 把方程写成矩阵形式：
 
@@ -63,13 +68,13 @@ r=b-Ax.
 必须与列空间中的每个方向正交。因此
 
 \[
-A^{\mathsf T}\hat r=0,
+A^{\trans}\hat r=0,
 \]
 
 也就是
 
 \[
-A^{\mathsf T}A\hat x=A^{\mathsf T}b.
+A^{\trans}A\hat x=A^{\trans}b.
 \]
 
 正规方程的真正含义是：在最优点，任何由参数微小变化造成的预测变化 \(Ah\)，都不能继续缩短残差。
@@ -95,13 +100,13 @@ b-Ax=\hat r-Ah.
 对当前数据，
 
 \[
-A^{\mathsf T}A=
+A^{\trans}A=
 \begin{pmatrix}
 3&6\\
 6&14
 \end{pmatrix},
 \qquad
-A^{\mathsf T}b=
+A^{\trans}b=
 \begin{pmatrix}5\\11\end{pmatrix}.
 \]
 
@@ -145,7 +150,7 @@ A^{\mathsf T}b=
 检查
 
 \[
-A^{\mathsf T}\hat r=
+A^{\trans}\hat r=
 \begin{pmatrix}
 \hat r_1+\hat r_2+\hat r_3\\
 \hat r_1+2\hat r_2+3\hat r_3
@@ -162,7 +167,7 @@ A^{\mathsf T}\hat r=
 在线性代数的几何图里，观测被看成一个向量
 
 \[
-b=(b_1,b_2,b_3)^{\mathsf T}\in\R^3,
+b=(b_1,b_2,b_3)^{\trans}\in\R^3,
 \]
 
 所有预测组成 \(\operatorname{Col}(A)\) 中的一个平面。此时 \(\hat b\) 才是 \(b\) 到该平面的正交投影，\(\hat r\) 是垂直于平面的残差。
@@ -174,7 +179,7 @@ b=(b_1,b_2,b_3)^{\mathsf T}\in\R^3,
 定义目标函数
 
 \[
-f(x)=\|Ax-b\|_2^2=(Ax-b)^{\mathsf T}(Ax-b).
+f(x)=\|Ax-b\|_2^2=(Ax-b)^{\trans}(Ax-b).
 \]
 
 直接考察扰动 \(x+h\)：
@@ -182,19 +187,19 @@ f(x)=\|Ax-b\|_2^2=(Ax-b)^{\mathsf T}(Ax-b).
 \[
 f(x+h)
 =\|Ax-b+Ah\|_2^2
-=f(x)+2(Ax-b)^{\mathsf T}Ah+\|Ah\|_2^2.
+=f(x)+2(Ax-b)^{\trans}Ah+\|Ah\|_2^2.
 \]
 
 对 \(h\) 的一阶项就是梯度与 \(h\) 的内积，因此
 
 \[
-\nabla f(x)=2A^{\mathsf T}(Ax-b).
+\nabla f(x)=2A^{\trans}(Ax-b).
 \]
 
 （矩阵微积分部分会系统处理这类求导；这里只需读出一次项。）令梯度为零，同样得到
 
 \[
-A^{\mathsf T}A\hat x=A^{\mathsf T}b.
+A^{\trans}A\hat x=A^{\trans}b.
 \]
 
 微积分视角告诉我们这是一个凸二次函数的一阶条件；投影视角则解释了条件为什么是``残差正交''。前者便于推广到非线性优化，后者更直接揭示线性代数结构。
@@ -209,12 +214,12 @@ A^{\mathsf T}A\hat x=A^{\mathsf T}b.
 
 因为有限维子空间中的正交投影唯一。残差 \(\hat r=b-\hat b\) 也因此唯一。
 
-但参数 \(\hat x\) 未必唯一。参数唯一当且仅当 \(A\) 的列线性无关，也等价于 \(A^{\mathsf T}A\) 可逆。
+但参数 \(\hat x\) 未必唯一。参数唯一当且仅当 \(A\) 的列线性无关，也等价于 \(A^{\trans}A\) 可逆。
 
 若 \(A\) 有两列完全相同，模型只取决于两个系数之和。许多不同参数都可能产生同一个预测向量。此时不能写
 
 \[
-(A^{\mathsf T}A)^{-1},
+(A^{\trans}A)^{-1},
 \]
 
 但最优拟合本身仍然存在。后面的 SVD 与伪逆会从多个参数解中选出范数最小的一个。
@@ -224,10 +229,10 @@ A^{\mathsf T}A\hat x=A^{\mathsf T}b.
 当 \(A\) 满列秩时，形式上可以写
 
 \[
-\hat x=(A^{\mathsf T}A)^{-1}A^{\mathsf T}b.
+\hat x=(A^{\trans}A)^{-1}A^{\trans}b.
 \]
 
-实际计算通常不应显式求这个逆。形成 \(A^{\mathsf T}A\) 会放大列之间的近线性相关：在二范数下，其条件数——解的相对误差对数据扰动的放大倍数，数值分析部分会给出严格定义——大约是 \(A\) 条件数的平方。原本已经敏感的问题会变得更加敏感。
+实际计算通常不应显式求这个逆。形成 \(A^{\trans}A\) 会放大列之间的近线性相关：在二范数下，其条件数——解的相对误差对数据扰动的放大倍数，数值分析部分会给出严格定义——大约是 \(A\) 条件数的平方。原本已经敏感的问题会变得更加敏感。
 
 更可靠的选择是：
 
@@ -265,10 +270,4 @@ A=\begin{pmatrix}1\\\vdots\\1\end{pmatrix}.
 
 再把它翻译回几何语言：从任意向量 \(b\in\R^m\) 中减去均值后，残差与全 \(1\) 向量正交，因此残差分量之和为零。由此可见，``均值''就是投影到常数子空间后的坐标，并非一条孤立公式。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06 Lecture 16：Projection Matrices and Least Squares
-\end{itemize}
+延伸阅读：MIT 18.06 Lecture 16：Projection Matrices and Least Squares。

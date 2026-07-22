@@ -1,4 +1,9 @@
 \section{割线法、收敛阶与混合策略}
+\label{sec:08-Numerical-Analysis/02-Root-Finding/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}没有导数时，割线法可以用最近两次函数值估计斜率。它通常比二分快，却不再自动守住含根区间。成熟求根器会先尝试快步，发现候选不安全时退回二分，而不是只忠于一种公式。
+\end{quote}
 
 \subsection{导数昂贵时，能否从函数值中学习斜率}
 
@@ -90,7 +95,6 @@ p=\varphi=\frac{1+\sqrt5}{2}\approx1.618.
 工程上常用混合方法：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   始终维护异号括区；

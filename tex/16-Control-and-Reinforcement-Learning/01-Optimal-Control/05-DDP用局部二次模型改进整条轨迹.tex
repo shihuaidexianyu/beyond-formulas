@@ -1,4 +1,9 @@
 \section{DDP：用局部二次模型改进整条轨迹}
+\label{sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/05}
+
+\begin{quote}
+\textbf{先抓住这一点：}DDP 先在当前轨迹附近做一个容易计算的近似，再从终点倒推该怎样修改动作，最后向前跑一次看看是否真的更好。它每次只看当前位置附近，所以不能保证找到全局最优解。
+\end{quote}
 
 \subsection{非线性控制很难一次求到全局答案}
 

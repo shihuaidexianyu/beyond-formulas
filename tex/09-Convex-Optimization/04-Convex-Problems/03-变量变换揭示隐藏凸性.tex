@@ -1,4 +1,9 @@
 \section{变量变换揭示隐藏凸性}
+\label{sec:09-Convex-Optimization/04-Convex-Problems/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}一个问题写成原始变量时可能显得非凸，换成对数、比例或新的辅助变量后，熟悉的凸结构才会出现。变量变换不是装饰，它会改变我们能否看见并利用全局结构。
+\end{quote}
 
 有些问题在原始坐标中不满足凸优化的标准形式，却能通过一一对应的变量变换显露凸性。几何规划是最典型的例子：它处理正变量的幂乘积与正项之和，原式看似非线性，取对数后却变成仿射函数与 log-sum-exp。
 
@@ -36,13 +41,13 @@ y_i=\log x_i,
 单项式的对数变为
 
 \[
-\log g(e^y) = \log c+a^Ty,
+\log g(e^y) = \log c+a^{\trans}y,
 \]
 是仿射函数。正项式的对数变为
 
 \[
 \log f(e^y) = \log\sum_{k=1}^K
-\exp(a_k^Ty+\log c_k),
+\exp(a_k^{\trans}y+\log c_k),
 \]
 也就是仿射函数的 log-sum-exp，因此凸（log-sum-exp 的凸性在上一单元的保凸运算中已建立）。
 
@@ -127,7 +132,6 @@ xy\le\Bigl(\frac{x+y}{2}\Bigr)^2\le25,
 对数变换只是众多技巧之一。分式线性变换、透视函数、Schur 补和 epigraph 也常把表面复杂的约束改写成标准凸形式。真正可迁移的步骤是：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   先辨认乘法、比值、最大值、二次型或谱约束的结构；
@@ -138,4 +142,3 @@ xy\le\Bigl(\frac{x+y}{2}\Bigr)^2\le25,
 \item
   求解后把结果映回原变量，并检查边界与数值尺度。
 \end{enumerate}
-

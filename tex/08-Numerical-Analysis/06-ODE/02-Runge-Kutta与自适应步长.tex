@@ -1,4 +1,9 @@
 \section{Runge--Kutta 与自适应步长}
+\label{sec:08-Numerical-Analysis/06-ODE/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}Runge--Kutta 在一步之内多看几次斜率，用这些试探拼出更可信的平均方向。自适应步长再用两种近似的差判断这一段是否困难，但它控制的是局部离散误差，不是最终答案的全部误差。
+\end{quote}
 
 \subsection{Euler 只看起点斜率，能否在一步内多看几次}
 

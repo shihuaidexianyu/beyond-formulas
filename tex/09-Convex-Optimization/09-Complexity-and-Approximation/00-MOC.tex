@@ -3,7 +3,6 @@
 本单元回答三个问题：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   P、NP 与 NP-hard 怎样给问题分类：多项式时间可解、多项式时间可验证、以及``至少和所有 NP 问题一样难''的含义。
@@ -14,3 +13,17 @@
 \end{enumerate}
 
 这三个问题共用一条主线：计算可行性是比最优性更基本的约束。一个算法在最坏情况下需要指数时间，即使它总是给出最优解，在实践中也可能不如一个总是给出 90\% 最优解的多项式算法。计算复杂度让我们能够精确讨论这种权衡。
+
+\subsection{怎么读这一章}
+
+先区分“数学上有最优解”和“能在可接受时间内找到它”。第一篇建立 P、NP 与 NP-hard 的语言，第二篇再看遇到难问题时怎样用凸松弛取得可算的下界和近似解。重点不是背复杂度类别，而是学会说明算法究竟牺牲了什么。非凸算法能提供的保证可回看 \hyperref[ch:078]{``非凸与随机优化：知道算法真正保证了什么''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/09-Complexity-and-Approximation/01]{``P、NP 与 NP-hard：给问题按计算难度分类''}；
+\item \hyperref[sec:09-Convex-Optimization/09-Complexity-and-Approximation/02]{``凸松弛把 NP-hard 问题变成可解问题''}。
+\end{itemize}

@@ -1,3 +1,18 @@
 反向传播给出当前参数处的梯度，却不保证沿它更新就能可靠训练。深度复合会让信号和梯度跨层放大、衰减或相关；mini-batch 又把完整经验风险的梯度换成带噪估计。学习率、初始化、归一化和优化器因此共同决定训练动力学。
 
 本单元先保留现有的 mini-batch、初始化、稳定概率计算和分层诊断，再补充动量与 Adam，最后区分归一化与 Dropout 的训练态和推理态。重点是理解这些选择分别改变了时间平均、坐标缩放、有效步长和模型中的随机性，以及它们为什么不能替代学习率检查、数据缩放与独立验证；训练配方只是这些机制的具体组合。
+
+\subsection{怎么读这一章}
+
+第一篇是诊断主干；训练出现 NaN、停滞或震荡时从这里进入。第二篇在需要比较 SGD、momentum 与 Adam 时回补；第三篇面向含归一化或 Dropout 的网络，部署前必须确认训练态与推理态的差异。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/01]{``训练动力学与数值稳定''}；
+\item \hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/02]{``动量与 Adam 在平均什么''}；
+\item \hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/03]{``归一化与 Dropout 改变训练时的随机系统''}。
+\end{itemize}

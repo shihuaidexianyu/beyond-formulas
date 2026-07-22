@@ -1,11 +1,16 @@
 \section{矩估计让样本特征匹配总体特征}
+\label{sec:11-Mathematical-Statistics/02-Point-Estimation/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}矩估计把总体矩写成参数的函数，再要求样本矩与它匹配。它往往容易计算，但选哪些矩会影响效率与稳定性，存在高阶矩也不是理所当然。
+\end{quote}
 
 如果模型告诉我们参数与总体均值、方差或更高阶矩之间的关系，一个自然办法是把未知总体矩换成样本矩，再解出参数。这就是矩估计。
 
-设参数 \(\theta\in\mathbb R^k\)，理论矩满足
+设参数 \(\theta\in\R^k\)，理论矩满足
 
 \[
-m_j(\theta) = \mathbb E_\theta[X^j],
+m_j(\theta) = \E_\theta[X^j],
 \qquad j=1,\ldots,k.
 \]
 样本矩为
@@ -108,7 +113,7 @@ X\sim N(\mu,\sigma^2),
 
 \[
 \hat\theta = \argmin_\theta
-\hat g(\theta)^T
+\hat g(\theta)^{\trans}
 W
 \hat g(\theta),
 \]
@@ -133,4 +138,3 @@ W
 \end{itemize}
 
 代价是可能丢弃似然中的其他信息、效率较低、参数约束被破坏，且高阶矩对尾部敏感。它是一种建模选择，不是 MLE 的粗糙前置步骤。
-

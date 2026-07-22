@@ -1,4 +1,5 @@
 \section{交叉熵训练其实在最小化 KL 差异}
+\label{sec:13-Machine-Learning/11-Information-Theoretic-Learning/01}
 
 设真实标签分布为 \(p(y)\)，模型预测为 \(q(y)\)。如果按照 \(q\) 设计理想概率码，却用它编码来自 \(p\) 的标签，平均码长为
 
@@ -8,14 +9,18 @@ H(p,q)=-\sum_y p(y)\log q(y),
 
 这就是 cross-entropy：它衡量``用模型 \(q\) 描述真实来源 \(p\)''所付出的代价，和 \(p\) 本身的不确定性需要区分。
 
+\begin{quote}
+\textbf{先抓住这一点：}交叉熵等于来源自身不可消除的不确定性，加上使用错误模型多付的编码代价。只有当真实分布 \(p\) 固定时，最小化交叉熵才与最小化 \(\KL(p\|q)\) 拥有同一个最优解。数值相等从来不是一般结论。
+\end{quote}
+
 在求和号内加入并减去 \(\log p(y)\)，逐项整理可得
 
 \[
 H(p,q)
-=H(p)+D_{\mathrm{KL}}(p\|q).
+=H(p)+\KL(p\|q).
 \]
 
-对固定数据生成分布 \(p\)，\(H(p)\) 与模型无关，所以最小化期望 cross-entropy 等价于最小化 forward KL（即以真实分布 \(p\) 为第一参数的 \(D_{\mathrm{KL}}(p\|q)\)）。最佳可达值在 \(q=p\) 时取得，等于真实 entropy。
+对固定数据生成分布 \(p\)，\(H(p)\) 与模型无关，所以最小化期望 cross-entropy 等价于最小化 forward KL（即以真实分布 \(p\) 为第一参数的 \(\KL(p\|q)\)）。最佳可达值在 \(q=p\) 时取得，等于真实 entropy。
 
 \subsection{为什么分类训练只看到一个标签也能使用这个目标}
 
@@ -57,8 +62,8 @@ softmax logits 为 \(z\) 时，应使用
 
 label smoothing 把 one-hot target 换成混合分布，class weighting 改变不同标签的相对风险，知识蒸馏使用教师的软分布。它们都仍可写成 cross-entropy，却不再以原始真实条件概率为同一个最优目标。若关心自然人群校准，必须在未被加权、未被重采样的验证分布上重新检查。
 
-\subsubsection{让三个概念各归其位}
+\subsection{一个最小检验：目标分布改变时什么会变}
 
-对三分类问题分别计算均匀预测、正确高置信预测和错误高置信预测的 entropy、cross-entropy 与 KL。然后把 target 从 one-hot 改成 label smoothing 分布，观察最优 \(q\) 怎样改变。最后验证给所有 logits 加常数不改变 loss，并解释这是数值稳定技巧而不是正则化。
+三分类中，均匀预测的单样本损失是 \(\log 3\)，正确高置信预测使损失趋近零，错误高置信预测则使损失迅速增大。把 target 从 one-hot 换成 label smoothing 分布后，最优 \(q\) 也随之变成平滑后的 target，而不再是原始条件分布。另一方面，给所有 logits 加同一个常数不会改变 softmax 或 loss；这来自归一化不变性，是稳定计算可利用的结构，不是正则化。
 
-信息论中的编码基础见``信息与熵''。
+信息论中的编码基础见\hyperref[ch:054]{``信息与熵：怎样把``不确定''变成可计算的量''}。

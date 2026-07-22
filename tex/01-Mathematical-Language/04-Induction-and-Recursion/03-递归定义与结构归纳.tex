@@ -1,4 +1,9 @@
 \section{递归定义与结构归纳}
+\label{sec:01-Mathematical-Language/04-Induction-and-Recursion/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}递归定义说明基本对象是什么、怎样由已有对象生成新对象。结构归纳沿同样的生成规则证明性质，因此能覆盖所有有限构造出来的对象。
+\end{quote}
 
 \subsection{用已经造出的对象继续造新对象}
 
@@ -29,7 +34,6 @@ F_0=0,\quad F_1=1,\quad F_n=F_{n-1}+F_{n-2} (n\ge2)
 递归不光能定义数列，也能定义一整类对象。比如二叉树可以这么规定：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   单个叶子是一棵树；
@@ -52,7 +56,6 @@ F_0=0,\quad F_1=1,\quad F_n=F_{n-1}+F_{n-2} (n\ge2)
 对递归生成的对象，证明方法就得跟着它的构造方式走：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   先证所有基础对象都满足性质；

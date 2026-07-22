@@ -1,4 +1,9 @@
 \section{逆矩阵求导应写成线性求解}
+\label{sec:10-Matrix-Calculus/03-Trace-Calculus/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}由 \(AA^{-1}=I\) 微分，可以得到逆矩阵怎样随 \(A\) 改变。但程序里通常不该显式求逆；前向计算和反向传播都应改写成线性方程求解。
+\end{quote}
 
 逆矩阵导数最容易被记成一个公式，却最适合从恒等式现场推出。只要 \(X\) 可逆，
 
@@ -24,18 +29,18 @@ d(X^{-1}) = -X^{-1}(dX)X^{-1}.
 令
 
 \[
-f(X)=a^TX^{-1}b.
+f(X)=a^{\trans}X^{-1}b.
 \]
 
 有
 
 \[
-df = -a^TX^{-1}(dX)X^{-1}b.
+df = -a^{\trans}X^{-1}(dX)X^{-1}b.
 \]
 定义
 
 \[
-u=X^{-T}a,
+u=X^{-\trans}a,
 \qquad
 v=X^{-1}b.
 \]
@@ -43,19 +48,19 @@ v=X^{-1}b.
 则
 
 \[
-df=-u^T(dX)v
-=-\operatorname{tr}\bigl((uv^T)^TdX\bigr),
+df=-u^{\trans}(dX)v
+=-\trace\bigl((uv^{\trans})^{\trans}dX\bigr),
 \]
 
 所以
 
 \[
-\nabla_Xf=-uv^T = -X^{-T}ab^TX^{-T}.
+\nabla_Xf=-uv^{\trans} = -X^{-\trans}ab^{\trans}X^{-\trans}.
 \]
 推导形式中出现逆，但计算 \(u,v\) 时应分别解
 
 \[
-X^Tu=a,\qquad Xv=b.
+X^{\trans}u=a,\qquad Xv=b.
 \]
 
 无需形成 \(X^{-1}\)。
@@ -63,10 +68,10 @@ X^Tu=a,\qquad Xv=b.
 若 \(X\) 被限制为对称正定、\(a=b\)，梯度自然为
 
 \[
--X^{-1}bb^TX^{-1},
+-X^{-1}bb^{\trans}X^{-1},
 \]
 
-它本身对称。一般受对称约束时，应取无约束（环境）梯度的对称部分：此时 \(dX\) 对称，\(\operatorname{tr}(G^TdX)\) 只感知 \(G\) 的对称部分，与上一节二次型只感知 \(A+A^T\) 同理。
+它本身对称。一般受对称约束时，应取无约束（环境）梯度的对称部分：此时 \(dX\) 对称，\(\trace(G^{\trans}dX)\) 只感知 \(G\) 的对称部分，与上一节二次型只感知 \(A+A^{\trans}\) 同理。
 
 \subsection{对线性求解做隐式微分}
 
@@ -114,35 +119,34 @@ dx=A^{-1}\bigl(db-(dA)x\bigr)
 得到
 
 \[
-d\ell = \bar x^TA^{-1}db
--\bar x^TA^{-1}(dA)x.
+d\ell = \bar x^{\trans}A^{-1}db
+-\bar x^{\trans}A^{-1}(dA)x.
 \]
 定义伴随变量 \(\lambda\) 为
 
 \[
-A^T\lambda=\bar x.
+A^{\trans}\lambda=\bar x.
 \]
 
 则
 
 \[
-d\ell = \lambda^Tdb-\lambda^T(dA)x.
+d\ell = \lambda^{\trans}db-\lambda^{\trans}(dA)x.
 \]
 因此
 
 \[
 \nabla_b\ell=\lambda,
 \qquad
-\nabla_A\ell=-\lambda x^T.
+\nabla_A\ell=-\lambda x^{\trans}.
 \]
 
 无论 \(A\) 有多少元素，反向只需求解一次转置系统，再形成一个外积。这是隐式层、Kalman 滤波、最小二乘和可微物理中常见的伴随方法。
 
 \subsection{可逆性与条件数不能被忽略}
 
-以上公式要求 \(A\) 在考虑点附近可逆。接近奇异时，\(A^{-1}\) 的范数很大，前向解和导数都会对小扰动极其敏感——敏感程度由条件数 \(\kappa(A)=\lVert A\rVert\lVert A^{-1}\rVert\) 刻画。病态来自解映射本身，不能归咎于自动微分的实现。
+以上公式要求 \(A\) 在考虑点附近可逆。接近奇异时，\(A^{-1}\) 的范数很大，前向解和导数都会对小扰动极其敏感——敏感程度由条件数 \(\kappa(A)=\norm{ A}\norm{ A^{-1}}\) 刻画。病态来自解映射本身，不能归咎于自动微分的实现。
 
 若矩阵秩发生变化，伪逆 \(A^\dagger\) 的导数不再由简单逆公式给出；固定秩流形上可以推导，但跨越秩变化点通常不光滑。把普通逆公式机械替换成伪逆是错误的。
 
 数值实现还应根据结构选择 Cholesky、QR、SVD 或迭代法，并在反向中保持相同的转置与精度语义。近似前向求解会使反向梯度也只近似满足隐式方程；停止容差应与所需梯度精度协调。
-

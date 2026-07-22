@@ -1,4 +1,9 @@
 \section{Huffman 编码与贪心最优性}
+\label{sec:07-Information-Theory/04-Source-Coding/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}最少出现的两个符号最适合待在码树最深处，并共享最后一个分叉。把它们暂时合成一个符号以后，问题会变成规模更小的同一个问题，这正是 Huffman 贪心选择能够得到全局最优解的原因。
+\end{quote}
 
 Kraft 不等式告诉我们哪些长度组合可行，却没有告诉我们怎样针对给定概率选择最佳长度。若概率已知，我们希望最小化
 
@@ -24,7 +29,6 @@ L=\sum_xp(x)\ell(x).
 这给出递归算法：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   取当前概率最小的两个节点；
@@ -74,7 +78,6 @@ H(X)\approx1.846\text{ bit}.
 很多贪心算法看起来合理却会失败，Huffman 需要一个明确证明。证明由两部分组成：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   交换论证：存在一棵最优树，其中最小的两个概率处于最深同胞位置；

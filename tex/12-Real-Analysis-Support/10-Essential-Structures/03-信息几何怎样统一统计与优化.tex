@@ -1,10 +1,15 @@
 \section{信息几何怎样统一统计与优化}
+\label{sec:12-Real-Analysis-Support/10-Essential-Structures/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}统计估计与优化都会在分布族中移动。信息几何用 Fisher 度量衡量分布变化，使似然曲率、自然梯度和局部 KL 近似成为同一结构的不同侧面。
+\end{quote}
 
 统计推断与优化看似两个领域：一个关心估计的准确性，一个关心算法的收敛性。信息几何把它们统一起来：统计流形上的 Fisher 度量、自然梯度、以及最大似然作为测地流，揭示了估计与优化的深层几何结构。
 
 \subsection{先感受困难：为什么欧氏梯度有时失效}
 
-考虑一个具体问题：估计 Gaussian 分布的均值 $\mu$ 和方差 $\sigma^2$。最直接的方法是用梯度下降最小化负对数似然：
+考虑一个具体问题：估计 Gaussian 分布的均值 \(\mu\) 和方差 \(\sigma^2\)。最直接的方法是用梯度下降最小化负对数似然：
 
 \[
 L(\mu,\sigma^2)=\frac{n}{2}\log\sigma^2+\frac{1}{2\sigma^2}\sum_{i=1}^n(x_i-\mu)^2.
@@ -18,13 +23,13 @@ L(\mu,\sigma^2)=\frac{n}{2}\log\sigma^2+\frac{1}{2\sigma^2}\sum_{i=1}^n(x_i-\mu)
 \nabla_{\sigma^2}L=\frac{n}{2\sigma^2}-\frac{1}{2\sigma^4}\sum(x_i-\mu)^2.
 \]
 
-但这里有一个问题：$\mu$ 和 $\sigma^2$ 的尺度差异很大（$\mu$ 是位置参数，$\sigma^2$ 是尺度参数），欧氏梯度下降会优先更新尺度大的方向，导致收敛慢且不稳定。
+但这里有一个问题：\(\mu\) 和 \(\sigma^2\) 的尺度差异很大（\(\mu\) 是位置参数，\(\sigma^2\) 是尺度参数），欧氏梯度下降会优先更新尺度大的方向，导致收敛慢且不稳定。
 
-更一般地，欧氏梯度把参数空间看作平坦的，但实际上参数空间有曲率：某些方向（如同时改变 $\mu$ 和 $\sigma^2$）导致分布剧烈变化，某些方向（如只改变 $\mu$ 而 $\sigma^2$ 很大）导致分布几乎不变。欧氏梯度忽略了这种几何结构。
+更一般地，欧氏梯度把参数空间看作平坦的，但实际上参数空间有曲率：某些方向（如同时改变 \(\mu\) 和 \(\sigma^2\)）导致分布剧烈变化，某些方向（如只改变 \(\mu\) 而 \(\sigma^2\) 很大）导致分布几乎不变。欧氏梯度忽略了这种几何结构。
 
 \subsection{统计流形：参数空间的几何}
 
-Part 12 的信息几何单元已经介绍了统计流形：参数空间 $\Theta$ 是流形，Fisher 信息 $I(\theta)$ 是黎曼度量。这个度量不是任意的，而是由分布的局部可区分性决定：
+Part 12 的信息几何单元已经介绍了统计流形：参数空间 \(\Theta\) 是流形，Fisher 信息 \(I(\theta)\) 是黎曼度量。这个度量不是任意的，而是由分布的局部可区分性决定：
 
 \[
 g_\theta(u,v)=u^\trans I(\theta)v,
@@ -71,13 +76,13 @@ I(\mu,\sigma^2)=\begin{pmatrix}
 =n\sigma^2-\sum(x_i-\mu)^2.
 \]
 
-与欧氏梯度相比，自然梯度自动调整了尺度：$\mu$ 的更新不依赖 $\sigma^2$，$\sigma^2$ 的更新不依赖 $\mu$ 的尺度。这解释了为什么自然梯度收敛更快且更稳定。
+与欧氏梯度相比，自然梯度自动调整了尺度：\(\mu\) 的更新不依赖 \(\sigma^2\)，\(\sigma^2\) 的更新不依赖 \(\mu\) 的尺度。这解释了为什么自然梯度收敛更快且更稳定。
 
 \subsection{最大似然作为测地流}
 
 最大似然估计（MLE）在统计流形上有一个深刻的几何解释：MLE 路径是 Fisher 度量下的测地流。
 
-具体来说，考虑似然函数 $\ell(\theta)=\log p_\theta(x)$。MLE 是 $\ell$ 的最大点，而 Fisher 度量下的梯度流方程
+具体来说，考虑似然函数 \(\ell(\theta)=\log p_\theta(x)\)。MLE 是 \(\ell\) 的最大点，而 Fisher 度量下的梯度流方程
 
 \[
 \dot\theta=-\widetilde\nabla_\theta\ell=-I(\theta)^{-1}\nabla_\theta\ell
@@ -89,18 +94,18 @@ I(\mu,\sigma^2)=\begin{pmatrix}
 
 \subsection{指数族的对偶几何}
 
-指数族 $p_\theta(x)=h(x)\exp(\theta^\trans T(x)-A(\theta))$ 的统计流形有特殊的对偶结构：自然参数 $\theta$ 与期望参数 $\mu=\E_\theta[T(X)]=\nabla A(\theta)$ 互为 Legendre 对偶。
+指数族 \(p_\theta(x)=h(x)\exp(\theta^\trans T(x)-A(\theta))\) 的统计流形有特殊的对偶结构：自然参数 \(\theta\) 与期望参数 \(\mu=\E_\theta[T(X)]=\nabla A(\theta)\) 互为 Legendre 对偶。
 
 在这对坐标下，KL 散度有显式形式：
 
 \[
-D_{\mathrm{KL}}(p_\theta\|p_{\theta'})
+\KL(p_\theta\|p_{\theta'})
 =A(\theta')-A(\theta)-\mu^\trans(\theta'-\theta),
 \]
 
-即 $A$ 的 Bregman 散度。Bregman 散度在无穷小位移下退化为 $\frac12 d\theta^\trans I(\theta)d\theta$，正是 Fisher 度量。
+即 \(A\) 的 Bregman 散度。Bregman 散度在无穷小位移下退化为 \(\frac12 d\theta^\trans I(\theta)d\theta\)，正是 Fisher 度量。
 
-对偶几何揭示了指数族的深层结构：自然参数是``分布的坐标''，期望参数是``数据可见的统计量''，Legendre 变换在两者之间切换。MLE 是 moment matching（$\mu=$ 样本均值），这解释了几何上``把数据投影到期望参数空间''的过程。
+对偶几何揭示了指数族的深层结构：自然参数是``分布的坐标''，期望参数是``数据可见的统计量''，Legendre 变换在两者之间切换。MLE 是 moment matching（\(\mu=\) 样本均值），这解释了几何上``把数据投影到期望参数空间''的过程。
 
 \subsection{信息几何在 AI 可解释性中的角色}
 

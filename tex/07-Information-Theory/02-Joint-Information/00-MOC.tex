@@ -5,18 +5,17 @@
 \item
   两个变量一起描述要多少信息；
 \item
-  已知 $Y$ 后 $X$ 还剩多少不确定；
+  已知 \(Y\) 后 \(X\) 还剩多少不确定；
 \item
-  $Y$ 平均减少了多少对 $X$ 的不确定；
+  \(Y\) 平均减少了多少对 \(X\) 的不确定；
 \item
   数据经过处理后还能保留多少原始信息。
 \end{itemize}
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  联合熵、条件熵与链式法则：把``先描述 $Y$，再描述 $X$''写成熵分解。
+  联合熵、条件熵与链式法则：把``先描述 \(Y\)，再描述 \(X\)''写成熵分解。
 \item
   互信息是依赖，也是对不确定性的减少：从多种等价表达理解互信息。
 \item
@@ -26,3 +25,25 @@
 \end{enumerate}
 
 这些量主要讨论统计依赖，不自动代表因果影响。高互信息可以来自共同原因，也可以来自直接作用或选择偏差。
+
+\subsection{怎么读这一章}
+
+\begin{itemize}
+\tightlist
+\item
+  第一次读：先抓住``联合量按揭示顺序分解''、``互信息衡量偏离独立''和``后处理不能增加信息''三条主线；把互信息看作统计依赖，不把它直接解释成因果作用。
+\item
+  如果还想弄清原理：再用 KL 散度统一离散与连续情形，核对熵差公式的有限性条件，并理解条件互信息如何刻画 Markov 结构与数据处理不等式的取等条件。
+\end{itemize}
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:07-Information-Theory/02-Joint-Information/01]{``联合熵、条件熵与链式法则''}；
+\item \hyperref[sec:07-Information-Theory/02-Joint-Information/02]{``互信息是依赖，也是对不确定性的减少''}；
+\item \hyperref[sec:07-Information-Theory/02-Joint-Information/03]{``条件互信息与 Markov 结构''}；
+\item \hyperref[sec:07-Information-Theory/02-Joint-Information/04]{``数据处理不等式与充分表示''}。
+\end{itemize}

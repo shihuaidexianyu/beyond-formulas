@@ -5,7 +5,6 @@
 建议依次阅读：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   错误模型的代价：从交叉熵到 KL 散度
@@ -17,4 +16,25 @@
 
 读完后，请带走三个判断习惯：先问期望是对哪个分布取的，再检查参考分布是否覆盖真实分布的支持，最后根据任务决定方向性究竟是信息还是麻烦。一张``散度性质表''只能起查阅作用。
 
-前一单元：联合信息
+\subsection{怎么读这一章}
+
+\begin{itemize}
+\tightlist
+\item
+  第一次读：把 KL 读成``真实数据按错误模型处理时的额外平均代价''，每次看到 \(D(P\|Q)\) 都先说清谁产生数据、谁充当参照，并检查 \(P\ll Q\)。
+\item
+  如果还想弄清原理：再追踪 Gibbs 不等式的等号条件、数据处理下可区分性的收缩，以及 JS 如何借助共同混合分布换取对称、有限的来源辨别尺度。
+\end{itemize}
+
+前一单元：\hyperref[ch:055]{``联合信息：一个变量能告诉我们另一个变量多少''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:07-Information-Theory/03-Divergences/01]{``错误模型的代价：从交叉熵到 KL 散度''}；
+\item \hyperref[sec:07-Information-Theory/03-Divergences/02]{``Gibbs 不等式与 KL 的方向性''}；
+\item \hyperref[sec:07-Information-Theory/03-Divergences/03]{``Jensen--Shannon 散度与尺度选择''}。
+\end{itemize}

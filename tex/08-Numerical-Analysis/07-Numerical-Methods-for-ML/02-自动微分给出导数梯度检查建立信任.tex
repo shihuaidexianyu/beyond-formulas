@@ -1,4 +1,9 @@
 \section{自动微分给出导数，梯度检查建立信任}
+\label{sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}自动微分负责高效地按照程序执行链式法则，有限差分负责从另一条计算路径检查它有没有写错。两者不是竞争方案：一个用于训练，一个常用于小规模验证。
+\end{quote}
 
 训练模型需要梯度。最直观的办法似乎是轻微改变参数，再观察损失变化：
 
@@ -53,7 +58,7 @@ a=x_1x_2,\qquad b=\sin a,\qquad c=x_2^2,\qquad y=b+c.
 
 正向模式在给定输入方向 \(v\) 后，同时传播数值和切向量，最终得到 Jacobian-vector product，记作 \(Jv\)。若输入维度很小、输出很多，一次正向传播就能看到一个输入方向如何影响所有输出。
 
-反向模式从输出端放入一个伴随量，按相反顺序传播，得到 vector-Jacobian product，通常写成 \(v^TJ\) 或其转置形式。对标量损失，令输出伴随为 \(1\)，一次反传便能得到所有输入分量的梯度。这正是神经网络参数很多、损失只有一个时，反向传播如此合适的原因。
+反向模式从输出端放入一个伴随量，按相反顺序传播，得到 vector-Jacobian product，通常写成 \(v^{\trans}J\) 或其转置形式。对标量损失，令输出伴随为 \(1\)，一次反传便能得到所有输入分量的梯度。这正是神经网络参数很多、损失只有一个时，反向传播如此合适的原因。
 
 在上面的例子中，记 \(\bar z\) 为输出 \(y\) 对中间量 \(z\) 的偏导（伴随量）。反向传播先得到
 
@@ -79,21 +84,21 @@ a=x_1x_2,\qquad b=\sin a,\qquad c=x_2^2,\qquad y=b+c.
 
 \subsection{不必构造完整 Jacobian}
 
-对映射 \(f:\mathbb R^n\to\mathbb R^m\)，完整 Jacobian 有 \(mn\) 个元素。许多应用真正需要的只是它对一个方向的作用：
+对映射 \(f:\R^n\to\R^m\)，完整 Jacobian 有 \(mn\) 个元素。许多应用真正需要的只是它对一个方向的作用：
 
 \begin{itemize}
 \tightlist
 \item
   敏感度传播需要 \(Jv\)；
 \item
-  标量损失反传需要 \(J^Tv\)；
+  标量损失反传需要 \(J^{\trans}v\)；
 \item
   Hessian-vector product 可以通过求导模式组合得到；
 \item
   隐式模型的反传往往只需求一个伴随线性系统。
 \end{itemize}
 
-先问``需要完整矩阵，还是只需要矩阵乘向量''能避免大量时间和存储浪费。这与下一节``需要的是解，而不是逆矩阵''的思想完全相同。
+先问``需要完整矩阵，还是只需要矩阵乘向量''能避免大量时间和存储浪费。这与下一节\hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/03]{``需要的是解，而不是逆矩阵''}的思想完全相同。
 
 \subsection{怎样让梯度检查真正有判断力}
 
@@ -109,7 +114,7 @@ g_i^{\mathrm{num}}
 \[
 \frac{f(x+hv)-f(x-hv)}{2h}
 \quad\text{与}\quad
-v^Tg_{\mathrm{AD}}.
+v^{\trans}g_{\mathrm{AD}}.
 \]
 
 一次随机方向检查会同时混合许多梯度分量，适合快速发现整体错误；它仍可能漏掉与所选方向近乎正交的错误，所以应使用多个方向，并在小问题上补充逐坐标检查。
@@ -117,8 +122,8 @@ v^Tg_{\mathrm{AD}}.
 比较时不能只看绝对差。一个常用的尺度化指标是
 
 \[
-\frac{\lVert g_{\mathrm{AD}}-g_{\mathrm{num}}\rVert}
-{\max\{1,\lVert g_{\mathrm{AD}}\rVert,\lVert g_{\mathrm{num}}\rVert\}}.
+\frac{\norm{ g_{\mathrm{AD}}-g_{\mathrm{num}}}}
+{\max\{1,\norm{ g_{\mathrm{AD}}},\norm{ g_{\mathrm{num}}}\}}.
 \]
 
 阈值没有脱离上下文的统一答案：float64 与 float32、平滑函数与尖点附近、数量级为 \(10^{-2}\) 与 \(10^8\) 的问题，本来就不应要求相同误差。

@@ -1,4 +1,9 @@
 \section{信息增益：从提问到实验设计}
+\label{sec:07-Information-Theory/06-Information-and-Learning/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}一次提问有没有价值，不看答案有多长，而看得到答案后，我们对真正关心的目标少了多少疑问。信息增益算的是提问之前的平均收益，所以一次意外但没用的回答，不等于一个好实验。
+\end{quote}
 
 \subsection{一个问题的价值不在于答案有多复杂}
 
@@ -46,7 +51,7 @@ H(Y\mid X)=\sum_xp(x)H(Y\mid X=x).
 
 \[
 I(Y;X)
-=\mathbb E_X\left[
+=\E_X\left[
 D\bigl(P_{Y\mid X}\|P_Y\bigr)
 \right].
 \]
@@ -63,7 +68,7 @@ D(P_{Y\mid x}\|P_Y)
 
 \[
 I(\Theta;D\mid a)
-=\mathbb E_{D\mid a}
+=\E_{D\mid a}
 D\bigl(P_{\Theta\mid D,a}\|P_\Theta\bigr).
 \]
 

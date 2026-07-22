@@ -1,9 +1,8 @@
 最优控制把动力学与代价都当成已知；强化学习拿走这份奢侈。智能体只能反复观察当前状态、选择动作、收到奖励并到达下一状态，再从这些局部交互中学会一套长期策略。困难不只是``没有公式''：当前动作会改变未来能看到什么数据，学习者既是统计者，也是数据生成过程的一部分。
 
-本单元沿着“先把问题写对，再把方程变成算法，再处理函数逼近与分布错配，最后让策略本身可微”的顺序展开：
+本单元沿着``先把问题写对，再把方程变成算法，再处理函数逼近与分布错配，最后让策略本身可微''的顺序展开：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   MDP 把决策问题写成随机过程：用状态、动作、转移、奖励与折扣率刻画交互，说明 Markov 性质究竟要求状态保留什么，并区分策略的表现与单步奖励。
@@ -27,8 +26,30 @@
   Actor--Critic 在偏差与方差之间搭桥：用学习到的价值函数近似 advantage，理解多步目标、双时间尺度与离策略修正。
 \end{enumerate}
 
-从因果角度看，策略会在每个时刻主动改变动作分配机制，进而改变未来状态分布；仅对既有数据做条件化无法表达这种干预。Machine Learning Part 的``因果推断：预测世界不等于改变世界''讨论静态干预、可识别性与重叠；本单元的 off-policy 评价和策略学习把同一问题推进到序贯场景，其中历史依赖、动态混杂和支持缺口会反复出现。
+从因果角度看，策略会在每个时刻主动改变动作分配机制，进而改变未来状态分布；仅对既有数据做条件化无法表达这种干预。Machine Learning Part 的\hyperref[ch:120]{``因果推断：预测世界不等于改变世界''}讨论静态干预、可识别性与重叠；本单元的 off-policy 评价和策略学习把同一问题推进到序贯场景，其中历史依赖、动态混杂和支持缺口会反复出现。
 
-若只做一次行动，数理统计中的``统计决策与可信预测：模型给出概率之后怎样行动''可以用 posterior risk、minimax、拒绝成本与容量约束选择规则。强化学习增加的核心困难是：行动会创造下一步状态和数据，眼前风险最小不必等于累计回报最大。
+若只做一次行动，数理统计中的\hyperref[ch:092]{``统计决策与可信预测：模型给出概率之后怎样行动''}可以用 posterior risk、minimax、拒绝成本与容量约束选择规则。强化学习增加的核心困难是：行动会创造下一步状态和数据，眼前风险最小不必等于累计回报最大。
 
 十篇共享一套记号：状态 \(s\)，动作 \(a\)，奖励 \(r\)，折扣率 \(\gamma\)，状态值 \(V^\pi\)，动作值 \(Q^\pi\)。本单元聚焦离散时间和折扣回报；有限时域、平均回报、部分可观测与连续时间问题需要相应改写，不能只换符号。
+
+\subsection{怎么读这一章}
+
+最短主线是前四篇：MDP 把问题写清，Bellman 方程给出递归目标，Monte Carlo 把期望换成样本，Q-learning 把最优性备份变成增量算法。第五至第八篇回答``加入函数逼近并复用异分布数据后为什么会不稳定''，适合第二遍连读；最后两篇给出直接优化随机策略的另一条路线。任何收敛结论都要连同有限性、折扣、访问频率、步长、策略是否固定以及 on/off-policy 条件一起读。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/01]{``MDP 把决策问题写成随机过程''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/02]{``Bellman 方程与值迭代、策略迭代''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/03]{``Monte Carlo 与随机逼近把回报变成增量更新''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/04]{``从动态规划到 Q 学习''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/05]{``线性价值函数逼近求解投影 Bellman 方程''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/06]{``Deadly Triad 让自举误差在分布外放大''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/07]{``DQN 用慢目标与回放缓和训练耦合''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/08]{``Off-policy 校正用权重交换分布偏差与方差''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/09]{``策略梯度直接优化动作分布''}；
+\item \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/10]{``Actor--Critic 在偏差与方差之间搭桥''}。
+\end{itemize}

@@ -1,4 +1,9 @@
 \section{MCMC 在无法独立采样时构造平稳链}
+\label{sec:13-Machine-Learning/08-Sampling-and-Inference/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}MCMC 构造以目标分布为平稳分布的相关样本链。平稳性不保证从任意初值收敛，有限运行的诊断也只能发现失败，不能证明已经充分混合。
+\end{quote}
 
 Bayesian posterior 常写成
 
@@ -42,17 +47,17 @@ p(y)=\int p(y\mid\theta)p(\theta)\,d\theta
 
 \[
 \frac1n\sum_{t=1}^nh(X_t)
-\longrightarrow\mathbb E_\pi[h(X)]
+\longrightarrow\E_\pi[h(X)]
 \]
 
 几乎处处成立。
 
 \subsection{一万次迭代不等于一万个独立样本}
 
-相邻链状态相关。记 \(\sigma_h^2=\operatorname{Var}_\pi(h(X))\)，\(\rho_k=\operatorname{Corr}(h(X_t),h(X_{t+k}))\) 为滞后 \(k\) 的自相关，则平稳链均值 \(\bar h_n=\frac1n\sum_th(X_t)\) 的方差近似为
+相邻链状态相关。记 \(\sigma_h^2=\Var_\pi(h(X))\)，\(\rho_k=\Corr(h(X_t),h(X_{t+k}))\) 为滞后 \(k\) 的自相关，则平稳链均值 \(\bar h_n=\frac1n\sum_th(X_t)\) 的方差近似为
 
 \[
-\operatorname{Var}(\bar h_n)
+\Var(\bar h_n)
 \approx\frac{\sigma_h^2}{n}
 \Bigl(1+2\sum_{k\ge1}\rho_k\Bigr).
 \]
@@ -73,4 +78,6 @@ p(y)=\int p(y\mid\theta)p(\theta)\,d\theta
 
 \subsubsection{让``高接受率''主动失败}
 
-对一个相关二维 Gaussian target 使用不同尺度的随机游走 Metropolis。比较接受率、每坐标 ESS 和均值的 Monte Carlo 标准误，找出接受率最高却效率很低的设置。随后换成双峰 target，从两个峰分别启动链，观察 \(\widehat R\) 与单链 trace 会给出什么不同信号。最后解释为什么``删掉前一半样本''不能解决跨峰失败。
+对一个相关二维 Gaussian target 运行不同尺度的随机游走 Metropolis，比较接受率、每坐标 ESS 和均值的 Monte Carlo 标准误，可以看到：提议尺度取得极小时接受率接近一，链却几乎原地不动，ESS 很低、标准误很大。接受率最高的设置恰是效率最低的设置之一。
+
+随后换成双峰 target，从两个峰分别启动链。两条链各自收敛于一个峰，\(\widehat R\) 明显大于一并报警；而任何一条单链的 trace 都平稳得毫无破绽。``删掉前一半样本''不能解决这种跨峰失败：burn-in 只删除仍困在同一峰内的样本，从不创造跨峰移动。

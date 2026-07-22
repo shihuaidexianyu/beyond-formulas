@@ -5,7 +5,6 @@
 本单元用机器学习中最常见的三类计算来练习这种能力：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   在对数域中稳定计算概率：从会溢出的 softmax 出发，推导 log-sum-exp、log-softmax 与稳定交叉熵。
@@ -15,4 +14,19 @@
   需要的是解，而不是逆矩阵：把回归、Gaussian 过程和隐式微分中的逆矩阵改写成结构化线性求解。
 \end{enumerate}
 
-这三节不是孤立的编程技巧。它们都在落实前面反复出现的同一原则：保存问题的数学结构，减少不必要的中间量，并用独立证据判断结果是否可信。读完后，可以继续把这些原则用于 凸优化、机器学习和深度学习。
+\subsection{怎么读这一章}
+
+第一次读，可以把三篇看成同一个习惯：不要照着数学符号逐字翻译成程序。先问最终要的是概率的对数、一个方向上的导数，还是线性方程的解，再选择不会制造巨大中间量的计算路径。如果对误差为什么会在逐步计算中积累还不熟悉，可先回看上一单元 \hyperref[ch:066]{``常微分方程数值方法：沿局部斜率走完整条轨迹''}。
+
+这三节不是孤立的编程技巧。它们都在落实前面反复出现的同一原则：保存问题的数学结构，减少不必要的中间量，并用独立证据判断结果是否可信。读完后，可以继续把这些原则用于凸优化、机器学习和深度学习。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/01]{``在对数域中稳定计算概率''}；
+\item \hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/02]{``自动微分给出导数，梯度检查建立信任''}；
+\item \hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/03]{``需要的是解，而不是逆矩阵''}。
+\end{itemize}

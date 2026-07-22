@@ -3,3 +3,17 @@
 核心在于把 reverse mode 看成连续应用向量---Jacobian 乘积：从标量损失出发，只传播当前计算真正需要的伴随量。掌握这个结构，比背诵各层导数更重要。这样既避免显式形成巨大 Jacobian，也能统一全连接层、卷积、注意力和概率模型中的梯度。
 
 梯度检查只提供局部数值证据。通过检查不代表损失语义正确，也不代表训练稳定；检查失败则应依次排查 shape、广播产生的隐式求和、不可微点、有限差分步长和浮点精度。
+
+\subsection{怎么读这一章}
+
+两篇都是核心主线。若当前只想排查实现错误，可先读第二篇；但在解释训练结果前必须回到第一篇，因为梯度算对只说明忠实优化了当前损失，不说明损失对应真实目标。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:14-Deep-Learning/02-Losses-and-Backpropagation/01]{``损失函数决定网络在学习什么''}；
+\item \hyperref[sec:14-Deep-Learning/02-Losses-and-Backpropagation/02]{``一次完整的前向与反向传播''}。
+\end{itemize}

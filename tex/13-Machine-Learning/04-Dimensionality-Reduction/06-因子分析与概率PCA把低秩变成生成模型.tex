@@ -1,4 +1,9 @@
 \section{因子分析与概率 PCA：把低秩变成生成模型}
+\label{sec:13-Machine-Learning/04-Dimensionality-Reduction/06}
+
+\begin{quote}
+\textbf{先抓住这一点：}概率 PCA 与因子分析把低维潜变量经过线性映射再加噪声，变成可估计的生成模型。二者主要差在噪声协方差结构，因此对哪些变异算信号有不同判断。
+\end{quote}
 
 \subsection{相关变量可能由少数共同原因驱动}
 
@@ -35,7 +40,7 @@ x\sim\mathcal N(\mu,\Lambda\Lambda^\trans+\Psi).
 =(\Lambda R)(\Lambda R)^\trans.
 \]
 
-所以 likelihood 只能识别载荷张成的子空间，不能自动识别每一列的名称和方向。旋转载荷可能让解释更稀疏或更符合领域习惯，却不会由数据单独证明某列就是“消费倾向”或“生活质量”。
+所以 likelihood 只能识别载荷张成的子空间，不能自动识别每一列的名称和方向。旋转载荷可能让解释更稀疏或更符合领域习惯，却不会由数据单独证明某列就是``消费倾向''或``生活质量''。
 
 缩放和符号也要固定约定。若允许一般 latent covariance，\(\Lambda\) 与 latent 尺度还能相互补偿；设 \(\Cov(z)=I\) 正是在移除这部分冗余。可辨认性约束决定哪些参数陈述真正有意义，因而具有实质统计作用，不是排版选择。
 

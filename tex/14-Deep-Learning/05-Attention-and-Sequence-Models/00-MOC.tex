@@ -1,3 +1,16 @@
 逐位置使用同一个函数无法读取上下文，把整个序列压成一个固定摘要又无法让不同查询寻找不同信息。注意力保留一组可读位置，并让每个查询根据当前内容产生自己的加权读取规则。
 
 本单元先建立 Query、Key、Value 和稳定 Softmax 的 shape 语言，再讨论 mask、多头、位置结构与二次复杂度。注意力本身对输入排列等变，并不知道词序；因果 mask 只限制信息方向，也不会自动提供位置。理解这些保持量与缺失量，比记住一个框架调用更能解释模型为何成功或失败。
+
+\subsection{怎么读这一章}
+
+Query、Key、Value 的角色、矩阵 shape 与 mask 是核心主干；多头、位置编码和复杂度是使用注意力时的必要回补。若只记住公式，应优先检查自己能否说明每一行 softmax 在哪些位置上归一化、哪些位置允许被读取。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:14-Deep-Learning/05-Attention-and-Sequence-Models/01]{``Self-Attention 是内容决定的加权读取''}。
+\end{itemize}

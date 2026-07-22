@@ -1,9 +1,8 @@
-一般矩阵可能没有完整特征基，特征向量也可能彼此几乎平行。实对称矩阵却拥有一套格外整齐的几何：全部特征值为实数，不同特征方向彼此正交，并且总能在正交基下对角化。二次型 \(x^{\mathsf T}Ax\) 把这些特征值解释为各方向上的曲率或能量；正定性则保证所有非零方向都具有正能量和严格曲率。
+一般矩阵可能没有完整特征基，特征向量也可能彼此几乎平行。实对称矩阵却拥有一套格外整齐的几何：全部特征值为实数，不同特征方向彼此正交，并且总能在正交基下对角化。二次型 \(x^{\trans}Ax\) 把这些特征值解释为各方向上的曲率或能量；正定性则保证所有非零方向都具有正能量和严格曲率。
 
 \subsection{阅读顺序}
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   对称矩阵与谱定理
@@ -16,3 +15,19 @@
 \end{enumerate}
 
 前三节建立谱、正定性与分解，最后一节把它们重新放回可见的几何：旋转消掉交叉项，平移找到中心，特征值的符号分类椭球、双曲与退化情形。主要参考 MIT 18.06 关于 symmetric matrices、positive definiteness、minima 与 Cholesky 的讲授。
+
+\subsection{怎么读这一章}
+
+按“谱—能量—分解—几何”阅读。对称矩阵拥有正交特征方向，二次型把特征值变成各方向的曲率，正定性允许 Cholesky 分解，最后再用谱坐标看清椭球面的主轴。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/01]{``对称矩阵与谱定理：什么时候特征方向一定正交''}；
+\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/02]{``二次型与正定性：每个方向上的能量是否为正''}；
+\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/03]{``Cholesky 分解：把正能量写成平方和''}；
+\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/04]{``二次曲面用谱分解显露几何形状''}。
+\end{itemize}

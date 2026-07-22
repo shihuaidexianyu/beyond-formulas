@@ -1,6 +1,11 @@
 \section{核技巧：只通过内积看世界}
+\label{sec:13-Machine-Learning/09-Kernel-Methods-and-Gaussian-Processes/02}
 
 上一节的结论是：升到高维有用，但显式构造 \(\phi\) 付不起账单。本节把上一节末尾的想法变成正式定义，然后做两件事：盘点哪些已学过的算法只通过内积接触数据；给``随手写出的相似度函数''一个判据——它什么时候真的是某个特征空间里的内积。
+
+\begin{quote}
+\textbf{先抓住这一点：}核技巧不是“任何算法加一个相似度函数”，而是把一个只依赖内积的算法搬到隐式特征空间。真正的门槛有两个：算法必须只通过内积接触数据，所用函数必须对任意有限样本产生半正定 Gram 矩阵。
+\end{quote}
 
 \subsection{核函数：不算特征，只算相似}
 
@@ -16,7 +21,7 @@ k(x,z)=\ip{\phi(x)}{\phi(z)}_{\mathcal{F}}
 
 \subsection{支持向量机：对偶里只有内积}
 
-``最大间隔与支持向量机''中，硬间隔 SVM 的驻点条件给出 \(w=\sum_i\alpha_iy_ix_i\) 与 \(\sum_i\alpha_iy_i=0\)。把 \(w\) 的形式代回原始问题消去 \((w,b)\)，剩下的对偶问题只含乘子：
+\hyperref[sec:09-Convex-Optimization/07-Applications/03]{``最大间隔与支持向量机''}中，硬间隔 SVM 的驻点条件给出 \(w=\sum_i\alpha_iy_ix_i\) 与 \(\sum_i\alpha_iy_i=0\)。把 \(w\) 的形式代回原始问题消去 \((w,b)\)，剩下的对偶问题只含乘子：
 
 \[
 \max_{\alpha}\ \sum_{i=1}^{n}\alpha_i
@@ -42,7 +47,7 @@ k(x,z)=x_1z_1+x_2z_2+x_1x_2\,z_1z_2,
 
 \subsection{Ridge 回归：同一个解的 Gram 形态}
 
-``正则化从 Ridge 到 Lasso''的一阶条件是
+\hyperref[sec:13-Machine-Learning/02-Linear-Models/02]{``正则化从 Ridge 到 Lasso''}的一阶条件是
 
 \[
 (X^{\trans}X+\lambda I)\,w=X^{\trans}y.
@@ -72,7 +77,7 @@ f(x)=\ip{w}{x}=\sum_{i=1}^{n}\alpha_i\,\ip{x_i}{x}.
 
 \subsection{PCA：协方差可以换成 Gram}
 
-``PCA 从最大方差到最小重构误差''中，主方向是 \(X_c^{\trans}X_c\) 的特征向量，其中 \(X_c\) 是中心化后的数据矩阵。但 \(X_c^{\trans}X_c\in\R^{p\times p}\) 与 Gram 矩阵 \(X_cX_c^{\trans}\in\R^{n\times n}\) 共享全部非零特征值：若 \(u_j\) 是 \(X_cX_c^{\trans}\) 对应特征值 \(\sigma_j^2\) 的单位特征向量，则 \(v_j=X_c^{\trans}u_j/\sigma_j\) 是 \(X_c^{\trans}X_c\) 对应同一特征值的单位特征向量。因此主方向与主成分得分都可以完全从 Gram 矩阵恢复；进一步把 Gram 矩阵换成核矩阵，就是核 PCA 的起点。这里只指出这扇门，不走进去。
+\hyperref[sec:13-Machine-Learning/04-Dimensionality-Reduction/01]{``PCA 从最大方差到最小重构误差''}中，主方向是 \(X_c^{\trans}X_c\) 的特征向量，其中 \(X_c\) 是中心化后的数据矩阵。但 \(X_c^{\trans}X_c\in\R^{p\times p}\) 与 Gram 矩阵 \(X_cX_c^{\trans}\in\R^{n\times n}\) 共享全部非零特征值：若 \(u_j\) 是 \(X_cX_c^{\trans}\) 对应特征值 \(\sigma_j^2\) 的单位特征向量，则 \(v_j=X_c^{\trans}u_j/\sigma_j\) 是 \(X_c^{\trans}X_c\) 对应同一特征值的单位特征向量。因此主方向与主成分得分都可以完全从 Gram 矩阵恢复；进一步把 Gram 矩阵换成核矩阵，就是核 PCA 的起点。这里只指出这扇门，不走进去。
 
 \subsection{三个常见核}
 
@@ -104,7 +109,7 @@ k(x,z)=\exp\bigl(-\gamma\norm{x-z}^{2}\bigr),\qquad \gamma>0.
 
 \subsection{什么时候可以自己设计核}
 
-反过来问：写一个直觉上合理的相似度函数 \(s(x,z)\)，什么时候能当核用？答案是正定性判据（常称 Mercer 条件）：
+反过来问：写一个直觉上合理的相似度函数 \(s(x,z)\)，什么时候能当核用？答案是正定性判据（在机器学习语境中常被宽泛地称为 Mercer 条件；经典 Mercer 定理还包含定义域、连续性与测度等附加条件）：
 
 \[
 k\ \text{是某个特征空间的内积}
@@ -118,12 +123,12 @@ k\ \text{是某个特征空间的内积}
 \[
 v^{\trans}Kv
 =\sum_{i=1}^{n}\sum_{j=1}^{n}v_iv_j\,\ip{\phi(x_i)}{\phi(x_j)}
-=\Bigl\lVert\sum_{i=1}^{n}v_i\,\phi(x_i)\Bigr\rVert^{2}\ge0.
+=\norm{\sum_{i=1}^{n}v_i\,\phi(x_i)}^{2}\ge0.
 \]
 
 充分性——从半正定的 \(k\) 真的造出一个特征空间——正是下一节构造 RKHS 的内容。
 
-这个判据让``设计核''成为可检验的工程，而不是玄学。封闭性性质提供了积木：两个核的和仍是核，两个核的积仍是核，核乘正常数仍是核——对应的 Gram 矩阵分别保持半正定。于是可以按数据的不同侧面分别构造相似度再组合。反过来，一个凭直觉写出却不满足半正定的``相似度''，会让 SVM 对偶目标失去凹性、让``范数''不再是范数——``最大间隔与支持向量机''末尾对非 PSD 相似度的警告正来自这里。
+这个判据让``设计核''成为可检验的工程，而不是玄学。封闭性性质提供了积木：两个核的和仍是核，两个核的积仍是核，核乘正常数仍是核——对应的 Gram 矩阵分别保持半正定。于是可以按数据的不同侧面分别构造相似度再组合。反过来，一个凭直觉写出却不满足半正定的``相似度''，会让 SVM 对偶目标失去凹性、让``范数''不再是范数——\hyperref[sec:09-Convex-Optimization/07-Applications/03]{``最大间隔与支持向量机''}末尾对非 PSD 相似度的警告正来自这里。
 
 \subsection{核技巧没回答的问题}
 

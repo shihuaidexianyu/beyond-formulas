@@ -1,6 +1,11 @@
 \section{随机过程、时间指标与样本路径}
+\label{sec:06-Random-Processes/01-Foundations/01}
 
-设传感器每秒记录一次温度。单独看第十秒的读数 $X_{10}$，它只是一个随机变量；把所有时刻放在一起，
+\begin{quote}
+\textbf{先抓住这一点：}随机过程不是许多个彼此分离的随机变量，而是同一次随机实验生成的一整条轨迹。固定时间看到的是总体中的一个切片，固定样本看到的才是一条可能演化。
+\end{quote}
+
+设传感器每秒记录一次温度。单独看第十秒的读数 \(X_{10}\)，它只是一个随机变量；把所有时刻放在一起，
 
 \[
 X_0,X_1,X_2,\ldots
@@ -15,12 +20,13 @@ X_0,X_1,X_2,\ldots
 X:T\times\Omega\to S,
 \qquad X(t,\omega)=X_t(\omega).
 \]
+严格地说，每个固定 \(t\) 的坐标映射 \(X_t:\Omega\to S\) 都应当可测；若还要把 \(X\) 当作时间与样本的联合函数来积分，则通常还会要求联合可测性。入门计算多从前一个条件出发，连续时间理论才更频繁地遇到后一个条件。
 \begin{itemize}
 \tightlist
 \item
-  固定 $t$，$\omega\mapsto X_t(\omega)$ 是随机变量；
+  固定 \(t\)，\(\omega\mapsto X_t(\omega)\) 是随机变量；
 \item
-  固定 $\omega$，$t\mapsto X_t(\omega)$ 是一条样本路径或轨迹。
+  固定 \(\omega\)，\(t\mapsto X_t(\omega)\) 是一条样本路径或轨迹。
 \end{itemize}
 
 这两个视角不能混淆。概率分布是对大量可能路径的总体描述；现实中一次实验通常只观察到其中一条路径。
@@ -30,11 +36,11 @@ X:T\times\Omega\to S,
 \[
 X_n=\text{前 }n\text{ 次正面总数}.
 \]
-固定 $n$，$X_n$ 服从 Binomial$(n,p)$（$p$ 为单次正面概率）；固定一串抛掷结果，$n\mapsto X_n$ 是一条从零开始、每步增加零或一的阶梯路径。
+固定 \(n\)，\(X_n\) 服从 Binomial\((n,p)\)（\(p\) 为单次正面概率）；固定一串抛掷结果，\(n\mapsto X_n\) 是一条从零开始、每步增加零或一的阶梯路径。
 
 \subsection{时间指标与状态空间形成四种基本类型}
 
-时间集合 $T$ 可以离散或连续，状态空间 $S$ 也可以离散或连续：
+时间集合 \(T\) 可以离散或连续，状态空间 \(S\) 也可以离散或连续：
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}{@{}lll@{}}
@@ -65,22 +71,22 @@ X_n=\text{前 }n\text{ 次正面总数}.
 
 两个过程可以在每个固定时刻拥有相同边缘分布，路径却完全不同。
 
-设 $Z\sim\mathcal N(0,1)$：
+设 \(Z\sim\mathcal N(0,1)\)：
 
 \begin{itemize}
 \tightlist
 \item
-  过程 A：$X_t=Z$ 对所有 $t$，整条路径是随机水平线；
+  过程 A：\(X_t=Z\) 对所有 \(t\)，整条路径是随机水平线；
 \item
-  过程 B：每个整数时刻 $Y_t$ 独立服从 $\mathcal N(0,1)$，路径在时刻间无关联。
+  过程 B：每个整数时刻 \(Y_t\) 独立服从 \(\mathcal N(0,1)\)，路径在时刻间无关联。
 \end{itemize}
 
-对每个固定 $t$（记号 $\overset d=$ 表示等号两边同分布），
+对每个固定 \(t\)（记号 \(\overset d=\) 表示等号两边同分布），
 
 \[
 X_t\overset d=Y_t\sim\mathcal N(0,1),
 \]
-但知道 $X_0$ 就完全知道所有 $X_t$，而知道 $Y_0$ 不透露 $Y_1$。所以不能用一系列边缘分布代替过程的联合结构。
+但知道 \(X_0\) 就完全知道所有 \(X_t\)，而知道 \(Y_0\) 不透露 \(Y_1\)。所以不能用一系列边缘分布代替过程的联合结构。
 
 路径还可能关心：
 
@@ -105,12 +111,11 @@ X_t\overset d=Y_t\sim\mathcal N(0,1),
 描述一个随机过程时，至少明确：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  时间指标 $T$；
+  时间指标 \(T\)；
 \item
-  状态空间 $S$；
+  状态空间 \(S\)；
 \item
   初始分布；
 \item

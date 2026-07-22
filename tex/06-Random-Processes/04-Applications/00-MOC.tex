@@ -1,7 +1,6 @@
 前面的定义只有进入具体问题才真正活起来。本单元选择四个彼此不同的方向：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   随机游走：从局部步进到整体尺度：简单独立步长怎样产生扩散、击中与维度效应。
@@ -14,3 +13,21 @@
 \end{enumerate}
 
 它们不是``应用列表''。每一节都展示一个建模动作：累积局部噪声、利用条件公平性、用平稳分布定义重要性、从间接观测估计隐藏轨迹。
+
+\subsection{怎么读这一章}
+
+若想随手挑一篇读，可以直接从最接近的问题进入：关心噪声累积读随机游走，关心公平性与停止策略读 Martingale，关心网络重要性读 PageRank，关心隐藏状态推断读 HMM。四篇开头的``核心洞见''足以先建立各自的判断框架。
+
+若想看见统一结构，再追踪四个共同问题：状态是否包含足够信息，局部转移怎样累积成长期行为，条件信息怎样改变期望或后验，以及算法输出究竟由哪些模型假设定义。推导可按需要选读，不必把四个应用一次读完。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:06-Random-Processes/04-Applications/01]{``随机游走：从局部步进到整体尺度''}；
+\item \hyperref[sec:06-Random-Processes/04-Applications/02]{``Martingale：公平游戏与停时''}；
+\item \hyperref[sec:06-Random-Processes/04-Applications/03]{``PageRank：把网页排序变成平稳概率''}；
+\item \hyperref[sec:06-Random-Processes/04-Applications/04]{``Hidden Markov Model：从观测反推状态''}。
+\end{itemize}

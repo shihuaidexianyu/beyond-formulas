@@ -1,24 +1,38 @@
-判别模型直接学习输入到输出的关系，生成式模型则先描述类别、潜在状态与观测如何共同产生。后一种路线需要更多假设，却能自然处理缺失标签、软归属、序列状态和不确定性。
+判别模型直接学习输入到输出的关系；生成式模型则描述类别、潜在状态和观测怎样共同产生。后一种路线承担更多假设，却能在标签缺失、归属不确定或状态随时间变化时，把``不知道什么''本身放进模型。
 
-本单元先沿着一条逐步隐藏信息的路径建立具体模型，再回到指数族和共轭先验，提炼这些模型反复使用的代数结构：
+\begin{quote}
+\textbf{先抓住这一点：}概率模型、推断算法和现实解释是三个不同层级。模型规定允许哪些分布，算法计算或近似模型中的未知量，数据与外部证据才决定隐变量能否获得现实含义。
+\end{quote}
+
+本章沿``逐步拿走可见信息''的贯穿主线前进：先让类别标签可见，再隐藏类别，随后让隐状态沿时间相关；最后抽取指数族和共轭性这一反复出现的代数结构。
+
+\subsection{核心主线}
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
-\item
-  生成式分类从 Naive Bayes 到 GDA：标签可见时，先学习各类怎样生成特征，再用 Bayes 公式反推类别。
-\item
-  LDA 与收缩：Fisher 的 Rayleigh 商给出同一判别方向的几何推导；高维下 $\widehat\Sigma^{-1}$ 的谱失真怎样由 Ledoit--Wolf 收缩修复。
-\item
-  Gaussian 混合模型让类别成为隐变量：拿走标签后，每个样本属于哪个成分也需要推断，硬聚类变成 posterior responsibility。
-\item
-  EM 用下界交替完成隐变量学习：隐变量未知使似然中出现难以拆开的对数求和，EM 用当前后验和参数更新交替推进。
-\item
-  HMM 把隐变量排列成时间链：让隐状态不再彼此独立，而沿时间转移；动态规划由此成为推断核心。
-\item
-  指数族把归一化、矩与似然连接起来：log-partition 的梯度给出充分统计量均值，Hessian 给出 covariance，极大似然的一阶条件因此成为 moment matching。
-\item
-  共轭先验让 Bayesian 更新保持同一形式：从指数族 likelihood 收集同类项，统一常见的闭式更新，并划清计算便利与先验合理性之间的边界。
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/01]{``生成式分类：从 Naive Bayes 到 GDA''}：标签可见时，先学习各类怎样生成特征，再反推类别；
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/03]{``Gaussian 混合模型让类别成为隐变量''}：拿走标签后，用后验责任度保留软归属；
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/04]{``EM 用下界交替完成隐变量学习''}：把参数未知与归属未知的循环依赖变成两个可执行步骤；
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/05]{``HMM 把隐变量排列成时间链''}：加入时间依赖，并用动态规划合并共享前缀。
 \end{enumerate}
 
-学习时要始终区分三层：模型假设规定了什么分布，推断算法近似或计算了什么量，数据是否足以识别我们赋予隐变量的现实含义。指数族或共轭性只改善第二层的计算结构，不会自动保证第一层正确或第三层可识别。
+第一次阅读可先完成这四篇。它们共同回答``信息被隐藏后怎样仍然学习''。
+
+\subsection{怎么读这一章}
+
+首次阅读沿``标签可见—标签隐藏—时间相关''推进：生成式分类、GMM、EM、HMM。重点区分模型分布、后验推断与参数学习，并记住隐变量标签通常只在置换意义下可识别。LDA 几何、指数族与共轭先验适合第二遍回读，它们分别解释判别方向、矩匹配和闭式更新为何出现。EM 的单调性、共轭的闭式性和训练似然的提高都只是算法或模型内部性质，不等于全局最优、模型正确或现实解释成立。
+
+\subsection{几何与代数支线}
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/02]{``LDA 与收缩判别方向的几何与高维失效''}从 Rayleigh 商解释判别方向，并处理高维 covariance 估计；
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/06]{``指数族把归一化、矩与似然连接起来''}说明 log-partition 的导数为何产生矩匹配；
+\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/07]{``共轭先验让 Bayesian 更新保持同一形式''}说明闭式更新来自同类项保持，而不来自先验天然正确。
+\end{itemize}
+
+这三篇适合在需要几何解释、统一符号或闭式 Bayesian 更新时回补。
+
+\subsection{贯穿判断}
+
+阅读每个模型时都问三次：假设允许哪些分布？算法实际计算了什么？现有数据凭什么支持我们赋予隐变量的名称？计算方便只能回答第二问，不能替代模型检验和现实证据。

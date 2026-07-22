@@ -1,4 +1,9 @@
 \section{基、坐标与维数：用最少的方向完整描述空间}
+\label{sec:03-Linear-Algebra/02-Vector-Spaces/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}基同时满足``足以生成''和``没有冗余''，因此每个向量有唯一坐标。坐标随基改变，维数却是空间自身的不变量。
+\end{quote}
 
 一组向量可以张成一个空间，却可能包含大量冗余。例如
 
@@ -55,7 +60,6 @@ Ac=0
 向量组 \(B=(v_1,\ldots,v_k)\) 是子空间 \(V\) 的一组基，当且仅当：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   它们张成 \(V\)；
@@ -243,10 +247,4 @@ c_1v_1+c_2v_2=w.
 
 这些结论直接来自``空间只有 \(n\) 个自由方向''；计数只是把这一结构写成数字。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06：Independence, Basis and Dimension
-\end{itemize}
+延伸阅读：MIT 18.06：Independence, Basis and Dimension。

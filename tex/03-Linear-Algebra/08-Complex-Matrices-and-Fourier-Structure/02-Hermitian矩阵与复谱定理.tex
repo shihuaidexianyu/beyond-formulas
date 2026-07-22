@@ -1,4 +1,9 @@
 \section{Hermitian 矩阵与复谱定理}
+\label{sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}Hermitian 矩阵的重要性不在于``元素看起来对称''，而在于它相对复内积等于自己的伴随。这一结构同时保证实特征值、正交特征基与实二次型。
+\end{quote}
 
 \subsection{``对称''在复数中应该怎样写}
 
@@ -8,7 +13,7 @@
 H=H^*,
 \]
 
-这样的矩阵称为 Hermitian（厄米）矩阵。逐项看，它要求 \(h_{ij}=\overline{h_{ji}}\)，所以对角元素必须为实数。普通的复对称条件 \(H=H^\top\) 没有包含共轭，不能替代 Hermitian 条件。
+这样的矩阵称为 Hermitian（厄米）矩阵。逐项看，它要求 \(h_{ij}=\overline{h_{ji}}\)，所以对角元素必须为实数。普通的复对称条件 \(H=H^{\trans}\) 没有包含共轭，不能替代 Hermitian 条件。
 
 Hermitian 条件首先保证二次型是实数：
 
@@ -66,7 +71,7 @@ u_1=\frac1{\sqrt2}\begin{bmatrix}-i\\1\end{bmatrix},
 u_2=\frac1{\sqrt2}\begin{bmatrix}i\\1\end{bmatrix}.
 \]
 
-它们满足 \(u_1^*u_2=0\)。把它们作为 \(U\) 的列，便有 \(H=U\operatorname{diag}(1,3)U^*\)。对任意 \(x=Uy\)，
+它们满足 \(u_1^*u_2=0\)。把它们作为 \(U\) 的列，便有 \(H=U\diag(1,3)U^*\)。对任意 \(x=Uy\)，
 
 \[
 x^*Hx=|y_1|^2+3|y_2|^2>0\quad(x\ne0),
@@ -104,13 +109,13 @@ A\text{ 正规}.
   任意对角矩阵正规，哪怕对角元素既非实数也非单位模。
 \end{itemize}
 
-正规性不等于 Hermitian 性。例如 \(\operatorname{diag}(i,2)\) 是正规矩阵，可以酉对角化，却既有虚特征值，也不使 \(x^*Ax\) 总为实数。
+正规性不等于 Hermitian 性。例如 \(\diag(i,2)\) 是正规矩阵，可以酉对角化，却既有虚特征值，也不使 \(x^*Ax\) 总为实数。
 
 任意复方阵即便不正规，仍可作 Schur 分解 \(A=QTQ^*\)，其中 \(Q\) 酉而 \(T\) 上三角。区别在于，只有正规矩阵的 \(T\) 能进一步成为对角矩阵。这个边界解释了为什么``特征多项式在复数中分裂''仍不等于``存在正交特征基''。
 
 \subsection{为什么这会通向 Fourier}
 
-平移、循环移位和循环卷积对应的矩阵具有强烈结构。它们彼此可交换，并且典型地是正规矩阵，因此值得寻找一组共同的酉特征基。这个基就是离散复指数，也就是 Fourier 基。
+在周期索引下，循环移位的各个幂和由它们线性组合而成的循环卷积矩阵彼此可交换，并且是正规矩阵。因此可以寻找一组共同的酉特征基。这个基就是离散复指数，也就是 Fourier 基。
 
 换句话说，Fourier 变换不是凭经验发明的一串正弦和余弦公式。它来自一个线性代数问题：\textbf{什么坐标能把``平移不变''的算子对角化？} 下一节将从循环移位矩阵直接回答它。
 
@@ -121,5 +126,5 @@ A\text{ 正规}.
 \item
   MIT 18.06SC：Complex Matrices; Fast Fourier Transform
 \item
-  对称矩阵与谱定理给出实数情形的对应主线。
+  \hyperref[ch:022]{``对称矩阵、二次型与正定性''}给出实数情形的对应主线。
 \end{itemize}

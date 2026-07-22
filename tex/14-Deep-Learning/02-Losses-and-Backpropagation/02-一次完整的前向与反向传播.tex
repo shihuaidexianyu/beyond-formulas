@@ -1,6 +1,11 @@
 \section{一次完整的前向与反向传播}
+\label{sec:14-Deep-Learning/02-Losses-and-Backpropagation/02}
 
 反向传播不是参数更新算法。它只做一件事：给定一个标量损失，利用计算图中的局部导数，高效算出损失对所有参数的梯度。梯度下降、Adam 或其他优化器随后才决定怎样使用这些梯度。
+
+\begin{quote}
+\textbf{先抓住这一点：}反向传播不构造完整 Jacobian。它从标量损失出发，沿计算图反向传播当前目标真正需要的向量--Jacobian 乘积。
+\end{quote}
 
 \subsection{先用一个标量网络看清链式法则}
 
@@ -8,7 +13,7 @@
 
 \[
 z=w_1x+b_1,\qquad
-h=\operatorname{ReLU}(z),\qquad
+h=\relu(z),\qquad
 o=w_2h+b_2,
 \]
 
@@ -61,12 +66,12 @@ z=1,\quad h=1,\quad o=-1,\quad L=2.
 采用``样本按行''的约定。设 batch 大小为 \(B\)，各层宽度为 \(d_0,d_1,d_2\)，则 \(X\in\R^{B\times d_0}\)，\(W_1\in\R^{d_0\times d_1}\)，\(W_2\in\R^{d_1\times d_2}\)，\(Z_1,H\in\R^{B\times d_1}\)，\(Z_2\in\R^{B\times d_2}\)。前向计算为
 
 \[
-Z_1=XW_1+\mathbf1b_1^\top,
+Z_1=XW_1+\mathbf1b_1^{\trans},
 \qquad H=\phi(Z_1),
 \]
 
 \[
-Z_2=HW_2+\mathbf1b_2^\top,
+Z_2=HW_2+\mathbf1b_2^{\trans},
 \qquad
 L=\frac1B\sum_{i=1}^B\ell(Z_{2i},y_i).
 \]
@@ -77,27 +82,27 @@ L=\frac1B\sum_{i=1}^B\ell(Z_{2i},y_i).
 G_2=\frac{\partial L}{\partial Z_2},
 \]
 
-逐样本看，\(Z_2\) 的第 \(i\) 行只参与第 \(i\) 个样本的损失，该样本对 \(\nabla_{W_2}L\) 的贡献是外积 \(h_ig_{2i}^{\top}\)（\(h_i^{\top}\)、\(g_{2i}^{\top}\) 分别为 \(H\) 与 \(G_2\) 的第 \(i\) 行）。对 \(i\) 求和恰是矩阵乘积，于是第二层梯度为
+逐样本看，\(Z_2\) 的第 \(i\) 行只参与第 \(i\) 个样本的损失，该样本对 \(\nabla_{W_2}L\) 的贡献是外积 \(h_ig_{2i}^{\trans}\)（\(h_i^{\trans}\)、\(g_{2i}^{\trans}\) 分别为 \(H\) 与 \(G_2\) 的第 \(i\) 行）。对 \(i\) 求和恰是矩阵乘积，于是第二层梯度为
 
 \[
-\nabla_{W_2}L=H^\top G_2,
+\nabla_{W_2}L=H^{\trans} G_2,
 \qquad
-\nabla_{b_2}L=G_2^\top\mathbf1.
+\nabla_{b_2}L=G_2^{\trans}\mathbf1.
 \]
 
 传回隐藏层（\(\odot\) 表示逐元素乘积）：
 
 \[
 G_1
-=(G_2W_2^\top)\odot\phi'(Z_1),
+=(G_2W_2^{\trans})\odot\phi'(Z_1),
 \]
 
 于是
 
 \[
-\nabla_{W_1}L=X^\top G_1,
+\nabla_{W_1}L=X^{\trans} G_1,
 \qquad
-\nabla_{b_1}L=G_1^\top\mathbf1.
+\nabla_{b_1}L=G_1^{\trans}\mathbf1.
 \]
 
 每个参数梯度 shape 必须与参数相同。bias 在前向被广播到 batch 中每一行，反向就要沿 batch 轴求和。若损失取 batch mean，\(1/B\) 应已经出现在 \(G_2\) 中；漏掉或重复这个因子会让学习率随 batch size 意外改变。
@@ -120,7 +125,7 @@ L(\theta+\varepsilon v)
 -L(\theta-\varepsilon v)
 }{2\varepsilon}
 \approx
-\nabla L(\theta)^\top v
+\nabla L(\theta)^{\trans} v
 \]
 
 其中 Hessian 项在中心差分中相消，截断误差为 \(O(\varepsilon^2)\)。取若干随机方向即可核对整组梯度。使用 double precision、小网络和不过大也不过小的 \(\varepsilon\)；避开 ReLU 恰好在零点的不可微位置。检查相对误差，并单独测试 batch size 1、bias broadcast、mask 和共享参数。
@@ -129,6 +134,8 @@ L(\theta+\varepsilon v)
 
 \subsubsection{手算后再交给框架}
 
-把标量例子改为两个隐藏单元，并让两个单元的输出都进入同一个最终节点。先手算每条路径对 \(x\) 的贡献并相加，再用自动微分核对。随后实现上面的 batch 网络，对一个随机方向做有限差分，而不是逐元素检查所有参数。解释为什么 directional check 能有效发现 transpose 与 reduction 错误。
+把标量例子改为两个隐藏单元，让两个单元的输出都进入同一个最终节点，就得到一个多路径计算图。手算每条路径对 \(x\) 的贡献并相加，所得总导数与自动微分的结果一致——多路径贡献必须累加，这正是框架在计算图上做的事。
 
-矩阵微积分与计算图的通用形式见``计算图上的反向传播与自动微分''。
+接着实现上面的 batch 网络，核对梯度不必逐元素检查所有参数：对一个随机方向做一次中心有限差分即可。directional check 之所以有效，是因为 transpose 与 reduction 类错误几乎总会破坏梯度与任意方向的内积关系；换一个随机方向再查一次，漏检的可能进一步降低。
+
+矩阵微积分与计算图的通用形式见\hyperref[sec:10-Matrix-Calculus/04-Applications/03]{``计算图上的反向传播与自动微分''}。

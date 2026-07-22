@@ -1,9 +1,8 @@
-概率并不是一成不变的属性。它总是相对于当前信息而言：一张未知扑克牌是 A 的概率为 $4/52$，得知它是黑桃后变成 $1/13$，看到牌面后则变成 $0$ 或 $1$。
+概率并不是一成不变的属性。它总是相对于当前信息而言：一张未知扑克牌是 A 的概率为 \(4/52\)，得知它是黑桃后变成 \(1/13\)，看到牌面后则变成 \(0\) 或 \(1\)。
 
-这一单元围绕``观察到 $B$ 以后，怎样重新评价 $A$''展开：
+这一单元围绕``观察到 \(B\) 以后，怎样重新评价 \(A\)''展开：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   条件概率与乘法法则：把样本空间限制到已知事件，并把顺序实验拆成条件概率的乘积。
@@ -16,3 +15,33 @@
 \end{enumerate}
 
 这里最重要的习惯是：每当概率改变，都明确说出``相对于什么信息''。四个公式都要在这个习惯中理解。
+
+\subsection{怎么读这一章}
+
+可以按当前困惑选择入口：
+
+\begin{itemize}
+\tightlist
+\item
+  若不知道条件化究竟改变了什么，读\hyperref[sec:05-Probability/02-Conditional-Probability/01]{``条件概率与乘法法则''}；把它理解为限制到已知事件后重新规范化，链式法则本身不要求独立。
+\item
+  若已知``原因怎样产生结果''却想反推原因，读\hyperref[sec:05-Probability/02-Conditional-Probability/02]{``全概率公式与 Bayes 更新''}；全概率公式计算证据的所有来路，Bayes 再按先验与似然重新分配权重。
+\item
+  若准备把联合概率写成乘积，先读\hyperref[sec:05-Probability/02-Conditional-Probability/03]{``独立性：从两事件到多个事件''}；区分互斥、两两独立、相互独立与不相关。
+\item
+  若加入第三个变量后依赖关系改变，读\hyperref[sec:05-Probability/02-Conditional-Probability/04]{``条件独立与信息结构''}；共同原因被给定时可能阻断依赖，共同结果被给定时则可能制造依赖。
+\end{itemize}
+
+第一次阅读可以在每次写出乘积时都能说明其来源后停下：这是条件概率定义的链式分解，还是模型额外假定的独立性？Bayes 更新改变的是信息状态，不会仅凭公式把统计关系变成因果关系。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:05-Probability/02-Conditional-Probability/01]{``条件概率与乘法法则''}；
+\item \hyperref[sec:05-Probability/02-Conditional-Probability/02]{``全概率公式与 Bayes 更新''}；
+\item \hyperref[sec:05-Probability/02-Conditional-Probability/03]{``独立性：从两事件到多个事件''}；
+\item \hyperref[sec:05-Probability/02-Conditional-Probability/04]{``条件独立与信息结构''}。
+\end{itemize}

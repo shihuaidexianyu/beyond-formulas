@@ -1,4 +1,9 @@
 \section{不变方向与特征值：寻找矩阵最自然的坐标轴}
+\label{sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/01}
+
+\begin{quote}
+\textbf{先抓住这一点：}特征向量寻找变换不会转向的方向，特征值记录该方向上的缩放。它们适合研究同一算子的重复作用，而不是任意矩阵问题的万能坐标。
+\end{quote}
 
 一般向量经过矩阵 \(A\) 后，长度和方向都会改变。连续作用 \(A\) 时，坐标分量不断混合，直接计算 \(A^2,A^3,\ldots\) 很快失去结构。
 
@@ -57,7 +62,7 @@ A\begin{pmatrix}1\\-1\end{pmatrix}
 =\begin{pmatrix}1\\-1\end{pmatrix}.
 \]
 
-沿 \((1,1)^{\mathsf T}\) 的方向放大 \(3\) 倍，沿 \((1,-1)^{\mathsf T}\) 的方向保持不变。普通标准坐标中两个分量彼此耦合；沿这两条斜轴看，变换只做独立缩放。
+沿 \((1,1)^{\trans}\) 的方向放大 \(3\) 倍，沿 \((1,-1)^{\trans}\) 的方向保持不变。普通标准坐标中两个分量彼此耦合；沿这两条斜轴看，变换只做独立缩放。
 
 从特征多项式也能得到同样结果：
 
@@ -154,7 +159,7 @@ c_1(\lambda_1-\lambda_2)v_1=0.
 若在复数范围把特征值按代数重数计为 \(\lambda_1,\ldots,\lambda_n\)，则
 
 \[
-\operatorname{tr}(A)=\lambda_1+\cdots+\lambda_n,
+\trace(A)=\lambda_1+\cdots+\lambda_n,
 \]
 
 \[
@@ -181,7 +186,7 @@ c_1(\lambda_1-\lambda_2)v_1=0.
 R=\begin{pmatrix}0&-1\\1&0\end{pmatrix}
 \]
 
-把每个非零实向量转到垂直方向，因此在 \(\mathbb R^2\) 中没有特征向量。其特征方程为
+把每个非零实向量转到垂直方向，因此在 \(\R^2\) 中没有特征向量。其特征方程为
 
 \[
 \lambda^2+1=0,
@@ -191,10 +196,4 @@ R=\begin{pmatrix}0&-1\\1&0\end{pmatrix}
 
 这个结果反映实数空间中确实不存在保持方向的直线，不能归咎于计算故障。扩展到复数空间后，特征方向才出现。后面的复矩阵单元会解释共轭转置和酉基如何处理这种情况。
 
-\subsection{延伸阅读}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06：Eigenvalues and Eigenvectors
-\end{itemize}
+延伸阅读：MIT 18.06：Eigenvalues and Eigenvectors。

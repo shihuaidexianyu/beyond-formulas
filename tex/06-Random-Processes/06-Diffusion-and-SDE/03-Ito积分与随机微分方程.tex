@@ -1,6 +1,11 @@
 \section{Itô 积分与随机微分方程}
+\label{sec:06-Random-Processes/06-Diffusion-and-SDE/03}
 
-前两节已经使用 $dX_t=\mu\,dt+\sigma\,dW_t$ 的写法，而``从随机游走到布朗运动''一节已经警告：布朗路径处处不可微、总变差无界，$dW$ 不是普通意义的微分。本节还债：先定义 $\int\sigma\,dW$ 是什么，随机微分方程（SDE）才有严格含义。策略依然分层：给出构造思想与关键结论，完整构造依赖测度论，本书声明其存在并指明条件。
+\begin{quote}
+\textbf{先抓住这一点：}Itô 积分用``先确定权重、后发生噪声''的左端点规则保住 martingale 结构。代价是 \((dW)^2=dt\) 不能忽略，函数曲率会通过 Itô 修正进入漂移。
+\end{quote}
+
+前两节已经使用 \(dX_t=\mu\,dt+\sigma\,dW_t\) 的写法，而\hyperref[sec:06-Random-Processes/06-Diffusion-and-SDE/01]{``从随机游走到布朗运动''}一节已经警告：布朗路径处处不可微、总变差无界，\(dW\) 不是普通意义的微分。本节还债：先定义 \(\int\sigma\,dW\) 是什么，随机微分方程（SDE）才有严格含义。策略依然分层：给出构造思想与关键结论，完整构造依赖测度论，本书声明其存在并指明条件。
 
 \subsection{Riemann--Stieltjes 为什么失效}
 
@@ -10,9 +15,9 @@
 \int_0^T f\,dg=\lim\sum_k f(\xi_k)\big(g(t_{k+1})-g(t_k)\big),
 \]
 
-它对连续 $f$ 与有界变差 $g$ 存在，且与取样点 $\xi_k$ 的位置无关。布朗路径以概率一不是有界变差——``从随机游走到布朗运动''一节由 $\sqrt{\Delta t}$ 尺度直接看到——所以 $\int\cdot\,dW$ 无法逐路径定义。
+它对连续 \(f\) 与有界变差 \(g\) 存在，且与取样点 \(\xi_k\) 的位置无关。布朗路径以概率一不是有界变差——\hyperref[sec:06-Random-Processes/06-Diffusion-and-SDE/01]{``从随机游走到布朗运动''}一节由 \(\sqrt{\Delta t}\) 尺度直接看到——所以 \(\int\cdot\,dW\) 无法逐路径定义。
 
-症结与出路是同一个事实：位移量级 $\sqrt{\Delta t}$ 让增量绝对值之和发散，却让增量平方之和收敛到区间长度，$[W]_t=t$。要利用的正是平方的可控性。
+症结与出路是同一个事实：位移量级 \(\sqrt{\Delta t}\) 让增量绝对值之和发散，却让增量平方之和收敛到区间长度，\([W]_t=t\)。要利用的正是平方的可控性。
 
 \subsection{Itô 积分的构造思想}
 
@@ -30,7 +35,7 @@ H_t=\sum_k H_k\,\ind_{[t_k,t_{k+1})}(t)
 \int_0^T H\,dW=\sum_k H_k\big(W_{t_{k+1}}-W_{t_k}\big).
 \]
 
-权重 $H_k$ 在区间左端点取值，并要求它只依赖 $t_k$ 之前的信息（称为非预见或适应）：先下权重，后开噪声，不能偷看未来。
+权重 \(H_k\) 在区间左端点取值，并要求它只依赖 \(t_k\) 之前的信息（称为非预见或适应）：先下权重，后开噪声，不能偷看未来。
 
 第二步，关键估计是 Itô 等距：
 
@@ -39,15 +44,15 @@ H_t=\sum_k H_k\,\ind_{[t_k,t_{k+1})}(t)
 =\E\left[\int_0^T H_t^2\,dt\right].
 \]
 
-来源是左端点取值带来的独立性：$H_k$ 与它乘的增量独立，故
+来源是左端点取值带来的独立性：\(H_k\) 与它乘的增量独立，故
 
 \[
 \E\big[H_k^2(\Delta W_k)^2\big]=\E[H_k^2]\,\Delta t_k,
 \]
 
-交叉项的条件均值为零。平方位移收敛到 $\Delta t_k$（二次变差）正是等式右端出现 $dt$ 的原因。
+交叉项的条件均值为零。平方位移收敛到 \(\Delta t_k\)（二次变差）正是等式右端出现 \(dt\) 的原因。
 
-第三步，Itô 等距说明映射 $H\mapsto\int H\,dW$ 保持 $L^2$ 距离，于是一切能被阶梯过程逼近（在 $L^2$ 意义下）的适应过程，其积分定义为阶梯积分的极限。这就是 Itô 积分。这个极限取在均方意义下，无须要求每条路径都收敛——这正是它能驯服无界变差路径的原因。
+第三步，Itô 等距说明映射 \(H\mapsto\int H\,dW\) 保持 \(L^2\) 距离，于是一切能被阶梯过程逼近（在 \(L^2\) 意义下）的适应过程，其积分定义为阶梯积分的极限。这就是 Itô 积分。这个极限取在均方意义下，无须要求每条路径都收敛——这正是它能驯服无界变差路径的原因。
 
 在适当可积条件下，Itô 积分关于上限是 martingale，且
 
@@ -55,32 +60,32 @@ H_t=\sum_k H_k\,\ind_{[t_k,t_{k+1})}(t)
 \E\left[\int_0^T H\,dW\right]=0.
 \]
 
-公平性同样来自左端点：权重确定时，它乘的增量尚未发生。这与``Martingale：公平游戏与停时''中``没有可预测漂移''的结构一脉相承。
+公平性同样来自左端点：权重确定时，它乘的增量尚未发生。这与\hyperref[sec:06-Random-Processes/04-Applications/02]{``Martingale：公平游戏与停时''}中``没有可预测漂移''的结构一脉相承。
 
 \subsection{代价：链式法则多出一项}
 
-普通积分中取样点 $\xi_k$ 无关紧要；这里不行。左端点、右端点、中点给出不同的极限，因为权重与区间内的位移相关，相关量级是 $\sqrt{\Delta t}\cdot\sqrt{\Delta t}=\Delta t$，分割再细也不消失。Itô 选定左端点，代价是普通链式法则要改变。
+普通积分中取样点 \(\xi_k\) 无关紧要；这里不行。左端点、右端点、中点给出不同的极限，因为权重与区间内的位移相关，相关量级是 \(\sqrt{\Delta t}\cdot\sqrt{\Delta t}=\Delta t\)，分割再细也不消失。Itô 选定左端点，代价是普通链式法则要改变。
 
-对 $f(X_t)$ 做 Taylor 展开：
+对 \(f(X_t)\) 做 Taylor 展开：
 
 \[
 df=f'(X)\,dX+\frac12f''(X)\,(dX)^2+\cdots.
 \]
 
-普通微积分中二阶项可以丢；这里 $dX$ 含有 $\sqrt{dt}$ 量级的 $\sigma\,dW$，其平方是 $dt$ 量级，不能丢。记住乘法规则
+普通微积分中二阶项可以丢；这里 \(dX\) 含有 \(\sqrt{dt}\) 量级的 \(\sigma\,dW\)，其平方是 \(dt\) 量级，不能丢。记住乘法规则
 
 \[
 (dt)^2=0,\qquad dt\,dW=0,\qquad (dW)^2=dt,
 \]
 
-最后一条正是二次变差 $[W]_t=t$ 的微分写法。代入得 Itô 公式：若 $dX_t=\mu\,dt+\sigma\,dW_t$，则
+最后一条正是二次变差 \([W]_t=t\) 的微分写法。代入得 Itô 公式：若 \(dX_t=\mu\,dt+\sigma\,dW_t\)，则
 
 \[
 \boxed{\;df(X_t)=\left(f'(X_t)\,\mu+\frac12f''(X_t)\,\sigma^2\right)dt
 +f'(X_t)\,\sigma\,dW_t\;}
 \]
 
-修正项 $\frac12f''\sigma^2$ 是``$\sqrt{\Delta t}$ 世界''的入场费：只要函数有曲率，噪声的二阶效应就进入一阶规律。普通微积分读者第一次见 Itô 公式时，最容易犯的错就是把 $(dW)^2$ 当成 $(dt)^2$ 丢掉；本节的乘法规则 $(dW)^2=dt$ 正是为了阻止这一步。
+修正项 \(\frac12f''\sigma^2\) 是``\(\sqrt{\Delta t}\) 世界''的入场费：只要函数有曲率，噪声的二阶效应就进入一阶规律。普通微积分读者第一次见 Itô 公式时，最容易犯的错就是把 \((dW)^2\) 当成 \((dt)^2\) 丢掉；本节的乘法规则 \((dW)^2=dt\) 正是为了阻止这一步。
 
 \subsection{例一：几何布朗运动}
 
@@ -90,7 +95,7 @@ df=f'(X)\,dX+\frac12f''(X)\,(dX)^2+\cdots.
 dS_t=\mu S_t\,dt+\sigma S_t\,dW_t.
 \]
 
-取 $f=\log$，则 $f'(S)=1/S$、$f''(S)=-1/S^2$，由 Itô 公式
+取 \(f=\log\)，则 \(f'(S)=1/S\)、\(f''(S)=-1/S^2\)，由 Itô 公式
 
 \[
 d\log S_t=\left(\mu-\frac{\sigma^2}{2}\right)dt+\sigma\,dW_t,
@@ -102,7 +107,11 @@ d\log S_t=\left(\mu-\frac{\sigma^2}{2}\right)dt+\sigma\,dW_t,
 S_t=S_0\exp\!\left(\left(\mu-\frac{\sigma^2}{2}\right)t+\sigma W_t\right).
 \]
 
-普通链式法则会猜指数里是 $\mu t+\sigma W_t$，少了 $-\sigma^2t/2$。这个修正有实在的金融含义：由 Gaussian 矩母函数 $\E[e^{\sigma W_t}]=e^{\sigma^2t/2}$ 得 $\E[S_t]=S_0e^{\mu t}$，期望增长率确实是 $\mu$；但每条路径的对数增长率是 $\mu-\sigma^2/2$，典型路径的复合增长被波动侵蚀（volatility drag）。期望被少数暴涨路径拉高，多数路径跑得比期望慢——Jensen 不等式在指数函数上的体现，正是 Itô 修正项的金融面孔。
+普通链式法则会猜指数里是 \(\mu t+\sigma W_t\)，少了 \(-\sigma^2t/2\)。
+
+这个修正有实在的金融含义：由 Gaussian 矩母函数 \(\E[e^{\sigma W_t}]=e^{\sigma^2t/2}\) 得 \(\E[S_t]=S_0e^{\mu t}\)，期望增长率确实是 \(\mu\)；但每条路径的对数增长率是 \(\mu-\sigma^2/2\)，典型路径的复合增长被波动侵蚀（volatility drag）。
+
+期望被少数暴涨路径拉高，多数路径跑得比期望慢——Jensen 不等式在指数函数上的体现，正是 Itô 修正项的金融面孔。
 
 \subsection{例二：Ornstein--Uhlenbeck 过程}
 
@@ -113,7 +122,7 @@ dX_t=-\theta X_t\,dt+\sigma\,dW_t,
 \qquad \theta>0,
 \]
 
-现在用路径方法解它。Itô 公式推广到显含时间的函数 $f(x,t)$ 时，多出一项 $\partial f/\partial t$：
+现在用路径方法解它。Itô 公式推广到显含时间的函数 \(f(x,t)\) 时，多出一项 \(\partial f/\partial t\)：
 
 \[
 df=\left(\frac{\partial f}{\partial t}
@@ -122,7 +131,7 @@ df=\left(\frac{\partial f}{\partial t}
 +\sigma\frac{\partial f}{\partial x}\,dW.
 \]
 
-取 $f(x,t)=e^{\theta t}x$（相当于乘以积分因子 $e^{\theta t}$），它对 $x$ 的二阶导为零，修正项消失，得
+取 \(f(x,t)=e^{\theta t}x\)（相当于乘以积分因子 \(e^{\theta t}\)），它对 \(x\) 的二阶导为零，修正项消失，得
 
 \[
 d\big(e^{\theta t}X_t\big)=\sigma e^{\theta t}\,dW_t,
@@ -134,7 +143,7 @@ d\big(e^{\theta t}X_t\big)=\sigma e^{\theta t}\,dW_t,
 X_t=X_0e^{-\theta t}+\sigma\int_0^t e^{-\theta(t-s)}\,dW_s.
 \]
 
-确定性被积函数的 Itô 积分是 Gaussian 随机变量，故 $X_t$ 是 Gaussian：均值为 $X_0e^{-\theta t}$，方差由 Itô 等距给出，
+确定性被积函数的 Itô 积分是 Gaussian 随机变量，故 \(X_t\) 是 Gaussian：均值为 \(X_0e^{-\theta t}\)，方差由 Itô 等距给出，
 
 \[
 \sigma^2\int_0^t e^{-2\theta(t-s)}\,ds
@@ -142,11 +151,11 @@ X_t=X_0e^{-\theta t}+\sigma\int_0^t e^{-\theta(t-s)}\,dW_s.
 \;\longrightarrow\;\frac{\sigma^2}{2\theta}.
 \]
 
-极限分布 $\mathcal N(0,\sigma^2/(2\theta))$ 与上一节用 Fokker--Planck 方程求出的平稳密度一致：路径视角与密度视角再次对上。初值的影响按 $e^{-\theta t}$ 指数遗忘，这是``均值回复''在路径层面的样子。
+极限分布 \(\mathcal N(0,\sigma^2/(2\theta))\) 与上一节用 Fokker--Planck 方程求出的平稳密度一致：路径视角与密度视角再次对上。初值的影响按 \(e^{-\theta t}\) 指数遗忘，这是``均值回复''在路径层面的样子。
 
 \subsection{SDE 是积分方程的缩写}
 
-记号 $dX=\mu\,dt+\sigma\,dW$ 的严格含义是积分方程
+记号 \(dX=\mu\,dt+\sigma\,dW\) 的严格含义是积分方程
 
 \[
 X_t=X_0+\int_0^t\mu(X_s)\,ds+\int_0^t\sigma(X_s)\,dW_s,
@@ -154,13 +163,13 @@ X_t=X_0+\int_0^t\mu(X_s)\,ds+\int_0^t\sigma(X_s)\,dW_s,
 
 第一项是普通积分，第二项是 Itô 积分。``微分形式''只是缩写；检验一个解，永远是代回积分形式。
 
-解的存在唯一性有常用充分条件：若 $\mu,\sigma$ 关于 $x$ 满足 Lipschitz 条件，并满足线性增长
+解的存在唯一性有常用充分条件：若 \(\mu,\sigma\) 关于 \(x\) 满足 Lipschitz 条件，并满足线性增长
 
 \[
 \abs{\mu(x)}+\abs{\sigma(x)}\le C(1+\abs{x}),
 \]
 
-则强解存在且唯一（声明，不证）。线性增长排除爆炸：确定性方程 $dx=x^2\,dt$ 已在有限时间跑到无穷，加噪声救不回来。状态依赖的 $\sigma$ 触及零、带跳跃项、有反射边界等情形都需要额外理论，本书不展开。
+则强解存在且唯一（声明，不证）。线性增长是排除爆炸的方便充分条件；确定性方程 \(dx=x^2\,dt\) 已展示超线性漂移可能导致有限时间爆炸。噪声有时会加剧、有时也可能抑制爆炸，不能脱离具体 \(\mu,\sigma\) 一概而论。状态依赖的 \(\sigma\) 触及零、带跳跃项、有反射边界等情形都需要额外理论，本书不展开。
 
 \subsection{Stratonovich 解释}
 
@@ -170,6 +179,6 @@ X_t=X_0+\int_0^t\mu(X_s)\,ds+\int_0^t\sigma(X_s)\,dW_s,
 \sigma\circ dW=\sigma\,dW+\frac12\,\sigma\frac{\partial\sigma}{\partial x}\,dt,
 \]
 
-其中 $\circ$ 标记 Stratonovich。物理文献常把噪声理解为光滑噪声的极限，自然对应 Stratonovich；金融与本笔记采用 Itô，因为``先下注后开奖''的左端点结构保持 martingale 性质。两套体系之间有换算公式，单独使用都合法，混用才会出错。本单元此后只用 Itô。
+其中 \(\circ\) 标记 Stratonovich。物理文献常把噪声理解为光滑噪声的极限，自然对应 Stratonovich；金融与本笔记采用 Itô，因为``先下注后开奖''的左端点结构保持 martingale 性质。两套体系之间有换算公式，单独使用都合法，混用才会出错。本单元此后只用 Itô。
 
 解析可解的 SDE 屈指可数。下一节转向数值模拟，并沿``时间反演''这一反直觉的方向，瞥见扩散生成模型。

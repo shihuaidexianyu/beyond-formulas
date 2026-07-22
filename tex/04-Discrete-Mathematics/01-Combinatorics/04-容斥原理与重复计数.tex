@@ -1,4 +1,9 @@
 \section{容斥原理与重复计数}
+\label{sec:04-Discrete-Mathematics/01-Combinatorics/04}
+
+\begin{quote}
+\textbf{先抓住这一点：}容斥不是需要背诵的交替符号，而是一套逐层修正权重的方法：先承认交集对象被多算，再让每个属于并集的对象最终恰好留下权重一。
+\end{quote}
 
 \subsection{直接相加为何会多算交集}
 
@@ -64,7 +69,7 @@ D_n
 集合很多时完整公式可能昂贵。只取前若干层会得到 Bonferroni 上下界：加单集给并集上界，加到两两交集给下界，继续交替。概率论中的 union bound 正是只保留第一层：
 
 \[
-\Prob\left(\bigcup_i A_i\right)\le\sum_i\Prob(A_i).
+P\left(\bigcup_i A_i\right)\le\sum_iP(A_i).
 \]
 
 简单上界虽然不精确，却常足以控制坏事件。

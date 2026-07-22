@@ -1,6 +1,11 @@
-\section{从 Gaussian 到卡方与 Student $t$}
+\section{从 Gaussian 到卡方与 Student \(t\)}
+\label{sec:05-Probability/06-Common-Distributions/06}
 
-若总体均值和方差都已知，Gaussian 计算很直接。但统计推断中恰恰常常不知道它们。我们用样本估计均值，同时还要用同一批样本估计噪声尺度。标准化时的分母因此变成随机样本标准差，无法继续当作固定的 $\sigma$；普通 Gaussian 不再准确，Student $t$ 分布自然出现。
+\begin{quote}
+\textbf{先抓住这一点：}标准化均值时若噪声尺度也由同一 Gaussian 样本估计，随机分母把正态枢轴变成 Student \(t\)。自由度记录估计尺度后剩余的独立信息。
+\end{quote}
+
+若总体均值和方差都已知，Gaussian 计算很直接。但统计推断中恰恰常常不知道它们。我们用样本估计均值，同时还要用同一批样本估计噪声尺度。标准化时的分母因此变成随机样本标准差，无法继续当作固定的 \(\sigma\)；普通 Gaussian 不再准确，Student \(t\) 分布自然出现。
 
 理解这条来源链，比记住两条新密度公式更重要。
 
@@ -17,7 +22,7 @@ Z_1,\ldots,Z_\nu
 \[
 Q=\sum_{i=1}^{\nu}Z_i^2
 \]
-服从自由度为 $\nu$ 的卡方分布：
+服从自由度为 \(\nu\) 的卡方分布：
 
 \[
 Q\sim\chi^2_\nu.
@@ -31,12 +36,12 @@ Q\sim\chi^2_\nu.
 所以
 
 \[
-\E[Q{]}=\nu,\qquad
-\operatorname{Var}(Q)=2\nu.
+\E[Q]=\nu,\qquad
+\Var(Q)=2\nu.
 \]
 自由度可以理解为平方和中独立标准 Gaussian 方向的数量。若线性约束消耗了一个方向，可用自由度也会少一个。
 
-\subsection{为什么样本方差有 $n-1$ 个自由度}
+\subsection{为什么样本方差有 \(n-1\) 个自由度}
 
 设
 
@@ -56,7 +61,7 @@ S^2=\frac1{n-1}\sum_i(X_i-\bar X)^2.
 \[
 \sum_i(X_i-\bar X)=0,
 \]
-所以 $n$ 个残差实际只张成 $n-1$ 个方向——这是自由度的直觉解释。严格结论是可以证明的（例如用正交投影或 Cochran 定理，证明超出本单元范围）：
+所以 \(n\) 个残差实际只张成 \(n-1\) 个方向——这是自由度的直觉解释。严格结论是可以证明的（例如用正交投影或 Cochran 定理，证明超出本单元范围）：
 
 \[
 \frac{(n-1)S^2}{\sigma^2}
@@ -69,14 +74,14 @@ S^2=\frac1{n-1}\sum_i(X_i-\bar X)^2.
 \]
 这使关于均值和方差的精确有限样本推断成为可能。
 
-\subsection{未知方差时的标准化：Student $t$}
+\subsection{未知方差时的标准化：Student \(t\)}
 
-若 $Z\sim\mathcal N(0,1)$，$V\sim\chi^2_\nu$，且二者独立，则
+若 \(Z\sim\mathcal N(0,1)\)，\(V\sim\chi^2_\nu\)，且二者独立，则
 
 \[
 T=\frac{Z}{\sqrt{V/\nu}}
 \]
-服从自由度 $\nu$ 的 Student-$t$ 分布。
+服从自由度 \(\nu\) 的 Student-\(t\) 分布。
 
 对 Gaussian 样本，
 
@@ -85,24 +90,24 @@ T
 =\frac{\bar X-\mu}{S/\sqrt n}
 \sim t_{n-1}.
 \]
-与标准 Gaussian 相比，$t$ 分布中心仍在零且对称，但尾部更厚。原因是分母 $S$ 本身随机：偶尔低估真实尺度会产生较大的标准化值，因此极端值比固定分母时更常见。
+与标准 Gaussian 相比，\(t\) 分布中心仍在零且对称，但尾部更厚。原因是分母 \(S\) 本身随机：偶尔低估真实尺度会产生较大的标准化值，因此极端值比固定分母时更常见。
 
-随着自由度增加，$S$ 对 $\sigma$ 的估计更稳定，$t_\nu$ 的分布也越来越接近 $\mathcal N(0,1)$（严格的收敛含义见后面的极限定理部分）。小样本时直接把 $t$ 替换为标准 Gaussian，会低估尾部不确定性。
+随着自由度增加，\(S\) 对 \(\sigma\) 的估计更稳定，\(t_\nu\) 的分布也越来越接近 \(\mathcal N(0,1)\)（收敛语言见\hyperref[sec:05-Probability/08-Limit-Theorems/01]{``随机变量的多种收敛''}）。小样本时直接把 \(t\) 替换为标准 Gaussian，会低估尾部不确定性。
 
-\subsection{Student-$t$ 的矩也有存在条件}
+\subsection{Student-\(t\) 的矩也有存在条件}
 
-$t_\nu$ 分布尾部较重：
+\(t_\nu\) 分布尾部较重：
 
 \begin{itemize}
 \item
-  $\nu\le1$ 时均值不存在；
+  \(\nu\le1\) 时均值不存在；
 \item
-  $1<\nu\le2$ 时均值存在但方差无穷；
+  \(1<\nu\le2\) 时均值存在但方差无穷；
 \item
-  $\nu>2$ 时
+  \(\nu>2\) 时
 
   \[
-  \operatorname{Var}(T)=\frac{\nu}{\nu-2}.
+  \Var(T)=\frac{\nu}{\nu-2}.
   \]
 \end{itemize}
 
@@ -110,9 +115,9 @@ $t_\nu$ 分布尾部较重：
 
 \subsection{统计应用与模型边界}
 
-卡方分布用于 Gaussian 方差推断、拟合优度检验与二次型；Student-$t$ 用于未知方差下的均值区间和回归系数检验。多个方差比还会导出 $F$ 分布。
+卡方分布用于 Gaussian 方差推断、拟合优度检验与二次型；Student-\(t\) 用于未知方差下的均值区间和回归系数检验。多个方差比还会导出 \(F\) 分布。
 
-这些精确结论依赖独立同分布 Gaussian 样本。大样本时某些方法对轻微偏离较稳健，但重尾、强偏斜、依赖或异方差会破坏小样本精确性。统计软件给出的 $t$ 检验结果背后始终有模型条件。
+这些精确结论依赖独立同分布 Gaussian 样本。大样本时某些方法对轻微偏离较稳健，但重尾、强偏斜、依赖或异方差会破坏小样本精确性。统计软件给出的 \(t\) 检验结果背后始终有模型条件。
 
 \subsection{分布族不是一张孤立清单}
 
@@ -129,7 +134,7 @@ $t_\nu$ 分布尾部较重：
 \item
   标准 Gaussian 平方和产生卡方；
 \item
-  Gaussian 除以独立卡方尺度产生 Student $t$；
+  Gaussian 除以独立卡方尺度产生 Student \(t\)；
 \item
   独立 Gamma 归一化产生 Beta 或 Dirichlet。
 \end{itemize}

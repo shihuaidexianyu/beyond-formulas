@@ -1,4 +1,9 @@
 \section{Gibbs 不等式与 KL 的方向性}
+\label{sec:07-Information-Theory/03-Divergences/02}
+
+\begin{quote}
+\textbf{先抓住这一点：}错误模型可能在少数结果上碰巧比真实分布更省，但把所有结果按真实概率平均后，它不可能长期占便宜。交换 KL 的方向，也就交换了谁是现实、谁是拿来比较的模型，问题已经变了。
+\end{quote}
 
 上一节把 KL 散度解释成使用错误模型的额外平均码长。这个解释强烈暗示
 
@@ -43,17 +48,17 @@ D(P\|Q)=0\quad\Longleftrightarrow\quad P=Q
 函数 \(-\ln u\) 是凸函数。由于
 
 \[
-D(P\|Q)=\mathbb E_P\left[-\ln\frac{Q(X)}{P(X)}\right],
+D(P\|Q)=\E_P\left[-\ln\frac{Q(X)}{P(X)}\right],
 \]
 
 Jensen 不等式给出
 
 \[
 D(P\|Q)
-\ge -\ln\mathbb E_P\left[\frac{Q(X)}{P(X)}\right].
+\ge -\ln\E_P\left[\frac{Q(X)}{P(X)}\right].
 \]
 
-共同支持时，期望等于 \(\sum_xQ(x)=1\)，所以右边为零。这个证明更短，但前一个证明更容易看清支持外质量和等号条件。证明不是越短越好；读者需要知道每个条件在哪一步发挥作用。
+若 \(Q\) 的质量都落在 \(P\) 的支持上，期望等于 \(\sum_xQ(x)=1\)，所以右边为零；若 \(Q\) 还在支持外分配质量，该期望小于一，右边反而严格为正。这个证明更短，但前一个证明更容易看清支持外质量和等号条件。证明不是越短越好；读者需要知道每个条件在哪一步发挥作用。
 
 \subsection{一个结论，支撑许多熟悉事实}
 

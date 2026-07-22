@@ -1,9 +1,8 @@
-一次随机实验的完整结果可能非常复杂。抛十次硬币有 $2^{10}$ 条序列，但如果问题只关心正面数，就没有必要逐条追踪顺序。随机变量把每个样本点映射成一个数，让我们可以研究``数值落在哪里''，而不必始终停留在原始样本空间。
+一次随机实验的完整结果可能非常复杂。抛十次硬币有 \(2^{10}\) 条序列，但如果问题只关心正面数，就没有必要逐条追踪顺序。随机变量把每个样本点映射成一个数，让我们可以研究``数值落在哪里''，而不必始终停留在原始样本空间。
 
 本单元按统一概念到具体表示的顺序展开：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   随机变量是样本空间上的函数：理解随机性来自输入结果，而变量本身是一个确定函数。
@@ -12,7 +11,37 @@
 \item
   连续分布、密度与分位数：理解密度不是概率，CDF 才是离散与连续的统一对象。
 \item
-  随机变量变换与逆变换抽样：当 $Y=g(X)$ 时，怎样从 $X$ 的分布得到 $Y$ 的分布。
+  随机变量变换与逆变换抽样：当 \(Y=g(X)\) 时，怎样从 \(X\) 的分布得到 \(Y\) 的分布。
 \end{enumerate}
 
-随后``期望与矩''会进一步把整个分布压缩成位置、波动与关联的数值摘要。
+随后\hyperref[ch:040]{``期望与矩：怎样用少量数字概括一个分布''}会进一步把整个分布压缩成位置、波动与关联的数值摘要。
+
+\subsection{怎么读这一章}
+
+四篇可以按所需表示进入：
+
+\begin{itemize}
+\tightlist
+\item
+  若仍把随机变量理解成会随机变化的字母，先读\hyperref[sec:05-Probability/03-Random-Variables/01]{``随机变量是样本空间上的函数''}；随机性来自输入样本点，函数规则本身是确定的。
+\item
+  若取值有限或可数，读\hyperref[sec:05-Probability/03-Random-Variables/02]{``离散分布与概率质量函数''}；PMF 把概率直接放在点上，CDF 则累计这些质量。
+\item
+  若通过区间积分计算概率，读\hyperref[sec:05-Probability/03-Random-Variables/03]{``连续分布、密度与分位数''}；密度是单位长度上的局部浓度，不是单点概率，而且并非每个分布都拥有 PDF。
+\item
+  若定义了 \(Y=g(X)\) 或需要从均匀随机数生成目标分布，读\hyperref[sec:05-Probability/03-Random-Variables/04]{``随机变量变换与逆变换抽样''}；先把 \(Y\) 的事件拉回 \(X\) 空间，再处理尺度伸缩与多个原像。
+\end{itemize}
+
+第一次阅读可以在能区分四层对象时停下：样本点 \(\omega\)、随机变量函数 \(X\)、实现值 \(x\) 与分布 \(P_X\)。同分布只说明最后一层相同，不说明随机变量在同一实验中相等或具有相同依赖关系。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:05-Probability/03-Random-Variables/01]{``随机变量是样本空间上的函数''}；
+\item \hyperref[sec:05-Probability/03-Random-Variables/02]{``离散分布与概率质量函数''}；
+\item \hyperref[sec:05-Probability/03-Random-Variables/03]{``连续分布、密度与分位数''}；
+\item \hyperref[sec:05-Probability/03-Random-Variables/04]{``随机变量变换与逆变换抽样''}。
+\end{itemize}

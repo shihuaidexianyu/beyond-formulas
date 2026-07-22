@@ -1,13 +1,18 @@
 \section{KL 散度与 Fisher 度量的局部关系}
+\label{sec:12-Real-Analysis-Support/09-Information-Geometry/03}
 
-Part 07 的 KL 散度 \(D_{\mathrm{KL}}(p\|q)\) 衡量``用 \(q\) 描述 \(p\) 的数据多付多少码长''，Part 11 的 Fisher 信息衡量``参数微小改变时分布有多容易区分''。这两个量看似不同，实则在参数空间中是同一几何的两面：KL 散度在无穷小参数位移下的二阶展开，正是 Fisher 度量。
+\begin{quote}
+\textbf{先抓住这一点：}KL 散度不是对称距离，但两个邻近分布之间的一阶差异消失后，二阶项由 Fisher 信息控制。Fisher 度量是 KL 在局部显露出的二次几何。
+\end{quote}
+
+Part 07 的 KL 散度 \(\KL(p\|q)\) 衡量``用 \(q\) 描述 \(p\) 的数据多付多少码长''，Part 11 的 Fisher 信息衡量``参数微小改变时分布有多容易区分''。这两个量看似不同，实则在参数空间中是同一几何的两面：KL 散度在无穷小参数位移下的二阶展开，正是 Fisher 度量。
 
 \subsection{KL 的二阶展开回到 Fisher 信息}
 
 设 \(p_\theta\) 是参数族，\(\theta\) 与 \(\theta+d\theta\) 是邻近参数。KL 散度为
 
 \[
-D_{\mathrm{KL}}(p_\theta\|p_{\theta+d\theta})
+\KL(p_\theta\|p_{\theta+d\theta})
 =\E_\theta\!\left[
 \log\frac{p_\theta(X)}{p_{\theta+d\theta}(X)}
 \right].
@@ -29,7 +34,7 @@ D_{\mathrm{KL}}(p_\theta\|p_{\theta+d\theta})
 \E_\theta[s(X)^\trans d\theta]=0,
 \]
 
-因为 score 的期望为零（``Score 与 Fisher 信息衡量局部可辨认性''）。二阶项为
+因为 score 的期望为零（\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}）。二阶项为
 
 \[
 -\frac12 d\theta^\trans\E_\theta[\nabla_\theta s(X)]\,d\theta.
@@ -38,26 +43,26 @@ D_{\mathrm{KL}}(p_\theta\|p_{\theta+d\theta})
 由 Fisher 信息的二阶形式 \(I(\theta)=-\E_\theta[\nabla_\theta s]=\E_\theta[ss^\trans]\)，得到
 
 \[
-D_{\mathrm{KL}}(p_\theta\|p_{\theta+d\theta})
+\KL(p_\theta\|p_{\theta+d\theta})
 =\frac12 d\theta^\trans I(\theta)\,d\theta
 +o(\norm{d\theta}^2).
 \]
 
-这就是``Score 与 Fisher 信息衡量局部可辨认性''末尾预告的展开式。它说明：在无穷小位移下，KL 散度就是 Fisher 度量下的平方距离的一半。Fisher 度量不是外加的几何，而是 KL 散度在参数空间中的局部化。
+这就是\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}末尾预告的展开式。它说明：在无穷小位移下，KL 散度就是 Fisher 度量下的平方距离的一半。Fisher 度量不是外加的几何，而是 KL 散度在参数空间中的局部化。
 
 \subsection{为什么 KL 不对称，度量却对称}
 
-KL 散度不对称：\(D_{\mathrm{KL}}(p\|q)\ne D_{\mathrm{KL}}(q\|p)\)。但上面的展开式对 \(d\theta\) 是对称的（二次型）。这是因为展开只在 \(\theta\) 处做了一次，\(D_{\mathrm{KL}}(p_{\theta+d\theta}\|p_\theta)\) 的展开会给出
+KL 散度不对称：\(\KL(p\|q)\ne \KL(q\|p)\)。但上面的展开式对 \(d\theta\) 是对称的（二次型）。这是因为展开只在 \(\theta\) 处做了一次，\(\KL(p_{\theta+d\theta}\|p_\theta)\) 的展开会给出
 
 \[
-D_{\mathrm{KL}}(p_{\theta+d\theta}\|p_\theta)
+\KL(p_{\theta+d\theta}\|p_\theta)
 =\frac12 d\theta^\trans I(\theta+d\theta)\,d\theta
 +o(\norm{d\theta}^2),
 \]
 
 其中 Fisher 信息在 \(\theta+d\theta\) 处取值。当 \(d\theta\to0\) 时，\(I(\theta+d\theta)\to I(\theta)\)，两个方向的二阶项相同；不对称性只出现在三阶及更高阶项。在无穷小极限下，KL 的两个方向给出同一个度量——这正是黎曼度量对称性的来源。
 
-有限位移下 KL 的不对称性仍有意义：前向 KL（\(D_{\mathrm{KL}}(p\|q)\)）倾向覆盖 \(p\) 的支撑，反向 KL（\(D_{\mathrm{KL}}(q\|p)\)）倾向避开 \(p\) 的低密度区（``Gibbs 不等式与 KL 的方向性''）。这种不对称性在 Fisher 几何中对应``指数联络与混合联络''的区别，本书不展开；对优化而言，选择最小化哪个方向的 KL 就是选择不同的目标。
+有限位移下 KL 的不对称性仍有意义：前向 KL（\(\KL(p\|q)\)）倾向覆盖 \(p\) 的支撑，反向 KL（\(\KL(q\|p)\)）倾向避开 \(p\) 的低密度区（\hyperref[sec:07-Information-Theory/03-Divergences/02]{``Gibbs 不等式与 KL 的方向性''}）。这种不对称性在 Fisher 几何中对应``指数联络与混合联络''的区别，本书不展开；对优化而言，选择最小化哪个方向的 KL 就是选择不同的目标。
 
 \subsection{指数族的对偶几何}
 
@@ -72,7 +77,7 @@ A^*(\mu)=\sup_\theta\bigl(\theta^\trans\mu-A(\theta)\bigr),
 在这对坐标下，KL 散度有显式形式：
 
 \[
-D_{\mathrm{KL}}(p_\theta\|p_{\theta'})
+\KL(p_\theta\|p_{\theta'})
 =A(\theta')-A(\theta)-\mu^\trans(\theta'-\theta),
 \]
 

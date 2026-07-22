@@ -1,4 +1,9 @@
 \section{Gaussian 混合模型让类别成为隐变量}
+\label{sec:13-Machine-Learning/06-Probabilistic-Models/03}
+
+\begin{quote}
+\textbf{先抓住这一点：}GMM 用后验责任度表达软归属，但成分标签可置换、似然可因协方差塌缩而无界。一个成分不自动对应现实中的一个群体。
+\end{quote}
 
 生成式分类假设类别标签已知。现在把标签遮住，只保留一团可能由多个群体混合形成的数据。我们仍可想象每个样本先选择一个隐藏成分 \(Z_i\)，再由该成分生成观测：
 
@@ -14,7 +19,11 @@ p(x_i)=\sum_{k=1}^K
 \pi_k\mathcal N(x_i\mid\mu_k,\Sigma_k).
 \]
 
-这就是 Gaussian mixture model。它可以表示多峰密度，也提供软聚类；但``成分''只是模型中的潜在解释，不会自动对应真实人群或因果类型。
+\begin{definition}[Gaussian 混合模型]
+由混合权重 \(\pi_k\)、成分均值 \(\mu_k\) 和 covariance \(\Sigma_k\) 定义的上述潜变量模型称为 Gaussian 混合模型。其边缘密度是各成分密度的加权和。
+\end{definition}
+
+它可以表示多峰密度，也提供软聚类；但``成分''只是模型中的潜在解释，不会自动对应真实人群或因果类型。
 
 \subsection{软归属来自 Bayes 公式}
 
@@ -81,4 +90,6 @@ p(x_i)=\sum_{k=1}^K
 
 \subsubsection{刻意触发一次失败}
 
-对二维数据拟合两个 Gaussian 成分，并逐渐减小 covariance 下界。加入一个远离主体的孤立点，观察最优 likelihood、最小特征值和该点 responsibility 的变化。然后增加随机初值，比较``最高训练 likelihood''与``最佳验证 likelihood''是否总是同一个解。这个实验应让你看见：优化成功与模型合理是两回事。
+对二维数据拟合两个 Gaussian 成分，并逐渐减小 covariance 下界。加入一个远离主体的孤立点后，可以看到一个成分塌缩到该点上：最小特征值压到下界，该点的 responsibility 集中于一，最优 likelihood 随下界继续减小而无界上升。数值上``更优''的解在统计上毫无意义。
+
+再增加随机初值重复拟合，``最高训练 likelihood''与``最佳验证 likelihood''选出的往往不是同一个解。这次刻意触发的失败直接显示：优化成功与模型合理是两回事。

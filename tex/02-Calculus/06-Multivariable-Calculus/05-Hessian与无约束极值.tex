@@ -1,4 +1,9 @@
 \section{Hessian 与无约束极值}
+\label{sec:02-Calculus/06-Multivariable-Calculus/05}
+
+\begin{quote}
+\textbf{先抓住这一点：}梯度为零只说明脚下暂时没有坡度，并不能告诉你站在山顶、谷底还是平坦的山脊上。Hessian 描述附近怎样弯曲。如果它也给不出明确方向，就必须看更高阶变化或直接分析函数。
+\end{quote}
 
 \subsection{二阶局部模型是一张二次曲面}
 
@@ -14,8 +19,8 @@ H_f(\mathbf x) = \begin{bmatrix}
 \[
 f(\mathbf a+\mathbf h)
 =f(\mathbf a)
-+\nabla f(\mathbf a)^\top\mathbf h
-+\frac12\mathbf h^\top H_f(\mathbf a)\mathbf h
++\nabla f(\mathbf a)^{\trans}\mathbf h
++\frac12\mathbf h^{\trans} H_f(\mathbf a)\mathbf h
 +o(\|\mathbf h\|^2).
 \]
 

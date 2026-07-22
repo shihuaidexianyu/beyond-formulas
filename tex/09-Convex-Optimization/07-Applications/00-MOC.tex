@@ -3,7 +3,6 @@
 本单元选择四个彼此呼应的案例：
 
 \begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
   光滑经验风险与 \(L_2\) 正则化比较 Ridge 与 logistic 回归，说明损失函数怎样决定曲率、概率解释与数值实现。
@@ -16,3 +15,19 @@
 \end{enumerate}
 
 这些模型都是凸的，但``全局最优''只说明已经忠实求解所写下的模型，不保证模型假设、数据分布或评价指标正确。每节最后都会把优化证书与统计、业务验证区分开来。
+
+\subsection{怎么读这一章}
+
+四篇都从“目标函数的每一项在现实里买来了什么”入手。平方正则控制整体幅度，绝对值正则鼓励系数归零，最大间隔用几何余量换稳健分类，投资组合则把收益与风险放进同一个权衡。算法只是最后一步；先读懂建模选择。所需算法可回看 \hyperref[ch:076]{``凸优化算法：利用梯度、曲率与可分结构''}。
+
+\subsection{本章篇目}
+
+以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+
+\begin{itemize}
+\tightlist
+\item \hyperref[sec:09-Convex-Optimization/07-Applications/01]{``\texorpdfstring{光滑经验风险与 \(L_2\) 正则化}{光滑经验风险与 L_2 正则化}''}；
+\item \hyperref[sec:09-Convex-Optimization/07-Applications/02]{``\texorpdfstring{\(L_1\) 正则为何产生稀疏}{L_1 正则为何产生稀疏}''}；
+\item \hyperref[sec:09-Convex-Optimization/07-Applications/03]{``最大间隔与支持向量机''}；
+\item \hyperref[sec:09-Convex-Optimization/07-Applications/04]{``风险、收益与投资组合''}。
+\end{itemize}
