@@ -1,11 +1,7 @@
 \section{KL 散度与 Fisher 度量的局部关系}
 \label{sec:12-Real-Analysis-Support/09-Information-Geometry/03}
 
-\begin{quote}
-\textbf{先抓住这一点：}KL 散度不是对称距离，但两个邻近分布之间的一阶差异消失后，二阶项由 Fisher 信息控制。Fisher 度量是 KL 在局部显露出的二次几何。
-\end{quote}
-
-Part 07 的 KL 散度 \(\KL(p\|q)\) 衡量``用 \(q\) 描述 \(p\) 的数据多付多少码长''，Part 11 的 Fisher 信息衡量``参数微小改变时分布有多容易区分''。这两个量看似不同，实则在参数空间中是同一几何的两面：KL 散度在无穷小参数位移下的二阶展开，正是 Fisher 度量。
+KL 散度 \(\KL(p\|q)\) 衡量``用 \(q\) 描述 \(p\) 的数据多付多少码长''，Fisher 信息衡量``参数微小改变时分布有多容易区分''。这两个量看似不同，实则在参数空间中是同一几何的两面：KL 散度在无穷小参数位移下的二阶展开，正是 Fisher 度量。
 
 \subsection{KL 的二阶展开回到 Fisher 信息}
 
@@ -34,7 +30,7 @@ Part 07 的 KL 散度 \(\KL(p\|q)\) 衡量``用 \(q\) 描述 \(p\) 的数据多�
 \E_\theta[s(X)^\trans d\theta]=0,
 \]
 
-因为 score 的期望为零（\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}）。二阶项为
+因为 score 的期望为零。二阶项为
 
 \[
 -\frac12 d\theta^\trans\E_\theta[\nabla_\theta s(X)]\,d\theta.
@@ -48,7 +44,7 @@ Part 07 的 KL 散度 \(\KL(p\|q)\) 衡量``用 \(q\) 描述 \(p\) 的数据多�
 +o(\norm{d\theta}^2).
 \]
 
-这就是\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}末尾预告的展开式。它说明：在无穷小位移下，KL 散度就是 Fisher 度量下的平方距离的一半。Fisher 度量不是外加的几何，而是 KL 散度在参数空间中的局部化。
+在无穷小位移下，KL 散度就是 Fisher 度量下的平方距离的一半。Fisher 度量不是外加的几何，而是 KL 散度在参数空间中的局部化。
 
 \subsection{为什么 KL 不对称，度量却对称}
 
@@ -62,7 +58,7 @@ KL 散度不对称：\(\KL(p\|q)\ne \KL(q\|p)\)。但上面的展开式对 \(d\t
 
 其中 Fisher 信息在 \(\theta+d\theta\) 处取值。当 \(d\theta\to0\) 时，\(I(\theta+d\theta)\to I(\theta)\)，两个方向的二阶项相同；不对称性只出现在三阶及更高阶项。在无穷小极限下，KL 的两个方向给出同一个度量——这正是黎曼度量对称性的来源。
 
-有限位移下 KL 的不对称性仍有意义：前向 KL（\(\KL(p\|q)\)）倾向覆盖 \(p\) 的支撑，反向 KL（\(\KL(q\|p)\)）倾向避开 \(p\) 的低密度区（\hyperref[sec:07-Information-Theory/03-Divergences/02]{``Gibbs 不等式与 KL 的方向性''}）。这种不对称性在 Fisher 几何中对应``指数联络与混合联络''的区别，本书不展开；对优化而言，选择最小化哪个方向的 KL 就是选择不同的目标。
+有限位移下 KL 的不对称性仍有意义：前向 KL（\(\KL(p\|q)\)）倾向覆盖 \(p\) 的支撑，反向 KL（\(\KL(q\|p)\)）倾向避开 \(p\) 的低密度区。这种不对称性在 Fisher 几何中对应``指数联络与混合联络''的区别，本书不展开；对优化而言，选择最小化哪个方向的 KL 就是选择不同的目标。
 
 \subsection{指数族的对偶几何}
 
@@ -97,7 +93,7 @@ d_{\mathrm{FR}}(\eta_1,\eta_2)
 =\frac12\int_{\eta_1}^{\eta_2}\operatorname{sech}(\eta/2)\,d\eta.
 \]
 
-这个积分可以算出，但更重要的是：当 \(\theta\to0\) 或 \(1\)（\(\eta\to\mp\infty\)）时，距离发散——边界在 Fisher 几何下被推到无穷远，与第一节的观察一致。Bernoulli 流形在 Fisher 度量下是一个完备的、常负曲率的空间（双曲空间），这不是欧氏直觉能猜到的。
+这个积分可以算出，但更重要的是：当 \(\theta\to0\) 或 \(1\)（\(\eta\to\mp\infty\)）时，距离发散——边界在 Fisher 几何下被推到无穷远。Bernoulli 流形在 Fisher 度量下是一个完备的、常负曲率的空间（双曲空间），这不是欧氏直觉能猜到的。
 
 全局几何影响算法：在弯曲空间中，直线坐标下降可能绕远；测地线下降（沿 Fisher 度量的最短路径）才是几何正确的方向。自然梯度是局部最速下降，测地线下降是全局最短路径，两者在小步长下一致，在大步长下不同。
 
@@ -115,4 +111,4 @@ d_{\mathrm{FR}}(\eta_1,\eta_2)
   \textbf{对偶}：指数族的自然参数与期望参数互为 Legendre 对偶，KL 是 Bregman 散度。
 \end{itemize}
 
-这条线从 Part 07 的 KL 散度出发，经过 Part 11 的 Fisher 信息，到 Part 12 的黎曼度量，最后回到 Part 10 的自然梯度。信息几何不是新数学，而是把已有概念按``参数即分布的坐标''这一原则重新组织。它的价值在于：当参数化、坐标选择或优化方向成为问题时，几何提供了一套不依赖坐标的标准答案。
+这条线从 KL 散度出发，经过 Fisher 信息，到黎曼度量，最后回到自然梯度。信息几何不是新数学，而是把已有概念按``参数即分布的坐标''这一原则重新组织。它的价值在于：当参数化、坐标选择或优化方向成为问题时，几何提供了一套不依赖坐标的标准答案。

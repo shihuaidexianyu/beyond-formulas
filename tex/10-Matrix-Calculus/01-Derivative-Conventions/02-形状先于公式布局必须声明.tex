@@ -1,10 +1,6 @@
 \section{形状先于公式，布局必须声明}
 \label{sec:10-Matrix-Calculus/01-Derivative-Conventions/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}两本书里的 Jacobian 互为转置，可能只是布局约定不同。不要先争哪张公式正确，先声明向量按列还是按行、线性映射如何作用，再检查乘法后的形状。
-\end{quote}
-
 同一个表达式在两本资料中相差一个转置，未必有人算错。矩阵微积分存在两种常见布局：
 
 \begin{itemize}
@@ -89,7 +85,7 @@ d\ell=(\nabla_y\ell)^{\trans}dy
 \nabla_x\ell = A^{\trans}\nabla_y\ell
 \in\R^n.
 \]
-\(A\) 把输入方向向前推到输出空间，\(A^{\trans}\) 把输出的敏感度向后拉回输入空间。转置由线性映射的伴随自然产生，其作用远不止凑齐形状。
+\(A\) 把输入方向向前推到输出空间，\(A^{\trans}\) 把输出的敏感度向后拉回输入空间。转置由线性映射的伴随自然产生。
 
 \subsection{JVP 与 VJP 比完整 Jacobian 更接近实际需求}
 
@@ -123,7 +119,7 @@ u^{\trans}J_f(x)
   Hessian-vector product 是对梯度再做一次 JVP。
 \end{itemize}
 
-面对矩阵到矩阵的映射，完整导数需要高阶数组表示，形状更容易混乱。保留算子写法 \(Df(X)[H]\) 或直接计算 JVP/VJP，通常更清楚也更高效。
+面对矩阵到矩阵的映射，完整导数需要高阶数组表示，形状更容易混乱。保留算子写法 \(Df(X)[H]\) 或直接计算 JVP/VJP，更清楚也更高效。
 
 \subsection{逐元素记号何时有用}
 
@@ -150,7 +146,7 @@ u^{\trans}J_f(x)
 
 \subsection{受约束矩阵还需要说明变量空间}
 
-若 \(X\) 被限制为对称矩阵，允许扰动 \(H\) 也必须对称。环境空间中的两个矩阵梯度，只要它们在所有对称 \(H\) 上给出相同 Frobenius 内积，就代表同一个受约束导数。通常取对称化
+若 \(X\) 被限制为对称矩阵，允许扰动 \(H\) 也必须对称。环境空间中的两个矩阵梯度，只要它们在所有对称 \(H\) 上给出相同 Frobenius 内积，就代表同一个受约束导数。取对称化
 
 \[
 \operatorname{sym}(G)=\frac12(G+G^{\trans})

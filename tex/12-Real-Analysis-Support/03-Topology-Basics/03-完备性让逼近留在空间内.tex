@@ -1,10 +1,6 @@
 \section{完备性让逼近留在空间内}
 \label{sec:12-Real-Analysis-Support/03-Topology-Basics/03}
 
-\begin{quote}
-\textbf{先抓住这一点：}完备性关心 Cauchy 逼近有没有在空间内部的极限，紧致性还要求能从任意序列抽出收敛子列。两者都谈极限，却提供不同强度的控制。
-\end{quote}
-
 度量空间 \((X,d)\) 完备，如果每个 Cauchy 数列都收敛到 \(X\) 中的点。Cauchy 数列的定义与实数情形平行：对任意 \(\varepsilon>0\)，存在 \(N\)，使 \(m,n\ge N\) 时 \(d(x_m,x_n)<\varepsilon\)，只是把绝对值换成 \(d\)。
 
 完备性与闭性相关，但对象不同：闭性描述子集是否保留环境空间中的极限；完备性描述空间自身是否包含所有内部 Cauchy 逼近的极限。
@@ -93,7 +89,7 @@ d(x_m,x_n)
 \le \frac{q^n}{1-q}\,d(x_1,x_0).
 \]
 
-右端随 \(n\to\infty\) 趋零，所以 \((x_n)\) Cauchy；完备性给出极限 \(x^\star\in X\)。再令 \(m\to\infty\)，得到定理所许诺的几何误差界
+右端随 \(n\to\infty\) 趋零，所以 \((x_n)\) Cauchy；完备性给出极限 \(x^\star\in X\)。再令 \(m\to\infty\)，得到几何误差界
 
 \[
 d(x_n,x^\star)\le\frac{q^n}{1-q}\,d(x_1,x_0).

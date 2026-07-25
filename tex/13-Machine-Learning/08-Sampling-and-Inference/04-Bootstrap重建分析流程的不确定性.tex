@@ -1,11 +1,7 @@
 \section{Bootstrap 重建分析流程的不确定性}
 \label{sec:13-Machine-Learning/08-Sampling-and-Inference/04}
 
-\begin{quote}
-\textbf{先抓住这一点：}Bootstrap 用经验分布模拟重新收集数据，并重复整个分析流程。重采样单位必须匹配真实独立单位，常规区间也会在非正则问题上失效。
-\end{quote}
-
-前面三节都从给定概率模型出发计算期望或 posterior。Bootstrap 回答另一类问题：如果按同样方式重新收集一份数据，整个分析结果会波动多少？
+前面三节都从给定概率模型出发计算期望或 posterior。Bootstrap 回答另一类问题：如果按同样方式重新收集一份数据，整个分析结果会波动多少？Bootstrap 用经验分布模拟重新收集数据，并重复整个分析流程。重采样单位必须匹配真实独立单位，常规区间也会在非正则问题上失效。
 
 设完整分析流程为 \(A\)，原数据为 \(D\)，估计量为
 

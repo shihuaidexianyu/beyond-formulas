@@ -1,10 +1,6 @@
 \section{Bellman 方程与值迭代、策略迭代}
 \label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}Bellman 方程用``一步结果加剩余价值''压缩未来。在折扣有限 MDP 中，压缩性同时给出唯一不动点与值迭代收敛。
-\end{quote}
-
 上一节定义了值函数，却没有告诉我们怎样计算。直接枚举所有未来轨迹会遭遇分支爆炸：每一步有多个动作，每个动作又可能到达多个下一状态，深度增加一层，路径数就成倍增长。动态规划的突破与 HJB 方程相同：不保存整段未来，只把``一步奖励''与``下一状态的最优剩余价值''相加。
 
 \subsection{回报自己带着递归}

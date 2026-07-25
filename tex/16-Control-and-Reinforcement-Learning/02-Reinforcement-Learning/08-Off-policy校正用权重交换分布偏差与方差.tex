@@ -1,10 +1,6 @@
 \section{Off-policy 校正用权重交换分布偏差与方差}
 \label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/08}
 
-\begin{quote}
-\textbf{先抓住这一点：}重要性权重能在支持覆盖时改写分布期望，却可能把少数轨迹放大到支配估计。截断和归一化以偏差换方差，不能补回从未观察的动作。
-\end{quote}
-
 目标策略 \(\pi\) 是希望评价或改进的策略，行为策略 \(\mu\) 是实际生成数据的策略。On-policy 令二者相同；off-policy 允许它们不同。这个区分与数据是否实时收集无关：可以在线运行一个探索行为策略而学习另一个目标策略，也可以在固定日志上做 on-policy evaluation。
 
 \subsection{轨迹概率比中环境动力学会抵消}

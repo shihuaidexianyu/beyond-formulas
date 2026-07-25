@@ -1,10 +1,6 @@
 \section{不放回抽样与 Hypergeometric 分布}
 \label{sec:05-Probability/06-Common-Distributions/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}不放回抽样使各次指标负相关。Hypergeometric 保留有限总体结构，Binomial 近似是否可用取决于抽样比例和所需尾部精度。
-\end{quote}
-
 总体中有 \(N\) 个对象，其中 \(K\) 个标为成功。随机不放回抽取 \(n\) 个，问成功对象数量 \(X\)。
 
 这看起来像做 \(n\) 次成败试验，但抽到一个成功对象后，剩余总体中成功比例会降低。各次结果依赖，普通 Binomial 模型不再精确。

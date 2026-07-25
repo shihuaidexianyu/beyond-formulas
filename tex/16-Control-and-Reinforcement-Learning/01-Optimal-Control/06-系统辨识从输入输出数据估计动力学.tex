@@ -1,10 +1,6 @@
 \section{系统辨识：从输入输出数据估计动力学}
 \label{sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/06}
 
-\begin{quote}
-\textbf{先抓住这一点：}模型能否辨认首先由实验输入是否激励关键方向决定。一步预测拟合良好，也不保证滚动模拟或闭环控制可靠。
-\end{quote}
-
 \subsection{``模型已知''本身需要来源}
 
 调节家中暖气前，我们未必知道房间升温多快、墙体蓄热多久或室外温度怎样渗入。控制章节写下 \(x_{t+1}=f(x_t,u_t)\) 时，常把这些参数当作已知；系统辨识追问它们怎样由输入输出数据获得。

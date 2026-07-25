@@ -1,11 +1,7 @@
 \section{变分推断把后验近似变成优化}
 \label{sec:13-Machine-Learning/08-Sampling-and-Inference/03}
 
-\begin{quote}
-\textbf{先抓住这一点：}变分推断在受限分布族中最大化 ELBO，等价于缩小特定方向的 KL。优化收敛仍可能留下表达误差、局部最优和系统性低估不确定性。
-\end{quote}
-
-MCMC 试图让样本长期服从真实 posterior，但在海量数据或复杂隐变量模型中，充分混合可能太慢。Variational inference 选择另一种交易：在易于计算的分布族 \(\mathcal Q\) 中寻找一个 \(q_\phi(z)\) 近似 posterior。
+MCMC 试图让样本长期服从真实 posterior，但在海量数据或复杂隐变量模型中，充分混合可能太慢。Variational inference 选择另一种交易：在易于计算的分布族 \(\mathcal Q\) 中寻找一个 \(q_\phi(z)\) 近似 posterior。变分推断在受限分布族中最大化 ELBO，等价于缩小特定方向的 KL。优化收敛仍可能留下表达误差、局部最优和系统性低估不确定性。
 
 对任意 \(q_\phi\)，把 \(\log p(x)\) 写入 \(q_\phi\) 下的期望（它对 \(z\) 是常数）并加减 \(\log q_\phi(z)\)：
 

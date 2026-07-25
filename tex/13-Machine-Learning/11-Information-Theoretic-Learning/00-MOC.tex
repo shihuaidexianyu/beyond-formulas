@@ -1,11 +1,13 @@
-信息论进入机器学习时，最容易出现两种误解：一是把 entropy、cross-entropy 和 KL 当成可互换的名称；二是只要目标里出现 mutual information，就认为泛化或鲁棒性已有保证。本单元从可严格推导的关系出发，再逐步讨论它们怎样参与建模。
+一个三分类问题，模型给正确类的概率为 0.9，则单样本 cross-entropy 损失为 \(-\log 0.9\approx 0.105\) nat；若信心满满地错判为另一类（给正确类 0.01），损失暴增为 \(-\log 0.01\approx 4.605\) nat。但这个损失同时等于真实分布 \(p\)（one-hot）的 entropy 加上 \(\KL(p\|q)\)——因为 one-hot 的 entropy 为零，cross-entropy 就是 KL。若非 one-hot 而是有噪声的软标签（如 \((0.7,0.2,0.1)\)，entropy 约 0.802 nat），同一个 \(q=(0.9,0.05,0.05)\) 的 cross-entropy 和 KL 就不再相等。这一区分是本章入口。
+
+信息论进入机器学习时，最容易出现两种误解：一是把 entropy、cross-entropy 和 KL 当成可互换的名称；二是只要目标里出现 mutual information，就认为泛化或鲁棒性已有理论支撑。本单元从可严格推导的关系出发，再逐步讨论它们怎样参与建模。
 
 \begin{enumerate}
 \tightlist
 \item
   交叉熵训练其实在最小化 KL 差异：连接概率编码、最大似然、proper scoring rule 与稳定分类训练。
 \item
-  最大熵从约束中选择最少承诺的分布：研究只知道若干期望约束时，怎样避免凭空加入额外结构，并由此得到指数族。
+  最大熵从约束中选择最少假设的分布：研究只知道若干期望约束时，怎样避免凭空加入额外结构，并由此得到指数族。
 \item
   MDL 把拟合与描述长度放在同一尺度：把模型自身与模型解释不了的数据都写成码长，重新理解复杂度惩罚。
 \item
@@ -16,7 +18,7 @@
 
 \subsection{怎么读这一章}
 
-随手阅读时，先看每篇开头的“核心洞见”，再分别抓住四个判断式：\(H(p,q)=H(p)+\KL(p\|q)\)、最大熵的约束集合、\(L(M)+L(D\mid M)\)、以及 \(I(X;Z)-\beta I(Z;Y)\)。想理解来源，再读 Lagrange 对偶、Kraft 不等式和数据处理不等式。真正使用这些目标时，最后检查哪些分布被固定、支持与基准测度是什么、编码协议是否完整，以及优化的究竟是精确信息量还是 variational bound。
+随手阅读时，先看第一篇的数值例子与 \(H(p,q)=H(p)+\KL(p\|q)\)，第二篇的最大熵约束集和骰子例子，第三篇的 \(L(M)+L(D\mid M)\) 和传感器曲线例子，第四篇的 \(I(X;Z)-\beta I(Z;Y)\) 和离散表示例子。想理解来源，再读 Lagrange 对偶、Kraft 不等式和数据处理不等式。真正使用这些目标时，最后检查哪些分布被固定、支持与基准测度是什么、编码协议是否完整，以及优化的究竟是精确信息量还是 variational bound。
 
 \subsection{本章篇目}
 
@@ -25,7 +27,7 @@
 \begin{itemize}
 \tightlist
 \item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/01]{``交叉熵训练其实在最小化 KL 差异''}；
-\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/02]{``最大熵从约束中选择最少承诺的分布''}；
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/02]{``最大熵从约束中选择最少假设的分布''}；
 \item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/03]{``MDL 把拟合与描述长度放在同一尺度''}；
 \item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/04]{``信息瓶颈在压缩与预测之间权衡''}。
 \end{itemize}

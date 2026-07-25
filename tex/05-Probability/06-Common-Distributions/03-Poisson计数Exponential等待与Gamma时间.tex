@@ -1,10 +1,6 @@
 \section{Poisson 计数、Exponential 等待与 Gamma 时间}
 \label{sec:05-Probability/06-Common-Distributions/03}
 
-\begin{quote}
-\textbf{先抓住这一点：}Poisson 过程把计数与等待统一起来：固定窗口看事件数得到 Poisson，等下一次或第 \(r\) 次到达得到 Exponential 或 Gamma。
-\end{quote}
-
 一个稳定到达过程可以从两种角度观察：
 
 \begin{itemize}
@@ -117,7 +113,7 @@ Exponential 具有连续无记忆性：
 \[
 P(T> s+t\mid T> s)=P(T> t).
 \]
-它与前面 Geometric 分布的无记忆性同源，验证也同样只有一行：\(P(T>s+t\mid T>s)=e^{-\lambda(s+t)}/e^{-\lambda s}=e^{-\lambda t}\)。直觉上，已经等待多久不会改变剩余等待分布。设备寿命若会老化、顾客到达有高峰周期，就不应盲目采用 Exponential。
+它与前面 Geometric 分布的无记忆性同源，验证也只有一行：\(P(T>s+t\mid T>s)=e^{-\lambda(s+t)}/e^{-\lambda s}=e^{-\lambda t}\)。直觉上，已经等待多久不会改变剩余等待分布。设备寿命若会老化、顾客到达有高峰周期，就不应盲目采用 Exponential。
 
 \subsection{等待第 \(r\) 个事件：Gamma}
 

@@ -1,10 +1,6 @@
 \section{GLM 用链接函数连接均值与线性预测子}
 \label{sec:13-Machine-Learning/02-Linear-Models/05}
 
-\begin{quote}
-\textbf{先抓住这一点：}GLM 让响应分布来自指数族，并用链接函数把条件均值接到线性预测子。线性发生在链接后的尺度上，不代表原始响应与特征呈直线关系。
-\end{quote}
-
 \subsection{线性不必意味着直接预测响应值}
 
 预测家庭每月用电量时，Gaussian 线性回归可能合适；预测一天收到多少个包裹时，输出必须是非负整数；预测是否迟到时，输出是 \(0/1\)。若仍令 \(x^\trans\beta\) 直接等于这些响应，可能得到负计数或超出 \([0,1]\) 的概率。
@@ -65,7 +61,7 @@ Poisson & \(\mu>0\) & \(g(\mu)=\log\mu\) \\
 \end{tabular}
 \end{center}
 
-因此普通线性回归、logistic 回归和 Poisson 回归都是同一建模接口的实例，公式相似有统一的结构来源。
+因此普通线性回归、logistic 回归和 Poisson 回归都是同一建模接口的实例。
 
 \subsection{Poisson 回归把相对变化写成加法}
 

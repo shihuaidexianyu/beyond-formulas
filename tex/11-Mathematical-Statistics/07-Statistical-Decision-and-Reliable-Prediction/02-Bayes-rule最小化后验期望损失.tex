@@ -1,10 +1,6 @@
 \section{Bayes rule 最小化后验期望损失}
 \label{sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}Bayes 规则在观察数据后，对每个候选行动计算后验期望损失，再选择最小者。后验均值、中央値或众数是否成为答案，取决于采用平方、绝对值还是其他损失。
-\end{quote}
-
 给未知状态加入 prior \(\pi(\theta)\) 后，观察 \(X=x\) 得到 posterior \(\pi(\theta\mid x)\)。Bayesian 决策直接为每个候选行动计算后验期望损失，无须先把 posterior 压成一个``最佳参数''：
 
 \[

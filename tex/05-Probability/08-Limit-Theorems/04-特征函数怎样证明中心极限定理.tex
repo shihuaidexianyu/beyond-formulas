@@ -1,10 +1,6 @@
 \section{特征函数怎样证明中心极限定理}
 \label{sec:05-Probability/08-Limit-Theorems/04}
 
-\begin{quote}
-\textbf{先抓住这一点：}特征函数把独立和的卷积变成乘法。中心化后的二阶展开决定 Gaussian 指数，Lévy 连续性定理再把函数极限翻译回分布极限。
-\end{quote}
-
 上一节把中心极限定理作为结论陈述：独立同分布、有限非零方差变量的中心化标准和趋向 Gaussian。为什么在这组条件下，不同母分布反复卷积并标准化后会奔向同一个极限？前面\hyperref[sec:05-Probability/05-Joint-Distributions/03]{``随机变量之和与卷积''}给出的直觉是``卷积让形状越来越圆''，但那不是证明。本节补上关键工具：特征函数把独立和的卷积变成乘法，而乘法的极限可以逐点算出来。
 
 \subsection{Lévy 连续性定理：分布收敛看特征函数}

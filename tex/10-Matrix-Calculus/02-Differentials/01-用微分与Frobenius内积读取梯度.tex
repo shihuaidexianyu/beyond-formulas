@@ -1,10 +1,6 @@
 \section{用微分与 Frobenius 内积读取梯度}
 \label{sec:10-Matrix-Calculus/02-Differentials/01}
 
-\begin{quote}
-\textbf{先抓住这一点：}对标量函数，把一阶变化整理成 \(df=\langle G,dX\rangle\) 后，与扰动 \(dX\) 配对的 \(G\) 就是梯度。微分法的核心是整理线性项，而不是逐元素展开。
-\end{quote}
-
 微分 \(df\) 是函数一阶变化的符号表示。若 \(f\) 是标量、\(X\) 是矩阵，我们希望把 \(df\) 整理成
 
 \[
@@ -53,7 +49,7 @@ Frobenius 内积
 \langle A,B\rangle_F = \sum_{ij}A_{ij}B_{ij}
 =\trace(A^{\trans}B)
 \]
-把矩阵空间变成欧氏空间。它满足``移动因子''关系，例如
+把矩阵空间变成欧氏空间。它满足"移动因子"关系，例如
 
 \[
 \langle A,BC\rangle_F
@@ -131,7 +127,7 @@ df = \trace(R^{\trans}A\,dX)
 
 损失取样本和还是样本平均也会改变梯度尺度，从而影响学习率和正则化参数解释。两个公式若只差 \(1/n\)，可能都正确，却对应不同目标定义。
 
-\subsection{常见错误来自错误地``移动''微分}
+\subsection{常见错误来自错误地"移动"微分}
 
 若
 

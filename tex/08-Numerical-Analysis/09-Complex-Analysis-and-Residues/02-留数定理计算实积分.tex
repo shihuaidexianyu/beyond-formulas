@@ -1,10 +1,6 @@
 \section{留数定理计算实积分}
 \label{sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}围道积分不需要把整条路径上的函数逐点算完。只要知道闭合路径圈住了哪些孤立奇点，以及每个奇点的留数，就能得到总积分。真正费判断的地方通常是选什么围道，以及远处那段积分能不能忽略。
-\end{quote}
-
 许多实积分没有初等原函数，或原函数极其复杂。留数定理提供了一条绕过原函数的路径：把实积分变成复平面上的围道积分，答案由围道内奇点的留数决定。
 
 \subsection{奇点与留数}
@@ -41,7 +37,7 @@ f(z)=\sum_{n=-\infty}^{\infty}a_n(z-z_0)^n,
 
 这是 Cauchy 积分定理的推广：无奇点时积分为零，有奇点时每个奇点贡献 \(2\pi i\) 乘留数。证明思路是把每个奇点用小圆挖掉，多连通区域上应用 Cauchy 定理，小圆上的积分在半径趋于零时给出留数。
 
-留数定理把``计算积分''变成``找奇点、算留数''——后者通常比求原函数简单得多。
+留数定理把"计算积分"变成"找奇点、算留数"——后者比求原函数简单得多。
 
 \subsection{实积分的围道方法}
 
@@ -67,18 +63,16 @@ I=2\pi i\cdot\frac{1}{2i}=\pi,
 
 与初等结果一致。这个方法的价值在于它不需要知道 \(\arctan\) 是原函数，也不限于有理函数。
 
-更复杂的例子：\(\int_{-\infty}^{\infty}e^{-x^2}\cos(bx)\,dx\) 可以通过把 \(e^{-z^2}\) 的围道移动为平行于实轴的矩形，利用 \(e^{-z^2}\) 在条带内的衰减，得到 \(\sqrt\pi e^{-b^2/4}\)。这是 Gaussian 的 Fourier 变换仍是 Gaussian 的严格证明，也是``特征函数''中 \(\varphi_Z(t)=e^{-t^2/2}\) 的来源。
+更复杂的例子：\(\int_{-\infty}^{\infty}e^{-x^2}\cos(bx)\,dx\) 可以通过把 \(e^{-z^2}\) 的围道移动为平行于实轴的矩形，利用 \(e^{-z^2}\) 在条带内的衰减，得到 \(\sqrt\pi e^{-b^2/4}\)。这是 Gaussian 的 Fourier 变换仍是 Gaussian 的严格证明，也是"特征函数"中 \(\varphi_Z(t)=e^{-t^2/2}\) 的来源。
 
 Jordan 引理处理含 \(e^{iaz}\) 的积分：若 \(f(z)\to0\) 在上半平面一致（当 \(|z|\to\infty\)），则 \(\int_{\gamma_R}f(z)e^{iaz}\,dz\to0\) 对 \(a>0\) 成立，其中 \(\gamma_R\) 是上半圆。这允许计算 \(\int_{-\infty}^{\infty}f(x)e^{iax}\,dx\)，是 Fourier 变换计算的主力工具。
 
 \subsection{留数定理的边界}
 
-留数定理要求围道内的奇点是孤立的。支割（如 \(\sqrt z\)、\(\log z\) 的多值性）需要修改围道，沿支割两侧绕行。本性奇点虽然 Laurent 展开含有无穷多个负幂项，仍然有 \((z-z_0)^{-1}\) 项的系数。因此只要它是孤立奇点，照样可以用留数定理；困难通常在于留数未必容易算。
+留数定理要求围道内的奇点是孤立的。支割（如 \(\sqrt z\)、\(\log z\) 的多值性）需要修改围道，沿支割两侧绕行。本性奇点虽然 Laurent 展开含有无穷多个负幂项，仍然有 \((z-z_0)^{-1}\) 项的系数。因此只要它是孤立奇点，照样可以用留数定理；困难在于留数未必容易算。
 
 围道方法也不总是最快：有些实积分用参数微分（Feynman 技巧）、级数展开或特殊函数更快。留数定理的优势在于通用性——它把一大类积分统一为代数计算，而不需要为每个积分发明新技巧。
 
 \subsection{与本书已有内容的连接}
 
-\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}中 Gaussian 的 Fourier 变换仍是 Gaussian，可以用围道移动证明；\hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/01]{``解析延拓与 Fourier 衰减''}中把积分路径移入条带，合法性由 Cauchy 定理和 Jordan 引理保证；``特征函数''中 \(\varphi_Z(t)=e^{-t^2/2}\) 的计算，是留数定理在概率论中的直接应用。
-
-下一节把这些工具用于特征函数反演和 Laplace 变换，展示复分析在概率论中的具体角色。
+\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}中 Gaussian 的 Fourier 变换仍是 Gaussian，可以用围道移动证明；\hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/01]{``解析延拓与 Fourier 衰减''}中把积分路径移入条带，合法性由 Cauchy 定理和 Jordan 引理保证；"特征函数"中 \(\varphi_Z(t)=e^{-t^2/2}\) 的计算，是留数定理在概率论中的直接应用。

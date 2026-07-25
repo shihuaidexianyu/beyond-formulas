@@ -1,10 +1,6 @@
 \section{Actor--Critic 在偏差与方差之间搭桥}
 \label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/10}
 
-\begin{quote}
-\textbf{先抓住这一点：}Actor--Critic 用学习到的价值估计换取较低方差的策略更新。Critic 的偏差因此会进入 Actor，两个学习过程必须在时间尺度与数据分布上协调。
-\end{quote}
-
 REINFORCE 等到未来回报实现后再更新策略，目标无须依赖当前价值估计，却有很大方差。价值方法能用 Bellman bootstrap 快速传播信息，却只间接产生策略。Actor--Critic 同时维护两者：Actor 表示策略，Critic 估计当前策略下的价值并为 Actor 提供低方差方向。
 
 \subsection{Critic 近似策略梯度中的动作价值}

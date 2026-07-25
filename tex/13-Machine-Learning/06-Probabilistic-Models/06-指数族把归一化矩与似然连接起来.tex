@@ -1,11 +1,7 @@
 \section{指数族把归一化、矩与似然连接起来}
 \label{sec:13-Machine-Learning/06-Probabilistic-Models/06}
 
-\begin{quote}
-\textbf{先抓住这一点：}指数族把``概率总和必须为一''和``数据的某些平均特征''连接在同一个函数里。最大似然估计常表现为让模型平均值追上样本平均值，但样本落在极端边界时，有限的参数可能永远追不上。
-\end{quote}
-
-Bernoulli、Poisson、Gaussian 看似拥有不同的概率公式，参数估计时却反复出现同一种结构：数据先被压缩成若干求和或均值，似然梯度再要求``经验统计量等于模型统计量''。指数族把这条共同骨架写成
+Bernoulli、Poisson、Gaussian 看似拥有不同的概率公式，参数估计时却反复出现同一种结构：数据先被压缩成若干求和或均值，似然梯度再要求经验统计量等于模型统计量。指数族把这条共同骨架写成
 
 \[
 p(x\mid\eta)
@@ -136,7 +132,7 @@ S_n=\sum_{i=1}^{n}T(x_i).
 =\E_{\widehat\eta}[T(X)].
 \]
 
-这就是 moment matching，它直接来自指数族 likelihood 的一阶条件，无须作为额外的估计技巧引入。Hessian 为
+这就是 moment matching，它直接来自指数族 likelihood 的一阶条件。Hessian 为
 
 \[
 \nabla_\eta^2\ell(\eta)
@@ -165,4 +161,4 @@ Logistic regression 中完全分离的数据出现同样现象：likelihood 可�
 
 有限维指数族要求数据维度增加时，充分统计量维数仍固定。混合模型、重尾分布和参数相关支撑可能不满足常规正则条件；即便能写成某种指数形式，也未必拥有平滑开放的自然参数空间。混合模型的 component label 未知时，观测 likelihood 中的对数求和也不会因各成分属于指数族就自动变凸。
 
-最大熵怎样在期望约束下导出指数族，前文``最大熵原理从约束到分布''和\hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/02]{``最大熵从约束中选择最少承诺的分布''}已经完整推导。本节更关心另一方向：一旦模型属于指数族，归一化函数如何同时控制矩、似然曲率和充分统计量。下一节再利用这套代数解释共轭先验为何能保持 posterior 形式不变。
+下一节再利用这套代数解释共轭先验为何能保持 posterior 形式不变。

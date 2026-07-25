@@ -1,10 +1,6 @@
 \section{图结构把联合分布拆成局部因子}
 \label{sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/01}
 
-\begin{quote}
-\textbf{先抓住这一点：}图模型用局部因子限制高维联合分布，并让变量消元复用中间结果。图本身不会自动带来稀疏、可识别或因果语义。
-\end{quote}
-
 \(d\) 个离散变量若各有 \(K\) 个取值，任意联合分布需要记录 \(K^d-1\) 个自由概率。维度稍大就无法存储，更不用说由有限数据可靠估计。概率图模型用条件独立把联合分布限制为局部因子的乘积；图只是表达这种结构的工具，本身不会减少复杂度。
 
 \subsection{Bayesian network 用有向无环图规定生成顺序}

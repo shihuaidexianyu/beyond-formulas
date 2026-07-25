@@ -1,10 +1,6 @@
 \section{Newton 法用曲率校正方向}
 \label{sec:09-Convex-Optimization/06-Optimization-Algorithms/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}Newton 法用 Hessian 把不同方向的尺度重新校准，在接近良好极小点时可以非常快。离得较远、曲率不正或线性系统难解时，完整 Newton 步却未必可靠，仍需要阻尼和数值求解策略。
-\end{quote}
-
 梯度下降把局部目标近似成一个倾斜平面，只知道往哪边下降，却不知道每个方向有多陡。Newton 法保留二阶曲率，在当前点 \(x\) 附近使用二次模型
 
 \[
@@ -79,7 +75,7 @@ H p=-g
 
 在大型机器学习问题中，完整 Hessian 存储本身就不可行。截断 Newton 与 Hessian-free 方法只近似求解 Newton 方程；拟 Newton 方法如 BFGS、L-BFGS 则从梯度变化构造曲率近似，以较少存储换取超越普通梯度下降的方向。
 
-``二阶方法每步更快''没有意义；它每步通常更贵。应比较达到所需精度的总时间、线性代数结构和内存。
+``二阶方法每步更快''没有意义；它每步更贵。应比较达到所需精度的总时间、线性代数结构和内存。
 
 \subsection{Newton decrement 衡量局部模型还剩多少}
 

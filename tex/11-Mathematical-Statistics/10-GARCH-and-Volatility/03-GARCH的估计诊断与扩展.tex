@@ -1,10 +1,6 @@
 \section{GARCH 的估计、诊断与扩展}
 \label{sec:11-Mathematical-Statistics/10-GARCH-and-Volatility/03}
 
-\begin{quote}
-\textbf{先抓住这一点：}GARCH 拟合后要检查标准化残差是否还留有自相关、波动聚集和厚尾。若诊断仍有结构，应调整误差分布、非对称响应或模型阶数，而不是只报告似然最大值。
-\end{quote}
-
 GARCH 模型的价值在于可估计、可检验、可扩展。最大似然给出标准估计方法，标准化残差检验给出诊断工具，EGARCH/GJR-GARCH 给出对杠杆效应的处理。
 
 \subsection{最大似然估计}
@@ -25,7 +21,7 @@ GARCH 模型的似然函数由标准化创新的密度给出。若 \(z_t\sim\mat
 
 Student-t 创新更稳健：实际数据的尾部常比 Gaussian 厚，Student-t 分布的额外自由度参数 \(\nu\) 可以捕捉厚尾。\(\nu\to\infty\) 时退化为 Gaussian，\(\nu\) 小（如 5-10）时尾部更厚。
 
-估计的标准误由观测信息矩阵的逆给出。GARCH 参数通常高度相关（\(\alpha\) 与 \(\beta\) 的估计相关性强），需要谨慎解释单个参数的显著性。
+估计的标准误由观测信息矩阵的逆给出。GARCH 参数高度相关（\(\alpha\) 与 \(\beta\) 的估计相关性强），需要谨慎解释单个参数的显著性。
 
 拟似然（quasi-MLE）放宽分布假设：即使 \(z_t\) 不是 Gaussian，Gaussian 似然仍给出一致估计（在适当矩条件下），但标准误需要 sandwich 校正。这与\hyperref[sec:11-Mathematical-Statistics/02-Point-Estimation/03]{``最大似然选择最能解释数据的参数''}中``模型错设时 MLE 收敛到伪真参数''的逻辑一致。
 

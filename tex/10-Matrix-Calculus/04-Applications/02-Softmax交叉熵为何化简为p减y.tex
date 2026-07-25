@@ -1,10 +1,6 @@
 \section{\texorpdfstring{Softmax 交叉熵为何化简为 \(p-y\)}{Softmax 交叉熵为何化简为 p-y}}
 \label{sec:10-Matrix-Calculus/04-Applications/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}softmax 的 Jacobian 看起来稠密，但与交叉熵链式相乘后，许多项正好抵消，logits 的梯度只剩预测概率减真实标签。简洁结果来自损失与输出层的配合，不是可以脱离条件背诵的口诀。
-\end{quote}
-
 多分类模型对每个样本输出 logits
 
 \[

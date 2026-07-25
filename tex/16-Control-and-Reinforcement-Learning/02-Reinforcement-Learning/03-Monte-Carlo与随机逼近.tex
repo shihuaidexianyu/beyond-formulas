@@ -1,10 +1,6 @@
 \section{Monte Carlo 与随机逼近把回报变成增量更新}
 \label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/03}
 
-\begin{quote}
-\textbf{先抓住这一点：}随机逼近用一串带噪样本追踪期望方程的根。收敛来自步长、噪声、访问频率与目标稳定性的共同条件，而非更新式看起来像平均。
-\end{quote}
-
 动态规划假设转移概率和奖励分布已知，因此能对下一状态精确求和。模型未知时，最直接的替代是让策略真实运行一条轨迹，等一幕结束后观察完整回报，再用许多回报的平均估计价值。这就是 Monte Carlo 强化学习的出发点。
 
 \subsection{完整回报是价值的随机样本}

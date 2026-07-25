@@ -1,10 +1,6 @@
 \section{线性价值函数逼近求解投影 Bellman 方程}
 \label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/05}
 
-\begin{quote}
-\textbf{先抓住这一点：}函数逼近后，TD 通常求的是依赖采样分布的投影 Bellman 固定点。参数稳定、Bellman 残差小和真实价值误差小是三件不同的事。
-\end{quote}
-
 表格价值函数为每个状态保存一个独立数值。状态是一幅图像或连续向量时，这张表既存不下，也无法把一个状态学到的经验迁移到相似状态。函数逼近改用有限参数表示
 
 \[

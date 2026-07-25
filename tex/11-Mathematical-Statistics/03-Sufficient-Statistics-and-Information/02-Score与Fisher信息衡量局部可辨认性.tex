@@ -1,10 +1,6 @@
 \section{Score 与 Fisher 信息衡量局部可辨认性}
 \label{sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}score 表示对参数轻微移动时对数似然怎样变化，Fisher 信息则衡量这种变化通常有多强。信息大意味着邻近参数更容易从数据中区分，但结论依赖正确的概率模型。
-\end{quote}
-
 如果参数稍微改变，数据分布几乎不变，就很难从有限样本区分这两个参数；如果似然对参数变化非常敏感，估计可以更精确。Fisher 信息把这种局部可辨认性写成 log-likelihood 斜率的波动。
 
 对单个观测 \(X\sim p_\theta\)，score 定义为
@@ -29,7 +25,7 @@ I(\theta) = \E_\theta
 U_\theta(X)U_\theta(X)^{\trans}
 \bigr].
 \]
-\subsection{为什么 score 的期望通常为零}
+\subsection{为什么 score 的期望为零}
 
 在可以交换求导与积分、且支持集不随参数变化等正则条件下，
 

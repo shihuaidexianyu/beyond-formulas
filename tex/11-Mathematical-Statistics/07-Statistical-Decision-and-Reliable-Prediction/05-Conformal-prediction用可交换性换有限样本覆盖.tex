@@ -1,10 +1,6 @@
 \section{Conformal prediction 用可交换性换有限样本覆盖}
 \label{sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/05}
 
-\begin{quote}
-\textbf{先抓住这一点：}conformal prediction 用样本的可交换性把新样本与旧样本的非一致性分数放在同一排名中，从而得到有限样本边际覆盖。它不自动提供每个子群或每个输入点的条件覆盖。
-\end{quote}
-
 普通回归模型给出点预测 \(\widehat f(x)\)，却不说明新结果可能偏离多远。参数置信区间针对未知参数，不能直接当作新观测的预测区间；Bayesian posterior predictive interval 又依赖 prior 与 likelihood。Conformal prediction 采取另一条路线：不要求模型正确，用样本之间的可交换性校准预测集合的有限样本覆盖。
 
 \subsection{Split conformal 把拟合与校准分开}
@@ -43,7 +39,7 @@ C(x)
 
 \subsection{覆盖保证来自秩的对称性}
 
-条件于 training data 后，若 \(m\) 个 calibration examples 与新样本可交换，则它们的 \(m+1\) 个 scores 也可交换。忽略 ties 时，新 score 的秩在 \(1,ldots,m+1\) 上均匀；有 ties 时采用相应保守处理仍得到
+条件于 training data 后，若 \(m\) 个 calibration examples 与新样本可交换，则它们的 \(m+1\) 个 scores 也可交换。忽略 ties 时，新 score 的秩在 \(1,\ldots,m+1\) 上均匀；有 ties 时采用相应保守处理仍得到
 
 \[
 P\bigl(Y_{\mathrm{new}}\in C(X_{\mathrm{new}})\bigr)
@@ -87,8 +83,8 @@ P\bigl(Y\in C(X)\mid X=x\bigr)
 
 \subsection{分布漂移与数据复用会破坏秩论证}
 
-若 calibration data 来自旧医院而新样本来自新设备，scores 不再可交换，名义 coverage 可能失效。某些 covariate shift 可用加权 conformal 处理，但需要可靠密度比与支持覆盖；concept drift 不能由普通权重自动修复。
+若 calibration data 来自旧医院而新样本来自新设备，scores 不再可交换，名义 coverage 可能失效。某些 covariate shift 可用加权 conformal 处理，但需要可靠密度比与支持覆盖；concept drift 不能由普通权重修复。
 
 同一 calibration set 若被反复用于选择模型、score、超参数和最终 quantile，新样本 rank 不再与一个预先固定程序直接对称。应把模型拟合、方法选择和最终校准的数据角色分开，或使用能重现完整选择流程的有效方案。
 
-Conformal 把主要假设集中到可交换性，并给出一个清楚的有限样本覆盖承诺；分布变化可以击穿它，所以不能概括为``无需假设''。
+Conformal 把主要假设集中到可交换性，并给出一个清楚的有限样本覆盖保证；分布变化可以击穿它，所以不能概括为``无需假设''。

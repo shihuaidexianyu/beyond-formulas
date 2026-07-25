@@ -1,9 +1,7 @@
 \section{模运算与模逆}
 \label{sec:04-Discrete-Mathematics/04-Number-Theory/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}模运算看起来像普通代数，但``非零''不等于``可除''。一个余数类能否被约掉，唯一的门槛是它与模数是否互素。Bézout 恒等式既证明逆元存在，也实际构造它。
-\end{quote}
+模运算看起来像普通代数，但``非零''不等于``可除''。一个余数类能否被约掉，唯一的门槛是它与模数是否互素。Bézout 恒等式既证明逆元存在，也实际构造它。
 
 先看一个按固定格数跳动的钟面。若从某个刻度 \(i_0\) 出发，每次跨过 \(c\) 格，第 \(k\) 次到达
 
@@ -87,4 +85,4 @@ ax\equiv b\pmod n
 
 模 \(n\) 余数类形成环 \(\Z_n\)。当 \(n\) 是素数时，每个非零类都与 \(n\) 互素，因此都有逆，\(\Z_p\) 是有限域；合数模数会出现零因子，如 \(2\cdot3\equiv0\pmod6\)。
 
-这一差别决定\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/01]{``有限域与多项式插值''}及后续纠错码为何通常工作在有限域上。
+这一差别决定\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/01]{``有限域与多项式插值''}及后续纠错码为何工作在有限域上。

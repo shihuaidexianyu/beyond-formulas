@@ -1,10 +1,6 @@
 \section{下降引理在非凸地形中只保证接近驻点}
 \label{sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/01}
 
-\begin{quote}
-\textbf{先抓住这一点：}非凸问题里，函数值持续下降通常只能保证梯度逐渐变小。梯度小表示接近驻点，却不能区分全局最优、局部最优、鞍点或平坦平台。
-\end{quote}
-
 \hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/01]{``梯度下降真正难在步长''}已经从 \(L\)-Lipschitz 梯度推出下降引理。值得重新检查的是：那一步推导并没有使用凸性。只要 \(f\) 为 \(L\)-光滑，更新
 
 \[
@@ -64,7 +60,7 @@ f(x_0)-f_{\inf}.
 
 \subsection{结论准确地说了什么}
 
-上式保证：给定足够多迭代，总能在已经访问的点中找到一个梯度较小的点。它没有自动保证：
+上式保证：给定足够多迭代，总能在已经访问的点中找到一个梯度较小的点。它没有保证：
 
 \begin{itemize}
 \tightlist

@@ -1,4 +1,4 @@
-Trace 方法不是一张公式表。它的核心任务只有一个：把标量微分整理成
+对 \(f(X)=\trace(X^{\trans}AXB)\)，微分产生两条路径：\(df=\trace(AXB\,dX^{\trans})+\trace(X^{\trans}A\,dX\,B)\)，整理后梯度为 \(AXB+A^{\trans}XB^{\trans}\)。若 \(A,B\) 对称，简化为 \(2AXB\)。Trace 方法不是一张公式表。它的核心任务只有一个：把标量微分整理成
 
 \[
 df=\trace(G^{\trans}dX),

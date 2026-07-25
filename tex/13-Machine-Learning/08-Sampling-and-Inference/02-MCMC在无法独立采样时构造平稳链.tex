@@ -1,10 +1,6 @@
 \section{MCMC 在无法独立采样时构造平稳链}
 \label{sec:13-Machine-Learning/08-Sampling-and-Inference/02}
 
-\begin{quote}
-\textbf{先抓住这一点：}MCMC 构造以目标分布为平稳分布的相关样本链。平稳性不保证从任意初值收敛，有限运行的诊断也只能发现失败，不能证明已经充分混合。
-\end{quote}
-
 Bayesian posterior 常写成
 
 \[
@@ -18,7 +14,7 @@ likelihood 与 prior 可以计算，归一化常数
 p(y)=\int p(y\mid\theta)p(\theta)\,d\theta
 \]
 
-却可能不可得，也难以直接从 posterior 独立采样。MCMC 通过构造一条长期访问频率为 \(\pi\) 的 Markov 链，绕开对归一化常数的直接计算。
+却可能不可得，也难以直接从 posterior 独立采样。MCMC 通过构造一条长期访问频率为 \(\pi\) 的 Markov 链，绕开对归一化常数的直接计算。它构造以目标分布为平稳分布的相关样本链。平稳性不等于从任意初值收敛，有限运行的诊断也只能发现失败，不能证明已经充分混合。
 
 \subsection{Metropolis--Hastings 如何让目标分布保持不变}
 
@@ -41,7 +37,7 @@ p(y)=\int p(y\mid\theta)p(\theta)\,d\theta
 \pi(x)K(x,x')=\pi(x')K(x',x).
 \]
 
-对 \(x\) 求和或积分便得到 \(\pi K=\pi\)，所以 \(\pi\) 是平稳分布。detailed balance 是平稳性的充分条件，不是必要条件；更重要的是，``平稳''只表示若当前已经服从 \(\pi\)，一步后仍服从 \(\pi\)，并不自动保证从任意初值都能到达它。
+对 \(x\) 求和或积分便得到 \(\pi K=\pi\)，所以 \(\pi\) 是平稳分布。detailed balance 是平稳性的充分条件，不是必要条件；更重要的是，''平稳''只表示若当前已经服从 \(\pi\)，一步后仍服从 \(\pi\)，并不自动意味着从任意初值都能到达它。
 
 要从初值收敛并让时间平均有效，还需要不可约、非周期、recurrence 等适当遍历条件。满足相应 Markov chain ergodic theorem 时，
 

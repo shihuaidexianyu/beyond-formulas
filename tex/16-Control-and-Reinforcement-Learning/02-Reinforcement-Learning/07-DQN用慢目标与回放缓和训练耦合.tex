@@ -1,10 +1,6 @@
 \section{DQN 用慢目标与回放缓和训练耦合}
 \label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/07}
 
-\begin{quote}
-\textbf{先抓住这一点：}经验回放减弱样本相关性，目标网络减慢标签漂移。它们是针对训练耦合的工程稳定器，不是一般收敛定理。
-\end{quote}
-
 Deep Q Network 用神经网络表示动作价值。离散动作下，网络通常输入状态 \(s\)，一次输出所有 \(Q(s,a;\theta)\)。先完整写出它的训练目标。这个写法明确暴露三种耦合：数据由变化中的行为策略产生，监督目标来自另一个价值网络，当前参数又同时决定未来行为。对经验
 
 \[

@@ -1,10 +1,6 @@
 \section{LZ 编码：不假设分布的通用压缩}
 \label{sec:07-Information-Theory/04-Source-Coding/06}
 
-\begin{quote}
-\textbf{先抓住这一点：}数据里如果出现过一段相同内容，与其再写一遍，不如告诉解码器``回到前面某处复制这么长''。LZ 一边读取一边建立这种共享记忆，因此不必事先拿到真实分布。
-\end{quote}
-
 前面几篇的理想构造大多从已知信源模型出发：Huffman 与算术编码需要概率，率失真函数也依赖信源分布。但现实中的文本、代码和日志往往只能边读边摸索规律。LZ（Lempel--Ziv）编码直接利用已经出现的字符串。DEFLATE、LZW 等具体家族被 gzip、PNG、GIF 以及部分 ZIP 格式采用，但这些文件格式还包含其他协议与编码步骤。
 
 \subsection{先感受困难：分布未知，码表从何而来}

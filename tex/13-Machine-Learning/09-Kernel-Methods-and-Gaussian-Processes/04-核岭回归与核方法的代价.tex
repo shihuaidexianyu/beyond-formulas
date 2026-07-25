@@ -1,18 +1,14 @@
 \section{核岭回归与核方法的代价}
 \label{sec:13-Machine-Learning/09-Kernel-Methods-and-Gaussian-Processes/04}
 
-上一节的表示定理许诺：``经验损失加范数惩罚''的无穷维问题必然塌缩成 \(n\) 维问题。本节先兑现这个许诺——用于平方损失，推出核岭回归的闭式解；再把它与\hyperref[sec:13-Machine-Learning/02-Linear-Models/02]{``正则化从 Ridge 到 Lasso''}中的原始形式对照，看清同一件事的两种视角；最后清点账单：Gram 矩阵的存储与求逆代价划定了朴素核方法的规模边界，而 \(\norm{f}_{\mathcal{H}_k}\) 与泛化理论的联系则解释了为什么这笔账值得付。
-
-\begin{quote}
-\textbf{先抓住这一点：}核方法消除了对特征维数的显式依赖，却把计算负担转移到了样本数：训练要处理 \(n\times n\) 的 Gram 矩阵，预测还要重新访问许多训练点。核化不是免费升维，而是用样本空间中的二次存储与三次求解交换特征空间的表达力。
-\end{quote}
+上一节的表示定理许诺：``经验损失加范数惩罚''的无穷维问题必然塌缩成 \(n\) 维问题。本节先兑现这个许诺——用于平方损失，推出核岭回归的闭式解；再把它与\hyperref[sec:13-Machine-Learning/02-Linear-Models/02]{``正则化从 Ridge 到 Lasso''}中的原始形式对照，看清同一件事的两种视角；最后清点账单：Gram 矩阵的存储与求逆代价划定了朴素核方法的规模边界。核方法消除了对特征维数的显式依赖，却把计算负担转移到了样本数：训练要处理 \(n\times n\) 的 Gram 矩阵，预测还要重新访问许多训练点。核化不是免费升维，而是用样本空间中的二次存储与三次求解交换特征空间的表达力。
 
 \subsection{从表示定理到 n 维问题}
 
 给定训练数据 \((x_1,y_1),\dots,(x_n,y_n)\)，核 \(k\)，正则参数 \(\lambda>0\)。核岭回归求解
 
 \[
-\min_{f\in\mathcal{H}_k}\ 
+\min_{f\in\mathcal{H}_k}\
 \sum_{i=1}^{n}\bigl(y_i-f(x_i)\bigr)^{2}
 +\lambda n\,\norm{f}_{\mathcal{H}_k}^{2}.
 \]
@@ -28,7 +24,7 @@ f(x_i)=\sum_{j=1}^{n}K_{ij}\alpha_j=(K\alpha)_i,
 问题化为 \(n\) 维二次问题
 
 \[
-\min_{\alpha\in\R^{n}}\ 
+\min_{\alpha\in\R^{n}}\
 \norm{y-K\alpha}^{2}+\lambda n\,\alpha^{\trans}K\alpha.
 \]
 
@@ -107,7 +103,7 @@ RBF 核的 \(\gamma\) 控制相似度的长度尺度。\(\gamma\) 大，\(k(x,z)
 \begin{itemize}
 \tightlist
 \item
-  Nyström 近似：抽样 \(m\ll n\) 个锚点，只用 \(K\) 的对应列做低秩近似 \(K\approx CW^{-1}C^{\trans}\)，把存储与求解降到 \(O(nm)\) 与 \(O(m^{3})\) 量级，本质是承认 Gram 矩阵通常近似低秩；
+  Nyström 近似：抽样 \(m\ll n\) 个锚点，只用 \(K\) 的对应列做低秩近似 \(K\approx CW^{-1}C^{\trans}\)，把存储与求解降到 \(O(nm)\) 与 \(O(m^{3})\) 量级；
 \item
   随机特征（random features）：对平移不变核显式构造低维特征 \(z(x)\in\R^{m}\)，使 \(\ip{z(x)}{z(x')}\approx k(x,x')\)，然后回到原始形式训练线性模型——核被重新``显式化''，训练成本回到线性模型的水平。
 \end{itemize}

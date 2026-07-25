@@ -1,10 +1,6 @@
 \section{最大似然选择最能解释数据的参数}
 \label{sec:11-Mathematical-Statistics/02-Point-Estimation/03}
 
-\begin{quote}
-\textbf{先抓住这一点：}最大似然固定已经观察到的数据，比较不同参数会给这份数据多大密度或概率。它不是参数为真的概率；其良好性质也依赖模型可辨认、正则条件和样本规模。
-\end{quote}
-
 给定观测 \(x=(x_1,\ldots,x_n)\)，似然函数把联合密度（离散情形为联合概率质量）视为参数的函数：
 
 \[
@@ -113,7 +109,7 @@ score 定义为
 \[
 U(\theta) = \nabla_\theta\ell(\theta).
 \]
-内部 MLE 通常满足 \(U(\hat\theta)=0\)。负 Hessian
+内部 MLE 满足 \(U(\hat\theta)=0\)。负 Hessian
 
 \[
 -\nabla_\theta^2\ell(\theta)
@@ -125,7 +121,7 @@ U(\theta) = \nabla_\theta\ell(\theta).
 
 \subsection{大样本优良性质有前提}
 
-在可识别、真参数位于内部、模型光滑、信息有限且非奇异等正则条件下，MLE 通常一致并渐近正态：
+在可识别、真参数位于内部、模型光滑、信息有限且非奇异等正则条件下，MLE 一致并渐近正态：
 
 \[
 \sqrt n
@@ -144,20 +140,6 @@ N(0,I(\theta_0)^{-1}),
 
 若真实分布不在模型族中，MLE 往往收敛到使 Kullback--Leibler divergence 最小的伪真参数。普通 Fisher 信息逆不一定给出正确方差，需要 sandwich variance 等稳健修正。
 
-复杂模型的 log-likelihood 可能非凸，有多个局部极大。算法停止在一个驻点，不自动等于全局 MLE；初始化、边界、梯度检查和 profile likelihood 都可能重要。
+复杂模型的 log-likelihood 可能非凸，有多个局部极大。算法停止在一个驻点，不等于全局 MLE；初始化、边界、梯度检查和 profile likelihood 都可能重要。
 
-数值实现应：
-
-\begin{itemize}
-\tightlist
-\item
-  计算 log-likelihood 而非概率乘积；
-\item
-  对概率和协方差使用稳定参数化；
-\item
-  检查参数空间边界与约束；
-\item
-  同时报告优化状态、梯度和 Hessian 条件；
-\item
-  区分算法误差与模型不确定性。
-\end{itemize}
+数值实现中，应计算 log-likelihood 而非概率乘积来避免下溢；对概率和协方差使用稳定参数化；检查参数空间边界与约束；同时报告优化状态、梯度和 Hessian 条件；区分算法误差与模型不确定性。

@@ -1,10 +1,6 @@
 \section{Jacobian 与多元链式法则}
 \label{sec:02-Calculus/06-Multivariable-Calculus/04}
 
-\begin{quote}
-\textbf{先抓住这一点：}当函数的输入和输出都是向量时，一个斜率已经不够用了，Jacobian 矩阵就是它在局部最像的线性变换。两个函数接在一起，局部变换也依次接在一起，所以链式法则表现为矩阵相乘。
-\end{quote}
-
 \subsection{向量值函数的导数必须是矩阵}
 
 设
@@ -61,7 +57,7 @@ J_{G\circ F}(\mathbf x)
 =J_G(F(\mathbf x))\,J_F(\mathbf x).
 \]
 
-矩阵顺序从信息流看非常自然：输入变化先乘 \(J_F\)，再乘 \(J_G\)。反过来通常尺寸不合，也表示错误的处理顺序。
+矩阵顺序从信息流看非常自然：输入变化先乘 \(J_F\)，再乘 \(J_G\)。反过来尺寸不合，也表示错误的处理顺序。
 
 设 \(z=g(u,v)\)，而 \(u=u(x,y),v=v(x,y)\)，则
 
@@ -111,6 +107,7 @@ J_{g\circ F} = \begin{bmatrix}
 1&1\\  y&x
 \end{bmatrix},
 \]
+
 得到
 
 \[
@@ -129,15 +126,15 @@ J_{g\circ F} = \begin{bmatrix}
 
 \subsection{局部可逆性}
 
-若 \(F:\R^n\to\R^n\) 且 \(\det J_F(\mathbf a)\ne0\)，逆函数定理保证在 \(\mathbf a\) 附近存在可微局部逆，并且
+若 \(F:\R^n\to\R^n\) 且 \(\det J_F(\mathbf a)\ne0\)，逆函数定理断言在 \(\mathbf a\) 附近存在可微局部逆，并且
 
 \[
 J_{F^{-1}}(F(\mathbf a))
 =J_F(\mathbf a)^{-1}.
 \]
 
-非零行列式表示局部线性化没有把某个方向压扁。它是局部条件，不自动保证全局一一对应；极坐标映射就具有周期重复和原点退化。
+非零行列式表示局部线性化没有把某个方向压扁。它是局部条件，不保证全局一一对应；极坐标映射就具有周期重复和原点退化。
 
 机械臂的关节角 \(\mathbf q\) 通过 \(F(\mathbf q)\) 决定末端位置，速度关系是 \(\dot{\mathbf x}=J_F(\mathbf q)\dot{\mathbf q}\)。奇异姿态会压扁某个运动方向，使指定的末端速度可能无解；接近奇异时，逆解又可能要求极大的关节速度。危险来自 Jacobian 的方向退化，不只是公式中恰好出现除零。
 
-到这里，一阶局部信息的链条就完整了：偏导数看坐标方向，Jacobian 组织所有方向，链式法则处理复合，局部可逆性由行列式非零保证。接下来是二阶信息——曲率如何决定临界点附近的形状，将在\hyperref[sec:02-Calculus/06-Multivariable-Calculus/05]{``Hessian 与无约束极值''}一节展开。
+到这里，一阶局部信息的链条就完整了：偏导数看坐标方向，Jacobian 组织所有方向，链式法则处理复合，局部可逆性由行列式非零支撑。接下来是二阶信息——曲率如何决定临界点附近的形状，将在\hyperref[sec:02-Calculus/06-Multivariable-Calculus/05]{``Hessian 与无约束极值''}一节展开。
