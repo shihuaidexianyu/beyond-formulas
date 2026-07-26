@@ -18,7 +18,7 @@ Part 11 的 Fisher 信息把``参数微小改变时分布有多容易区分''量
 
 \subsection{一个具体算例}
 
-Bernoulli 分布族 \(\Bern(p)\), \(p\in(0,1)\)：Fisher 信息 \(I(p)=1/[p(1-p)]\)。在 \(p=0.5\) 处 \(I=4\)（最易分辨），在 \(p=0.01\) 处 \(I\approx 101\)（更难分辨——分布几乎退化）。自然梯度下降步长 \(\Delta p\propto I(p)^{-1}\nabla\ell=p(1-p)\nabla\ell\)：在 \(p\) 接近边界时自动缩短步长，避免跳出 \([0,1]\)。
+Bernoulli 分布族 \(\Bernoulli(p)\), \(p\in(0,1)\)：Fisher 信息 \(I(p)=1/[p(1-p)]\)。在 \(p=0.5\) 处 \(I=4\)（最易分辨），在 \(p=0.01\) 处 \(I\approx 101\)（更难分辨——分布几乎退化）。自然梯度下降步长 \(\Delta p\propto I(p)^{-1}\nabla\ell=p(1-p)\nabla\ell\)：在 \(p\) 接近边界时自动缩短步长，避免跳出 \([0,1]\)。
 
 \subsection{怎么读这一章}
 

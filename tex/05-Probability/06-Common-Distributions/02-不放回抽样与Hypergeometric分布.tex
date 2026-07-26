@@ -100,7 +100,7 @@ P(I_i=1)=\frac{K}{N},\qquad i=1,\ldots,n.
 
 回到零件例子感受一下数字。Binomial\((10,0.08)\) 的方差是 \(10\times0.08\times0.92=0.736\)。Hypergeometric 的方差是 \(0.736\times(100-10)/(100-1)\approx0.736\times0.909=0.669\)。不放回把方差缩小了约 \(9\%\)——不算剧烈，但如果你抽的不是 \(10\) 个而是 \(50\) 个，Binomial 方差 \(50\times0.08\times0.92=3.68\)，而 Hypergeometric 方差要乘上 \((100-50)/(100-1)\approx0.505\)，只有约 \(1.86\)，差了一倍。抽样越多，两种模型的分歧越大。
 
-\subsection{Binomial 近似：\"足够大\"有多\"大\"}
+\subsection{Binomial 近似：``足够大''有多``大''}
 
 当总体很大而你只摸了很小一部分时，不放回对组成的扰动微乎其微。此时
 
@@ -120,7 +120,7 @@ Hypergeometric 可以用
 
 还有一个更隐蔽的问题：即使方差近似尚可，Hypergeometric 的尾部行为和 Binomial 仍有差别。因为总体中成功对象数量有硬上限，Hypergeometric 的右尾在接近 \(K\) 时会被截断，而 Binomial 的正态近似则允许理论上任意大的值。做极端尾部概率计算时，Binomial 近似可能给出物理上不可能的结论。
 
-\subsection{区别不在\"是否放回\"，在\"随机性的来源\"}
+\subsection{区别不在``是否放回''，在``随机性的来源''}
 
 放回是 Binomial 模型最自然的物理实现；不放回是 Hypergeometric 最自然的物理实现。但二选一不应只看物理操作。
 

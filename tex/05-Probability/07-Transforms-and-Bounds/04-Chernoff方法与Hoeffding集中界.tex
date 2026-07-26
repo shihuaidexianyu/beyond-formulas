@@ -220,8 +220,15 @@ Chebyshev 还在四分之一级别，Hoeffding 已经跟真实概率在数量级
 \tightlist
 \item Chebyshev：\(0.025\)；
 \item Hoeffding：\(2e^{-20} \approx 4.1\times 10^{-9}\)；
-\item 精确值：\[
-P(|\bar X_{1000}-0.5|\ge 0.1) = P(|S_{1000}-500|\ge 100) \approx 2(1-\Phi(100/\sqrt{250})) \approx 2(1-\Phi(6.32)) \approx 2.6\times 10^{-10}.
+\item 精确值：
+\[
+\begin{aligned}
+P(|\bar X_{1000}-0.5|\ge 0.1)
+&=P(|S_{1000}-500|\ge 100)\\
+&\approx 2\bigl(1-\Phi(100/\sqrt{250})\bigr)
+\approx 2\bigl(1-\Phi(6.32)\bigr)
+\approx 2.6\times 10^{-10}.
+\end{aligned}
 \]
 \end{itemize}
 在这个量级上，Hoeffding 和精确值只差一个数量级左右，Chebyshev 差了几个宇宙。

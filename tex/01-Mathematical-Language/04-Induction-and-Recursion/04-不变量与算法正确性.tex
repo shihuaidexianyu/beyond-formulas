@@ -69,10 +69,13 @@ s_{\text{new}} = s_{\text{old}} + k_{\text{new}}.
 \]
 由归纳假设 \(s_{\text{old}} = k_{\text{old}}(k_{\text{old}}+1)/2\)，而 \(k_{\text{new}} = k_{\text{old}}+1\)。代入：
 \[
-s_{\text{new}} = \frac{k_{\text{old}}(k_{\text{old}}+1)}{2} + (k_{\text{old}}+1)
-= \frac{k_{\text{old}}(k_{\text{old}}+1) + 2(k_{\text{old}}+1)}{2}
-= \frac{(k_{\text{old}}+1)(k_{\text{old}}+2)}{2}
+\begin{aligned}
+s_{\text{new}}
+&= \frac{k_{\text{old}}(k_{\text{old}}+1)}{2} + (k_{\text{old}}+1)\\
+&= \frac{k_{\text{old}}(k_{\text{old}}+1) + 2(k_{\text{old}}+1)}{2}\\
+&= \frac{(k_{\text{old}}+1)(k_{\text{old}}+2)}{2}
 = \frac{k_{\text{new}}(k_{\text{new}}+1)}{2}.
+\end{aligned}
 \]
 同时 \(k_{\text{new}}\le n\)（否则循环不会进入这一轮），\(k_{\text{new}}\ge 0\) 显然。\(I\) 保持住了。
 

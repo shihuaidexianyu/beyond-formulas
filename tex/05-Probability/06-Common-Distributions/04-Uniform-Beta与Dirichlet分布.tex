@@ -7,7 +7,7 @@
 
 这三个分布——Uniform、Beta、Dirichlet——共享同一个核心问题：如何在有边界的空间里灵活地分配概率。区间、线段上的比例、或者单纯形上的概率向量，都是受约束的空间，而这三个分布提供了递进的建模工具。
 
-\subsection{Uniform：\"均匀\"是个比想象中更狡猾的词}
+\subsection{Uniform：``均匀''是个比想象中更狡猾的词}
 
 \(X\sim\mathrm{Unif}(a,b)\)，密度很直白：
 
@@ -82,7 +82,7 @@ B(\alpha,\beta)=\frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha+\beta)}.
 
 把总量 \(\alpha+\beta\) 称为浓度。均值由比值 \(\alpha/(\alpha+\beta)\) 决定——这是你的最佳猜测落在哪里。浓度决定分布围绕那个猜测有多紧密——浓度越大，方差越小，你越确信。两个参数控制两个维度，方向感和确信度分开调节，正是 Beta 比 Uniform 灵活的关键。
 
-\subsection{数据和先验怎么\"自然\"地合在一起}
+\subsection{数据和先验怎么``自然''地合在一起}
 
 Beta 和 Bernoulli/Binomial 之间的配合度在概率分布中几乎是教科书级的。设未知成功率 \(p\) 的先验为 \(\operatorname{Beta}(\alpha,\beta)\)。独立试验中观察到 \(s\) 次成功、\(f\) 次失败。似然中和 \(p\) 有关的部分是
 
@@ -146,7 +146,11 @@ p=(p_1,\ldots,p_K),\qquad p_i\ge0,\;\sum_{i=1}^{K}p_i=1
 \end{cases}
 \]
 
-协方差对 \(i\neq j\) 始终为负——这个是单纯形的几何强制，不是偶然。总和固定为一，任何一个分量增大一定挤占其他分量的空间。更精确地说，任意两个分量的相关系数为 \(-\sqrt{\alpha_i\alpha_j/[(\alpha_0-\alpha_i)(\alpha_0-\alpha_j)]}\)。所有配对的相关结构被同一组 \(\alpha\) 参数完全锁定。
+协方差对 \(i\neq j\) 始终为负——这个是单纯形的几何强制，不是偶然。总和固定为一，任何一个分量增大一定挤占其他分量的空间。更精确地说，任意两个分量的相关系数为
+\[
+-\sqrt{\frac{\alpha_i\alpha_j}{(\alpha_0-\alpha_i)(\alpha_0-\alpha_j)}}.
+\]
+所有配对的相关结构被同一组 \(\alpha\) 参数完全锁定。
 
 对 Multinomial 类别计数 \(n_1,\ldots,n_K\)，Dirichlet 先验以完全相同的方式更新：
 
