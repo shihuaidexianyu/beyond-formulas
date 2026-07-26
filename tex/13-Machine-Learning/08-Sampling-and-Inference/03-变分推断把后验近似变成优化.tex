@@ -1,93 +1,133 @@
 \section{变分推断把后验近似变成优化}
 \label{sec:13-Machine-Learning/08-Sampling-and-Inference/03}
 
-MCMC 试图让样本长期服从真实 posterior，但在海量数据或复杂隐变量模型中，充分混合可能太慢。Variational inference 选择另一种交易：在易于计算的分布族 \(\mathcal Q\) 中寻找一个 \(q_\phi(z)\) 近似 posterior。变分推断在受限分布族中最大化 ELBO，等价于缩小特定方向的 KL。优化收敛仍可能留下表达误差、局部最优和系统性低估不确定性。
+上一节的 MCMC 做了一件很重的事：构造一条 Markov 链，让它跑足够久，使得链上的状态逐步服从目标后验分布。理论保证是渐近的——链足够长时，收集的样本来自正确的分布。但在两个现实面前，这个方案会很吃力。
 
-对任意 \(q_\phi\)，把 \(\log p(x)\) 写入 \(q_\phi\) 下的期望（它对 \(z\) 是常数）并加减 \(\log q_\phi(z)\)：
+第一个现实是数据量。你有 100 万个样本，每次计算后验密度需要遍历全部数据，MCMC 每走一步就要付出这个代价。第二条链跑 10000 步就要求 100 亿次密度评估——而你还需要判断它是否已经混合。
+
+第二个现实是后验形状。假设真实后验有两个被低概率区域隔开的峰，一个峰代表``参数在 2 附近''的解释，另一个峰代表``参数在 8 附近''。MCMC 链可能在一个峰附近停留几千步，trace 图看起来已经平稳，acceptance rate 也健康——但它从未访问过另一个峰。你根据这条链计算的 posterior mean 大约是 2，而真实后验的期望是 5。
+
+变分推断（variational inference）选择了一条完全不同的路。它不试图从后验中采样。它问的是：在一个容易处理的分布族 \(\mathcal Q\) 中，哪一个成员 \(q_\phi(z)\) 最接近真实后验 \(p(z\mid x)\)？推断不再是采样问题，而是优化问题。
+
+\subsection{ELBO 把推断变成最大化}
+
+从同一个恒等式出发。对任意分布 \(q_\phi(z)\)：
 
 \[
 \log p(x)
-=\E_{q_\phi}\!\left[\log\frac{p(x,z)}{p(z\mid x)}\right]
-=\E_{q_\phi}\!\left[\log\frac{p(x,z)}{q_\phi(z)}\right]
-+\E_{q_\phi}\!\left[\log\frac{q_\phi(z)}{p(z\mid x)}\right].
+= \E_{q_\phi}\!\left[\log\frac{p(x,z)}{q_\phi(z)}\right]
++ \E_{q_\phi}\!\left[\log\frac{q_\phi(z)}{p(z\mid x)}\right].
 \]
 
 第一项记为
 
 \[
 \mathcal L(\phi)
-=\E_{q_\phi}
-[\log p(x,z)-\log q_\phi(z)],
+= \E_{q_\phi}[\log p(x,z) - \log q_\phi(z)],
 \]
 
-称为 ELBO；第二项正是 \(q_\phi\) 与真实 posterior 的 KL 散度，于是
+称为证据下界（ELBO）。第二项是 \(q_\phi\) 与真实后验的 KL 散度：
 
 \[
-\log p(x)
-=\mathcal L(\phi)
-+\KL
-\bigl(q_\phi(z)\|p(z\mid x)\bigr).
+\log p(x) = \mathcal L(\phi) + \KL\bigl(q_\phi(z)\|p(z\mid x)\bigr).
 \]
 
-因为 evidence \(\log p(x)\) 与 \(\phi\) 无关，最大化 ELBO 等价于最小化
+等式左边——观测数据的对数证据 \(\log p(x)\)——与变分参数 \(\phi\) 无关。因此最大化 ELBO 精确等价于最小化 \(\KL(q_\phi\|p)\)。KL 非负，ELBO 永远是证据的下界；当 \(q_\phi\) 恰好等于真实后验时，KL 归零，ELBO 触及证据值。
+
+于是后验推断变成了：选定一个分布族 \(\mathcal Q\)，在这个族内找一个使 ELBO 最大的成员。优化目标 ELBO 可以计算——它只涉及联合分布 \(p(x,z)\) 和变分分布 \(q_\phi\)，不需要计算真实后验本身。代价从一开始就写在了公式里：即使优化完全成功，你得到的也只是 \(\mathcal Q\) 中最好的那个近似，不是真实后验本身。变分族预先决定了哪些后验形状永远无法表达。
+
+\subsection{Mean field：用独立性换可计算性}
+
+最常见的选择是 mean-field 族——假设所有隐变量（或隐变量组）在近似后验中彼此独立：
 
 \[
-\KL(q_\phi\|p).
+q(z) = \prod_{j=1}^m q_j(z_j).
 \]
 
-后验推断于是变成优化问题。但优化目标可算，不等于近似误差消失；变分族已经预先决定了哪些 posterior 形状永远无法表达。
+这是一个很强的假设。真实后验中 \(z_1\) 和 \(z_2\) 可能高度相关，但 mean-field \(q\) 里它们的联合分布被强制写成边缘的乘积。交换条件是优化变得极为简单：固定其他所有因子，对单个 \(q_j\) 的最优解有闭式。
 
-\subsection{Mean field 用独立性换可计算性}
-
-最常见选择是
+推导只有一步。把 ELBO 中涉及 \(q_j\) 的部分单独拎出来：
 
 \[
-q(z)=\prod_jq_j(z_j).
+\mathcal L
+= \E_{q_j}\bigl[\E_{q_{-j}}\log p(x,z)\bigr]
+- \E_{q_j}[\log q_j(z_j)]
++ \text{与 }q_j\text{ 无关的常数}.
 \]
 
-固定其他因子时，对 \(q_j\) 优化 ELBO 可得
+这个形式等于 \(-\KL(q_j\|\tilde p_j)\) 加上常数，其中
+
+\[
+\tilde p_j(z_j) \propto \exp\!\bigl(\E_{q_{-j}}[\log p(x,z)]\bigr).
+\]
+
+KL 散度在 \(q_j = \tilde p_j\) 时取得最小值零，因此最优因子就是：
 
 \[
 \log q_j^*(z_j)
-=\E_{q_{-j}}[\log p(x,z)]
-+\text{constant}.
+= \E_{q_{-j}}[\log p(x,z)]
++ \text{常数}.
 \]
 
-理由只有一步：把 ELBO 中依赖 \(q_j\) 的部分整理出来，即 \(\mathcal L=\E_{q_j}\bigl[\E_{q_{-j}}\log p(x,z)\bigr]-\E_{q_j}[\log q_j(z_j)]+\text{constant}\)，它等于 \(-\KL(q_j\|\tilde p_j)\) 加常数，其中 \(\tilde p_j(z_j)\propto\exp\bigl(\E_{q_{-j}}\log p(x,z)\bigr)\)；KL 散度在 \(q_j=\tilde p_j\) 时取零，最优因子因此就是上式。
+常数由归一化条件决定。在指数族模型与共轭先验的搭配下，\(q_j^*\) 的解析形式与先验属于同一族——这就是 coordinate ascent variational inference（CAVI）的基础。每次更新一个因子，轮转遍历，ELBO 单调上升。
 
-在共轭模型中，这给出解析的 coordinate ascent 更新。它与 EM（见上一单元\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/04]{``EM 用下界交替完成隐变量学习''}）外形相似，但 EM 的 E 步使用当前参数下的精确潜变量 posterior，并把参数当点估计；变分 Bayes 还可为参数保留分布，只是用受限 \(q\) 近似整个 posterior。
+这个公式与 EM（\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/04]{``EM 用下界交替完成隐变量学习''}）的 E 步外形相似，但角色不同。EM 的 E 步使用当前参数下的精确后验，并在 M 步把参数当作点估计来更新；变分推断可以为参数也保留一个分布——参数不再是标量，而是一个概率分布——代价是这个分布被约束在 mean-field 的独立性框架内。
 
-若解析期望不可得，可以用 Monte Carlo 估计梯度。对可重参数化变量写
+\subsection{重参数化让梯度流过随机性}
+
+当解析期望不可得时，需要用 Monte Carlo 估计 ELBO 的梯度。直接对 \(\E_{q_\phi}[f(z)]\) 关于 \(\phi\) 求导不能简单地把梯度移进期望号——分布本身依赖 \(\phi\)。
+
+重参数化技巧（reparameterization trick）解决这个问题。如果存在一个变换
 
 \[
-z=g_\phi(\varepsilon),\qquad
-\varepsilon\sim p(\varepsilon),
+z = g_\phi(\varepsilon),\qquad \varepsilon \sim p(\varepsilon),
 \]
 
-便能把分布参数的梯度传过随机生成过程。此时又引入随机优化误差，需要区分：
+使得 \(z\) 在分布上等于 \(q_\phi(z)\)，而噪声 \(\varepsilon\) 的分布不依赖 \(\phi\)，那么
+
+\[
+\nabla_\phi \E_{q_\phi}[f(z)]
+= \E_{p(\varepsilon)}[\nabla_\phi f(g_\phi(\varepsilon))].
+\]
+
+梯度传过了随机生成过程。最经典的例子是 Gaussian 变分分布：\(z = \mu + \sigma \odot \varepsilon\)，\(\varepsilon \sim \mathcal N(0,I)\)。参数 \(\phi = (\mu,\sigma)\) 被移到了确定性变换中，Monte Carlo 梯度估计只需要从固定的标准正态采样。
+
+这时出现了三层误差，需要区分清楚：
 
 \begin{itemize}
 \tightlist
 \item
-  优化误差：尚未找到当前变分族中的最佳 \(q\)；
+  优化误差：你还没有找到 \(\mathcal Q\) 中 ELBO 最大的那个成员——梯度下降可能停在局部最优，或尚未收敛；
 \item
-  Monte Carlo 误差：随机梯度估计有限；
+  Monte Carlo 误差：你用有限样本估计的梯度不等于真实梯度——样本量决定了这层误差的大小；
 \item
-  近似误差：即使优化完全，\(\mathcal Q\) 仍无法表示真实 posterior；
+  近似误差：即使优化完全成功，\(\mathcal Q\) 本身可能无法表达真实后验的形状——这是变分推断的结构性代价；
 \item
-  模型误差：整个概率模型与数据生成过程不符。
+  模型误差：你的概率模型 \(p(x,z)\) 与数据生成过程之间的差距——这不是推断方法的问题，而是建模的问题。
 \end{itemize}
 
-\subsection{KL 的方向会改变近似行为}
+其中只有第一项可以通过更好的优化器或更多迭代来消除。后两项是变分推断从起点就接受的代价。
 
-\(\KL(q\|p)\) 对 \(q\) 把质量放到 \(p\) 很小的区域惩罚很重，而对 \(q\) 漏掉某个 \(p\) 的模式不一定同样敏感。因此在双峰 posterior 上，一个单峰 Gaussian \(q\) 常选择覆盖某一个峰，而不是在两峰之间铺开。上一节的双峰例子里，单链可能困在一个峰而 trace 看似平稳；这里则是近似族主动放弃另一个峰——失效机制不同，表象同样具有迷惑性。这种 mode-seeking 行为会低估尾部或多峰不确定性。
+\subsection{KL 的方向决定近似的性格}
 
-mean-field 还会删除变量间 posterior 相关。即使每个边际均值看似准确，联合决策所需的 covariance 也可能严重偏小。ELBO 上升只说明当前近似目标改善，并不证明 predictive calibration 或可信区间覆盖正确。
+\(\KL(q\|p)\)——变分推断最小化的那个 KL——有一个具体的行为特征。当 \(p\) 在某处概率接近零而 \(q\) 在该处有质量时，对数项 \(\log(q/p)\) 很大，KL 惩罚很重。反过来，当 \(p\) 在某处有显著概率而 \(q\) 在该处质量很小，\(q \log(q/p)\) 中 \(q\) 本身已经很小，乘积不一定大。
 
-更丰富的 full-covariance family、mixture、normalizing flow 或结构化变分分布可以减小表达限制，但也增加计算和优化难度。最优 ELBO 不会因扩大族而变差，实际优化结果却可能因非凸性反而更不稳定。
+所以最小化 \(\KL(q\|p)\) 的 \(q\) 倾向于避开 \(p\) 概率小的区域——它宁可漏掉 \(p\) 的某个模式，也不愿把概率质量放在 \(p\) 不支持的地方。这种行为叫 mode-seeking。
 
-\subsection{怎样知道近似是否够用}
+回到本节开头的双峰后验例子。一个单峰 Gaussian 变分分布在最小化 \(\KL(q\|p)\) 时，会选择贴住双峰中的一个，而不是在两者之间取平均位置。它给另一个峰分配的概率质量几乎为零。你看着 ELBO 曲线平稳收敛，看着变分参数不再变化——一切指标都健康——但你得到的后验近似约等于真实后验的一半。基于这个近似计算出的 posterior predictive 方差会严重低估不确定性。
 
-在小规模版本上，可与精确枚举或经过诊断的 MCMC 比较边际、相关、尾概率和 posterior predictive 分布。多初始化能暴露局部最优；逐步增加变分族容量，可以观察关键结论是否稳定。
+Mean-field 的独立性假设从另一个角度削掉了不确定性。即使每个 \(z_j\) 的边缘均值看起来合理，它们之间的 correlation 被强制设为零。两个变量在真实后验中同涨同跌，在 mean-field 近似中却各自独立变动。联合决策所需的 covariance 可能比真实值小一个数量级。
 
-评估必须针对用途。若只需 posterior predictive mean，低估 covariance 可能影响有限；若要用尾概率触发高风险决策，同样的近似就可能不可接受。ELBO 不是 held-out predictive score，也不能跨不同模型或实现无条件比较。
+更丰富的变分族——full-covariance Gaussian、mixture of Gaussians、normalizing flow、结构化的依赖关系——可以缓解这些限制，但代价是优化更难、计算更贵。扩大族不会让最优 ELBO 变差（更大的搜索空间只会找到更好或同等的解），但非凸优化可能让实际找到的解反而更不稳定。
+
+\subsection{怎样判断近似是否够用}
+
+ELBO 本身不能回答这个问题。ELBO 上升只说明近似分布在自己和自己比较的意义上更接近真实后验了；它不告诉你距离真实后验还有多远，也不告诉你被丢掉的那部分后验质量对你的下游任务是否致命。
+
+在小规模问题上可以做的事：找一个可以精确计算后验的情况（比如小数据、共轭模型），或者跑一条经过充分诊断的长 MCMC 链作为参考，然后比较边际分布、相关系数、尾概率和 posterior predictive 分布。如果变分近似在简化版问题上就已经丢失了关键结构，全尺寸版本的结论就需要格外谨慎。
+
+多初始化暴露局部最优：从不同的随机起点运行变分优化，检查是否收敛到相近的解。如果五个起点给出五组不同的变分参数和不同的预测结论，优化本身可能尚未解决。
+
+逐步增加族容量：从 mean-field 到 full-covariance，再到 mixture，观察关键结论是否稳定。如果加一个成分就让某个效应的方向逆转，那么 mean-field 的结论本身就不够可靠。
+
+评估必须针对用途。如果你的下游任务只需要 posterior predictive mean——比如预测一批新机台的振动等级——低估 covariance 的影响可能有限；如果你要根据 posterior 的 99\% 分位数决定是否停机检修，同样的近似就可能不可接受。ELBO 不是 held-out predictive score，不能跨模型或跨实现做无条件比较。它只是优化器的手柄，不是裁判的打分牌。

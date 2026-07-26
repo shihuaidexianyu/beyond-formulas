@@ -1,94 +1,104 @@
 \section{Trace 怎样整理二次型微分}
 \label{sec:10-Matrix-Calculus/03-Trace-Calculus/01}
 
-矩阵求导常以标量目标结束。任何标量都等于自己的 trace，因此可以把内积和二次型统一放进 trace 中，再利用循环性质把微分移动到便于读取的位置。
-
-最基本的规则包括：
+取一个简单到可以心算的情形：\(f(x)=x^{\trans}Ax\)，其中 \(A=\begin{bmatrix}0&2\\0&0\end{bmatrix}\)，\(x=\begin{bmatrix}x_1\\x_2\end{bmatrix}\)。直接展开：
 
 \[
-\trace(A+B) = \trace(A)+\trace(B),
-\]
-\[
-\trace(A) = \trace(A^{\trans}),
-\]
-以及在形状相容时
-
-\[
-\trace(ABC) = \trace(BCA)
-=\trace(CAB).
-\]
-最后一条只允许循环移动，不能任意交换因子顺序。矩阵乘法一般不交换。
-
-\subsection{线性 trace 先建立读取习惯}
-
-令 \(f(X)=\trace(A^{\trans}X)\)，其微分为 \(df=\trace(A^{\trans}\,dX)\)。直接与梯度定义比较，得到
-
-\[
-\nabla_Xf=A.
+x^{\trans}Ax
+=\begin{bmatrix}x_1&x_2\end{bmatrix}
+\begin{bmatrix}0&2\\0&0\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\end{bmatrix}
+=2x_1x_2.
 \]
 
-若写成 \(f(X)=\trace(AXB)\)，则 \(df=\trace(A\,dX\,B)=\trace(BA\,dX)\)。为了匹配 \(\trace(G^{\trans}dX)\)，有
+真实梯度是 \(\nabla f=\begin{bmatrix}2x_2\\2x_1\end{bmatrix}\)。但如果你背的是``二次型梯度是 \(2Ax\)''，算出来的是
 
 \[
-G=(BA)^{\trans}=A^{\trans}B^{\trans}.
+2Ax=2\begin{bmatrix}0&2\\0&0\end{bmatrix}
+\begin{bmatrix}x_1\\x_2\end{bmatrix}
+=\begin{bmatrix}4x_2\\0\end{bmatrix}.
 \]
 
-这里最容易漏掉最后的转置。不要把"\(dX\) 左边的东西"未经匹配就直接叫梯度。
+差了 \(\begin{bmatrix}-2x_2\\2x_1\end{bmatrix}\)。错误出在哪？\(A\) 不对称。`\(2Ax\)' 仅在 \(A\) 对称时有效。
 
-\subsection{\texorpdfstring{向量二次型为何出现 \(A+A^{\trans}\)}{向量二次型为何出现 A+A^{\trans}}}
+这个错误用一个 \(2\times2\) 的手算就能发现。但当变量升级为矩阵——\(f(X)=\trace(X^{\trans}AXB)\)——你不再能靠展开每个元素来验算。规则必须在推导阶段就准确。
 
-考虑
+\subsection{标量等于自己的 trace，微分可以穿透它}
+
+任何实标量 \(s\) 都满足 \(s=\trace(s)\)。把矩阵表达式包进 trace，就可以利用 \(d\trace(\cdot)=\trace(d(\cdot))\) 把微分送进去。最基本的运算规则：
 
 \[
-f(x)=x^{\trans}Ax.
+\trace(A+B)=\trace(A)+\trace(B),
+\qquad
+\trace(A)=\trace(A^{\trans}),
+\qquad
+\trace(ABC)=\trace(BCA)=\trace(CAB).
 \]
 
-微分同时作用到两个 \(x\)：
+最后一条只在形状相容时成立，且只能循环移动，不能任意交换因子顺序。矩阵乘法一般不交换。
+
+从线性 trace 开始建立读写节奏。若
 
 \[
-df
-=(dx)^{\trans}Ax+x^{\trans}A\,dx.
+f(X)=\trace(A^{\trans}X),
 \]
 
-第一项是标量，可以转置：
+则 \(df=\trace(A^{\trans}dX)\)，直接与 \(\trace(G^{\trans}dX)\) 对照得 \(\nabla_X f=A\)。
+
+稍复杂一点：\(f(X)=\trace(AXB)\)。则
 
 \[
-(dx)^{\trans}Ax = x^{\trans}A^{\trans}dx.
+df=\trace(A\,dX\,B)=\trace(BA\,dX).
 \]
-所以
+
+为了匹配梯度定义 \(\trace(G^{\trans}dX)\)，有 \(G^{\trans}=BA\)，所以
 
 \[
-df = x^{\trans}(A^{\trans}+A)dx
+\nabla_X f=(BA)^{\trans}=A^{\trans}B^{\trans}.
+\]
+
+这里最容易漏掉最后的转置。``\(dX\) 左边的东西''不是梯度，是梯度的转置。
+
+\subsection{向量二次型：反对称部分自动消失}
+
+回到开头的问题。\(f(x)=x^{\trans}Ax\) 的微分是
+
+\[
+df=(dx)^{\trans}Ax+x^{\trans}A\,dx.
+\]
+
+第一项是标量，转置它：\((dx)^{\trans}Ax=x^{\trans}A^{\trans}dx\)。于是
+
+\[
+df=x^{\trans}(A^{\trans}+A)dx
 =\bigl[(A+A^{\trans})x\bigr]^{\trans}dx,
 \]
-从而
+
+得到
 
 \[
-\nabla_xf=(A+A^{\trans})x.
+\nabla_x f=(A+A^{\trans})x.
 \]
 
-只有当 \(A\) 对称时，才简化为 \(2Ax\)。事实上
+当 \(A\) 对称时简化为 \(2Ax\)。但导致简化的不是``二次型''，是``\(A\) 对称''——这两个条件应当被分开陈述。
+
+为什么反对称部分对二次型没有贡献？任何向量 \(x\) 和反对称矩阵 \(W\)（\(W^{\trans}=-W\)）满足
 
 \[
-x^{\trans}Ax = x^{\trans}\left(\frac{A+A^{\trans}}{2}\right)x,
-\]
-反对称部分对二次型没有贡献：反对称矩阵 \(W\) 满足 \(x^{\trans}Wx=(x^{\trans}Wx)^{\trans}=-x^{\trans}Wx\)，故只能为零。直接背"二次型梯度是 \(2Ax\)"而忽略对称性，是错误的。
-
-更一般地，
-
-\[
-f(x)=\frac12x^{\trans}Ax+b^{\trans}x+c
+x^{\trans}Wx=(x^{\trans}Wx)^{\trans}=x^{\trans}W^{\trans}x=-x^{\trans}Wx,
 \]
 
-的梯度为
+因此 \(x^{\trans}Wx=0\)。只有 \(A\) 的对称部分 \(\frac{A+A^{\trans}}{2}\) 对二次型有实质影响。反对称部分在不同的 \(x\) 之间产生不同的值——只是对同一个 \(x\) 的二次型恰好为零。
+
+更一般的形式 \(f(x)=\frac12x^{\trans}Ax+b^{\trans}x+c\) 的梯度是
 
 \[
 \frac12(A+A^{\trans})x+b.
 \]
 
-若 \(A\) 是 Hessian 或协方差，本来就对称。
+当 \(A\) 是 Hessian 或协方差矩阵时，它本来就是对称的，不必额外对称化。
 
-\subsection{矩阵二次型需要保留两条路径}
+\subsection{矩阵二次型：变量的每次出现各产生一条路径}
 
 令
 
@@ -96,89 +106,105 @@ f(x)=\frac12x^{\trans}Ax+b^{\trans}x+c
 f(X)=\trace(X^{\trans}AXB),
 \]
 
-其中 \(A,B\) 为常矩阵。微分为
+其中 \(A,B\) 为常矩阵。\(X\) 在表达式中出现两次：一次是 \(X^{\trans}\)，一次是 \(X\)。微分必须同时击中两处：
 
 \[
-df = \trace\bigl((dX)^{\trans}AXB\bigr)
+df=\trace\bigl((dX)^{\trans}AXB\bigr)
 +\trace\bigl(X^{\trans}A(dX)B\bigr).
 \]
-第一项利用转置和循环可写成
+
+第一项用转置和循环处理：
 
 \[
-\trace\bigl((AXB)^{\trans}dX\bigr)
+\trace\bigl((dX)^{\trans}AXB\bigr)
+=\trace\bigl((AXB)^{\trans}dX\bigr),
 \]
 
-对应梯度 \(AXB\)。第二项循环为
+对应梯度贡献 \(AXB\)。
+
+第二项循环移动，把 \(dX\) 从中间移到右端：
 
 \[
-\trace(BX^{\trans}A\,dX) = \trace\bigl((A^{\trans}XB^{\trans})^{\trans}dX\bigr).
+\trace\bigl(X^{\trans}A(dX)B\bigr)
+=\trace\bigl(BX^{\trans}A\,dX\bigr)
+=\trace\bigl((A^{\trans}XB^{\trans})^{\trans}dX\bigr),
 \]
-因此
+
+对应梯度贡献 \(A^{\trans}XB^{\trans}\)。
+
+两项相加：
 
 \[
-\nabla_Xf = AXB+A^{\trans}XB^{\trans}.
+\nabla_X f=AXB+A^{\trans}XB^{\trans}.
 \]
-若 \(A,B\) 都对称，结果为 \(2AXB\)。再次可以看到，因变量 \(X\) 在表达式中出现两次，所以微分必须产生两条路径。
 
-\subsection{Frobenius 范数只是 trace 二次型}
+两条路径各自的贡献。若 \(A,B\) 都对称，结果简化为 \(2AXB\)——但这同样是因为对称性，不是因为``二次型''本身的什么特性。
 
-因为 Frobenius 范数平方即全部元素的平方和，
+\subsection{Frobenius 范数是 trace 二次型的特例}
+
+Frobenius 范数平方就是全部元素的平方和：
 
 \[
-\norm{ X}_F^2 = \trace(X^{\trans}X),
+\norm{X}_F^2=\trace(X^{\trans}X).
 \]
-有
+
+微分：
 
 \[
-d\norm{ X}_F^2 = 2\trace(X^{\trans}dX),
+d\norm{X}_F^2=\trace\bigl((dX)^{\trans}X\bigr)+\trace(X^{\trans}dX)
+=2\trace(X^{\trans}dX),
 \]
-所以
+
+所以 \(\nabla_X\frac12\norm{X}_F^2=X\)。
+
+更一般的形式是最小二乘的扩展版本：
 
 \[
-\nabla_X\frac12\norm{ X}_F^2=X.
+f(X)=\frac12\norm{AXB-C}_F^2.
 \]
 
-同理，对
-
-\[
-f(X)=\frac12\norm{ AXB-C}_F^2
-\]
-
-先对残差 \(R=AXB-C\) 求导得 \(df=\trace(R^{\trans}dR)\)，代入 \(dR=A\,dX\,B\) 并循环整理，
+设残差 \(R=AXB-C\)，则 \(df=\trace(R^{\trans}dR)\)。由于 \(dR=A\,dX\,B\)，
 
 \[
 df=\trace(R^{\trans}A\,dX\,B)
+=\trace(BR^{\trans}A\,dX)
 =\trace\bigl((A^{\trans}RB^{\trans})^{\trans}dX\bigr),
 \]
 
 得到
 
 \[
-\nabla_Xf=A^{\trans}(AXB-C)B^{\trans}.
+\nabla_X f=A^{\trans}(AXB-C)B^{\trans}.
 \]
 
-在图像恢复中，\(X\) 可以是待恢复图像，\(A\) 与 \(B\) 分别表示沿行、列方向的模糊或降采样，\(C\) 是实际观测。前向算子把图像变成 \(AXB\)，梯度则把观测残差通过 \(A^{\trans}\) 和 \(B^{\trans}\) 反投影回像素空间：哪些像素变化最能解释当前误差，由这个伴随作用决定。这里的转置不能凭"把模糊倒放"猜出；边界填充、采样位置和权重都必须与前向算子完全一致。若降采样已经丢失某些方向的信息，伴随只能把现有残差拉回，不能凭空恢复零空间中的细节，额外细节必须来自正则化或先验。
+\subsection{伴随：转置不是``把模糊倒放''}
 
-这也是链式法则中"伴随"的含义：前向 \(X\mapsto AXB\)，反向伴随 \(G\mapsto A^{\trans}GB^{\trans}\) 正是上面把残差两侧的因子转置后拉回的那一步。
+上一个梯度公式在图像恢复中有一种自然解释。设 \(X\) 是待恢复的高分辨率图像，\(A\) 是对每列做模糊和下采样，\(B\) 是对每行做模糊和下采样，\(C\) 是实际观测到的低分辨率图像。前向算子把高分辨率图像映射为观测：\(X\mapsto AXB\)。
 
-\subsection{Trace 技巧不能取代定义域与形状}
+梯度计算中，残差 \(AXB-C\) 先被左乘 \(A^{\trans}\)、右乘 \(B^{\trans}\)，再叠加到当前估计上。\(A^{\trans}\) 和 \(B^{\trans}\) 是前向算子的伴随——它们不``还原''丢失的信息，而是把每个像素位置上的误差反投影回原来的高分辨率空间：哪些位置如果稍微调整，最能解释当前观测与预测之间的差异？
 
-以下检查应当先于代数操作：
+这里有一个不能靠直觉猜对的地方。如果降采样丢失了某些方向上的信息（这些方向落在算子的零空间里），伴随只能把当前残差拉回到它能到达的子空间。零空间中的细节——无论怎么估计都产生相同观测的分量——不能用残差反投影恢复，必须从正则化或先验中补回。伴随的作用是精确的线性代数关系，不是``把模糊操作的每一步倒退回去''。
+
+这也正是链式法则中``伴随''的更一般含义：前向映射 \(X\mapsto AXB\) 是一个线性算子，它的伴随（在 Frobenius 内积的意义下）是 \(G\mapsto A^{\trans}GB^{\trans}\)——正是梯度公式中残差两端被转置后拉回的那一步。
+
+\subsection{代数操作前的形状和定义域检查}
+
+Trace 技巧是整理的工具，不是推导的开端。在动手之前，先确认以下事项会省掉大量返工：
 
 \begin{itemize}
 \tightlist
 \item
-  每个乘积和 trace 是否形状相容；
+  每个乘积的每个维度是否匹配——矩阵乘法对形状的要求是硬的，一个位置上形状不符，后续所有循环移动都没有意义。
 \item
-  哪些矩阵是变量，哪些是常量；
+  哪些矩阵是变量，哪些是常量——常量微分直接为零，忽略这一步会把简单问题复杂化。
 \item
-  变量是否对称、对角或正交；
+  变量是否负有特殊约束——对称、对角、正交、低秩——这些约束在微分之后需要对应地投影梯度。对称化只是最常见的一种投影。
 \item
-  表达式是否实值；
+  表达式是否确实取实值——如果结果可以是非实数，trace 不再是标量，转置和循环移动需要更小心处理。
 \item
-  是否遗漏变量的多次出现；
+  变量是否在表达式中多次出现——每次出现都产生微分的一条路径，遗漏路径是二次型梯度出错的另一个常见来源。
 \item
-  循环移动是否被误写成任意交换。
+  循环移动是否被误用为任意交换——\(\trace(ABCD)\) 可以循环成 \(\trace(BCDA)\) 等四种形式，但不能拆成 \(\trace(ACBD)\) 等。
 \end{itemize}
 
-对于复矩阵，还要区分转置与共轭转置，并可能使用 Wirtinger 导数；本章默认实矩阵。
+对复矩阵，本章默认实域处理。复情形需要区分转置与共轭转置，并可能使用 Wirtinger 导数，此处不展开，但在遇到复梯度需求时不应直接把实矩阵公式套用。

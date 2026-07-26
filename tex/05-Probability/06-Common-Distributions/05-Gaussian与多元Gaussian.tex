@@ -1,175 +1,221 @@
 \section{Gaussian 与多元 Gaussian}
 \label{sec:05-Probability/06-Common-Distributions/05}
 
-Gaussian 分布之所以无处不在，一个重要原因是许多近似独立的小扰动相加后，标准化的和常趋近 Gaussian（\hyperref[sec:05-Probability/08-Limit-Theorems/03]{``中心极限定理与 Gaussian 近似''}会说明准确条件），并不意味着所有数据都天然呈钟形。它还在线性变换、边缘化和条件化下保持封闭，使推导与计算格外方便。
+你拿到一组身高和体重的测量数据。单个看，身高的直方图像个钟；体重的直方图也像。更关键的是，两者显然不独立：高的人一般体重也偏大。你想用一个联合分布一次性描述两个变量的中心和散布、以及它们之间的关联强度。
 
-方便并不等于普适。明显偏斜、有边界、多峰或重尾的数据可能不适合 Gaussian 模型。
+Gaussian 分布是处理这类问题的首选工具。它的便利来源至少有三：许多微小独立扰动的叠加通常会趋向 Gaussian（\hyperref[sec:05-Probability/08-Limit-Theorems/03]{``中心极限定理与 Gaussian 近似''}会给出精确条件），线性变换后仍然是 Gaussian，以及边缘化和条件化都有简洁闭式。但它不是万能钥匙——拿到数据先看是不是真像钟，而不是因为 Gaussian 好用就硬套。
 
-\subsection{一维 Gaussian}
+\subsection{一维 Gaussian：一条钟形曲线的全部}
 
-若
-
-\[
-X\sim\mathcal N(\mu,\sigma^2),
-\qquad\sigma>0,
-\]
-密度为
+\(X\sim\mathcal N(\mu,\sigma^2)\)，\(\sigma>0\)：
 
 \[
-f_X(x)
-=\frac1{\sqrt{2\pi\sigma^2}}
-\exp\left[-\frac{(x-\mu)^2}{2\sigma^2}\right].
+f_X(x)=\frac{1}{\sqrt{2\pi\sigma^2}}
+\exp\!\left[-\frac{(x-\mu)^2}{2\sigma^2}\right].
 \]
-\(\mu\) 决定中心，\(\sigma\) 决定水平尺度：
+
+\(\mu\) 决定曲线的水平位置，\(\sigma\) 决定宽窄：
 
 \[
-\E[X]=\mu,\qquad
-\Var(X)=\sigma^2.
+\E[X]=\mu,\qquad\Var(X)=\sigma^2.
 \]
-标准化
+
+密度关于 \(\mu\) 对称，均值、中位数和众数三点合一。标准化操作
 
 \[
 Z=\frac{X-\mu}{\sigma}
 \]
-得到 \(Z\sim\mathcal N(0,1)\)，因此
+
+将任意 Gaussian 拉回标准 Gaussian \(\mathcal N(0,1)\)。任何区间的概率都可以用标准 CDF \(\Phi\) 表达：
 
 \[
-P(a\le X\le b)
-=\Phi\left(\frac{b-\mu}{\sigma}\right)
--\Phi\left(\frac{a-\mu}{\sigma}\right),
+P(a\le X\le b)=\Phi\!\left(\frac{b-\mu}{\sigma}\right)-\Phi\!\left(\frac{a-\mu}{\sigma}\right).
 \]
-其中 \(\Phi\) 是标准 Gaussian CDF。
 
-密度关于 \(\mu\) 对称，因此均值、中位数和众数相同。约 \(68\%\)、\(95\%\)、\(99.7\%\) 的概率分别位于 \(\mu\) 的一、二、三个标准差内，这只是常用近似记忆，不应替代精确 CDF 或在非 Gaussian 数据上滥用。
+\(\mu\pm\sigma\) 覆盖约 \(68\%\)，\(\mu\pm2\sigma\) 覆盖约 \(95\%\)，\(\mu\pm3\sigma\) 覆盖约 \(99.7\%\)。这几个数字只是便于口头估算的经验记忆——需要精确尾部概率时仍应查询 \(\Phi\) 或调用统计软件，且它们只在数据确实接近 Gaussian 时才有意义。拿 \(\mu\pm2\sigma\) 的 \(95\%\) 来说，精确值是约 \(95.45\%\)，这个 \(0.45\%\) 的差距在置信区间和尾部检验中可能重要。
 
-\subsection{线性组合保持 Gaussian}
+\subsection{独立 Gaussian 的线性组合：封闭到让人上瘾}
 
-若 \(X_i\) 独立 Gaussian，则任意线性组合
+若 \(X_1,\ldots,X_n\) 相互独立，各自服从 Gaussian，则任意线性组合 \(\sum_i a_i X_i\) 仍为 Gaussian，均值和方差为
 
 \[
-\sum_i a_iX_i
+\sum_i a_i\mu_i,\qquad \sum_i a_i^2\sigma_i^2.
 \]
-仍为 Gaussian，其均值和方差为
+
+不需要再验证什么——加性封闭是 Gaussian 最省心的性质之一。两个独立 Gaussian 的差也是 Gaussian：\(X_1-X_2\sim\mathcal N(\mu_1-\mu_2,\sigma_1^2+\sigma_2^2)\)。注意方差是相加而不是相减——两个不确定源，无论你关心的是和还是差，总的不确定性都是各自方差的叠加。
+
+推广到随机向量：\(X\in\R^d\) 称为联合 Gaussian，当且仅当对任意系数向量 \(a\in\R^d\)，标量 \(a^{\trans}X\) 都是一维 Gaussian（允许方差为零，即退化为常数）。这个定义的好处在于它不显式写出密度——即使协方差阵奇异、不存在相对于 \(\R^d\) Lebesgue 测度的密度，联合 Gaussian 的概念仍然有意义。
+
+\subsection{小心一个陷阱：边缘 Gaussian 加不相关不等于联合 Gaussian}
+
+每个分量各自为 Gaussian 是联合 Gaussian 的必要条件，但远非充分。标准反例非常说明问题：
+
+令 \(X\sim\mathcal N(0,1)\)，\(S\) 为独立于 \(X\) 的随机符号，等概率取 \(\pm1\)。定义 \(Y=SX\)。
+
+由标准 Gaussian 密度关于原点的对称性，\(Y\) 也是 \(\mathcal N(0,1)\)。核对：对任意 \(t\)，\(P(Y\le t)=\frac{1}{2}P(X\le t)+\frac{1}{2}P(-X\le t)=P(X\le t)=\Phi(t)\)，因为 \(X\) 和 \(-X\) 同分布。又 \(\E[XY]=\E[S]\E[X^2]=0\)，协方差为零，二者不相关。
+
+但 \((X,Y)\) 的联合支撑只落在两条直线 \(y=x\) 和 \(y=-x\) 上，不是布满平面的椭圆云。它根本不是二维 Gaussian——二维 Gaussian 的支撑要么是全平面，要么是更低维的仿射子空间，绝不会分裂成多条直线。给定 \(X=x\) 时，\(Y\) 以各 \(1/2\) 的概率取 \(\pm x\)——一个两点离散分布，离 Gaussian 条件分布差了十万八千里。
+
+这个反例的教训是：想要联合 Gaussian，光看边缘不够，还必须确认任意线性组合是一维 Gaussian。实际建模中，如果你只关心协方差矩阵而假设了 Gaussian，这个反例提醒你：协方差矩阵不足以约束联合分布的结构，除非你同时确认了联合 Gaussian 的前提。同一个协方差矩阵 \((\begin{smallmatrix}1&0\\0&1\end{smallmatrix})\)，既可以来自本例中分布在两条直线上的\((X,Y)\)，也可以来自真正的二维标准 Gaussian——协方差矩阵看不穿联合结构。
+
+\subsection{多元 Gaussian 的几何直觉}
+
+当协方差阵 \(\Sigma\) 正定时，\(X\sim\mathcal N(\mu,\Sigma)\) 拥有漂亮的密度形式：
 
 \[
-\sum_i a_i\mu_i,\qquad
-\sum_i a_i^2\sigma_i^2.
+f_X(x)=\frac{1}{(2\pi)^{d/2}\,|\Sigma|^{1/2}}
+\exp\!\left[-\frac{1}{2}(x-\mu)^{\trans}\Sigma^{-1}(x-\mu)\right].
 \]
-更一般的``联合 Gaussian''定义是：随机向量 \(X\) 的每个线性组合 \(a^{\trans}X\) 都是一维 Gaussian（允许退化为常数）。
 
-仅仅每个分量各自为 Gaussian，并不能保证联合 Gaussian。可以构造 \(X\sim\mathcal N(0,1)\)，再令 \(Y=S X\)，其中随机符号 \(S\) 独立于 \(X\) 且等概率为 \(\pm1\)。由标准 Gaussian 密度的对称性，\(Y\) 也是标准 Gaussian；又 \(\E[XY]=\E[S]\,\E[X^2]=0\)，故二者不相关；但 \((X,Y)\) 集中在直线 \(y=x\) 与 \(y=-x\) 上，并非二维 Gaussian。
-
-\subsection{多元 Gaussian 的几何}
-
-若 \(X\in\R^d\) 服从均值 \(\mu\)、正定协方差 \(\Sigma\) 的多元 Gaussian，记为
+指数中的二次型
 
 \[
-X\sim\mathcal N(\mu,\Sigma),
+\Delta^2=(x-\mu)^{\trans}\Sigma^{-1}(x-\mu)
 \]
-密度为
 
-\[
-f_X(x)
-=\frac1{(2\pi)^{d/2}|\Sigma|^{1/2}}
-\exp\left[
--\frac12(x-\mu)^{\trans}
-\Sigma^{-1}(x-\mu)
-\right].
-\]
-二次型
+是平方 Mahalanobis 距离——一种被协方差结构校准后的统计距离。如果 \(\Sigma=I\)，它退化为普通的欧氏平方距离 \(\|x-\mu\|^2\)；如果各分量之间有相关或方差不等，\(\Sigma^{-1}\) 的作用就是把这些差异纳入距离的度量，使得等距离面恰好是等密度面。
 
-\[
-(x-\mu)^{\trans}\Sigma^{-1}(x-\mu)
-\]
-是平方 Mahalanobis 距离。等密度面是椭球：
+等密度面的几何解释把协方差阵的代数结构直观化了：
 
 \begin{itemize}
 \tightlist
 \item
-  协方差特征向量决定主轴方向；
+  \(\Sigma\) 的特征向量给出等密度椭球的主轴方向——数据云拉伸的角度；
 \item
-  特征值平方根决定各主轴尺度；
+  特征值的平方根给出各主轴方向上的尺度——数据在各方向上的离散程度；
 \item
-  行列式 \(|\Sigma|^{1/2}\) 控制总体积尺度。
+  行列式 \(|\Sigma|\) 衡量椭球的总体积——\(\Sigma\) 的特征值乘积决定了云的整体散布大小。
 \end{itemize}
 
-若 \(\Sigma\) 仅半正定而奇异，分布仍可定义，但集中在低维仿射子空间，没有相对于整个 \(\R^d\) 的普通密度。
-
-\subsection{线性变换、边缘与条件仍为 Gaussian}
-
-若
+用身高的例子把特征结构数值化。刚才的协方差阵
 
 \[
-X\sim\mathcal N(\mu,\Sigma),
-\qquad Y=AX+b,
+\Sigma=\begin{bmatrix}100&70\\70&100\end{bmatrix}
 \]
-则
+
+的特征值：\(\lambda_1=170\)，\(\lambda_2=30\)。对应的特征向量分别是 \((1,1)/\sqrt{2}\) 和 \((1,-1)/\sqrt{2}\)。第一主轴指向身高和体重同向变化的方向——``大个子''方向，方差 \(170\)；第二主轴指向身高和体重反向偏离的方向——``瘦高 vs 矮胖''的方向，方差仅 \(30\)。数据云是一个被拉长的椭圆，长轴沿 \(45^\circ\) 方向，短轴沿 \(-45^\circ\) 方向。主轴解释了你在数据中最容易看到的变异模式：人和人之间最大的差异是整体体型的大小，其次才是身高和体重的比例。
+
+若 \(\Sigma\) 仅半正定——特征值中有零——分布的质量全部集中在某个低维仿射子空间上。此时在 \(\R^d\) 上没有普通密度，但作为随机向量的分布仍定义良好。实践中奇异协方差常出现在变量之间存在精确线性关系的场合，例如成分数据中比例之和恒为一。
+
+\subsection{平方 Mahalanobis 距离的分布}
+
+Mahalanobis 距离不仅是几何工具，本身也有明确的分布。若 \(X\sim\mathcal N(\mu,\Sigma)\) 且 \(\Sigma\) 为正定矩阵，则
 
 \[
-Y\sim\mathcal N(A\mu+b,A\Sigma A^{\trans}).
+(X-\mu)^{\trans}\Sigma^{-1}(X-\mu)\sim\chi^2_d,
 \]
-因此任意子向量的边缘分布仍为 Gaussian。
 
-把向量分块
+自由度为 \(d\) 的卡方分布。这个事实提供了多维 Gaussian 的离群检测工具：计算每个观测点的 Mahalanobis 距离，和 \(\chi^2_d\) 的分位数比较，超过阈值即标记为潜在异常点。在一维时，这就是熟知的``超过 \(k\) 个标准差''的规则；在多维时，Mahalanobis 距离是那个规则在一个被协方差重标定过的空间中的正确推广。
+
+\subsection{线性变换：Gaussian 中的 Gaussian}
+
+对非随机的 \(A\) 和 \(b\)，
 
 \[
-\begin{bmatrix}X_1\\  X_2\end{bmatrix}
-\sim
-\mathcal N\left(
-\begin{bmatrix}\mu_1\\\mu_2\end{bmatrix},
+X\sim\mathcal N(\mu,\Sigma)
+\;\Longrightarrow\;
+Y=AX+b\sim\mathcal N(A\mu+b,\;A\Sigma A^{\trans}).
+\]
+
+这个性质包含了两层实用后果。其一，任意子向量——只需取 \(A\) 为选择矩阵——的边缘分布仍为 Gaussian：均值取对应分量，协方差取对应子块。其二，两个联合 Gaussian 变量的和与差也是 Gaussian，协方差按代数规则传递。
+
+更进一步的便利：任意联合 Gaussian 向量都可以通过线性变换``白化''。取 \(A=\Sigma^{-1/2}\)（协方差阵的逆平方根），则 \(Y=\Sigma^{-1/2}(X-\mu)\sim\mathcal N(0,I)\)——一个分量独立且各为标准 Gaussian 的向量。白化是很多多元统计方法的数据预处理标准操作，从主成分分析到独立成分分析的光谱上都能看到它的影子。
+
+\subsection{条件分布：另一条封闭的捷径}
+
+将向量分块：
+
+\[
+\begin{bmatrix}X_1\\ X_2\end{bmatrix}
+\sim\mathcal N\!\left(
+\begin{bmatrix}\mu_1\\ \mu_2\end{bmatrix},
 \begin{bmatrix}
-\Sigma_{11}&\Sigma_{12}\\
+\Sigma_{11}&\Sigma_{12}\\[2pt]
 \Sigma_{21}&\Sigma_{22}
 \end{bmatrix}
 \right).
 \]
-若 \(\Sigma_{22}\) 可逆，则
+
+假定 \(\Sigma_{22}\) 可逆，则在给定 \(X_2=x_2\) 的条件下，\(X_1\) 仍然是 Gaussian：
 
 \[
-X_1\mid X_2=x_2
+X_1\mid X_2=x_2\;\sim\;
+\mathcal N\!\left(
+\mu_1+\Sigma_{12}\Sigma_{22}^{-1}(x_2-\mu_2),\;
+\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}
+\right).
 \]
-仍为 Gaussian，条件均值为
+
+两个特征非常醒目。条件均值是 \(x_2\) 的仿射函数：\(\Sigma_{12}\Sigma_{22}^{-1}\) 扮演了回归系数矩阵的角色，它把观测到 \(x_2\) 与 \(\mu_2\) 的偏离乘以适当权重加到对 \(X_1\) 的预测上。条件协方差 \(\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}\) 不依赖于 \(x_2\) 的具体数值——观测到 \(X_2\) 总是把不确定性减少相同的量，无论观测值本身是什么。这个恒定方差性质在其他分布中通常不成立。
+
+正因为条件均值是线性的，在 Gaussian 模型下，线性最小均方预测和完整的条件期望完全重合——不需要更复杂的非线性回归就可以达到 Bayes 最优预测。这也是 Gaussian 在信号处理、控制和统计中经久不衰的算力支撑。
+
+\subsection{不相关推出独立？只在联合 Gaussian 下成立}
+
+一般的随机变量，协方差为零和独立之间隔着遥远的距离。但对联合 Gaussian 的向量，\(\Sigma_{12}=0\) 时联合密度可分解为两个边缘密度的乘积，二者独立。
+
+再次强调``联合''二字。前面的反例 (\(X\) 为标准 Gaussian，\(Y=SX\)) 中，两个分量各自 Gaussian 且不相关，但不独立——给定 \(X=x\) 时，\(Y\) 只能取值 \(\pm x\)，条件分布远非 Gaussian。不相关推出独立的推理，需要联合 Gaussian 作为前提。只检验边缘和相关系数是不够的。
+
+\subsection{用具体数字感受条件分布}
+
+设身高 \(X_1\) 和体重 \(X_2\) 服从二元 Gaussian，身高均值 \(170\) cm，体重均值 \(65\) kg：
 
 \[
-\mu_1+\Sigma_{12}\Sigma_{22}^{-1}(x_2-\mu_2),
+\mu=\begin{bmatrix}170\\ 65\end{bmatrix},\qquad
+\Sigma=\begin{bmatrix}
+100 & 70\\[2pt]
+70 & 100
+\end{bmatrix}.
 \]
-条件协方差为
+
+身高的标准差为 \(10\) cm，体重的标准差为 \(10\) kg，二者相关：\(\Corr(X_1,X_2)=70/100=0.7\)。
+
+现在你得知某个人的体重是 \(75\) kg，比她所在群体的均值高了 \(10\) kg。在 Gaussian 模型下，你对她的身高做条件推断：
+
+条件均值：
 
 \[
-\Sigma_{11}
--\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}.
+\E[X_1\mid X_2=75]=170+70\cdot 100^{-1}\cdot(75-65)=170+0.7\times 10=177.
 \]
-条件均值是 \(x_2\) 的仿射函数，条件协方差不依赖具体观测值。这解释了 Gaussian 模型中线性最小均方预测为何就是完整条件期望。
 
-\subsection{联合 Gaussian 中不相关才推出独立}
-
-一般变量协方差为零不能推出独立。但若 \(X_1,X_2\) 联合 Gaussian 且
+条件方差：
 
 \[
-\Sigma_{12}=0,
+\Var(X_1\mid X_2=75)=100-70\cdot 100^{-1}\cdot 70=100-49=51.
 \]
-联合密度会分解为两个边缘密度，于是二者独立。
 
-这里``联合''二字不能删。只知道每个边缘都是 Gaussian 不够，前面的随机符号反例正说明这一点。
+知道体重之后，身高的预测从 \(170\) 上修到 \(177\)（回归系数 \(0.7\) 拉动了 \(7\) cm），同时不确定性从方差 \(100\) 缩小到 \(51\)——标准差从 \(10\) cm 缩到约 \(7.1\) cm。条件分布的信息增益在此清晰可见。
 
-\subsection{什么时候应怀疑 Gaussian}
+现在考虑观测值不偏离均值的情况。假如得知某人体重恰为 \(65\) kg（即均值），条件预测的身高就是 \(170+0.7\times0=170\)，但方差仍然从 \(100\) 缩到 \(51\)。即使观测值本身没有提供修正方向，知道了一个相关变量的值仍然降低了另一变量的不确定性——因为相关结构本身就锁定了部分信息。
 
-以下迹象值得警惕：
+\subsection{高维 Gaussian 的几个反直觉现象}
+
+Gaussian 在低维的直觉到了高维会失灵。一个最著名的现象：在高维标准 Gaussian \(\mathcal N(0,I_d)\) 中，虽然每个分量集中在 \(0\) 附近，但整个向量的欧氏范数 \(\|X\|\) 却高度集中在 \(\sqrt{d}\) 附近。实际上 \(\|X\|^2\sim\chi^2_d\)，均值为 \(d\)，标准差为 \(\sqrt{2d}\)。相对波动 \(\sqrt{2d}/d=\sqrt{2/d}\) 随维度衰减——在高维中，几乎所有概率质量都位于一个薄薄的球壳上，距离原点大约 \(\sqrt{d}\)。这意味着高维 Gaussian 远非``在原点附近一团云''，而更接近``在半径 \(\sqrt{d}\) 的球面上均匀分布''。
+
+这个现象对多元统计方法和机器学习有深远影响：基于欧氏距离的最近邻方法在高维 Gaussian 数据中可能失效，因为所有点都挤在差不多相同的距离上；协方差估计在高维小样本场景下变得极不稳定。
+
+\subsection{什么时候你手里的数据不应该用 Gaussian}
+
+Gaussian 是很好的起点，但绝对不应该不假思索地成为终点。以下任何一种迹象都值得你停下来检查：
 
 \begin{itemize}
 \tightlist
 \item
-  数据只允许非负或被严格限制在区间内；
+  数据被硬边界约束——计数、持续时间、比例，这些天然非负或有上下限，Gaussian 的支撑却是整条实轴；
 \item
-  右偏或左偏非常明显；
+  分布明显不对称——右偏（收入）或左偏（考试高分区域），靠均值和方差概括会丢失大量结构；
 \item
-  存在多个群体形成多峰；
+  存在多个可分辨的子群体——直方图出现不止一个峰，可能意味着混合分布而非单一 Gaussian；
 \item
-  极端值远多于 Gaussian 预测；
+  极端值远比 Gaussian 预测的多——金融收益率和网络流量的尾部通常更重；
 \item
-  方差随均值或条件显著变化；
+  方差随均值发生变化——方差在异方差数据中不是常数，而 Gaussian 的条件方差恒定；
 \item
-  变量是离散计数且均值不大。
+  变量是离散计数且均值较小——此时 Poisson 或负二项分布是 Gaussian 近似之前的优先选项。
 \end{itemize}
 
-可以通过变换、混合模型、Gamma/Poisson/Student \(t\) 等替代分布，或直接使用非参数方法。Gaussian 是有力基准，不是默认真理。
+实际诊断不一定要靠肉眼看直方图。Q-Q 图把样本分位数对理论 Gaussian 分位数绘图：点偏离对角线呈现 S 形弯曲→尾部比 Gaussian 重或轻；呈弧线形→偏斜；中间跳跃→多峰。Shapiro-Wilk 检验等形式化检验也能给出定量判断，但在大样本时可能对微小的 Gaussian 偏离也显著——此时需要结合效应量判断偏离是否有实际意义。
+
+替代路线很多：Box-Cox 或 log 变换把数据拉回对称、混合 Gaussian 模型处理多峰、Student \(t\) 分布给尾部更厚的容忍度、广义线性模型把均值和方差的关系纳入建模、乃至完全放弃参数形式转向核密度估计或分位数方法。
+
+Gaussian 的核心身份是一个强有力的基准。它让你在假设线性、可加、对称的世界里快速算出答案。但基准是否适用于眼前的数据，需要你先睁开眼睛看，而不是闭着眼睛套。

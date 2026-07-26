@@ -1,110 +1,135 @@
 \section{链式法则就是线性映射复合}
 \label{sec:10-Matrix-Calculus/02-Differentials/02}
 
-若
+你有一个三层计算：\(x \to Ax \to \tanh \to \frac12\|\cdot-y\|^2\)。需要损失对 \(x\) 的梯度。试一下逐分量展开：
 
 \[
-x\xrightarrow{f}y\xrightarrow{g}z,
+\frac{\partial\ell}{\partial x_i}
+= \sum_j\sum_k
+\frac{\partial\ell}{\partial v_k}
+\frac{\partial v_k}{\partial u_j}
+\frac{\partial u_j}{\partial x_i}.
 \]
 
-输入扰动先被 \(Df(x)\) 推到 \(y\) 空间，再被 \(Dg(y)\) 推到 \(z\) 空间：
+三层、每层几百维，下标已经追不下。这还是三层——实际网络动辄几十层。不是算不对，是算不下去。
+
+一个自然的升级：每步的 Jacobian。记 \(J_f=\partial y/\partial x\)，\(J_g=\partial z/\partial y\)。链式法则说 \(\partial z/\partial x = J_g J_f\)。逻辑严密。
+
+现在想一想实际尺寸。线性层 \(u=Ax\)，\(A\in\R^{1000\times1000}\)，它对 \(x\) 的 Jacobian 就是 \(A\) 本身——\(10^6\) 个元素。下一层 tanh 的 Jacobian 是对角矩阵，虽大部分为零但仍然需要表示为一个 \(10^6\) 元素的稀疏结构。再下一个线性层，又一个 \(10^6\)。中间表示总量已经爆炸，而深层网络维度可能上几万——全尺寸 Jacobian 的地图根本画不出来。
+
+更重要的是：你只想要损失对第一层参数的梯度——一个与参数同形的矩阵。你为什么要经过若干个百万级中间量的乘法才拿到它？
+
+退回到导数最原始的含义。\(f\) 在 \(x\) 处的导数是一个线性映射：它把 \(x\) 处的微小扰动 \(dx\) 映到 \(f(x)\) 处的微小变化 \(dy = Df(x)[dx]\)。复合函数 \(g\circ f\) 的导数，就是两段线性映射的复合：
 
 \[
-Dz(x) = Dg(y)\circ Df(x).
+D(g\circ f)(x) = Dg(y)\circ Df(x).
 \]
-在 Jacobian 表示下，
+
+在 Jacobian 表示下：
 
 \[
-J_{g\circ f}(x) = J_g(y)J_f(x).
+J_{g\circ f}(x) = J_g(y)\,J_f(x).
 \]
-矩阵乘法顺序由映射复合决定：最先作用的 \(J_f\) 写在最右边。
 
-\subsection{JVP 是沿计算方向前推扰动}
+矩阵乘法顺序由映射复合顺序决定——最先作用的 \(J_f\) 写在最右边。
 
-给定输入方向 \(v\)，
+\textbf{但这条等式还藏着另一层信息}：线性映射复合不需要你先写出矩阵再相乘。你可以直接让向量流过这些映射——先把 \(v\) 通过 \(J_f\) 推成中间向量，再把这个中间向量通过 \(J_g\) 推过去。每一步只做矩阵乘向量，从未构造完整的中间 Jacobian。
+
+\subsection{正向：输入扰动沿计算方向前推}
+
+给定输入方向 \(v\)，需要的是扰动在输出空间的像：
 
 \[
-J_{g\circ f}(x)v = J_g(y)\bigl(J_f(x)v\bigr).
+J_{g\circ f}(x)\,v = J_g(y)\bigl(J_f(x)\,v\bigr).
 \]
-因此不必先形成两个 Jacobian 再相乘。可以先计算 \(dy=J_fv\)，再计算 \(dz=J_gdy\)。这就是正向模式自动微分。
 
-若输入维度很小、输出很多，少量输入方向就能得到完整导数。例如 \(f:\R\to\R^m\) 只有一个输入方向，一次正向传播便得到所有输出对该标量的导数。
+先算 \(dy = J_f(x)\,v\)，再算 \(dz = J_g(y)\,dy\)。每步代价 \(O(\dim_{\text{out}}\times\dim_{\text{in}})\)。这就是正向模式自动微分（Jacobian-vector product，JVP）。
 
-\subsection{VJP 是把输出敏感度反向拉回}
+输入维度很小时正向模式极其高效。\(f:\R\to\R^m\) 只有一个输入方向，一次正向传播就拿到全部 \(m\) 个输出对它的导数。参数灵敏度分析、少量设计变量对应的全量输出导数，正向模式正合适。
 
-设最终损失 \(\ell(z)\) 为标量。链式法则给
+\subsection{反向：输出敏感度往回拉}
+
+但神经网络最典型的场景完全相反：百万参数输入，一个标量损失输出。正向需要百万次传播。
+
+换方向。设 \(\ell(z)\) 是标量损失。链式法则对梯度的表达式：
 
 \[
-\nabla_x\ell = J_f(x)^{\trans} J_g(y)^{\trans}\nabla_z\ell.
+\nabla_x\ell = J_f(x)^{\trans} J_g(y)^{\trans} \nabla_z\ell.
 \]
-计算顺序从右到左：先把 \(\nabla_z\ell\) 通过 \(J_g^{\trans}\) 拉回 \(y\)，再通过 \(J_f^{\trans}\) 拉回 \(x\)。这就是反向模式。
 
-当输入参数很多、输出只有一个标量损失时，一次反向传播就得到全部参数梯度；逐输入方向做正向传播则需要许多次。这一复杂度差异来自 Jacobian 形状，而不是神经网络的特殊魔法。
+从右往左算：先把 \(\nabla_z\ell\) 通过 \(J_g^{\trans}\) 拉回 \(y\) 空间，得到的向量再通过 \(J_f^{\trans}\) 拉回 \(x\) 空间。每步是向量-Jacobian 乘积（VJP），代价同为 \(O(\dim_{\text{out}}\times\dim_{\text{in}})\)，但现在无论输入维度多大，一次反向传播就拿齐所有参数梯度。
+
+这是反向模式自动微分。效率的来源不在神经网络的特定结构——它只依赖 Jacobian 尺寸。\(m\times n\) 的 Jacobian：正向每次 \(O(mn)\) 但需 \(n\) 次（每个输入方向一次），反向每次 \(O(mn)\) 但只需 \(m\) 次（每个输出方向一次）。\(n\gg m=1\)：反向以数量级优势碾压。
 
 \subsection{一个完整的两层计算}
 
-考虑
+把所有概念捏进一个具体例子：
 
 \[
-u=Ax,\qquad
-v=\tanh u,\qquad
-\ell=\frac12\norm{ v-y}_2^2.
+u = Ax,\qquad v = \tanh u,\qquad \ell = \frac12\|v-y\|_2^2.
 \]
 
-正向先保存 \(u,v\)。反向从
+设 \(A\in\R^{5\times 3}\)，\(x\in\R^3\)，\(y\in\R^5\)。正向计算并保存 \(u,v\)。
+
+反向从损失对 \(v\) 的梯度开始：
 
 \[
-\bar v=\nabla_v\ell=v-y
+\bar v = \nabla_v\ell = v - y \in \R^5.
 \]
 
-开始。逐元素 \(\tanh\) 的 Jacobian 是对角矩阵（对角元为 \(\tanh'(u_i)=1-\tanh^2(u_i)=1-v_i^2\)），但无需真的构造它：记 \(\bar u=\nabla_u\ell\)，则
+tanh 的 Jacobian：\(\diag(\tanh'(u_1),\dots,\tanh'(u_5))\)，其中 \(\tanh'(u_i) = 1-\tanh^2(u_i) = 1-v_i^2\)。你不需要构造 \(5\times5\) 矩阵。记 \(\bar u = \nabla_u\ell\)：
 
 \[
-\bar u = \bar v\odot(1-v\odot v).
+\bar u_i = \bar v_i \cdot (1-v_i^2),\quad i=1,\dots,5,
 \]
-最后
+
+即 \(\bar u = \bar v \odot (1-v\odot v)\)。对角 Jacobian 与向量的乘积退化为逐元素乘，\(O(m)\) 而不是 \(O(m^2)\)。
+
+最后，线性层 \(u=Ax\) 的两个梯度：
 
 \[
-\nabla_x\ell=A^{\trans}\bar u,
-\qquad
-\nabla_A\ell=\bar u x^{\trans}.
+\nabla_x\ell = A^{\trans}\bar u \in \R^3,\qquad
+\nabla_A\ell = \bar u\,x^{\trans} \in \R^{5\times 3}.
 \]
 
-为什么 \(\nabla_A\ell\) 是外积？扰动 \(dA\) 产生
+为什么 \(\nabla_A\ell = \bar u x^{\trans}\)？形状检验：\(\bar u\) 是 \(5\times1\)，\(x\) 是 \(3\times1\)，外积是 \(5\times3\)，与 \(A\) 同形。但形状对只是必要条件，不是推导。真正的推导来自扰动传播：
 
 \[
-du=(dA)x,
+du = (dA)x.
 \]
 
-所以
+因此
 
 \[
-d\ell = \bar u^{\trans}(dA)x
-=\trace(\bar u^{\trans}dA\,x)
-=\trace\bigl((\bar u x^{\trans})^{\trans}dA\bigr).
+d\ell = \bar u^{\trans}(dA)x = \trace(\bar u^{\trans} dA\,x) = \trace\bigl((\bar u x^{\trans})^{\trans}dA\bigr).
 \]
-先把标量写成迹，再整段循环移动。形状与微分同时决定了答案：把 \(d\ell\) 整理成 \(\trace\bigl(G^{\trans}dA\bigr)\) 后，系数 \(G=\bar ux^{\trans}\) 就是梯度——这正是上一节的读取规则。
 
-\subsection{分支处要相加，共享处要累积}
+把标量写成迹，循环移动矩阵，整理成 \(\trace(G^{\trans}dA)\) 的形式——系数 \(G = \bar u x^{\trans}\) 就是梯度。\hyperref[sec:10-Matrix-Calculus/02-Differentials/01]{上一节} 中微分读取梯度的规则：\(d\ell = \trace(G^{\trans}dX)\) 意味着 \(\nabla_X\ell = G\)。
 
-若一个中间量 \(x\) 同时流向两条分支：
+查一遍整个反向的维数流：\(\bar v\in\R^5\)，\(\bar u\in\R^5\)，\(\nabla_x\ell\in\R^3\)，\(\nabla_A\ell\in\R^{5\times 3}\)。每一步的形状都由上游传入的维度和当前算子的输入维度自动决定，反向传播过程中不需要任何显式 reshape——只要你对 VJP 的实现保持了 Jacobian 的正确转置约定。
+
+\subsection{分支加，共享累}
+
+中间量 \(x\) 同时走向两条路径：
 
 \[
-y=f(x),\qquad z=g(x),\qquad \ell=h(y,z),
+y = f(x),\qquad z = g(x),\qquad \ell = h(y,z).
 \]
 
-则总微分包含两条路径：
+总微分是两条路径贡献之和：
 
 \[
-d\ell = \left(\frac{\partial\ell}{\partial y}Df(x)
-+\frac{\partial\ell}{\partial z}Dg(x)\right)[dx].
+d\ell = \Bigl(\frac{\partial\ell}{\partial y}Df(x) + \frac{\partial\ell}{\partial z}Dg(x)\Bigr)[dx].
 \]
-反向传播时，来自不同下游分支的伴随必须相加。忘记累积共享变量的梯度，是手写计算图中常见错误。
 
-广播和求和也遵循同一原则。前向广播把一个参数复制到多个位置，反向就要把这些位置的梯度按广播轴求和；前向求和把多项合并，反向则把上游标量复制回每项。
+反向传播时，\(x\) 的伴随来自 \(y\) 和 \(z\) 两路伴随之和。忘记累加共享变量的梯度，是手写计算图中最高频也最难排查的错误——每个分支单独看都对，合起来漏了交叉项。
 
-\subsection{链式法则的边界}
+广播和求和是同一逻辑的两种投影。前向广播：一个值复制到多个位置（如 bias 加到每行）。反向：这些位置的梯度沿广播轴求和。前向求和：多个元素合并成一个（如损失沿 batch 轴取平均）。反向：上游标量复制回每个元素。前向的``一对多''对偶于反向的``多对一''。
 
-ReLU、max、排序和离散分支可能在某些点不可微。自动微分系统采用约定的次梯度或分支导数，但这不等于经典导数存在。随机采样、状态更新和停止梯度还会改变"所执行程序"与抽象数学模型之间的关系。
+\subsection{链式法则不出声的地方}
 
-因此反向传播正确性包含两层：链式组合是否实现正确，以及每个基本算子的局部求导规则是否符合预期语义。
+ReLU 在零点不可微。max、排序、取整也都是。自动微分系统在这些点返回约定值——右导数、次梯度的某个特定元素、或单侧极限——但它们不是经典意义下的导数。你拿到的数字是工程约定，不是分析结论。
+
+更隐蔽的问题来自计算图的结构偏离。随机采样让每次前向对应不同的数学函数——反向传播的梯度针对的是这次采样的函数，不是期望的梯度。BatchNorm 的 running mean 在训练和推理时行为不一致，改变了``执行程序''和``数学函数''之间的映射。stop\_gradient 指令告诉自动微分``此处截断链式法则''——它对优化或许有用，但你不再是在求原始复合函数的导数。
+
+自动微分框架的``梯度''正确性有两层：（1）链式组合关系是否被正确实现——各步 Jacobian 的转置和乘法顺序对不对（框架保证）；（2）每个基本算子的局部求导规则是否符合你在具体问题中的语义期望（你来判断）。

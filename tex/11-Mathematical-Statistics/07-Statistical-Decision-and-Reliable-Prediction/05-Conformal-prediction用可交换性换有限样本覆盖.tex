@@ -1,90 +1,121 @@
 \section{Conformal prediction 用可交换性换有限样本覆盖}
 \label{sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/05}
 
-普通回归模型给出点预测 \(\widehat f(x)\)，却不说明新结果可能偏离多远。参数置信区间针对未知参数，不能直接当作新观测的预测区间；Bayesian posterior predictive interval 又依赖 prior 与 likelihood。Conformal prediction 采取另一条路线：不要求模型正确，用样本之间的可交换性校准预测集合的有限样本覆盖。
+医院运营部门委托你建一个模型，根据入院时的生命体征和化验结果预测患者住院天数。你用 5000 条历史记录训练了一个梯度提升模型，测试 RMSE 2.3 天。现在一个 68 岁的慢阻肺患者入院，模型输出 5.2 天。临床主任问：``有多确定？能给一个区间吗？''
 
-\subsection{Split conformal 把拟合与校准分开}
+你用线性回归教科书的方法算了一个 \(95\%\) 预测区间：\(5.2 \pm t_{n-p,0.975}\times s\times\sqrt{1+\text{leverage}}\)，得到 \([1.1, 10.7]\)。主任看了看说，这个范围几乎覆盖了科室里绝大部分住院时长，决策价值不大。而且你的梯度提升模型根本不符合高斯误差假设，那个 \(t\) 分位数也不成立。有没有一种方法，不需要假设误差分布，不依赖大样本渐进，也不要求 Bayes 先验，只凭手头这 5000 条数据的某一部分构造出有保的预测区间？
 
-把数据分成 training set 和含 \(m\) 个样本的 calibration set。先只用 training data 拟合任意预测器 \(\widehat f\)，再在 calibration data 上计算 nonconformity scores
+\subsection{Split conformal：拿一部分数据校准，另一部分拟合}
+
+把 5000 条数据拆成两部分：4000 条 training set，1000 条 calibration set。规则很明确——两部分完全隔离。
+
+先在 training data 上拟合任意预测器 \(\widehat f\)。它可以是一个梯度提升模型、一个神经网络、甚至一个人工规则表；conformal 不限制模型形式。
+
+然后在 calibration data 上算 nonconformity scores：
 
 \[
 R_i=\abs{Y_i-\widehat f(X_i)},
-\qquad i=1,\ldots,m.
+\qquad i=1,\ldots,m,
 \]
 
-令排序后分数为
+其中 \(m=1000\)。这些分数衡量每个 calibration 样本``偏离预测有多远''。把它们从小到大排列：
 
 \[
-R_{(1)}\le\cdots\le R_{(m)},
+R_{(1)}\le R_{(2)}\le\cdots\le R_{(m)}.
 \]
 
-并取
+现在取
 
 \[
 k=\left\lceil(m+1)(1-\alpha)\right\rceil.
 \]
 
-当 \(k\le m\) 时令 \(q=R_{(k)}\)；若 \(k=m+1\)，可把 \(q\) 视为无穷大。对新输入 \(x\) 输出区间
+如果 \(k\le m\)，令 \(q=R_{(k)}\)；如果 \(k=m+1\)，令 \(q=\infty\)——后者只发生在 \(\alpha\) 极小时。对新来的患者 \(x\)，输出预测区间：
 
 \[
-C(x)
-=
-\left[
-\widehat f(x)-q,
-\widehat f(x)+q
-\right].
+C(x)=[\widehat f(x)-q,\;\widehat f(x)+q].
 \]
 
-这里的有限样本修正是 \(m+1\)，不是随手取 calibration scores 的经验 \(1-\alpha\) 分位数。它把新样本也计入可能的秩位置。
+为什么是 \(m+1\) 而不是 \(m\)？因为新样本自己也要参与排名。如果你用 calibration scores 的简单经验 \(1-\alpha\) 分位数，相当于隐含假设新 score 一定不排进前 \(1-\alpha\) 分位之外。把样本量从 \(m\) 修正为 \(m+1\)，正是承认新 score 有同等可能落在任何一个秩位置。取 \(\alpha=0.1\)、\(m=1000\)，则 \(k=\lceil 1001\times 0.9\rceil=901\)，取第 901 小的残差作为 \(q\)。这个 \(m+1\) 修正在一百多个 calibration 点时差别明显，在大样本中影响变小，但它确保了有限样本覆盖的严格性。
 
-\subsection{覆盖保证来自秩的对称性}
+\subsection{覆盖保证的论证只依赖一个对称性}
 
-条件于 training data 后，若 \(m\) 个 calibration examples 与新样本可交换，则它们的 \(m+1\) 个 scores 也可交换。忽略 ties 时，新 score 的秩在 \(1,\ldots,m+1\) 上均匀；有 ties 时采用相应保守处理仍得到
+条件于 training data 之后，calibration samples \((X_1,Y_1),\ldots,(X_m,Y_m)\) 和新样本 \((X_{\text{new}},Y_{\text{new}})\) 如果可交换——即这 \(m+1\) 个数据点的联合分布在任意排列下不变——那么它们的 nonconformity scores \(R_1,\ldots,R_m,R_{\text{new}}\) 也可交换。
+
+可交换性的直接后果是：新 score 的秩在 \(1,2,\ldots,m+1\) 上均匀分布。因此
 
 \[
-P\bigl(Y_{\mathrm{new}}\in C(X_{\mathrm{new}})\bigr)
-\ge
-1-\alpha.
+P\bigl(R_{\text{new}}\text{ 的秩 }\le k\bigr)
+=\frac{k}{m+1}
+\ge 1-\alpha.
 \]
 
-保证对任意样本量成立，不依赖线性、Gaussian 噪声或 \(\widehat f\) 一致。模型越好，residual scores 通常越小，区间越窄；模型很差时 coverage 仍可能成立，只是集合宽到没有用途。Conformal 校准覆盖，不制造预测信息。
-
-\subsection{分类输出集合而不是强迫单标签}
-
-若分类器给出类别概率 \(\widehat p_y(x)\)，可用
+\(R_{\text{new}}\) 的秩 \(\le k\) 当且仅当 \(R_{\text{new}}\le R_{(k)}=q\)，即 \(\abs{Y_{\text{new}}-\widehat f(X_{\text{new}})}\le q\)，也就是 \(Y_{\text{new}}\in C(X_{\text{new}})\)。所以
 
 \[
-R_i=1-\widehat p_{Y_i}(X_i)
+P\bigl(Y_{\text{new}}\in C(X_{\text{new}})\bigr)\ge 1-\alpha.
 \]
 
-作为 score。以 calibration quantile \(q\) 构造
+这个推导中没有任何关于模型形式的假设，没有渐近符号，没有高斯分布，没有先验。它只要求可交换性——比独立同分布稍弱（i.i.d. 的序列可交换，但可交换的序列不一定独立），却足以把秩的均匀性变成覆盖保证。有 ties 时采用保守随机化处理，保证依然成立。
+
+注意保证给了什么、没给什么：``模型越好，区间越窄''——如果预测误差普遍小，第 \(k\) 分位数就小，区间就紧。但即使模型糟糕到残差巨大，覆盖保证依然成立，只不过区间宽到丧失临床意义。Conformal 校准的是覆盖概率，不是预测精度。
+
+\subsection{分类问题输出集合而非单标签}
+
+分类器同样可以用 conformal。设模型对每个类别输出概率估计 \(\widehat p_y(x)\)，定义 nonconformity 为模型给真实类别概率的补数：
 
 \[
-C(x)=
-\set{y:1-\widehat p_y(x)\le q}.
+R_i=1-\widehat p_{Y_i}(X_i).
 \]
 
-容易样本可能只保留一个类别，模糊样本可能保留多个，极端情况下也可能为空或包含全部类别，具体取决于 score 与构造方式。集合大小反映当前程序为维持覆盖所付出的信息代价，不应只汇报平均 coverage 而隐藏集合是否几乎总是过大。
-
-更精细的 adaptive scores、class-conditional calibration 或 normalized residuals 可以让集合适应异方差与类别不平衡，但每种修改都要重新说明交换性单位和保证对象。
-
-\subsection{边际覆盖不是每个子群的条件覆盖}
-
-上式平均于新样本的整体分布。它不推出
+分数小的样本是``模型很有把握且判断正确''的样本；分数大的样本则是模型对真实类别信心不足甚至完全看错。用 calibration quantile \(q\) 构造预测集合：
 
 \[
-P\bigl(Y\in C(X)\mid X=x\bigr)
-\ge1-\alpha
+C(x)=\set{\,y:1-\widehat p_y(x)\le q\,}.
 \]
 
-对每个 \(x\) 成立，也不保证每个年龄、地区或风险组都达到名义覆盖。无分布假设下要求所有点都具有非平凡的精确条件覆盖，一般不可实现；局部适应需要平滑性、分组样本量或模型结构等额外条件。
+对容易的样本，\(1-\widehat p_{\text{true}}(x)\) 很小，\(q\) 过滤后可能只留一个类别；对模棱两可的样本，多个类别的 \(\widehat p_y(x)\) 都差不多，集合中保留下来的类别变多。极端情况下——模型对所有类别都没信心或 calibration 分数差异极大——集合可能为空，也可能包含全部类别。这并非缺陷，而是说明模型在当前样本上能提供的分辨信息很少。集合大小本身就是不确定性的一种度量。
 
-总体 coverage 可以由容易的大群体补偿困难小群体。因而应同时检查有实际意义的预设子群、集合宽度和 coverage 的不确定性，但不能看完结果后无限搜索最差子群而忽略多重选择。
+更精细的构造可以让区间或集合适应异方差和类别不平衡：用归一化残差 \(\abs{Y_i-\widehat f(X_i)}/\widehat\sigma(X_i)\) 作为 score 能让区间在预测不确定的区域自动变宽；对不同类别分别校准可以防止多数类的分数主导了 quantile 的选择。但每次修改 score 函数，都要重新说明可交换性单位：校准集和新样本的 scores 是否仍然可交换？归一化残差中的 \(\widehat\sigma\) 是用哪些数据拟合的？如果它依赖 calibration data 本身，对称性就变了。
 
-\subsection{分布漂移与数据复用会破坏秩论证}
+\subsection{边际覆盖不是每个子群的覆盖}
 
-若 calibration data 来自旧医院而新样本来自新设备，scores 不再可交换，名义 coverage 可能失效。某些 covariate shift 可用加权 conformal 处理，但需要可靠密度比与支持覆盖；concept drift 不能由普通权重修复。
+覆盖保证中的概率是平均于新样本的整体分布：
 
-同一 calibration set 若被反复用于选择模型、score、超参数和最终 quantile，新样本 rank 不再与一个预先固定程序直接对称。应把模型拟合、方法选择和最终校准的数据角色分开，或使用能重现完整选择流程的有效方案。
+\[
+P\bigl(Y_{\text{new}}\in C(X_{\text{new}})\bigr)\ge 1-\alpha.
+\]
 
-Conformal 把主要假设集中到可交换性，并给出一个清楚的有限样本覆盖保证；分布变化可以击穿它，所以不能概括为``无需假设''。
+它不能推出对每个固定的 \(x\) 都有
+
+\[
+P\bigl(Y\in C(X)\mid X=x\bigr)\ge 1-\alpha.
+\]
+
+更不能保证每个年龄组、每种合并症组合、每家医院都达到 \(90\%\) 的名义覆盖率。一个可能发生的情形是：年轻低风险患者群中覆盖高达 \(97\%\)，高龄多病患群中只有 \(78\%\)，二者均值仍有 \(90\%\)。整体覆盖被容易的群体补偿了困难群体。
+
+在无分布假设下要求所有点都达到精确的条件覆盖是不可能的任务。局部条件覆盖需要额外的平滑性假设、足够的组内样本量或模型结构信息。因此 conformal 结果的使用者应预先指定有实际意义的子群——不是看完结果后无限搜索最差子群——分别检查它们的覆盖率、集合宽度与覆盖的不确定性。
+
+\subsection{分布漂移和数据复用会摧毁论证}
+
+可交换性一旦被打破，整条秩论证链条就断了。如果 calibration data 全部来自 2023 年的 A 医院，而新预测要用在 2025 年换了检验设备的 B 医院，scores 不再可交换，名义 \(90\%\) 覆盖可能掉到 \(60\%\) 以下，而且你不知道掉了多少。
+
+某些 covariate shift 场景可以用加权 conformal 缓解：给 calibration samples 加权来逼近目标分布的 score 分布。但这需要可靠的密度比估计，并且要求目标分布的支持包含在 calibration 分布的支持内——如果 B 医院设备测出的某项指标范围完全超出 A 医院的历史范围，加权也无济于事。Concept drift（条件分布 \(Y|X\) 本身改变）更不能用简单权重修复。
+
+同样的逻辑也适用于数据复用。如果同一个 calibration set 被你反复用来选择模型架构、挑选 score 函数、调试超参数，然后才决定最终的 conformal quantile，那 calibration set 实际上参与了全部建模选择，不再是``只用于校准的隔离数据''。新样本的 rank 不再与一个预先固定下来的程序直接对称。正确做法是把数据分成三段——训练集用于拟合模型，校准集用于确定 conformal quantile，测试集用于最终验证——或者使用能够还原完整选择流程的方案（如 cross-conformal 或 jackknife+），但那些方案会引入各自的有限样本行为和假设。
+
+\subsection{能相信什么，需要额外验证什么}
+
+Conformal prediction 提供的是一个有限样本的分布无关覆盖保证，代价是放弃了条件覆盖和模型改进。你得到的保证是你的预测区间至少以概率 \(1-\alpha\) 包含新观测——不多不少。以下判断不能由 conformal 直接推出，而需要额外的验证：
+
+\begin{itemize}
+\tightlist
+\item
+  每个预设子群的覆盖是否达标——需要在子群层面单独统计。
+\item
+  区间的平均宽度是否窄到有临床决策价值——覆盖和宽度是一对需要同时审视的指标，单报覆盖而隐藏平均宽度等于隐瞒了方法付出的信息代价。
+\item
+  分布随时间漂移后覆盖是否仍然成立——需要在新时期的新数据上用相同的校准程序重新计算实际覆盖，而不是依赖旧日的保证。
+\end{itemize}
+
+Conformal 最大的诚实在于：它把全部假设集中到一个明确的条件上——可交换性——然后从这一个条件严格推出有限样本覆盖。你认为数据满足可交换性，覆盖保证就成立；你认为不满足，就失去了保护。它不是``无需假设''的魔法，而是把假设显式地放在了你能审查的地方。

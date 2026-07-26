@@ -1,163 +1,169 @@
 \section{Poisson 计数、Exponential 等待与 Gamma 时间}
 \label{sec:05-Probability/06-Common-Distributions/03}
 
-一个稳定到达过程可以从两种角度观察：
+你在监控一台服务器。可以问两个不同方向的问题：
 
 \begin{itemize}
 \tightlist
 \item
-  固定看一小时，来了多少个事件？
+  往后看一个小时，预计会收到多少个请求？——固定窗口，问计数。
 \item
-  固定等若干个事件，需要多长时间？
+  从现在开始等，第 \(5\) 个请求什么时候到？——固定事件数，问时间。
 \end{itemize}
 
-Poisson、Exponential 与 Gamma 分布分别回答这些问题。把它们放在同一过程里理解，比把三个公式分开背更自然。
+同一个到达过程，两种观察角度。Poisson 分布回答计数问题；Exponential 分布回答等待第一个事件的时间问题；Gamma 分布回答等满 \(r\) 个事件的总时间问题。三者不是孤立的三个公式，是同一过程的三个投影。
 
-\subsection{固定窗口内的事件数：Poisson}
+\subsection{先把时间切碎：稀有事件作为大量小机会的叠加}
 
-若事件在时间或空间中以平均速率 \(\lambda\) 稀疏发生，不相交小区间的事件数近似独立，而且极短区间内发生两个以上事件的概率可以忽略，那么长度 \(t\) 窗口中的计数 \(N(t)\) 服从
+考虑一个长度为 \(t\) 的时间段。把它切成 \(n\) 个等分小格，每格极短，短到同一格里发生两次事件的概率可以忽略。每个小格里事件要么发生要么不发生。如果过程足够稳定——不相交区间的计数近似独立，小格事件概率大致恒定——那么整个 \(t\) 内的计数看起来就是一个 Binomial\((n,p)\)。
 
-\[
-N(t)\sim\mathrm{Poisson}(\lambda t),
-\]
-即
+但这里的 \(n\) 和 \(p\) 有特殊关系。把格子越切越细（\(n\to\infty\)），每格的事件概率必然越来越小（\(p\to0\)），而平均计数 \(np\) 应该趋向一个有限值 \(\mu=\lambda t\)。这就是稀有事件 Binomial 的极限。
 
-\[
-P(N(t)=k)
-=e^{-\lambda t}\frac{(\lambda t)^k}{k!},
-\qquad k=0,1,\ldots
-\]
-均值和方差都为
+用一个具体数字感受这个过程。假设平均每小时 \(\lambda=3\) 个请求。你观测 \(t=1\) 小时。如果把一小时切成 \(n=60\) 个一分钟小格，每格概率 \(p=3/60=0.05\)，计数近似为 Binomial\((60,0.05)\)。切成 \(n=3600\) 个一秒小格，\(p=3/3600\approx0.000833\)，近似为 Binomial\((3600,0.000833)\)。两种切法的期望都是 \(3\)，但越细的切分越接近真实的 Poisson\((3)\)。到了极限，Binomail 的繁琐组合数被 Poisson 的简洁形式取代。
+
+\subsection{从 Binomial 极限长出来的 Poisson}
+
+固定 \(\mu=np\)。把 \(p=\mu/n\) 代入 Binomial PMF 并展开：
 
 \[
-\E[N(t)]
-=\Var(N(t))
-=\lambda t.
-\]
-事实上，记 \(\mu=\lambda t\)，按定义把期望展开成级数，提出 \(\mu\) 的幂后剩余级数求和为 \(e^\mu\)，得
-
-\[
-\E[N]=e^{-\mu}\sum_{k=1}^{\infty}\frac{\mu^k}{(k-1)!}=\mu,
-\qquad
-\E[N(N-1)]=e^{-\mu}\sum_{k=2}^{\infty}\frac{\mu^k}{(k-2)!}=\mu^2,
-\]
-于是 \(\Var(N)=\E[N(N-1)]+\E[N]-(\E[N])^2=\mu\)。
-``均值等于方差''是 Poisson 模型的诊断线索。实际计数若方差显著大于均值，可能存在速率随时间变化、事件聚集或个体异质性；若显著小于，可能存在容量限制或排斥。
-
-\subsection{从稀有 Binomial 到 Poisson}
-
-把时间窗分成 \(n\) 个小格，每格事件发生概率约为 \(p\)，且 \(np=\mu\) 固定。当 \(n\) 很大、\(p\) 很小时，
-
-\[
-\binom nkp^k(1-p)^{n-k}
-\longrightarrow
-e^{-\mu}\frac{\mu^k}{k!}.
-\]
-把 \(p=\mu/n\) 代入并拆开因子即可看出极限来源：
-
-\[
-\binom nkp^k(1-p)^{n-k}
-=\frac{\mu^k}{k!}\cdot
+\begin{aligned}
+\binom{n}{k}p^k(1-p)^{n-k}
+&=\frac{n(n-1)\cdots(n-k+1)}{k!}
+\left(\frac{\mu}{n}\right)^k
+\left(1-\frac{\mu}{n}\right)^{n-k}\\[2pt]
+&=\frac{\mu^k}{k!}\cdot
 \frac{n(n-1)\cdots(n-k+1)}{n^k}\cdot
-\left(1-\frac\mu n\right)^{n}\cdot
-\left(1-\frac\mu n\right)^{-k}.
+\left(1-\frac{\mu}{n}\right)^{n}\cdot
+\left(1-\frac{\mu}{n}\right)^{-k}.
+\end{aligned}
 \]
-固定 \(k\) 令 \(n\to\infty\)：第二个因子趋于 \(1\)，第三个趋于 \(e^{-\mu}\)，第四个趋于 \(1\)，乘积正是 \(e^{-\mu}\mu^k/k!\)。
-这解释 Poisson 为什么适合``大量机会、单次概率很小、总平均数有限''的稀有事件计数。它不是因为事件``看起来随机''就自动成立，还需要机会近似独立且速率没有剧烈异质性。
 
-独立 Poisson 变量可相加：
+固定 \(k\)，令 \(n\to\infty\)。第二项趋近 \(1\)（分子分母都是 \(k\) 个因子的乘积，各因子比趋近 \(1\)）。第三项是 \((1-\mu/n)^n\)，标准极限 \(e^{-\mu}\)。第四项 \((1-\mu/n)^{-k}\to 1\)。乘在一起：
 
 \[
-X\sim\mathrm{Poisson}(\lambda_1),\quad
-Y\sim\mathrm{Poisson}(\lambda_2)
+\lim_{n\to\infty}\binom{n}{k}p^k(1-p)^{n-k}
+=e^{-\mu}\frac{\mu^k}{k!}.
 \]
-则
+
+这就是 Poisson 分布，记为 \(\mathrm{Poisson}(\mu)\)：
 
 \[
+P(N(t)=k)=e^{-\lambda t}\frac{(\lambda t)^k}{k!},\qquad k=0,1,2,\ldots
+\]
+
+参数 \(\lambda\) 是速率——单位时间内事件的平均发生次数。\(\mu=\lambda t\) 是该窗口的平均计数。
+
+把这个极限当成一个数值对账来验证信用。取 \(\mu=3\)，\(n=100\)，\(p=0.03\)。Binomial\((100,0.03)\) 的 \(P(X=2)\) 是 \(\binom{100}{2}(0.03)^2(0.97)^{98}\approx0.225\)。Poisson\((3)\) 的 \(P(N=2)\) 是 \(e^{-3}\cdot 3^2/2!\approx0.224\)。两者只差千分之一量级——用极限代替精确 Binomial 的误差在 \(n=100\) 时就已经极小。这解释了 Poisson 为什么在计数数据建模中如此普及：大量机会加微小概率的组合在现实世界中频繁出现。
+
+\subsection{\"均值等于方差\"不是巧合，是可以追查的诊断信号}
+
+Poisson 的均值和方差相等，都等于 \(\mu=\lambda t\)。从定义直接验证：
+
+\[
+\begin{aligned}
+\E[N]&=e^{-\mu}\sum_{k=1}^{\infty}\frac{\mu^k}{(k-1)!}=\mu,\\[2pt]
+\E[N(N-1)]&=e^{-\mu}\sum_{k=2}^{\infty}\frac{\mu^k}{(k-2)!}=\mu^2.
+\end{aligned}
+\]
+
+于是 \(\Var(N)=\E[N(N-1)]+\E[N]-(\E[N])^2=\mu^2+\mu-\mu^2=\mu\)。
+
+这个等方差性质给了你一个很实用的诊断工具。拿到一组计数数据，如果样本方差显著大于样本均值（过离散），往往意味着速率不是常数——可能有时段密集、有时段稀疏，或者个体之间的速率本身有差异。比如你统计每个路口每周的事故数，有的路口在商圈、有的在郊区，把它们混在一起，方差会远超均值。如果样本方差显著小于均值（欠离散），可能存在容量限制或事件间的排斥效应——比如一个停车场每小时进入的车辆数，车位满了就进不去了。两种偏离都在告诉你：光用一个 \(\lambda\) 描述整个过程是不够的。
+
+两个独立 Poisson 变量的和仍然是 Poisson：
+
+\[
+X\sim\mathrm{Poisson}(\lambda_1),\quad Y\sim\mathrm{Poisson}(\lambda_2)
+\;\Longrightarrow\;
 X+Y\sim\mathrm{Poisson}(\lambda_1+\lambda_2).
 \]
-这对应把两个独立事件流叠加。
 
-\subsection{等待第一个事件：Exponential}
+这对应把两个独立的事件流叠在一起——两个独立的请求源，合并后的请求到达仍是 Poisson，速率相加。反方向的分解也存在：若总的计数是 Poisson\((\lambda)\)，而每个事件独立地以概率 \(p\) 被标记为``类型 A''，则类型 A 的计数服从 Poisson\((\lambda p)\)。这个性质叫 Poisson 的随机稀释，在分类计数问题中极其顺手。
 
-设 \(T_1\) 为第一个事件的等待时间。事件 \(T_1> t\) 等价于前 \(t\) 时间内没有事件：
+\subsection{等待第一个事件：从\"没有事件\"反推等待时间}
 
-\[
-P(T_1> t)
-=P(N(t)=0)
-=e^{-\lambda t}.
-\]
-因此 CDF 与密度为
+换一个问法：第一个事件要等多久？记 \(T_1\) 为等待时间。``\(T_1>t\)''等价于``前 \(t\) 时间内一个事件都没有''。而 \(N(t)=0\) 的概率由 Poisson 的 \(k=0\) 项直接给出：
 
 \[
-F_{T_1}(t)=1-e^{-\lambda t},
-\qquad
-f_{T_1}(t)=\lambda e^{-\lambda t},
-\qquad t\ge0.
+P(T_1>t)=P(N(t)=0)=e^{-\lambda t}.
 \]
-这就是 Exponential(\(\lambda\)) 分布，其中 \(\lambda\) 是速率：
+
+有了生存函数，CDF 和密度就自然出来：
 
 \[
-\E[T_1]=\frac1\lambda,\qquad
-\Var(T_1)=\frac1{\lambda^2}.
+F_{T_1}(t)=1-e^{-\lambda t},\qquad
+f_{T_1}(t)=\lambda e^{-\lambda t},\qquad t\ge0.
 \]
-有些资料用尺度参数 \(\theta=1/\lambda\)，密度写为
+
+这就是 \(\mathrm{Exponential}(\lambda)\)——速率参数化。均值是 \(1/\lambda\)，方差是 \(1/\lambda^2\)。
+
+用服务器的数字把直觉钉牢。\(\lambda=3\) 每小时，则平均等待时间是 \(1/3\) 小时 = \(20\) 分钟。但等待的波动很大——标准差也是 \(20\) 分钟。也就是说，有相当一部分时候你需要等 \(40\) 分钟以上，而有时可能几分钟就来。Exponential 的变异系数（标准差比均值）恒为 \(1\)：波动和中心同等量级，这一点在所有分布中是一个相当特别的性质。
+
+有些教材用尺度参数 \(\theta=1/\lambda\)，密度写成 \((1/\theta)e^{-t/\theta}\)，均值就是 \(\theta\)。同一个分布、同一个符号、完全不同的参数角色——拿到公式先确认是 rate 还是 scale，否则算出的均值会互为倒数。
+
+Exponential 最著名的性质：无记忆性。
 
 \[
-\frac1\theta e^{-t/\theta}.
+P(T>s+t\mid T>s)=\frac{e^{-\lambda(s+t)}}{e^{-\lambda s}}=e^{-\lambda t}=P(T>t).
 \]
-同一个符号参数若角色不同，均值公式也会不同，必须辨明 rate 还是 scale。
 
-Exponential 具有连续无记忆性：
+也就是说，无论你已经等了多久，剩余等待时间的分布和刚开始等时一模一样。这个性质在连续分布中只有 Exponential 满足（离散中则是 Geometric）。回到等公交的例子：你已经等了 \(15\) 分钟，剩下还要等的分布和一个刚来的人要等的分布完全相同——这在真实的公交场景中显然不对（公交车有大致时刻表），但对完全随机到达、没有调度的事件流，它是精确的。设备不老化、交通不分高峰低谷、排队的人不会午休。如果你的真实场景中这些因素存在，Exponential 就是一个需要被替换而非被修补的起点。
+
+\subsection{等第 \(r\) 个事件：Gamma 是 Exponential 的叠加}
+
+Poisson 过程的一个核心事实：相邻到达间隔是独立的 Exponential\((\lambda)\)。因此，等待第 \(r\) 个事件的总时间就是 \(r\) 个独立 Exponential\((\lambda)\) 之和：
 
 \[
-P(T> s+t\mid T> s)=P(T> t).
+T_r = E_1+E_2+\cdots+E_r.
 \]
-它与前面 Geometric 分布的无记忆性同源，验证也只有一行：\(P(T>s+t\mid T>s)=e^{-\lambda(s+t)}/e^{-\lambda s}=e^{-\lambda t}\)。直觉上，已经等待多久不会改变剩余等待分布。设备寿命若会老化、顾客到达有高峰周期，就不应盲目采用 Exponential。
 
-\subsection{等待第 \(r\) 个事件：Gamma}
-
-Poisson 过程中相邻到达间隔独立且服从 Exponential(\(\lambda\))。等待第 \(r\) 个事件的总时间
+这个总时间服从形状参数 \(r\)、速率参数 \(\lambda\) 的 Gamma 分布：
 
 \[
-T_r=E_1+\cdots+E_r
+f_{T_r}(t)=\frac{\lambda^r}{\Gamma(r)}\,t^{r-1}e^{-\lambda t},\qquad t>0.
 \]
-服从形状参数 \(r\)、速率参数 \(\lambda\) 的 Gamma 分布：
+
+当 \(r\) 为正整数时，\(\Gamma(r)=(r-1)!\)。但 Gamma 函数的优雅在于它并不要求 \(r\) 是整数——任何正实数都可以作为形状参数，使 Gamma 族能灵活地拟合各种正值、右偏的等待或强度数据。非整数形状参数下，Gamma 不再能解释为整数个 Exponential 之和，但数学形式仍然合法。
+
+均值和方差：
 
 \[
-f_{T_r}(t)
-=\frac{\lambda^r}{\Gamma(r)}
-t^{r-1}e^{-\lambda t},
-\qquad t>0.
+\E[T_r]=\frac{r}{\lambda},\qquad
+\Var(T_r)=\frac{r}{\lambda^2}.
 \]
-当 \(r\) 为正整数，
+
+\(r=1\) 时退化为 Exponential。形状参数增大，密度从指数衰减的尖峰逐渐向钟形靠拢——你等的次数越多，总时间的相对波动越小。定量看：变异系数 \(\sqrt{\Var}/\E = 1/\sqrt{r}\)。等第 \(1\) 个时变异系数是 \(1\)，等第 \(10\) 个时降到约 \(0.32\)，等第 \(100\) 个时只有 \(0.1\)。这个收敛是中心极限定理在 Gamma 族上的具体映照：大量独立 Exponential 之和的分布趋向 Gaussian。
+
+回到服务器。\(\lambda=3\)/小时。等第 \(5\) 个请求的平均时间 \(5/3\approx1.67\) 小时。标准差 \(\sqrt{5}/3\approx0.745\) 小时。单次等的波动巨大，但聚成批次后的可预测性明显提升。
+
+注意 Gamma 的加法规则有条件：相互独立的 Gamma 变量只有速率参数相同时，加出来仍是 Gamma（形状参数相加）。速率不同则和不再留在 Gamma 族内。这个限制在使用 Gamma 混合模型时很重要。
+
+\subsection{计数与等待是一句话的正反面}
+
+这个等价关系虽然简单，但用好了可以绕过很多积分：
 
 \[
-\Gamma(r)=(r-1)!.
+\{T_r\le t\}\;\Longleftrightarrow\;\{N(t)\ge r\}.
 \]
-均值与方差为
+
+``第 \(r\) 个事件在时间 \(t\) 之前到达''和``在时间 \(t\) 内至少发生了 \(r\) 个事件''是同一件事的两种说法。因此
 
 \[
-\E[T_r]=\frac r\lambda,\qquad
-\Var(T_r)=\frac r{\lambda^2}.
+P(T_r\le t)=P(N(t)\ge r)=1-\sum_{k=0}^{r-1}e^{-\lambda t}\frac{(\lambda t)^k}{k!}.
 \]
-\(r=1\) 时退化为 Exponential。对非整数形状参数，Gamma 仍然定义良好，可用于正值、右偏、可加的等待或强度模型。
 
-Gamma 的``可加''也有条件：相互独立且采用同一速率（或同一尺度）的 Gamma 变量相加时，形状参数相加，结果仍为 Gamma；速率不同则一般不再留在同一 Gamma 族中。
+右边是 Poisson 的尾部概率，计算时查 Poisson CDF 表比积分 Gamma 密度方便得多。这个关系也解释了为什么这三个分布总是成组出现：给定了 Poisson 过程的计数规律，等待时间的规律就被完全确定；反过来也一样。
 
-\subsection{计数与等待事件是同一句话}
+\subsection{哪些情况会让你用错 Poisson}
 
-\[
-\{T_r\le t\}
-\]
-表示第 \(r\) 个事件在时间 \(t\) 前到达，这等价于
+Poisson 需要的假设很明确：事件在不相交区间内独立发生，速率恒定，瞬时不可能有两个事件同时发生。现实中偏离这三条的情况到处都是。
 
-\[
-\{N(t)\ge r\}.
-\]
-因此
+速率不是常数：早晚高峰的请求密度、季节性波动的故障率。这时需要非齐次 Poisson 过程——速率是时间的函数 \(\lambda(t)\)，计数不再是简单的 \(\lambda t\)，而变成速率函数在区间上的积分 \(\Lambda(t)=\int_0^t\lambda(s)\,ds\)，\(N(t)\sim\mathrm{Poisson}(\Lambda(t))\)。
 
-\[
-P(T_r\le t)=P(N(t)\ge r).
-\]
-这个等价关系可以在不积分 Gamma 密度时计算概率，也揭示计数分布与等待时间分布为何成对出现。
+事件之间不独立：一个故障引发连锁故障、一个顾客进店带动朋友进店。这种聚集效应使得方差远超均值，负二项分布或 Cox 过程（Poisson 的速率本身随机化）可能更合适。
+
+瞬时多事件：批处理系统中一次可能到达多个任务。复合 Poisson 过程允许每次发生的事件数本身也是一个随机变量——总的计数可以拆成每次批量的叠加。
+
+Exponential 无记忆性的背离更常见：设备越旧越容易坏（失效率递增→Weibull），或者刚修好的设备需要磨合期（失效率递减）。Gamma 的灵活性部分弥补了这一点，但真正需要的是检查数据是否支持无记忆假设，而不是默认如此。一个简单的诊断是画间隔时间的 Q-Q 图：若点偏离对角线呈弯曲趋势，无记忆性就值得怀疑。
+
+Poisson--Exponential--Gamma 体系的美妙之处在于它们是一体三面。理解了计数和等待的等价关系，三个分布就不再是记忆列表中的三个独立条目，而是你手里的一套切换视角的工具。你可以从计数翻到等待，从等待翻到累积，每个角度回答一类具体问题——切换不需要重新建模，因为它们的根基是同一个过程。

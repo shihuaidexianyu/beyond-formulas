@@ -1,117 +1,141 @@
 \section{策略梯度直接优化动作分布}
 \label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/09}
 
-价值方法先估计每个动作的长期价值，再选择价值最大的动作。连续动作中逐点取最大可能昂贵，随机策略本身也可能是问题所需的对象。策略梯度改为参数化
+\subsection{值方法在动作空间面前的两难}
+
+价值方法先估计每个动作的长期回报，再在每个状态上选值最大的动作。这套逻辑在离散动作中很顺畅：4 个按钮，4 个 Q 值，取 \(\argmax\) 就是比大小。
+
+但动作空间一旦变成连续的——机器人 7 自由度的关节角度、自动驾驶的方向盘转角——每一步都要在高维连续空间上做 \(\argmax\)。这是个嵌在决策循环里的非凸优化子问题，Q 函数本身还在不断随训练变化。值方法没有直接给你策略，它给你一堆数，然后让你在每个状态下临时解一个优化问题。
+
+还有另一种情况：你本身就想要一个随机策略。博弈对抗中确定性策略可能被对手完美利用；探索密集的环境中，softmax 输出的概率分布比单点的 \(\argmax\) 包含更多信息。
+
+策略梯度的思路很直接：与其绕道值函数再取 \(\argmax\)，不如直接参数化策略
 
 \[
-\pi_\theta(a\mid s)
+\pi_\theta(a \mid s)
 \]
 
-并直接调整 \(\theta\)，使高回报轨迹变得更可能。
+然后调整参数 \(\theta\)，让高回报的轨迹变得更可能，低回报的轨迹变得更不可能。把决策问题变成一个参数优化问题。
 
-\subsection{目标分布本身依赖策略参数}
+\subsection{第一步就撞到的麻烦}
 
-设一条有限轨迹为
+假设轨迹
 
 \[
-\tau=(s_0,a_0,r_1,\ldots,s_T).
+\tau = (s_0, a_0, r_1, s_1, a_1, r_2, \ldots, s_T)
 \]
 
-在初始分布 \(\rho_0\) 与环境转移 \(P\) 下，轨迹概率为
+在初始分布 \(\rho_0\) 和环境转移 \(P\) 下发生。轨迹的联合概率是
 
 \[
-p_\theta(\tau)
-=\rho_0(s_0)
-\prod_{t=0}^{T-1}
-\pi_\theta(a_t\mid s_t)
-P(s_{t+1}\mid s_t,a_t).
+p_\theta(\tau) = \rho_0(s_0) \prod_{t=0}^{T-1}
+\pi_\theta(a_t \mid s_t) \, P(s_{t+1} \mid s_t, a_t).
 \]
 
-目标取期望回报
+目标是期望回报
 
 \[
-J(\theta)=\E_{\tau\sim p_\theta}[G(\tau)].
+J(\theta) = \E_{\tau \sim p_\theta}[G(\tau)].
 \]
 
-参数不仅改变给定样本上的函数值，还改变未来会采到哪些状态与动作。不能把轨迹当作与 \(\theta\) 无关的固定监督数据直接求导。
+想对 \(\theta\) 求梯度，立刻遇到一个问题：\(\theta\) 不仅影响给定轨迹上回报的高低——它首先影响哪些轨迹会被采样到。\(\E_{\tau \sim p_\theta}\) 中的分布下标依赖 \(\theta\)。不能把一批采样轨迹当作与参数无关的固定数据，直接对回报取导——数据生成过程本身就含 \(\theta\)。
 
-\subsection{log-derivative 把分布导数变成样本平均}
+这和普通的监督学习参数优化不一样。监督学习中，数据和模型参数独立——你用固定数据集算 loss，对参数求导。强化学习中，采到的数据是什么，本身取决于策略参数当下的值。梯度必须穿过这个依赖。
 
-利用恒等式
+\subsection{log-derivative：把分布求导变成采样平均}
+
+恒等式
 
 \[
-\nabla_\theta p_\theta(\tau)
-=p_\theta(\tau)\nabla_\theta\log p_\theta(\tau),
+\nabla_\theta p_\theta(\tau) = p_\theta(\tau) \, \nabla_\theta \log p_\theta(\tau)
 \]
 
-可得
+是最关键的一步。它把对概率密度求导变成了密度自身乘上一个对数导数。代入积分号：
+
+\[
+\begin{aligned}
+\nabla_\theta J(\theta)
+&= \nabla_\theta \int G(\tau) \, p_\theta(\tau) \, d\tau \\
+&= \int G(\tau) \, \nabla_\theta p_\theta(\tau) \, d\tau \\
+&= \int G(\tau) \, p_\theta(\tau) \, \nabla_\theta \log p_\theta(\tau) \, d\tau \\
+&= \E_{\tau \sim p_\theta}
+\Bigl[ G(\tau) \, \nabla_\theta \log p_\theta(\tau) \Bigr].
+\end{aligned}
+\]
+
+现在它是一个期望了——可以采样。环境转移 \(P\) 和初始分布 \(\rho_0\) 都不含 \(\theta\)，log-概率的梯度只剩策略部分：
+
+\[
+\nabla_\theta \log p_\theta(\tau) = \sum_{t=0}^{T-1}
+\nabla_\theta \log \pi_\theta(a_t \mid s_t).
+\]
+
+一条轨迹的一次采样就给出了无偏 Monte Carlo 估计。直觉清晰得不需要公式也能说：回报高的轨迹，把上面的每个动作概率往上拉；回报低的，往下压。
+
+\subsection{一个小例子：两臂赌博机}
+
+一条臂以概率 \(p_1\) 给奖 1，另一条以概率 \(p_2\) 给奖 1，每次只能选一条。策略参数化为 \(\pi_\theta(\text{左}) = \theta\)。采样 100 次，左侧选中 40 次，其中 8 次得奖；右侧选中 60 次，其中 30 次得奖。
+
+平均回报约 \(0.38\)。REINFORCE 会把左侧期望回报高的动作概率往上拉。在这里，右侧回报 \(30/60 = 0.5\)，左侧 \(8/40 = 0.2\)，所以梯度会降低 \(\theta\)（减少选左侧的概率）。
+
+如果没有 log-derivative 恒等式，你可能会想：回报对参数的导数怎么算？选左和选右的概率加起来为 1，调参数改变概率分配，但回报是随机变量。log-derivative 把``改变分布''的效果翻译成了``在样本上加权重''的期望——权重就是回报本身。
+
+\subsection{去掉过去：reward-to-go}
+
+完整 \(G(\tau)\) 乘在轨迹上每个时间步的 score 上，意味着动作 \(A_t\) 的梯度被它发生之前的奖励加权了。当前动作改变不了过去——这部分加权在期望意义下是零，但采样上引入额外波动。
+
+利用条件期望的性质，可以只保留从当前时刻开始的未来回报：
 
 \[
 \nabla_\theta J(\theta)
-=\E_{\tau\sim p_\theta}
-\left[
-G(\tau)\nabla_\theta\log p_\theta(\tau)
-\right].
+= \E_\pi \Bigl[ \sum_t G_t \, \nabla_\theta \log \pi_\theta(A_t \mid S_t) \Bigr].
 \]
 
-环境转移和初始分布不依赖 \(\theta\)，所以
+期望不变，方差下降。REINFORCE 用样本 \(G_t\) 做更新：
 
 \[
-\nabla_\theta\log p_\theta(\tau)
-=\sum_{t=0}^{T-1}
-\nabla_\theta\log\pi_\theta(a_t\mid s_t).
+\theta \leftarrow \theta + \alpha \, G_t \, \nabla_\theta \log \pi_\theta(A_t \mid S_t).
 \]
 
-于是一次轨迹就给出无偏 Monte Carlo 估计。直觉很直接：回报高的轨迹增加其中动作的 log-probability，回报低的轨迹减少它们。
+但注意：\(G_t\) 进入乘数，所以奖励的绝对尺度直接缩放有效步长。奖励放大十倍，相当于学习率放大十倍。奖励缩放、折扣约定和 episode 长度都绑在步长上，不是分离的超参数。
 
-\subsection{过去奖励不应评价未来动作}
+\subsection{baseline：减掉一个常数，期望不变}
 
-在完整 \(G(\tau)\) 乘每个时刻 score function 的写法中，动作 \(A_t\) 之前已经发生的奖励也进入权重，但当前动作不可能改变过去。利用条件期望可把它们去掉，得到 reward-to-go：
+对任意只依赖状态的函数 \(b(s)\)，
 
 \[
-\nabla_\theta J(\theta)
-=\E_\pi\left[
-\sum_t
-G_t\nabla_\theta\log\pi_\theta(A_t\mid S_t)
-\right].
+\E_{A \sim \pi_\theta(\cdot \mid s)}
+\bigl[ b(s) \, \nabla_\theta \log \pi_\theta(A \mid s) \bigr]
+= b(s) \, \nabla_\theta \sum_a \pi_\theta(a \mid s) = 0.
 \]
 
-这不改变期望，却减少与当前动作无关的随机波动。REINFORCE 使用样本 \(G_t\) 执行更新
+所以把 \(G_t\) 换成 \(G_t - b(S_t)\)，梯度的期望不变。关键在方差：选 \(b(S_t)\) 接近状态价值 \(V^\pi(S_t)\)，差值就衡量``这个动作比该状态的平均水平好多少''，正负分得更开，方差大幅下降。
 
-\[
-\theta\leftarrow
-\theta+\alpha
-G_t\nabla_\theta\log\pi_\theta(A_t\mid S_t).
-\]
+一个具体的数字直觉：如果一个小区域内所有动作的 \(G_t\) 都是正的（比如 50 到 60 之间），REINFORCE 会同时抬高所有动作概率，有效信号被公共的大正数淹没。减去一个接近均值（比如 55）的 baseline，就会把 55 附近的动作变为接近零的信号，远高于 55 的变正，远低于 55 的变负。两种信号分开了，梯度更干净。
 
-回报尺度会直接缩放梯度，因此奖励缩放、episode 长度和 discount 约定都会改变有效学习率。
+但 baseline 若依赖当前动作，上述消去一般不成立，需要额外修正。实践中常用 batch 平均回报做 baseline——简单，但与每个样本有 batch 内相关性，统计行为不是完全白噪声。
 
-\subsection{与动作无关的 baseline 不改变期望}
-
-对任意只依赖状态的 \(b(s)\)，
-
-\[
-\E_{A\sim\pi_\theta(\cdot\mid s)}
-\left[
-b(s)\nabla_\theta\log\pi_\theta(A\mid s)
-\right]
-=b(s)\nabla_\theta\sum_a\pi_\theta(a\mid s)=0.
-\]
-
-因此可以把 \(G_t\) 换成 \(G_t-b(S_t)\) 而不改变期望。若 \(b(S_t)\) 接近状态价值，差值衡量动作相对该状态平均水平好多少，方差通常显著下降。
-
-baseline 若依赖当前动作，上述消去一般不再成立，除非加入相应修正。减去 batch 平均回报常作为经验 baseline，但它与每个样本之间存在有限 batch 相关；理解其作用时仍应回到条件期望，而不是把任何中心化都称为无偏。
-
-\subsection{策略参数化决定可探索的动作}
+\subsection{策略参数化的形式就是可探索空间的形状}
 
 离散动作常用 softmax：
 
 \[
-\pi_\theta(a\mid s)
-=\frac{\exp z_\theta(s,a)}
-{\sum_{a'}\exp z_\theta(s,a')}.
+\pi_\theta(a \mid s) = \frac{\exp z_\theta(s, a)}{\sum_{a'} \exp z_\theta(s, a')}.
 \]
 
-连续动作可使用 Gaussian 策略，由网络输出均值与尺度。若尺度过早塌缩，策略接近确定性，未尝试区域几乎没有梯度证据；尺度过大则回报方差高。Entropy bonus 常用来延缓过早集中，但它在目标中加入了新的偏好，不是免费改进原问题。
+连续动作常用 Gaussian 策略，网络输出均值 \(\mu_\theta(s)\) 和标准差 \(\sigma_\theta(s)\)：
 
-策略梯度定理提供的是局部方向，不提供全局最优或样本效率保证。长时域 credit assignment、稀疏奖励与高方差仍可能让无偏估计几乎不可用。Actor--Critic 的出发点正是用学习到的价值函数替代完整 Monte Carlo 回报。
+\[
+\pi_\theta(a \mid s) = \frac{1}{\sqrt{2\pi}\sigma_\theta(s)}
+\exp\Bigl( -\frac{(a - \mu_\theta(s))^2}{2\sigma_\theta^2(s)} \Bigr).
+\]
+
+标准差的演化直接影响探索。如果 \(\sigma\) 过早塌缩趋近于零，策略趋近确定性，未尝试过的动作区域几乎没有梯度信号，探索停止，可能困在局部最优。如果 \(\sigma\) 一直很大，采样回报的方差高，梯度噪声大。Entropy bonus 是延缓过早集中的一种常见手段，但它在目标函数中加入了一个新的偏好项——不再是在原问题上做纯粹优化，而是在``原目标 + 熵正则''的修正问题上做优化。目标和原始问题的差距值得留意。
+
+\subsection{策略梯度定理给的是局部方向，不是路线图}
+
+策略梯度定理确保梯度方向（期望意义下）指向期望回报增加的方向。在足够小的步长下，一直沿梯度方向走，期望回报不会下降。但回报曲面可能高度非凸——策略参数化叠加上环境动力学的非线性，曲面上满布鞍点和局部极值。策略梯度不保证走出它们。
+
+一个极端但常见的场景：稀疏奖励的长时域任务。如果任务成功才给 \(+1\)，其余全为零，只有极少数轨迹碰巧触发奖励。绝大多数采样轨迹回报为零——梯度也为零。偶尔一条幸运轨迹击中奖励，给一个巨大的梯度脉冲。方差大到几乎不可用的程度。这不是学习率的问题——信号本身就有结构性缺失。
+
+策略梯度的无偏性是它在理论上的核心优势——不会因为价值函数近似而引偏。但当方差大到连无偏估计的符号都不稳定时，无偏性在实用上的价值就打折扣了。Actor-Critic 的出发点就是用学习到的价值函数替代完整的 Monte Carlo 回报——接受偏差，换取方差。

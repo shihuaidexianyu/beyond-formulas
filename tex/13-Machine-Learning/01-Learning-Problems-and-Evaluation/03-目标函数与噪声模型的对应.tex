@@ -1,110 +1,155 @@
 \section{目标函数与噪声模型的对应：从生成机制到优化目标}
 \label{sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/03}
 
-为什么回归用 MSE、分类用交叉熵？这些选择来自数据的噪声结构、训练目标和正则化约束。似然项对应噪声模型，正则项对应先验约束，两者合起来才是完整的优化目标。
+\subsection{一个点毁掉一条回归线}
 
-\subsection{先感受困难：一个异常值毁掉整个回归}
+有 47 个干净的观测点，大致沿 \(y=2x+1\) 散布，噪声标准差约 0.5。用 MSE 拟合线性回归，得到 \(\widehat\beta_1\approx 2.03\)，\(\widehat\beta_0\approx 0.94\)。一切合理。
 
-考虑简单线性回归 \(y_i=\beta x_i+\varepsilon_i\)，用 MSE 估计 \(\beta\)。若数据干净，MSE 给出最优估计；但若混入一个异常值 \((x_{n+1},y_{n+1})=(100,1000)\)，MSE 会把它当作``信息量最大的点''——残差平方 \((y-\beta x)^2\) 随距离平方增长，异常值主导目标函数，把 \(\widehat\beta\) 拉向自己。
+现在往数据里加入第 48 个点：\((x_{48}, y_{48})=(100, 1000)\)。运行同一段最小二乘代码。\(\widehat\beta_1\) 从 2.03 跳到了 8.71，\(\widehat\beta_0\) 从 0.94 掉到了 \(-12.3\)。一个点。47 个点提供的信号被一个离群值覆盖了。
 
-MAE（绝对损失）对这个异常值不敏感：残差线性增长，异常值的影响与它的距离成正比，不会被平方放大。但 MAE 在干净数据上效率低于 MSE——对 Gaussian 噪声，MSE 是最优的（Cramér--Rao 下界），MAE 只是鲁棒的折中。
+为什么会这样？平方损失对残差平方求和。一个残差 900 的点贡献的损失是 \(900^2=810{,}000\)，而 47 个残差为 \(0.5\) 的点合计贡献约 \(47\times 0.25\approx 12\)。优化器别无选择——最小化总损失就必须优先把这个巨型残差压下去，代价是把整条线的斜率和截距拉向那个离群值。
 
-没有普适最优的损失，只有与噪声模型匹配的损失。MSE 对 Gaussian 噪声最优，MAE 对 Laplace 噪声最优，Huber 对 Gaussian+异常值混合最优。选择损失函数，就是选择对噪声的假设。
+换用 MAE。同样 48 个点，\(\widehat\beta_1\approx 2.14\)，\(\widehat\beta_0\approx 0.87\)。离群值的影响还在，但不再主导——MAE 对残差的惩罚是线性的，一个 900 的残差贡献 900，47 个 0.5 的残差合计贡献约 23.5。优化器在两者之间找到了更合理的平衡。
 
-\subsection{似然项：噪声模型决定目标函数的核心}
+但别急着宣布 MAE 更优。回到只有 47 个干净点的情形，重复模拟 1000 次。MSE 给出的 \(\widehat\beta_1\) 围绕 2.0 波动，标准差约 0.03。MAE 给出的 \(\widehat\beta_1\) 同样围绕 2.0，但标准差约 0.047——比 MSE 宽了约 56\%。在 Gaussian 噪声下，MSE 达到了 Cram\'er--Rao 下界，MAE 的渐近相对效率只有 \(2/\pi\approx 0.637\)。
 
-噪声模型决定目标函数的机制是最大似然。设 \(Y\given X=x\) 的条件分布为 \(p(y\given x;\theta)\)，对独立样本 \((x_i,y_i)\)，似然为
+没有一种损失在所有数据集上都是最优的。MSE 在 Gaussian 噪声下效率最高，但一个离群值就能让它崩溃。MAE 抗离群值，但在干净 Gaussian 数据上浪费信息。选择损失函数，就是在选择你对数据生成过程所做的假设。
 
+\subsection{损失函数是倒过来写的噪声假设}
+
+噪声模型决定目标函数的机制来自最大似然。设 \(Y\given X=x\) 的条件分布为 \(p(y\given x;\theta)\)。对独立样本 \((x_i,y_i)\)，似然是
 \[
 L(\theta)=\prod_{i=1}^n p(y_i\given x_i;\theta).
 \]
 
-最大化似然等价于最小化负对数似然
-
+最大化似然等价于最小化负对数似然：
 \[
 -\log L(\theta)=-\sum_{i=1}^n\log p(y_i\given x_i;\theta).
 \]
 
-不同的噪声模型给出不同的负对数似然。若噪声是 Gaussian 的，即 \(Y=\mu(x)+\varepsilon\)，\(\varepsilon\sim\mathcal N(0,\sigma^2)\)，负对数似然是
+现在代入不同的噪声假设，看目标函数从负对数似然里长出来。
 
+\textbf{Gaussian 噪声 \(\to\) MSE。}设 \(Y=\mu(x)+\varepsilon\)，\(\varepsilon\sim\mathcal N(0,\sigma^2)\)。条件密度为
 \[
-\frac{1}{2\sigma^2}\sum_{i=1}^n(y_i-\mu(x_i))^2+\text{常数},
+p(y\given x;\theta)=\frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(y-\mu(x))^2}{2\sigma^2}\right).
 \]
 
-这正是 MSE（差一个常数因子）。把噪声换成 Bernoulli，\(Y\sim\operatorname{Bernoulli}(p(x))\)，负对数似然变成
-
+负对数似然：
 \[
--\sum_{i=1}^n\bigl[y_i\log p(x_i)+(1-y_i)\log(1-p(x_i))\bigr],
+-\log L(\theta)=\frac{1}{2\sigma^2}\sum_{i=1}^n(y_i-\mu(x_i))^2+\frac{n}{2}\log(2\pi\sigma^2).
 \]
 
-这正是交叉熵。若噪声是 Laplace 的，\(\varepsilon\sim\operatorname{Laplace}(0,b)\)，负对数似然是 \(\frac1b\sum\abs{y_i-\mu(x_i)}+\text{常数}\)，即 MAE。若噪声服从 Poisson，\(Y\sim\operatorname{Poisson}(\lambda(x))\)，负对数似然是 \(\sum[\lambda(x_i)-y_i\log\lambda(x_i)]\)，即 Poisson 损失。
+第二项不依赖模型参数 \(\theta\)（假设 \(\sigma^2\) 已知或单独估计），最小化负对数似然等价于最小化 \(\sum(y_i-\mu(x_i))^2\)。MSE 不是被人为选中的——它是在 Gaussian 噪声假设下，最大似然原则自动给出的结果。
 
-选择 MSE 就是假设 Gaussian 噪声，选择交叉熵就是假设 Bernoulli 噪声。这个对应不是查表，而是最大似然的直接结果：给定生成模型，似然项自然导出损失形式。
-
-\subsection{训练目标：似然项只是起点}
-
-似然项由噪声模型决定，但训练目标可以更进一步：预测均值、中位数、分位数、概率还是排序，由任务需求决定。
-
-MSE 对应条件均值 \(\E[Y\given X]\)，在 Gaussian 噪声下最优。MAE 对应条件中位数，在 Laplace 噪声下最优，对异常值鲁棒。分位数损失（pinball loss）对应条件分位数，是不对称代价（如缺货 vs 报废）下的最优选择。
-
-当任务要的是概率而非点预测时，交叉熵对应条件概率 \(P(Y\given X)\)，在 Bernoulli 噪声下最优，proper scoring rule 保证校准。当绝对数值本身不重要时，pairwise loss（如 RankNet）对应相对顺序，不关心绝对值，只关心排序。
-
-同样的 Gaussian 噪声下，可以选择预测均值（MSE）、中位数（MAE）或分位数（pinball loss）。似然项给出与噪声匹配的目标，训练目标给出与任务匹配的目标。
-
-\subsection{正则化项：先验约束优化结果}
-
-似然项拟合数据，正则化项约束模型。完整的目标函数是
-
+\textbf{Bernoulli 噪声 \(\to\) 交叉熵。}设 \(Y\sim\operatorname{Bernoulli}(p(x))\)，其中 \(p(x)\) 是模型要学的成功概率。条件概率质量函数：
 \[
-J(\theta)=-\log L(\theta)+\lambda\Omega(\theta),
+P(Y=y\given x)=p(x)^y(1-p(x))^{1-y},\qquad y\in\{0,1\}.
 \]
 
-其中 \(\Omega(\theta)\) 是正则化项，\(\lambda\) 控制强度。正则化把领域知识编码进优化。
-
-L2（Ridge）取 \(\Omega(\theta)=\norm{\theta}_2^2\)，假设权重小（平滑），改善病态方向，对应 Gaussian 先验。L1（Lasso）取 \(\Omega(\theta)=\norm{\theta}_1\)，假设权重稀疏（特征选择），产生零权重，对应 Laplace 先验。Elastic Net 取 \(\Omega(\theta)=\alpha\norm{\theta}_1+(1-\alpha)\norm{\theta}_2^2\)，兼顾稀疏与平滑。
-
-并非所有正则化都写成惩罚项。早停在训练到验证误差最小时停止，是隐式正则化。Dropout 在训练时随机失活神经元，假设特征不应共适应。
-
-MAP（最大后验）视角统一了似然与正则化：
-
+负对数似然：
 \[
-\theta_{\text{MAP}}=\argmax_\theta\log p(y\given x;\theta)+\log p(\theta),
+-\log L(\theta)=-\sum_{i=1}^n\bigl[y_i\log p(x_i)+(1-y_i)\log(1-p(x_i))\bigr].
 \]
 
-其中 \(\log p(\theta)\) 是先验。Gaussian 先验对应 L2，Laplace 先验对应 L1。
+这正是二分类交叉熵。注意它并非``两个分布之间的距离''再套一层近似——它就是 Bernoulli 噪声下的负对数似然本身。
 
-\subsection{三个维度的统一：噪声、任务、约束}
+\textbf{Laplace 噪声 \(\to\) MAE。}设 \(\varepsilon\sim\operatorname{Laplace}(0,b)\)，密度为
+\[
+p(\varepsilon)=\frac{1}{2b}\exp\!\left(-\frac{|\varepsilon|}{b}\right).
+\]
 
-目标函数的选择是三个维度的平衡：噪声模型决定似然项的数学形式（Gaussian→MSE，Bernoulli→交叉熵，Laplace→MAE）；任务需求决定预测目标（均值、中位数、概率还是排序）；正则化约束模型容量（L2 平滑、L1 稀疏、早停、Dropout）。
+负对数似然：
+\[
+-\log L(\theta)=\frac{1}{b}\sum_{i=1}^n\abs{y_i-\mu(x_i)}+n\log(2b).
+\]
 
-三个维度可以独立变化：Gaussian 噪声下可以选择预测均值（MSE）或中位数（MAE），可以加 L2 或 L1 正则化。但维度之间也有交互：强正则化可能偏离似然项的最优解（偏差-方差权衡），任务目标可能要求特定的似然形式（分位数预测需要分位数损失，不能用 MSE 替代）。
+常数项不影响优化，于是最小化 MAE。
 
-\subsection{目标函数的形状决定优化几何}
+\textbf{Poisson 噪声 \(\to\) Poisson 损失。}设 \(Y\sim\operatorname{Poisson}(\lambda(x))\)，概率质量函数为 \(P(Y=k)=e^{-\lambda}\lambda^k/k!\)。负对数似然：
+\[
+-\log L(\theta)=\sum_{i=1}^n\bigl[\lambda(x_i)-y_i\log\lambda(x_i)+\log(y_i!)\bigr].
+\]
 
-目标函数的形状——凸性、光滑性、增长速率——决定优化的难度与性质。
+最后一项不依赖 \(\lambda\)，优化时等价于最小化 \(\sum[\lambda(x_i)-y_i\log\lambda(x_i)]\)。
 
-MSE 是二次的：梯度线性，Hessian 常数，构成凸优化问题，线性回归有闭式解（正规方程）；但二次增长对异常值敏感——残差平方随距离平方增长。交叉熵是凸的：梯度含 sigmoid/softmax，需要迭代优化（梯度下降、Newton）；凸性保证全局最优，但条件数可能很差（类别不平衡时）。
+这些对应不是经验规律，而是数学推导：给定生成模型，写出似然，取负对数，损失函数的形式就被确定下来。
 
-MAE 是分段线性的，只有次梯度（在零点不可导），对异常值鲁棒；但线性增长意味着对 Gaussian 噪声效率低，渐近方差比 MSE 大 \(\pi/2\) 倍。Hinge 同样是分段线性的，只有次梯度；它给出支持向量（稀疏解），不可导点对应决策边界，次梯度提供下降方向。
+\subsection{似然给定形式，任务给定预测目标}
 
-形状决定优化几何：二次损失给出光滑凸问题，分段线性损失给出非光滑凸问题，0-1 损失给出非凸组合问题。
+即使噪声模型相同，不同任务也可能需要不同的预测目标。
 
-\subsection{目标函数的统计性质决定泛化}
+MSE 的最优预测是条件均值 \(\E[Y\given X]\)。在 Gaussian 噪声下这是最大似然解，但即使噪声不是 Gaussian，只要损失是平方的，最优预测就仍然是条件均值——这是平方损失作为 proper scoring rule 的固有性质，与噪声模型无关。
 
-目标函数的统计性质——偏差-方差、校准、proper scoring rule——决定泛化能力。
+MAE 的最优预测是条件中位数。在 Laplace 噪声下这是最大似然解。在条件分布偏斜时，均值和中位数可以相差很远。上一节便利店的例子中，第 80 百分位数才是业务需要的位置——均值和中位数都不对。
 
-MSE 对 Gaussian 噪声有效（达到 Cramér--Rao 下界），但对异常值高方差；MAE 对异常值低方差，但对 Gaussian 噪声低效。交叉熵是 strictly proper scoring rule——最优预测是真实条件概率 \(p(y\given x)\)，不是``最能分开两类的分数''。
+分位数损失（pinball loss）：
+\[
+\ell_\tau(f(x),y)=
+\begin{cases}
+\tau\,(y-f(x)), & y\ge f(x),\\
+(1-\tau)\,(f(x)-y), & y<f(x),
+\end{cases}
+\]
+的最优预测恰为条件 \(\tau\) 分位数。当 \(\tau=0.5\) 时退化为 MAE（差一个常数因子）。
 
-0-1 损失是最优的分类目标（Bayes 风险），但不可导。Hinge、logistic、交叉熵都是凸替代——在一定条件下（如 \(p(y\given x)\) 单调），替代损失的最优解与 0-1 损失一致，但替代损失本身可能过度惩罚``容易分类的点''（logistic）或``边界附近的点''（hinge）。
+交叉熵的最优预测是条件概率 \(P(Y\given X)\)。它是 strictly proper scoring rule——任何偏离真实概率的预测都会增加期望损失。这不是巧合，而是 proper scoring rule 的定义本身保证的。
 
-\subsection{这些对应关系都有前提}
+当任务只关心相对顺序而不关心绝对值时（如搜索结果排序），pairwise loss（如 RankNet）只惩罚顺序错误：
+\[
+\ell(f(x_i),f(x_j),y_{ij})=\log(1+e^{-(f(x_i)-f(x_j))}),\qquad y_{ij}=\ind\{x_i\text{ 应排在 }x_j\text{ 之前}\}.
+\]
 
-对应关系成立的前提是噪声模型正确：目标函数与噪声模型匹配时最优，错配时失效。MSE 对 Gaussian 噪声最优，但对 Laplace 噪声低效；交叉熵对 Bernoulli 噪声最优，但对重尾噪声（如 t 分布）可能过度自信。若真实噪声是混合分布，任何单一噪声假设的目标函数都只是近似；鲁棒方法（Huber、trimmed loss）是折中。
+同一个 Gaussian 噪声下，可以选 MSE 学均值、MAE 学中位数、pinball loss 学分位数。噪声约束了似然的形式，任务是额外的一层选择。
 
-即使噪声模型正确，目标函数里仍有需要外部选择的量。正则化强度 \(\lambda\) 是超参数，需要交叉验证选择：过强的正则化导致欠拟合，过弱的正则化导致过拟合。替代损失与真实损失之间也有差距：0-1 损失不可导，凸替代（hinge、logistic）在一定条件下一致，但替代损失本身可能过度惩罚某些点。
+\subsection{正则化：在似然之外表达偏好}
 
-目标函数还与优化算法交互：MSE 加线性模型是闭式解，MSE 加深度网络是非凸优化；交叉熵加线性模型是凸优化，交叉熵加深度网络是非凸优化。
+仅靠似然项不能唯一确定解。当特征数量接近样本数、特征之间高度相关、或信噪比低时，许多不同的 \(\theta\) 都能对训练数据给出几乎相同的似然值。正则化在这时候表态：在拟合数据同样好的候选解里，我们偏好哪个？
+
+完整的目标函数：
+\[
+J(\theta)=-\log L(\theta)+\lambda\,\Omega(\theta).
+\]
+
+\(\Omega(\theta)\) 编码偏好，\(\lambda\) 控制这个偏好的强度。
+
+L2 正则化 \(\Omega(\theta)=\norm{\theta}_2^2\) 偏好系数小的解。它抑制弱信息方向上的噪声放大，改善数值稳定性。在 Gaussian 噪声模型下，给参数配一个零均值各向同性 Gaussian 先验，后验众数就等价于 L2 正则化的解。
+
+L1 正则化 \(\Omega(\theta)=\norm{\theta}_1\) 偏好稀疏解——许多系数恰好为零。当人们相信只有少数特征真正起作用时，L1 比 L2 更接近这个信念。对应 Laplace 先验。
+
+Elastic Net \(\Omega(\theta)=\alpha\norm{\theta}_1+(1-\alpha)\norm{\theta}_2^2\) 同时偏好稀疏和平滑，适合特征数量远超样本数但特征之间又存在分组相关的情形。
+
+并非所有正则化都写成显式惩罚项。早停在验证误差开始上升之前停止训练，用优化轨迹本身作为正则化——它防止参数走到经验风险极小值附近那个容易过拟合的深谷。Dropout 在每次前向传播时随机丢弃一部分神经元，强迫网络不能用少数几个神经元的共适应来拟合训练噪声。
+
+MAP 视角统一了似然与正则化：
+\[
+\theta_{\text{MAP}}=\argmax_\theta\bigl[\log p(y\given x;\theta)+\log p(\theta)\bigr],
+\]
+其中 \(\log p(\theta)\) 是先验对数密度。Gaussian 先验 \(\to\) L2，Laplace 先验 \(\to\) L1。但 MAP 视角也暴露了正则化的局限：把``米''改成``毫米''，同一个 Gaussian 先验就不再代表同一个偏好了。所以通常应在每个训练折内部标准化特征，并且不惩罚截距。
+
+\subsection{目标函数的结构决定优化和泛化}
+
+目标函数的形状直接影响优化的难度。MSE 是二次的：梯度线性，Hessian 常数。线性回归有闭式解（正规方程）；即使用迭代方法，条件数可控时收敛很快。但二次增长意味着一个残差为 100 的点贡献的梯度是残差为 1 的点的 100 倍——异常值在梯度层面同样主导训练。
+
+交叉熵搭配 sigmoid 或 softmax 后整体仍是凸的，但梯度的表达式含 sigmoid 函数，条件数在类别极不平衡时会变得很差。凸性保证全局最优存在且唯一（在参数空间上可能有平坦区域），但找到它所需的迭代次数取决于数据。
+
+MAE 和 hinge loss 是分段线性的，在零点不可导，只能使用次梯度。次梯度给出下降方向，但不能保证每次迭代都减小目标值。收敛判断也比光滑情况麻烦——目标值变化很小不意味着已经到达最优点附近（想想在尖角两侧来回振荡的情形）。
+
+0-1 损失是分段常数，几乎处处梯度为零，构成组合优化问题。
+
+统计性质则在另一维度上决定泛化。MSE 在 Gaussian 噪声下达到 Cram\'er--Rao 下界，但对重尾噪声方差暴增。交叉熵是 strictly proper scoring rule——驱使模型输出校准概率，而不仅仅是``足以分开两类的分数''。MAE 对离群值低方差，但渐近效率低于 MSE。替代损失（hinge、logistic）的最优解在一定条件下与 0-1 损失一致，但这些条件不一定在具体数据上成立：logistic loss 会继续惩罚已经分对的、离边界很远的点，hinge loss 对边界附近的点敏感但对已分对的点完全零梯度。它们把优化变容易了，但代价是优化方向并不总是瞄准 0-1 错误。
+
+\subsection{这些对应关系的前提}
+
+噪声模型必须正确，对应才精确。MSE 对 Gaussian 噪声最优，但如果真实噪声是 Laplace 的，MSE 虽然仍给出条件均值，但效率低于 MAE——你用更多数据才能达到同样的精度。交叉熵假设 Bernoulli 噪声，若真实标签的随机性来自 t 分布的重尾（例如连续评分被二值化），交叉熵模型会对``容易判断的样本''过于自信。
+
+即使噪声模型正确，正则化强度 \(\lambda\) 仍需外部选择。过大的 \(\lambda\) 让模型无法拟合数据中的真实结构；过小的 \(\lambda\) 让模型把采样噪声也当作结构。交叉验证可以提供选择，但交叉验证本身也有方差和偏差。
+
+替代损失与真实损失之间还有一层差距。Hinge loss 和 logistic loss 都是 0-1 损失的凸替代，在一定条件下它们的总体最优解与 Bayes 分类器一致。但这些条件依赖于数据分布和函数类的容量——当函数类表达能力不足时，不同的替代损失可能选择不同的近似方向。
+
+最后，目标函数的性质与优化算法交互。MSE 配线性模型是凸且光滑的闭式问题；MSE 配深度网络是非凸的，局部极小值众多。目标函数的选择不能独立于模型结构和优化工具来讨论。
 
 \subsection{落点}
 
-目标函数的选择是三个维度的统一：似然项匹配噪声模型（Gaussian→MSE，Bernoulli→交叉熵），训练目标超越噪声（预测均值、中位数、概率、排序），正则化项约束模型（L2 平滑、L1 稀疏、早停、Dropout）。噪声模型给出似然，先验给出正则化，任务需求选择预测目标。目标函数的形状决定优化几何，统计性质决定泛化——选择目标函数就是选择任务定义。
+目标函数的三个维度——似然项匹配噪声模型（Gaussian\(\to\)MSE，Bernoulli\(\to\)交叉熵），训练目标超越噪声去匹配任务需求（均值、中位数、概率、排序），正则化编码对解的偏好（小而平滑、稀疏、早停）——可以独立变化，但彼此施加约束。
+
+从离群值毁掉回归线开始，到理解损失函数是倒过来写的噪声假设为止，核心变化是：选择目标函数不是在选择优化算法，而是在选择你相信数据是以什么方式生成的、你最终要回答什么问题、以及在信息不足以唯一确定答案时，你愿意往哪个方向倾斜。

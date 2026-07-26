@@ -1,156 +1,129 @@
-\section{VAE 把不可积 posterior 变成可训练下界}
+\section{VAE 把不可积后验变成可训练下界}
 \label{sec:14-Deep-Learning/06-Variational-Autoencoders/01}
 
-普通自编码器把输入压成向量再重构，却没有规定潜空间中哪些点应当出现，也没有给出完整的生成概率。VAE 从另一端开始：先假设一个带潜变量的概率模型，再面对如何由观测反推潜变量的问题。
-
-
-\subsection{生成模型先描述世界怎样产生数据}
-
-设潜变量先从先验采样
+你想生成手写数字。不是从训练集里挑一张现成的——每次随机抽样都能得到一张看起来像人写的新图片。最自然的概率建模思路：假设存在一些隐藏变量（笔画粗细、倾斜角度、数字类别），先从一个简单分布里抽这些变量，再让一个深度网络把它们解码成像素。
 
 \[
-Z\sim p(z),
+Z\sim p(z),\qquad X\mid Z=z\sim p_\theta(x\mid z).
 \]
 
-再由条件分布生成观测
+联合分布 \(p_\theta(x,z)=p(z)p_\theta(x\mid z)\) 定义了一个从潜空间到观测空间的完整生成机制。训练它，需要最大化观测数据的对数似然 \(\log p_\theta(x)\)。写出这个量：
 
 \[
-X\mid Z=z\sim p_\theta(x\mid z).
+p_\theta(x) = \int p(z)p_\theta(x\mid z)\,dz.
 \]
 
-联合分布为
+假设潜空间取 20 维标准正态先验，decoder \(p_\theta(x\mid z)\) 是一个把 20 维向量映射到 784 个 Bernoulli 参数的卷积网络。现在算这个积分。
+
+它没有解析式。20 维空间上的积分，被积函数里嵌着一个深度网络。网格求积？20 维的网格每条边 10 个点就是 \(10^{20}\) 个求值点——天文数字。Monte Carlo？从标准正态先验直接抽 \(z\) 然后平均 \(p_\theta(x\mid z)\)。问题是 20 维标准正态的概率质量集中在半径约 \(\sqrt{20}\approx 4.5\) 的薄球壳上，而绝大多数从先验抽出的 \(z\) 落在对生成当前观测完全无关的区域——对应的 \(p_\theta(x\mid z)\) 接近零。估计量的方差大到没有实用价值。
+
+再试 importance sampling：从另一个分布抽 \(z\) 来降低方差。但这要求 proposal 分布接近真实后验 \(p_\theta(z\mid x)\)——而真实后验正是你得不到的东西：
 
 \[
-p_\theta(x,z)=p(z)p_\theta(x\mid z),
+p_\theta(z\mid x) = \frac{p(z)p_\theta(x\mid z)}{p_\theta(x)}.
 \]
 
-观测似然则要消去不可见的 \(z\)：
+分母就是刚才那个不可积的量。边缘似然算不出，后验也算不出——同一个积分堵住了两条路。EM 算法跑不了（E 步要在后验下求期望）。模型写得干净漂亮，核心量一个都算不出来。
 
-\[
-p_\theta(x)=\int p(z)p_\theta(x\mid z)\,dz.
-\]
+\subsection{引入近似后验，导出一个下界}
 
-若 decoder 是深度网络，这个积分通常没有解析式。真实 posterior
+VAE 的策略：不试图计算真实后验，拿一个可操作的分布去逼近它。选一族好采样、密度也写得出的分布 \(q_\phi(z\mid x)\)，参数 \(\phi\) 由 encoder 网络输出。经典选择是对角高斯——encoder 吃进 \(x\)，吐出均值 \(\mu_\phi(x)\) 和对数方差 \(\log\sigma_\phi^2(x)\)。
 
-\[
-p_\theta(z\mid x)
-=\frac{p(z)p_\theta(x\mid z)}{p_\theta(x)}
-\]
-
-又包含同一个难算的边缘似然。模型写得出，不代表似然和 posterior 算得出。
-
-\subsection{引入近似 posterior 并推导 ELBO}
-
-VAE 选择一族可采样、可计算密度的分布 \(q_\phi(z\mid x)\)，通常由 encoder 输出其参数。将它乘除进边缘似然：
+把 \(q_\phi\) 乘除进边缘似然：
 
 \[
 \begin{aligned}
 \log p_\theta(x)
-&=\log\int q_\phi(z\mid x)
-\frac{p_\theta(x,z)}{q_\phi(z\mid x)}\,dz\\
-&=\log\E_{q_\phi(z\mid x)}
-\left[\frac{p_\theta(x,z)}{q_\phi(z\mid x)}\right].
+&= \log\int q_\phi(z\mid x)\frac{p_\theta(x,z)}{q_\phi(z\mid x)}\,dz\\
+&= \log\E_{q_\phi(z\mid x)}\!\left[\frac{p_\theta(x,z)}{q_\phi(z\mid x)}\right].
 \end{aligned}
 \]
 
-由 Jensen 不等式，
+Jensen 不等式把对数搬进期望内部：
 
 \[
-\log p_\theta(x)
-\ge
-\E_{q_\phi(z\mid x)}
-\left[
-\log p_\theta(x,z)-\log q_\phi(z\mid x)
-\right].
+\log p_\theta(x) \ge \E_{q_\phi(z\mid x)}\!\left[\log p_\theta(x,z) - \log q_\phi(z\mid x)\right].
 \]
 
-右端称为 evidence lower bound：
+右端是 evidence lower bound（ELBO）。拆开联合分布，得到更常用的形式：
 
 \[
-\mathcal L(\theta,\phi;x)
-=\E_{q_\phi(z\mid x)}[\log p_\theta(x\mid z)]
--\KL\bigl(q_\phi(z\mid x)\Vert p(z)\bigr).
+\mathcal L(\theta,\phi;x) = \E_{q_\phi(z\mid x)}[\log p_\theta(x\mid z)] - \KL(q_\phi(z\mid x)\Vert p(z)).
 \]
 
-第一项鼓励潜变量能够解释观测，第二项让每个样本的近似 posterior 不要任意远离先验。二者共同来自同一个似然下界的分解，并非随意拼接的两项目标。
+第一项是重构项：给定从近似后验抽出的 \(z\)，观测 \(x\) 的对数似然期望——鼓励潜变量能够解释观测。第二项是 KL 正则：迫使每个样本的近似后验不要跑得离先验太远——鼓励潜空间规整。两项来自同一个下限的代数分解，不是设计者凭直觉拼出的两个独立目标。
 
-更精确的恒等式是
+还有一个精确恒等式值得记住：
 
 \[
-\log p_\theta(x)
-=\mathcal L(\theta,\phi;x)
-+\KL\bigl(q_\phi(z\mid x)\Vert p_\theta(z\mid x)\bigr).
+\log p_\theta(x) = \mathcal L(\theta,\phi;x) + \KL(q_\phi(z\mid x)\Vert p_\theta(z\mid x)).
 \]
 
-因此下界与真实 log-likelihood 的间隙正是近似 posterior 的 KL。提高 ELBO 可能来自改善生成模型，也可能来自让 \(q_\phi\) 更贴近当前模型 posterior；两种变化不能只看总数区分。
+最大化 ELBO 同时拉高对数似然的下界、缩小近似后验与真实后验的 KL 间隙。但间隙是未知的——你不知道真实后验长什么样。因此只看 ELBO 数值上升，无法区分是生成模型真的变好了，还是 \(q_\phi\) 单纯更贴合了当前可能很差的真实后验。ELBO 上升是好事，但"为什么上升"需要单独诊断。
+
+\subsection{重参数化让随机节点可导}
+
+从分布采样不是可微操作——梯度流到采样步骤会被截断。解决方案是把随机性与参数分离：
+
+\[
+\varepsilon \sim \mathcal N(0,I),\qquad
+z = \mu_\phi(x) + \sigma_\phi(x)\odot\varepsilon.
+\]
+
+现在 \(z\) 对 \(\phi\) 可微，随机性全在 \(\varepsilon\)。对任意函数 \(g\)，
+
+\[
+\nabla_\phi\E_{q_\phi(z\mid x)}[g(z)] = \E_{\varepsilon}\!\left[\nabla_\phi\,g(\mu_\phi+\sigma_\phi\odot\varepsilon)\right],
+\]
+
+可用一次 Monte Carlo 抽样估计。实践中每步只抽一个 \(\varepsilon\) 就够——SGD 的随机梯度特性覆盖了抽样方差。
+
+取标准正态先验 \(p(z)=\mathcal N(0,I)\) 和对角高斯近似后验，KL 项有闭式，不需要 Monte Carlo：
+
+\[
+\KL(q_\phi\Vert p) = \frac12\sum_j\left(\mu_j^2 + \sigma_j^2 - 1 - \log\sigma_j^2\right).
+\]
+
+Encoder 输出 \(\log\sigma^2\) 而非 \(\sigma\) 或 \(\sigma^2\)：省去强制为正的激活函数约束；数值上 \(\log\sigma^2\) 的变化比 \(\sigma\) 变化更平滑，梯度更稳定——\(\sigma\) 接近零时 \(\log\sigma^2\) 的梯度不会爆炸。
 
 \subsection{重构项必须保留概率语义}
 
-若 \(p_\theta(x\mid z)\) 是固定方差 Gaussian，负 log-likelihood 在忽略常数后与平方误差成比例；若像素被建模为 Bernoulli，则得到 binary cross-entropy。选择哪一种意味着对观测噪声和支持作出不同假设。
+若 \(p_\theta(x\mid z)\) 是固定方差 Gaussian，负 log-likelihood 在忽略常数后与平方误差成比例。若像素被建模为 Bernoulli，则得到 binary cross-entropy。选择哪一种，意味着对观测噪声的分布和支持集作出不同假设。
 
-把任意图像都机械使用 BCE，或把可学习方差的 Gaussian 仍当作普通 MSE，会丢失似然语义。重构项的 reduction 也重要：对像素求和、对像素取平均会让它与 KL 项的相对尺度随分辨率不同，等价于改变目标权重。
+把任意图像都机械地使用 BCE，或把可学习方差的 Gaussian 仍当作普通 MSE，会丢失似然语义。重构项的 reduction 也重要：对像素求和、取平均会让它与 KL 项的相对尺度随分辨率改变——不同分辨率下等效于改变了目标的隐式权重，同一组超参数在小图和大图上优化的可能不是同一个 trade-off。
 
-\subsection{重参数化把随机节点移出参数路径}
+\subsection{重构、生成和异常检测用到不同分布}
 
-若直接采样 \(z\sim q_\phi(z\mid x)\)，样本随 \(\phi\) 的变化路径不显式，普通反向传播无法穿过``从分布采样''这一步。对对角 Gaussian，encoder 输出 \(\mu_\phi(x)\) 与 \(\log\sigma_\phi^2(x)\)，可写成
+同一个 VAE 训练完有三套不同的使用方式：
 
-\[
-\varepsilon\sim\mathcal N(0,I),
-\qquad
-z=\mu_\phi(x)+\sigma_\phi(x)\odot\varepsilon.
-\]
+\begin{itemize}
+\tightlist
+\item
+  给定 \(x\) 想重构它：从 \(q_\phi(z\mid x)\) 采样 \(z\)，再让 decoder 输出 \(p_\theta(x\mid z)\) 的均值或采样。用 posterior mean \(\mu_\phi(x)\) 重构最稳定，但抹掉了条件不确定性——变分后验的方差没有反映在结果中。
+\item
+  无条件生成新样本：从先验 \(p(z)=\mathcal N(0,I)\) 直接采样 \(z\)，送入 decoder。如果训练中聚合后验 \(\frac1n\sum_i q_\phi(z\mid x_i)\) 与先验之间存在空洞——先验支持了某些没有训练样本对应的 \(z\)——生成质量可能远不如重构。
+\item
+  用重构误差做异常检测：在正常样本上训练 VAE，期望缺陷样本的重构误差更大。但这个期望可能落空。足够强的 decoder 可能已经把某些缺陷记住了，重构误差并不高。反过来，光照变化或相机参数漂移可能让无缺陷产品产生高重构误差——不是因为产品异常，而是因为视觉特征不在训练分布中。重构误差是由 decoder 似然、后验近似和 reduction 方式共同定义的分数，不是"产品存在缺陷的概率"。阈值必须在带缺陷标签且匹配部署成像条件的数据上单独确定。
+\end{itemize}
 
-随机性现在来自与参数无关的 \(\varepsilon\)，而 \(z\) 是 \(\phi\) 和 \(\varepsilon\) 的可微函数。于是
+展示结果时务必说明使用的是 posterior mean、posterior sample 还是 prior sample——三个来源的行为差异可能比模型之间的差异更大。
 
-\[
-\nabla_\phi
-\E_{q_\phi(z\mid x)}[g(z)]
-=\E_{\varepsilon}
-\left[
-\nabla_\phi g\bigl(\mu_\phi+\sigma_\phi\odot\varepsilon\bigr)
-\right]
-\]
+\subsection{Posterior collapse 是一个可解释的优化解}
 
-可用 Monte Carlo 和反向传播估计。
+训练中你可能会看到：KL 项迅速降到接近零，潜变量不再随输入变化，\(q_\phi(z\mid x)\approx p(z)\) 对所有 \(x\) 几乎相同。这就是 posterior collapse——潜变量不再携带关于 \(x\) 的信息。
 
-对标准正态先验 \(p(z)=\mathcal N(0,I)\)，对角 Gaussian posterior 的 KL 有闭式：
+这不是需要抓虫子的优化失败。它是当前目标函数、decoder 能力与优化动力学的共同产物。如果 decoder 本身足够强（比如内嵌了强大的自回归结构），它可以在几乎不使用 \(z\) 的情况下直接对数据建模。此时优化器发现：维持 \(q_\phi(z\mid x)\approx p(z)\)、KL\(\approx0\)，让 decoder 独自扛起重构项，比在潜变量里编码复杂信息更划算——目标函数本身并没有惩罚这个选择。
 
-\[
-\KL(q_\phi\Vert p)
-=\frac12\sum_j
-\left(\mu_j^2+\sigma_j^2-1-\log\sigma_j^2\right).
-\]
+诊断不能只看总 ELBO。应分别观察重构项和逐维 KL、从先验生成样本的质量、潜变量对 decoder 输出的干预效果，以及 encoder 输入改变时 posterior 均值和方差是否随之改变。KL annealing（训练初期给 KL 项从小到大的权重）、free bits（限制 KL 每维不低于某阈值）、削弱 decoder 容量或调整目标权重都可能缓解 collapse，但它们也同时改变了实际优化的目标函数。collapse 被一种 trick 压下去，不等于模型变成了你想要的表示学习器。
 
-实现常直接预测 \(\log\sigma^2\)，既避免强制方差为正的约束优化，也比先求很小的 \(\sigma\) 再取对数稳定。
+\subsection{VAE 不保证的事情}
 
-\subsection{训练、重构与生成使用不同分布}
+ELBO 是每个观测对数似然的下界。它不保证学到的潜坐标对应人类可以命名和干预的独立因素（disentanglement），不保证从先验生成的样本满足感知质量标准，也不保证近似后验覆盖了真实后验的全部模式。Mean-field 对角高斯本来就不可能表达后验中的分量间相关和多峰结构——如果真实后验双峰，单峰对角高斯只能卡在中间或被拉向某一峰。
 
-重构一个给定 \(x\) 时，从 \(q_\phi(z\mid x)\) 取潜变量；无条件生成新样本时，从先验 \(p(z)\) 取样再通过 decoder。若聚合 posterior 与先验之间仍有明显空洞，重构可以很好，从先验生成却可能很差。
+VAE 的价值在于把生成模型、近似推断和随机梯度放进同一个可以端到端训练的框架。判断结果时需要分开问几个独立问题：概率建模假设（潜变量维度、先验形式、decoder 似然族）是否适合数据？变分族 \(q_\phi\) 够不够灵活？Monte Carlo 梯度是否因高方差需要更多样本？学到的表示在下游任务中是否有用——后者是一个经验问题，与 ELBO 高低只有松散的相关。
 
-同样，encoder 的均值重构通常比随机样本重构稳定，却没有完整反映模型的条件不确定性。展示结果时应说明使用 posterior mean、posterior sample 还是 prior sample。
+\subsection{与能量模型的困难不是同一个}
 
-把 VAE 用于产品外观缺陷筛查时，这个区分会直接影响结论。用正常品训练后，人们常把重构误差当作异常分数：划痕若难以由正常潜空间重构，误差可能升高。但强 decoder 也可能把某些缺陷重构得很好，照明或相机变化又可能让无缺陷产品产生很大误差。重构误差只是当前 decoder likelihood、posterior 近似与 reduction 共同定义的分数，不是``产品存在缺陷的概率''。阈值仍需在带缺陷标签且符合部署成像条件的数据上验证，并分别检查漏检与误报。
+VAE 写出的是归一化的 decoder 似然 \(p_\theta(x\mid z)\)——每个 \(z\) 下 \(x\) 的条件分布本身是合法的概率分布。真正难算的是消去 \(z\) 的积分 \(\int p(z)p_\theta(x\mid z)dz\) 和由此引起的后验不可用。
 
-\subsection{Posterior collapse 是一个可解释的最优解}
-
-若 decoder 足够强，它可能在几乎不使用 \(z\) 的情况下直接建模数据。此时
-
-\[
-q_\phi(z\mid x)\approx p(z),
-\qquad
-\KL(q_\phi(z\mid x)\Vert p(z))\approx0,
-\]
-
-潜变量不再携带关于 \(x\) 的信息。这不是简单的梯度 bug，而可能是当前目标、decoder 能力与优化路径共同产生的解。
-
-诊断不能只看总 ELBO。应分别观察重构项、逐维 KL、从先验生成的样本、潜变量对输出的干预，以及 encoder 输入改变时 posterior 是否变化。KL annealing、free bits、限制 decoder 或改变目标权重都可能缓解 collapse，但它们同时改变了实际优化问题。
-
-\subsection{VAE 给出的保证与没有给出的保证}
-
-ELBO 是每个观测 log-likelihood 的下界；它不保证学到的潜坐标对应人类可命名因素，不保证样本感知质量，也不保证近似 posterior 覆盖真实 posterior 的所有模式。Mean-field Gaussian 本身就排除了复杂相关与多峰结构。
-
-VAE 的价值在于把生成模型、近似推断和随机梯度放进一个可训练目标。判断结果时仍需分开：概率模型是否合适，variational family 是否足够，Monte Carlo 梯度是否稳定，以及所得表示是否满足下游用途。
-
-\subsection{它与能量模型绕开的不是同一个难点}
-
-VAE 写出规范化的 decoder likelihood \(p_\theta(x\mid z)\)，难点是边缘化 \(z\) 以及逼近 \(p_\theta(z\mid x)\)。一般能量模型直接给 \(x\) 一个未归一化分数，难点是覆盖全部 \(x\) 的配分函数和模型期望。因此 ELBO 不是所有生成模型的通用训练替代品，短链 MCMC 也不是 VAE posterior inference 的同义词。两条路线的共同点是承认目标积分难算；它们选择的近似对象和误差来源并不相同。
+能量模型走另一条路：直接给每个 \(x\) 一个未归一化的能量分数，省去了潜变量。困难转移到了配分函数的计算和模型期望的估计。两条路线都承认"目标里有难算的积分"，但近似对象不同：VAE 近似的是一族潜变量后验，能量模型近似的是整个数据空间的归一化常数。ELBO 不是所有生成模型的通用训练替代，短链 MCMC 也不是 VAE posterior inference 的同义词。理解了一条路线不能自动理解另一条。

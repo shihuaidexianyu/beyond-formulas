@@ -1,109 +1,116 @@
 \section{训练动力学与数值稳定}
 \label{sec:14-Deep-Learning/03-Optimization-and-Training/01}
 
-梯度正确之后，模型仍可能完全学不动。原因可能来自步长、随机梯度方差、初始化、饱和、数据泄漏，也可能只是浮点计算把理论上有限的表达式算成了无穷或 NaN。训练是数学目标、随机优化和数值实现共同形成的动态系统。
+梯度正确之后，模型仍可能完全学不动。
 
+你检查了反向传播的实现——梯度检查通过了，手算和自动微分对得上。你按下训练，loss 曲线开始下降，然后振荡；换一个小学习率，曲线平得像结冰的湖面；再换一个中间的，第三条曲线先降后炸，最后一行日志是 NaN。
 
-\subsection{Mini-batch 梯度只是真实经验梯度的噪声观察}
+这三种失败都不是梯度算错的问题。它们来自步长、随机梯度方差、初始化、饱和和浮点运算的共同作用。训练是数学目标、随机优化和数值实现三方形成的一个动态系统，只看单独的每一方都不足以诊断。
 
-若经验风险为
+\subsection{Mini-batch 梯度是对真实梯度的一次带噪采样}
 
+设经验风险为
 \[
-\widehat R(\theta)
-=\frac1n\sum_{i=1}^n\ell_i(\theta),
+\widehat R(\theta)=\frac1n\sum_{i=1}^n\ell_i(\theta),
+\]
+真实经验梯度是 \(\nabla\widehat R(\theta)\)。但完整数据集上的一步梯度计算太贵——百万级样本，每步都把所有人扫一遍不现实。均匀抽取 mini-batch \(\mathcal B_t\) 后，用
+\[
+\widehat g_t=\frac1{|\mathcal B_t|}\sum_{i\in\mathcal B_t}\nabla\ell_i(\theta_t)
+\]
+替代真实梯度。在条件期望上它是无偏的：
+\[
+\E[\widehat g_t\mid\theta_t]=\nabla\widehat R(\theta_t).
 \]
 
-均匀抽取 mini-batch \(\mathcal B_t\) 后，
-
+但无偏只保证长期平均指向正确方向，不保证每一步都在下降。更新
 \[
-\widehat g_t
-=\frac1{|\mathcal B_t|}
-\sum_{i\in\mathcal B_t}\nabla\ell_i(\theta_t)
+\theta_{t+1}=\theta_t-\eta_t\widehat g_t
 \]
+之后，目标函数值可能上升——因为 \(\widehat g_t\) 与 \(\nabla\widehat R(\theta_t)\) 之间有一个由 mini-batch 采样引入的随机误差。误差的方差大致随 batch size 增大而减小，但 batch size 加倍的代价是单步计算量加倍。迭代次数、归一化层的统计特性、以及某些隐式正则化效果也会随 batch size 改变——所以 batch size 不是调大就更好，而是改变了一组相互牵制的动力学。
 
-通常满足
+举个具体的感受：100 个样本，batch size=10。每步梯度由 10 个样本决定，与全量梯度之间的角度可能差到 40--60 度。batch size=50 时角度缩小到 15--25 度左右，但单步计算量涨了 5 倍。如果你还同步调大了学习率（因为``梯度更准了''），可能抵消掉方差缩小带来的稳定性。epoch 数也不能跨 batch size 直接比较：batch size=10 跑一个 epoch 产生 10 步更新，batch size=50 只产生 2 步——优化进展不是同一个量。
 
-\[
-\E[\widehat g_t\mid\theta_t]
-=\nabla\widehat R(\theta_t).
-\]
+学习率通常是所有因素里最敏感的。取一个具体的三层网络，在 CIFAR-10 上跑 SGD：学习率 1.0，第一步 loss 直接从 2.3 跳到 NaN；学习率 0.001，loss 在 300 个 epoch 后从 2.3 降到 2.1；学习率 0.1，loss 在 30 个 epoch 内降到 0.8 并继续稳定下降。这三个学习率相差不到三个数量级，训练结果却从``立刻爆炸''到``几乎不动''到``正常工作''。敏感度来自损失景观的局部曲率——梯度大小本身不告诉你安全步长的上限，因为曲率决定了线性近似在多大范围内成立。
 
-但无偏不意味着每一步都下降。更新
+momentum 平滑长期方向，Adam 按坐标分别缩放更新量——这两个机制下一节展开——但它们都不能取消选择和调度学习率的需要。weight decay、梯度裁剪和 early stopping 各自改变的也不是同一个东西：weight decay 改变目标函数，梯度裁剪改变单次更新向量的长度上限，early stopping 改变优化器的停步时间。它们的效果有时看起来相似，但失效模式完全不同。
 
-\[
-\theta_{t+1}
-=\theta_t-\eta_t\widehat g_t
-\]
+\subsection{初始化决定信号能不能穿过深度}
 
-会因 batch 噪声上下波动。batch 增大通常降低方差，却增加单步成本并改变迭代次数、归一化层统计和隐式正则化。epoch 只是大致遍历一次训练集，不能跨数据规模直接代表相同优化进展。
+前向传播是一层层乘权重矩阵、过激活函数。假设每层权重独立同分布，均值零，方差 \(\sigma_w^2\)；输入均值零，方差 \(\sigma_x^2\)。一层线性变换后，输出的每个分量是 \(d\) 个乘积之和，方差约为 \(d\cdot\sigma_w^2\cdot\sigma_x^2\)。激活函数再介入：ReLU 置零一半，方差再折半；tanh 在零附近近似恒等，但输入绝对值稍大就饱和，导数趋于零。
 
-学习率通常是最敏感的超参数。过大时 loss 振荡或发散，过小时曲线缓慢且可能在给定预算内几乎不动。momentum 平滑长期方向，Adam 按坐标缩放更新，但都不能取消选择全局学习率和 schedule 的需要。weight decay、梯度裁剪和 early stopping 分别改变目标或更新轨迹，不能当成同一种``防爆''开关。
+问题在于：穿过多层后，这个方差是层层相乘的。每层方差放大 \(c>1\)，十层后放大 \(c^{10}\)——如果 \(c=1.5\)，十层后是 57 倍；\(c=2\) 则是 1024 倍。前向激活值要么溢出 float16/float32 的表示范围，要么进入 sigmoid/tanh 的饱和区，导数几乎为零。反向传播同样经历多层乘积——梯度要么爆炸到 inf，要么消失到浮点零。两种情况下，较早层的参数都收不到有效的梯度信号。
 
-\subsection{初始化决定信号能否穿过深度}
+这正是 Xavier 和 He 初始化试图解决的问题。Xavier（Glorot）初始化对 sigmoid/tanh，取权重方差为 \(2/(\text{fan\_in}+\text{fan\_out})\)，试图让前向和反向的方差都大致不变。He 初始化对 ReLU，取 \(2/\text{fan\_in}\)——多一个因子 2 补偿 ReLU 置零一半的效应。两者都依赖激活函数的局部线性近似和权重与输入的独立性假设——都不是严格保证，只是把方差漂移从指数级压到线性级附近。
 
-前向激活若层层放大，会溢出或进入饱和；层层缩小，则信息趋于常数。反向梯度同样连续乘以权重矩阵与 activation 导数。Xavier、He 等初始化通过匹配 fan-in/fan-out 近似维持方差，但它们依赖激活与独立性近似，不是任何架构的严格保证。
-
-训练初期应监控各层 activation 均值、方差与饱和比例，以及 gradient norm 和 parameter norm。若所有 ReLU 几乎为零，继续增加 epoch 通常无济于事；若梯度逐层指数增长，gradient clipping 可以限制单次更新，却不应掩盖错误初始化、归一化或循环动力学。
+训练初期应监控几条最简单的线索：各层激活值的均值和方差是否逐层剧烈变化；ReLU 的输出为零的比例是否接近 1（``死亡 ReLU''——如果某个 ReLU 对所有训练样本输出零，它永远收不到梯度，参数就此冻结）；各层梯度的 norm 是否逐层指数增长或衰减；参数 norm 是否在几步内就爆炸。如果所有 ReLU 在训练开始后几乎全部死亡，再多的 epoch 也救不回来，因为零输出对应零梯度。gradient clipping 可以限制单次更新的长度防止参数飞出去，但它不能掩盖错误的初始化、缺失的归一化或循环中积累的梯度爆炸——clipping 是紧急刹车，不是方向盘。
 
 \subsection{实数等价不代表浮点等价}
 
-softmax 的数学定义为
+几条在实数域绝对成立的等式，在 float32 下可能算出 inf 或 NaN。这是数值分析和纯数学之间最实际的缝隙。
 
+softmax 的数学定义清清爽爽：
 \[
-p_k=\frac{e^{z_k}}{\sum_je^{z_j}}.
+p_k=\frac{e^{z_k}}{\sum_j e^{z_j}}.
 \]
+输入 logits \((1000, 1001)\)，float32 下 \(e^{1000}\approx 10^{434}\)，直接溢出到 inf。inf/inf = NaN，训练终结。但你并没做错任何数学推导。
 
-对 logits \((1000,1001)\) 直接取指数会溢出。由于加同一常数不改变概率，令 \(m=\max_jz_j\)：
-
+修复方案是数学上等价的小变换。softmax 概率对 logits 整体平移不敏感——分子分母同除以 \(e^m\) 不改变比值。取 \(m=\max_j z_j\)：
 \[
-p_k
-=\frac{e^{z_k-m}}{\sum_je^{z_j-m}}.
+p_k=\frac{e^{z_k-m}}{\sum_j e^{z_j-m}}.
 \]
+此时所有指数自变量不大于零，最大值为 \(e^0=1\)，最小值接近零但不溢出。\(m=1001\) 时，分子最大是 \(e^{-1}\approx0.368\)，一切安全。
 
-所有指数自变量不大于零，至少有一项为 1。相应地，log-sum-exp 函数 \(\operatorname{LSE}(z)=\log\sum_je^{z_j}\)（cross-entropy 与似然中的对数归一化项）应写成稳定形式
-
+同一套技巧用于 log-sum-exp——cross-entropy 和 log-likelihood 中的对数归一化项：
 \[
-\operatorname{LSE}(z)
-=m+\log\sum_je^{z_j-m}.
+\operatorname{LSE}(z)=\log\sum_j e^{z_j}
+=m+\log\sum_j e^{z_j-m}.
 \]
+右边先做稳定 softmax 的分母，再取 log。这避免了先溢出再补救的窘境——等先溢出，inf 已经进到张量里了，后面取什么 log 都无济于事。
 
-binary cross-entropy、log-softmax 和概率模型似然也应使用稳定融合公式。随意给概率加 \(\varepsilon\) 可能避免 \(\log0\)，却同时改变目标并掩盖上游 NaN；稳定恒等变换优先于经验补丁。
+binary cross-entropy、log-softmax 和各类概率模型的似然都应有自己配套的稳定融合形式。给概率手工加一个 \(\varepsilon\)（\(10^{-7}\) 之类）可以避免 \(\log 0\)，但同时改变了目标函数在极限处的梯度，可能掩盖更深处的 NaN 来源。稳定恒等变换优先于事后涂抹。
 
-mixed precision 减少内存和计算，但小梯度可能下溢。loss scaling 先放大损失和梯度，在更新前再缩回，并检测 overflow。它扩展了可用动态范围，不会修复病态模型或错误梯度。
+mixed precision 训练用 float16 做前向和反向、float32 保存主权重。float16 的动态范围极窄：最小正数约 \(6\times10^{-8}\)，最大约 65504。小梯度直接下溢——变成零，对应的参数永久停更。loss scaling 为此而生：前向算出损失后先乘一个大常数（如 \(2^{16}=65536\)），把梯度放大到 float16 可表示的范围；反向传播完成后，更新权重前再除以同一个常数。同时检测梯度中是否出现 inf/NaN（overflow），如有则跳过本次更新并降低 scaling 因子。loss scaling 扩展的是浮点表示范围，不是修复病态条件数或代码逻辑错误。
 
-数值稳定性与问题 conditioning 也要区分。稳定算法使计算结果接近某个邻近问题的精确解；若模型本身对微小数据扰动极敏感，即便算法稳定，输出仍可能变化巨大。
+数值稳定性和问题的 conditioning 要分清。稳定算法保证计算结果接近某个邻近问题的精确解——浮点舍入不会让答案完全离谱。但如果模型本身对输入微小扰动极其敏感（ill-conditioned），即使每步运算都稳定，输出仍可能随输入剧烈变化。数值稳定性是计算过程不出错，conditioning 是问题本身传递误差的性质——前者归数值分析管，后者归问题建模管。
 
 \subsection{一套能定位问题的训练顺序}
 
-面对新模型，先尝试过拟合极小数据子集。若连几十个样本都无法拟合，优先查 shape、标签、loss、梯度和容量，而不是调泛化正则。随后建立简单优化器基线，并记录：
+面对一个新模型，最可靠的做法不是反复调学习率，而是先把复杂度降到最低。
+
+第一步：在一小撮数据（几十到几百个样本）上尝试过拟合到接近零训练 loss。如果连这都做不到，问题出在 shape、标签、loss、梯度或容量上，而不是泛化、正则或 batch size。这一关过不了，后面加什么都是加噪声。常见拦路虎：标签和输出 shape 不匹配、loss reduction 用了 sum 而非 mean 导致梯度差 \(B\) 倍、最后一层激活函数选错（sigmoid vs softmax）、数据归一化在训练/验证之间泄漏。
+
+第二步：过拟合测试通过后，先用不带动量的 SGD 建立优化器基线，同时记录：
 
 \begin{itemize}
 \tightlist
 \item
-  train data loss、regularization loss 与 validation metric；
+  train data loss 和 regularization loss 分别记录，不是只看总和——总 loss 下降可能只是 weight decay 在缩参数，预测质量反而变差；
 \item
-  学习率和每层 gradient/parameter norm；
+  validation metric 独立于训练 loss——训练 loss 降而验证升，是泛化问题，不是优化问题；
 \item
-  activation 分布、非有限值出现位置；
+  学习率，以及每层 gradient norm 与 parameter norm 的比值——比值超过 \(10^{-1}\) 量级，单步更新可能过大；小于 \(10^{-5}\)，参数几乎不动；
 \item
-  不同随机种子下的曲线差异；
+  各层激活的均值、方差和饱和比例（ReLU 的零占比，sigmoid/tanh 接近 0 或 1 的比例）；
 \item
-  训练与验证分布、预处理是否严格隔离。
+  NaN 或 inf 首次出现在哪个算子、哪一层——而不是在日志末尾看到 NaN 后茫然回找；
+\item
+  不同随机种子下的 loss 曲线差异——差异巨大说明优化景观或初始化极其不稳定，单个种子的好结果不可靠；
+\item
+  训练集和验证集的分布、预处理 pipeline 是否严格隔离。
 \end{itemize}
 
-一次 Taylor 检查也很有帮助：小步更新前，局部预测
-
+一次 Taylor 检查简单而高效：取很小的 \(\eta\)（比如正常学习率的 \(10^{-3}\)），预测
 \[
-L(\theta-\eta g)
-\approx L(\theta)-\eta\|g\|^2.
+L(\theta-\eta g)\approx L(\theta)-\eta\|g\|^2.
 \]
+若实际 loss 变化与预测方向相反（本该下降却上升了），极可能梯度符号有问题、或者随机层（dropout、BatchNorm 的 running stats）在两次前向中状态不同、或者 loss reduction 少乘了某个因子。这个检查只用几行代码，能在训练跑了几百步之后才发现 NaN 之前就暴露梯度符号错误。
 
-若极小 \(\eta\) 下实际 loss 仍向相反方向变化，可能存在梯度符号、随机层状态或 loss reduction 问题。
+第三步：确认优化能跑通后，再逐步加回正则化项、lr scheduler、数据增强和更复杂的架构组件，每次只加一个，确认不破坏基线训练动态。
 
-最后，低训练 loss 只说明优化了训练目标。validation 恶化属于泛化问题，部署漂移属于分布问题，概率失准属于校准问题；它们不应都被称为``没收敛''。
+最后一条分诊原则需要反复提醒自己：训练 loss 低而 validation 恶化，是泛化问题，不应被称为``没收敛''。部署时数据分布漂移导致指标下降，是分布问题。概率估计系统性偏斜，是校准问题。这三者的干预手段完全不同——加大训练量只能影响第一者。
 
 \subsubsection{一次分层故障诊断}
 
-训练一个小型分类网络，依次人为制造四个故障：学习率过大、sigmoid 初始化进入饱和、直接对巨大 logits 做 exponent、在全数据上拟合标准化。为每个故障选择最早能暴露它的证据，并说明为什么其他训练指标可能仍显得正常。最后比较 clipping、减小学习率和稳定 log-softmax 各自解决的是哪一层问题。
+训练一个小型分类网络，依次制造四种故障：学习率设为 1.0（正确值约 0.01）、sigmoid 权重用 \(\mathcal N(0,5^2)\) 初始化（正确值应远小于此）、直接对 logits 范围 \([800,1200]\) 做 softmax 而不做稳定化、先在全量数据上 fit StandardScaler 再划分训练/验证集。对每种故障，找出最早能暴露它的监控信号，并说明为什么其他训练指标在故障初期可能仍然看起来正常。最后比较 gradient clipping、减小学习率和使用稳定 log-softmax 各自解决的是哪一层的问题——梯度更新的幅度限制、搜索方向的可靠性、还是数值表达的安全性。
 
-步长与凸下降理论见\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/01]{``梯度下降真正难在步长''}；非凸驻点界、mini-batch 方差与优化---泛化分层见\hyperref[ch:078]{``非凸与随机优化：能下降不等于找到全局解''}；稳定浮点原则见数值分析部分的\hyperref[ch:067]{``机器学习中的稳定计算''}。
+步长与凸下降理论见\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/01]{``梯度下降真正难在步长''}；非凸驻点界、mini-batch 方差与优化--泛化分层见\hyperref[ch:078]{``非凸与随机优化：能下降不等于找到全局解''}；稳定浮点原则见数值分析部分的\hyperref[ch:067]{``机器学习中的稳定计算''}。

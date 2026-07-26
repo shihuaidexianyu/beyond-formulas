@@ -1,214 +1,235 @@
 \section{对角化与动力系统：把耦合演化变成独立缩放}
 \label{sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/02}
 
-迭代 \(x_{k+1}=Ax_k\) 是最朴素的问题：给我初始状态和矩阵，k 步之后会怎样。硬算 \(A^kx_0\) 很笨，但对角化让答案变得透明——把初始状态按特征向量拆开，各方向各自乘 \(\lambda_i^k\)，互不干扰。
-
-若 \(n\times n\) 矩阵 \(A\) 拥有 \(n\) 个线性无关特征向量 \(v_1,\ldots,v_n\)，它们构成整个空间的一组基，任意状态都能分解到这些独立模式上。
-
-把特征向量作为列：
+给你一个初始状态 \(x_0\) 和一个矩阵 \(A\)，问：\(k\) 步之后状态变成了什么？
 
 \[
-S=\begin{pmatrix}v_1&\cdots&v_n\end{pmatrix},
+x_1=Ax_0,\quad x_2=A^2x_0,\quad\ldots,\quad x_k=A^kx_0.
+\]
+
+硬算 \(A^k\) 就是把矩阵反复乘自己，然后作用在 \(x_0\) 上。五六步还好说，几十几百步之后，中间过程就是一片噪音，看不出任何趋势。
+
+但如果我们能找到一种方法——把 \(x_0\) 拆成若干个“各自独立演化”的分量，每个分量只被一个简单的数控制，互不干扰——那整件事就从一团乱麻变成了几根可以单独追踪的线。
+
+\subsection{把矩阵写成特征向量的语言}
+
+假设 \(n\times n\) 矩阵 \(A\) 有 \(n\) 个线性无关的特征向量 \(v_1,\ldots,v_n\)。它们构成整个空间的一组基，任何向量都可以在这组基下分解。
+
+把特征向量排成列：
+
+\[
+S = \begin{pmatrix}v_1&\cdots&v_n\end{pmatrix},
 \]
 
 把特征值放在对角线上：
 
 \[
-\Lambda=\diag(\lambda_1,\ldots,\lambda_n).
+\Lambda = \diag(\lambda_1,\ldots,\lambda_n).
 \]
 
-各列满足 \(Av_i=\lambda_i v_i\)，合在一起就是
+每条关系 \(Av_i=\lambda_i v_i\) 合在一起写成矩阵乘法：
 
 \[
-AS=S\Lambda.
+AS = S\Lambda.
 \]
 
-由于 \(S\) 可逆，
+因为 \(S\) 的列线性无关，\(S\) 可逆。两边左乘 \(S^{-1}\)：
 
 \[
-A=S\Lambda S^{-1},
-\qquad
-S^{-1}AS=\Lambda.
+S^{-1}AS = \Lambda,
+\qquad\text{或等价地}\qquad
+A = S\Lambda S^{-1}.
 \]
 
-这叫作对角化。它把同一线性变换改写到特征向量基下，并没有更换所研究的问题；在这组坐标中，各方向不再互相混合。
+这就叫对角化。它不是什么新变换——还是那个 \(A\)，只是换到了特征向量构成的坐标系里去描述。在这组坐标系下，每个坐标轴恰好对齐一个特征方向，变换退化为逐轴的独立缩放。原来在标准坐标里搅在一起的各个分量，在特征坐标里井水不犯河水。
 
-\subsection{矩阵幂为什么突然简单}
+\subsection{矩阵幂为什么突然简单了}
 
-直接计算 \(A^k\) 会不断进行矩阵乘法。利用对角化：
+直接算 \(A^k\)：
 
 \[
 \begin{aligned}
 A^k
-&=(S\Lambda S^{-1})^k\\
-&=S\Lambda^kS^{-1},
+&= (S\Lambda S^{-1})^k \\
+&= (S\Lambda S^{-1})(S\Lambda S^{-1})\cdots(S\Lambda S^{-1}) \\
+&= S\Lambda^k S^{-1}.
 \end{aligned}
 \]
 
-因为相邻的 \(S^{-1}S\) 都抵消。对角矩阵的幂只需逐项取幂：
+相邻的 \(S^{-1}S\) 全部抵消，只剩下最外层的一对 \(S\) 和 \(S^{-1}\) 包裹着对角矩阵的 \(k\) 次幂。而对角矩阵的幂简单到只是逐项取幂：
 
 \[
-\Lambda^k
-=\diag(\lambda_1^k,\ldots,\lambda_n^k).
+\Lambda^k = \diag(\lambda_1^k,\ldots,\lambda_n^k).
 \]
 
-矩阵指数由幂级数定义：
+与此平行的还有矩阵指数。它由幂级数定义：
 
 \[
-e^{At}=\sum_{k=0}^{\infty}\frac{t^k}{k!}A^k.
+e^{At} = \sum_{k=0}^{\infty}\frac{t^k}{k!}A^k.
 \]
 
-代入 \(A^k=S\Lambda^kS^{-1}\)，每一项都带有同一对 \(S\) 与 \(S^{-1}\)，于是
+把 \(A^k=S\Lambda^kS^{-1}\) 代入，每一项都提着同一对 \(S\) 和 \(S^{-1}\)：
 
 \[
-e^{At}=Se^{\Lambda t}S^{-1},
+\begin{aligned}
+e^{At}
+&= \sum_{k=0}^{\infty}\frac{t^k}{k!}S\Lambda^k S^{-1} \\
+&= S\Bigl(\sum_{k=0}^{\infty}\frac{t^k}{k!}\Lambda^k\Bigr)S^{-1} \\
+&= S\,e^{\Lambda t}\,S^{-1},
+\end{aligned}
 \]
 
 其中
 
 \[
-e^{\Lambda t}
-=\diag(e^{\lambda_1t},\ldots,e^{\lambda_nt}).
+e^{\Lambda t} = \diag(e^{\lambda_1 t},\ldots,e^{\lambda_n t}).
 \]
 
-特征值因此直接控制重复作用和连续时间演化的增长速度。
+特征值因此直接控制两种演化方式的增长速度：离散时间看 \(|\lambda|\) 和 \(\lambda^k\)，连续时间看 \(\operatorname{Re}(\lambda)\) 和 \(e^{\lambda t}\)。
 
-\subsection{回到二维例子}
-
-对
+\subsection{回到那个二维例子}
 
 \[
 A=\begin{pmatrix}2&1\\1&2\end{pmatrix},
 \]
 
-取
+上一节已经找到：
 
 \[
-v_1=\begin{pmatrix}1\\1\end{pmatrix},
-\quad \lambda_1=3,
+v_1=\begin{pmatrix}1\\1\end{pmatrix},\;\lambda_1=3,
 \qquad
-v_2=\begin{pmatrix}1\\-1\end{pmatrix},
-\quad \lambda_2=1.
+v_2=\begin{pmatrix}1\\-1\end{pmatrix},\;\lambda_2=1.
 \]
 
-初始向量
+设初始状态
 
 \[
-x_0=\begin{pmatrix}1\\0\end{pmatrix}
+x_0=\begin{pmatrix}1\\0\end{pmatrix}.
 \]
 
-可以写成
+这个向量现在在特征基下是什么？解 \(c_1v_1+c_2v_2=x_0\) 得 \(c_1=c_2=\frac12\)，所以
 
 \[
-x_0=\frac12v_1+\frac12v_2.
+x_0 = \frac12 v_1 + \frac12 v_2.
 \]
 
 连续作用 \(k\) 次：
 
 \[
-x_k=A^kx_0
-=\frac12 3^k v_1+\frac12 1^k v_2.
+x_k = A^k x_0
+= \frac12\cdot3^k\cdot v_1 + \frac12\cdot1^k\cdot v_2
+= \frac12\cdot3^k\begin{pmatrix}1\\1\end{pmatrix} + \frac12\begin{pmatrix}1\\-1\end{pmatrix}.
 \]
 
-当 \(k\) 很大时，第一项占主导，状态越来越接近 \((1,1)^{\trans}\) 的方向。我们无需逐次相乘，就能看见长期行为。
+\(k=1\)：\(x_1=\frac12(3,3)^{\trans}+\frac12(1,-1)^{\trans}=(2,1)^{\trans}\)，核对直接乘 \(A\cdot(1,0)^{\trans}\) 确实得 \((2,1)^{\trans}\)。
+
+\(k=5\)：第一项是 \(\frac12\cdot243=121.5\) 量级，第二项仍是 \(0.5\)。后者完全可以忽略。
+
+\(k\) 很大时，状态几乎就是 \((1,1)^{\trans}\) 方向的纯拉伸。我们不需要逐次乘矩阵，就能看见长期行为的归宿。
 
 \subsection{离散动力系统}
 
-离散线性系统写成
+离散线性系统
 
 \[
-x_{k+1}=Ax_k,
+x_{k+1}=Ax_k
 \]
 
-所以
+的解就是
 
 \[
-x_k=A^kx_0.
+x_k = A^k x_0.
 \]
 
-若 \(A\) 可对角化，把初始状态展开为
+若 \(A\) 可对角化，将 \(x_0\) 展开：
 
 \[
-x_0=c_1v_1+\cdots+c_nv_n,
+x_0 = c_1v_1 + \cdots + c_nv_n,
 \]
 
 则
 
 \[
-x_k=c_1\lambda_1^kv_1+\cdots+c_n\lambda_n^kv_n.
+x_k = c_1\lambda_1^k v_1 + \cdots + c_n\lambda_n^k v_n.
 \]
 
-每个特征方向都是一个独立演化模式：
+每个特征方向都是一个独立演化模式。不同模式根据特征值的大小走向各自的命运：
 
 \begin{itemize}
 \tightlist
 \item
-  \(|\lambda_i|<1\)：该模式衰减；
+  \(|\lambda_i|<1\)：该模式逐次衰减，最终消失；
 \item
-  \(|\lambda_i|>1\)：该模式增长；
+  \(|\lambda_i|>1\)：该模式逐次增长，最终统治全局；
 \item
-  \(\lambda_i<0\)：符号随步数交替；
+  \(\lambda_i<0\)：符号随步数交替——这步朝正，下步朝反；
 \item
-  \(|\lambda_i|=1\)：需要进一步分析是否保持、振荡或因缺陷结构产生增长（下一节给出最小例子）。
+  \(|\lambda_i|=1\)：该模式不增不减。但“不增不减”分多种情况：可能是保持不变，可能是周期振荡，也可能因为缺陷结构（特征方向不够）而出现多项式增长——下一节会给出最小例子。
 \end{itemize}
 
-最大绝对值
+最大特征值的绝对值
 
 \[
-\rho(A)=\max_i|\lambda_i|
+\rho(A) = \max_i|\lambda_i|
 \]
 
-称为谱半径。在适当条件下，它决定长期增长率。
+叫谱半径。当 \(\rho(A)<1\) 时所有模式都衰减，系统渐近稳定；\(\rho(A)>1\) 时至少有一个模式在增长，系统发散。
 
 \subsection{连续动力系统}
 
 微分方程
 
 \[
-\frac{dx}{dt}=Ax
+\frac{dx}{dt} = Ax
 \]
 
-的解为
+的解是
 
 \[
-x(t)=e^{At}x(0).
+x(t) = e^{At}x(0).
 \]
 
-对幂级数逐项求导可得 \(\frac{d}{dt}e^{At}=Ae^{At}\)，所以它确实满足方程；代入 \(t=0\) 也给出正确初值。
+对幂级数逐项求导：\(\frac{d}{dt}e^{At}=Ae^{At}\)，所以它确实满足方程；代入 \(t=0\) 得 \(x(0)\)，初值也对。
 
-若 \(A\) 可对角化，
+若 \(A\) 可对角化：
 
 \[
-x(t)=\sum_i c_i e^{\lambda_it}v_i.
+x(t) = \sum_i c_i\, e^{\lambda_i t}\, v_i.
 \]
 
-此时：
+不同模式的行为由特征值的实部决定：
 
 \begin{itemize}
 \tightlist
 \item
-  \(\operatorname{Re}(\lambda_i)<0\) 的模式指数衰减；
+  \(\operatorname{Re}(\lambda_i)<0\)：指数衰减，趋于零；
 \item
-  \(\operatorname{Re}(\lambda_i)>0\) 的模式指数增长；
+  \(\operatorname{Re}(\lambda_i)>0\)：指数增长，趋于无穷；
 \item
-  非零虚部产生振荡；
+  非零虚部产生振荡——\(e^{(a+bi)t}=e^{at}(\cos bt+i\sin bt)\)，实部控制包络，虚部控制频率；
 \item
-  实部为零时，需要结合 Jordan 结构判断是否出现多项式增长。
+  实部恰为零时，需要结合 Jordan 结构判断：可能仅仅是等幅振荡，也可能因为特征方向不够而乘上 \(t\) 的幂次增长。
 \end{itemize}
 
-一个容易犯的错误：离散系统看 \(|\lambda|\)，连续系统看 \(\operatorname{Re}(\lambda)\)。把两套条件混用，结论会完全错误。
+一条容易踩的坑：离散系统判断 \(|\lambda|\) 与 \(1\) 的关系，连续系统判断 \(\operatorname{Re}(\lambda)\) 与 \(0\) 的关系。把连续系统的条件 \(\operatorname{Re}(\lambda)<0\) 套进离散系统，或者反过来用 \(|\lambda|<1\) 判断连续稳定性，结论会完全错误。两套判据针对的是完全不同的动力学机制——一个是乘幂，一个是指数。
 
 \subsection{相似矩阵表示同一个变换}
 
 若
 
 \[
-B=S^{-1}AS,
+B = S^{-1}AS,
 \]
 
-则 \(A\) 与 \(B\) 相似。\(S\) 把新坐标翻译到旧坐标，\(A\) 执行真实变换，\(S^{-1}\) 再翻译回来。因此二者是同一线性变换在不同基下的矩阵。
+称 \(A\) 与 \(B\) 相似。从 \(x\) 到 \(Bx\) 的处理流程是：
 
-相似变换不会改变与坐标无关的性质：
+\[
+x \;\xrightarrow{S}\; Sx \;\xrightarrow{A}\; ASx \;\xrightarrow{S^{-1}}\; S^{-1}ASx = Bx.
+\]
+
+\(S\) 把新坐标翻译到旧坐标，\(A\) 在旧坐标中执行变换，\(S^{-1}\) 再翻译回新坐标。所以 \(B\) 和 \(A\) 是同一个线性变换在两套不同基底下的描述。
+
+相似变换不会改变那些与坐标选择无关的性质：
 
 \begin{itemize}
 \tightlist
@@ -224,32 +245,40 @@ B=S^{-1}AS,
   Jordan 块的结构。
 \end{itemize}
 
-对角化就是寻找一个特别好的相似矩阵：希望 \(B\) 恰好为对角矩阵。
+对角化就是一场寻宝游戏：在一堆相似矩阵中，找到最漂亮的那个——对角矩阵 \(\Lambda\)。
 
 \subsection{什么时候可以对角化}
 
-\(A\) 可对角化当且仅当它拥有 \(n\) 个线性无关特征向量，也等价于所有特征空间维数之和为 \(n\)。
+\(A\) 可对角化当且仅当它拥有 \(n\) 个线性无关的特征向量。这也等价于所有特征空间的维数之和等于 \(n\)。
 
-足够但非必要的条件是有 \(n\) 个互不相同的特征值。若特征值重复，就必须检查对应特征空间是否足够大。
+一个充分但不必要的条件是拥有 \(n\) 个互不相同的特征值——不同特征值保证独立特征向量，所以一定够用。但如果特征值有重复，就必须逐一检查每个重复根对应的特征空间是否足够大。
 
-例如单位矩阵只有一个特征值 \(1\)，代数重数为 \(n\)，但每个非零向量都是特征向量，所以当然可以对角化。重复根本身不是问题；问题是重复根是否提供了足够多的独立方向。
+举两个极端的例子。单位矩阵 \(I\) 只有一个特征值 \(1\)，代数重数 \(n\)——但每个非零向量都是它的特征向量，特征空间维数也是 \(n\)，当然可以对角化。重复根完全可以是良性的。
 
-\subsection{谱分解的两个含义需要区分}
+而
+
+\[
+J = \begin{pmatrix}0&1\\0&0\end{pmatrix}
+\]
+
+的特征值是 \(0,0\)（代数重数 \(2\)），但特征空间维数只有 \(1\)——所有特征向量都是 \((c,0)^{\trans}\) 的形式，只有第一个基向量的方向能用。这就是缺陷结构：重复根没有提供足够多的独立方向。对这样的矩阵，不存在一组特征向量构成全空间的基，因此不能对角化。
+
+\subsection{谱分解的两个版本要分清}
 
 一般可对角化矩阵可以写成
 
 \[
-A=S\Lambda S^{-1}.
+A = S\Lambda S^{-1}.
 \]
 
-有时这也被宽泛地称为 eigendecomposition。若 \(A\) 是实对称矩阵，会得到更强的形式
+有时这也被笼统地称为特征分解（eigendecomposition）。但如果 \(A\) 恰好是实对称矩阵，会得到更强的形式：
 
 \[
-A=Q\Lambda Q^{\trans},
+A = Q\Lambda Q^{\trans},
 \]
 
-其中 \(Q\) 正交。后者通常称为谱定理或正交谱分解，具有更好的几何和数值性质。
+其中 \(Q\) 是正交矩阵。后者叫谱定理或正交谱分解，具有更好的几何性质：列正交归一，数值稳定，逆就是转置。
 
-不能把一般的 \(S^{-1}\) 随意替换成 \(S^{\trans}\)。只有特征向量能够选成正交归一组时才成立，下一单元将专门解释为什么对称矩阵拥有这一优势。
+不能看到 \(A=S\Lambda S^{-1}\) 就把 \(S^{-1}\) 顺手写成 \(S^{\trans}\)。一般特征向量不会恰好彼此正交，\(S\) 不是正交矩阵。只有对称矩阵才被保证拥有正交的特征向量组——下一单元会专门解释这个保证从哪里来。
 
 延伸阅读：MIT 18.06：Diagonalization and Powers of \(A\)。

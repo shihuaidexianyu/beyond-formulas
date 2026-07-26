@@ -1,17 +1,27 @@
 \section{用微分与 Frobenius 内积读取梯度}
 \label{sec:10-Matrix-Calculus/02-Differentials/01}
 
-微分 \(df\) 是函数一阶变化的符号表示。若 \(f\) 是标量、\(X\) 是矩阵，我们希望把 \(df\) 整理成
+设你需要最小化
 
 \[
-df = \langle\nabla_Xf,dX\rangle_F
-=\trace\bigl((\nabla_Xf)^{\trans}dX\bigr).
+f(X)=\frac12\norm{AX-B}_F^2,
 \]
-一旦 \(dX\) 被孤立出来，其 Frobenius 内积前的系数就是梯度。整个 trace calculus 都围绕这个目标服务。
 
-\subsection{微分遵守熟悉的代数规则}
+其中 \(A\in\R^{100\times 50}\)，\(X\in\R^{50\times 30}\)，\(B\in\R^{100\times 30}\)。梯度下降需要 \(\nabla_X f\)——一个 \(50\times 30\) 的矩阵，包含 1500 个偏导数。
 
-对相容形状的变量：
+你不会想一个个求偏导再拼回矩阵形状。你可以把 \(X\) 拉成向量 \(\operatorname{vec}(X)\in\R^{1500}\)，用 Kronecker 积写出 \(\nabla_{\operatorname{vec}(X)}f = (I_{30}\otimes A^{\trans}A)\operatorname{vec}(X)-(I\otimes A^{\trans})\operatorname{vec}(B)\)。这个式子是对的——但 \(1500\times 1500\) 的 Kronecker 积不告诉你任何关于 \(A\)、\(X\)、\(B\) 原来形状的信息。你失去了从结果一眼认出 \(A^{\trans}(AX-B)\) 的能力。
+
+需要一个既尊重矩阵形状又能系统推演的记法。微分 \(df\) 加 Frobenius 内积就是为这个目的服务的。
+
+\subsection{微分是线性化，不是``无穷小量''}
+
+把 \(f\) 在 \(X\) 处的变化线性近似：当 \(X\) 扰动一个很小的 \(dX\) 时，
+
+\[
+f(X+dX)-f(X)\approx df,
+\]
+
+其中 \(df\) 对 \(dX\) 线性。\(dX\) 不是``一个极小的矩阵''，它是一个与 \(X\) 同形的占位符号，记录``变化发生在哪个位置以及什么方向''。获取 \(df\) 不需要特殊的极限技巧——直接用你熟悉的运算规则，只要忽略 \((dA)(dB)\) 级别的二阶小量：
 
 \[
 d(A+B)=dA+dB,
@@ -25,140 +35,137 @@ d(AB)=(dA)B+A(dB),
 d(A^{\trans})=(dA)^{\trans}.
 \]
 
-这些规则来自把 \(A+dA\)、\(B+dB\) 代入并忽略二阶小量 \((dA)(dB)\)。它们是提取一阶项的简写，不能把 \(d\) 当作普通数理解。
-
-例如
+例如 \(Y=X^{\trans}X\) 的微分：把 \(X+dX\) 代入，
 
 \[
-Y=X^{\trans}X.
+Y+dY=(X+dX)^{\trans}(X+dX)=X^{\trans}X+(dX)^{\trans}X+X^{\trans}dX+(dX)^{\trans}dX.
 \]
 
-有
+扔掉最后那个二阶小量，得到
 
 \[
 dY=(dX)^{\trans}X+X^{\trans}dX.
 \]
 
-结果对 \(dX\) 线性，正是上一章中用方向导数求得的答案（把 \(H\) 换成 \(dX\)）。
+这就是上一章方向导数中把 \(H\) 换成 \(dX\) 的结果。微分记法把``沿特定方向的变化率''升级为``对所有可能方向统一的线性映射''。
 
-\subsection{Frobenius 内积让矩阵梯度自然出现}
+\subsection{Frobenius 内积把矩阵空间变成向量空间}
 
-Frobenius 内积
+两个同形矩阵 \(A,B\) 的 Frobenius 内积定义为逐元素乘积之和：
 
 \[
-\langle A,B\rangle_F = \sum_{ij}A_{ij}B_{ij}
-=\trace(A^{\trans}B)
+\langle A,B\rangle_F = \sum_{i,j}A_{ij}B_{ij}
+=\trace(A^{\trans}B).
 \]
-把矩阵空间变成欧氏空间。它满足"移动因子"关系，例如
+
+它满足欧氏内积的全部性质：对称、线性、正定。矩阵空间的几何直觉——“两个矩阵之间的距离”“投影到某个子空间”——全都建立在这个内积上。
+
+关键洞察在于：如果能把 \(df\) 写成 Frobenius 内积的形式
+
+\[
+df = \langle G, dX\rangle_F = \trace(G^{\trans}dX),
+\]
+
+那么 \(G\) 就是梯度 \(\nabla_X f\)。梯度是内积空间中唯一满足 \(df=\langle\nabla f,dX\rangle\) 的那个元素。
+
+于是整个技术路线就清楚了：用微分规则算出 \(df\)，利用 trace 的循环性质把它整理到 \(dX\) 出现在右端、前面是一个矩阵的转置的形式，读出来就是梯度。
+
+\subsection{从微分到梯度：一个完整范例}
+
+回到开头的最小二乘。定义残差 \(R=AX-B\)。先算 \(f\) 的微分：
+
+\[
+f=\frac12\trace(R^{\trans}R),
+\]
+
+\[
+df=\frac12\trace\bigl((dR)^{\trans}R+R^{\trans}dR\bigr).
+\]
+
+两项都是标量——\(\trace((dR)^{\trans}R)=\trace(R^{\trans}dR)\) 因为迹在转置下不变——所以
+
+\[
+df=\trace(R^{\trans}dR).
+\]
+
+这一步省掉了因子 \(1/2\)。为什么要主动在目标函数前加 \(1/2\)？因为不加的话微分是 \(2\trace(R^{\trans}dR)\)，梯度里就多一个因子 2。加 \(1/2\) 纯粹是为了梯度表达式更干净，不改变最优解。它是建模者自己选的归一化，不是什么需要背的定理。
+
+下一步，\(dR=A\,dX\)。注意这里 \(dA=0\) 因为 \(A\) 是常量，\(dB=0\) 同理。代入：
+
+\[
+df=\trace(R^{\trans}A\,dX).
+\]
+
+现在 \(dX\) 在 trace 的最右端。为了匹配 \(\trace(G^{\trans}dX)\)，循环移动：
+
+\[
+df=\trace(R^{\trans}A\,dX)
+=\trace\bigl((A^{\trans}R)^{\trans}dX\bigr).
+\]
+
+读取梯度：
+
+\[
+\nabla_X f = A^{\trans}R = A^{\trans}(AX-B).
+\]
+
+你再回头看一眼那个 Kronecker 积版本——\(A^{\trans}(AX-B)\) 的矩阵形状和因子顺序一目了然，可以立刻与原始问题对应。
+
+\subsection{循环移动的每一步都要匹配形状}
+
+Trace 的循环性质是唯一可以``移动因子''的操作：
+
+\[
+\trace(ABC)=\trace(BCA)=\trace(CAB).
+\]
+
+它不是任意交换——\(\trace(ABC)\) 一般不等于 \(\trace(ACB)\)。循环必须保持乘积顺序，只能整体轮换。
+
+利用循环可以实现 Frobenius 内积中的因子移动。例如，
 
 \[
 \langle A,BC\rangle_F
 =\trace(A^{\trans}BC)
 =\trace(CA^{\trans}B)
 =\trace\bigl((AC^{\trans})^{\trans}B\bigr)
-=\langle AC^{\trans},B\rangle_F,
+=\langle AC^{\trans},B\rangle_F.
 \]
-中间一步就是 trace 的循环性质：
+
+这个性质在梯度推导中反复出现：你想把 \(dX\) 从表达式中间移到最右端，中间经过的因子会被``吞''进梯度转置的内部。
+
+最常见的错误就出在最后一步。如果微分整理到
 
 \[
-\trace(ABC) = \trace(BCA)
-=\trace(CAB).
+df=\trace(BA\,dX),
 \]
-循环不等于任意交换。一般不能把 \(ABC\) 改成 \(ACB\)；只有整段循环移动，且矩阵形状相容。
 
-\subsection{完整推导一个矩阵最小二乘}
-
-令
+直接与 \(\trace(G^{\trans}dX)\) 比较，\(G^{\trans}=BA\)，所以
 
 \[
-f(X) = \frac12\norm{ AX-B}_F^2.
+G=(BA)^{\trans}=A^{\trans}B^{\trans},
 \]
-先设残差
+
+不是 \(BA\)。把 \(dX\) 前面的东西不经转置地称作梯度，是出错最集中的地方。避免这个错误的最可靠方法是每次都显式写出梯度定义 \(\trace((\nabla f)^{\trans}dX)\)，而不是依赖视觉记忆判断要不要转置。
+
+\subsection{损失用和还是平均影响梯度尺度}
+
+目标函数定义为样本损失之和还是平均，会改变梯度的大小，从而改变同一学习率下的有效步长和正则化强度的解释。两个公式如果只差一个 \(1/n\) 因子，可能各自对应不同的目标定义，都是正确的——但它们对应的优化问题不完全相同。这种差异不是数学错误，但需要在调整学习率和权重衰减时保持一致。
+
+\subsection{变量有约束时需要额外的一步}
+
+当 \(X\) 被要求对称时，\(dX\) 也必须对称。只有对称扰动才能被接受，反对称扰动不在定义域内。如果直接按无约束方法求出的梯度 \(G\)，它的反对称部分与任何对称扰动的内积为零：
+
+设 \(K^{\trans}=-K\) 且 \(H^{\trans}=H\)，则
 
 \[
-R=AX-B.
+\trace(KH)=\trace\bigl((KH)^{\trans}\bigr)
+=-\trace(HK)=-\trace(KH),
 \]
 
-则
+这推出 \(\trace(KH)=0\)，即 \(\langle K,H\rangle_F=0\)。反对称部分对梯度的有效分量没有贡献：在对称变量空间中，只有 \(G\) 的对称部分对目标函数的变化负责。因此对称约束下的正确梯度是
 
 \[
-f=\frac12\trace(R^{\trans}R).
+\operatorname{sym}(G)=\frac12(G+G^{\trans}),
 \]
 
-微分为
-
-\[
-df = \frac12\trace\bigl((dR)^{\trans}R+R^{\trans}dR\bigr).
-\]
-两个标量项相等——迹在转置下不变，\(\trace\bigl((dR)^{\trans}R\bigr)=\trace(R^{\trans}dR)\)——所以
-
-\[
-df=\trace(R^{\trans}dR).
-\]
-
-又因为
-
-\[
-dR=A\,dX,
-\]
-
-得到
-
-\[
-df = \trace(R^{\trans}A\,dX)
-=\trace\bigl((A^{\trans}R)^{\trans}dX\bigr).
-\]
-因此
-
-\[
-\nabla_Xf = A^{\trans}(AX-B).
-\]
-每一步都有明确目的：把所有依赖写成微分，把 \(dX\) 移到 trace 最后，再使前面的矩阵转置形式与梯度定义匹配。
-
-\subsection{\texorpdfstring{为什么 \(\frac12\) 常被主动加入}{为什么 \frac12 常被主动加入}}
-
-对平方范数
-
-\[
-\norm{ R}_F^2,
-\]
-
-微分会产生因子 2。写成 \(\frac12\norm{ R}_F^2\) 只是为了让梯度更简洁，不改变最优解。这是建模者选择的归一化，无须把它当成求导定理。
-
-损失取样本和还是样本平均也会改变梯度尺度，从而影响学习率和正则化参数解释。两个公式若只差 \(1/n\)，可能都正确，却对应不同目标定义。
-
-\subsection{常见错误来自错误地"移动"微分}
-
-若
-
-\[
-df=\trace(A\,dX\,B),
-\]
-
-循环移动得
-
-\[
-df=\trace(BA\,dX).
-\]
-
-要与
-
-\[
-\trace\bigl((\nabla_Xf)^{\trans}dX\bigr)
-\]
-
-比较，所以
-
-\[
-\nabla_Xf=(BA)^{\trans}=A^{\trans}B^{\trans}.
-\]
-
-直接把 \(dX\) 前面的 \(BA\) 称为梯度会漏掉转置。最可靠的做法是每次明确写出梯度定义，而不是依赖视觉记忆。
-
-若 \(X\) 被要求对称，只有对称 \(dX\) 可行。此时环境梯度 \(G\) 的反对称部分与任何对称扰动的内积为零（设 \(K^{\trans}=-K\)、\(H^{\trans}=H\)，则 \(\trace(KH)=\trace\bigl((KH)^{\trans}\bigr)=-\trace(HK)=-\trace(KH)\)，故 \(\langle K,H\rangle_F=0\)），自然表示是上一章引入的对称化
-
-\[
-\operatorname{sym}(G)=\frac12(G+G^{\trans}).
-\]
-
-是否需要这一步取决于变量空间，不能从公式本身猜测。
+这正是上一章方向导数中引入的对称化算子。是否需要这一步取决于变量空间的定义，不能从公式本身推测。

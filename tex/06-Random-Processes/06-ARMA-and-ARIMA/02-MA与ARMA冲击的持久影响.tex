@@ -1,67 +1,109 @@
 \section{MA 与 ARMA：冲击的持久影响}
 \label{sec:06-Random-Processes/06-ARMA-and-ARIMA/02}
 
-AR 模型假设未来由历史值直接决定，但许多序列的依赖是间接的：一个冲击（政策变化、设备故障、市场恐慌）影响未来几期，然后逐渐消失。滑动平均（MA）模型捕捉这种``冲击的持久影响''，ARMA 把 AR 与 MA 结合起来。
+AR 模型假设未来值由历史值直接加权决定。上一节你看到它的自相关按指数拖尾，偏自相关干净截尾，识别起来有章可循。但你在实际序列里会碰到另一种信号：一个外部冲击来了——政策调整、设备故障、市场恐慌——然后它的影响跨越多期逐渐退潮，但历史值本身并不直接出现在方程右边。比如一个工厂因为设备故障停产一天，次日出货量下降不是因为前一天出货少，而是因为同一次故障在三天的生产排期中都留下了痕迹。今天的问题想捕捉的就是这种``冲击的持久影响''。
 
-\subsection{MA(q) 的定义与可逆性}
+AR 把影响储存在可观测的历史值里；MA 把影响储存在不可观测的历史冲击里。两者都不对，两者都有用——要看数据的记忆模式更接近哪一种。
 
-MA(q) 模型为
+\subsection{MA(q)：只用冲击说话}
+
+MA(q) 模型直接把当前值写成历史白噪声的加权和：
 
 \[
 X_t=\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_q\varepsilon_{t-q},
 \]
 
-其中 $\varepsilon_t$ 是白噪声。与 AR 不同，MA 的当前值不依赖历史值，而依赖历史冲击。
+其中 \(\varepsilon_t\) 是白噪声——均值为零、方差恒定、前后不相关。
 
-MA(q) 总是平稳的（有限白噪声加权和），但其 ACF 有特征形状：$\rho_k=0$ 对 $k>q$，即 ACF 在滞后 $q$ 后截尾。这与 AR 的 PACF 截尾形成对偶：AR 的 ACF 拖尾、PACF 截尾；MA 的 ACF 截尾、PACF 拖尾。
+与 AR 的差异很直观：AR 写 \(X_t=\phi X_{t-1}+\varepsilon_t\)，今天依赖昨天的观测值；MA 写 \(X_t=\varepsilon_t+\theta\varepsilon_{t-1}\)，今天只依赖今天和昨天的冲击，不引用任何可观测的系统状态。一个冲击在第 \(t\) 期进入系统，直接从 \(X_t\) 开始显现，然后通过系数 \(\theta_1\) 进入 \(X_{t+1}\)，再通过 \(\theta_2\) 进入 \(X_{t+2}\)，直到 \(q\) 期后完全消失——之前的 AR 模型里冲击的效应是按 \(\phi^k\) 指数衰减、永不完全归零的。
 
-可逆性条件是 MA 特有的：要求 $\theta(B)=1+\theta_1B+\cdots+\theta_qB^q=0$ 的根在单位圆外。这保证 MA 可以写成 AR($\infty$) 形式，即当前冲击可以用历史值线性表示。可逆性对预测和参数估计都重要——不可逆的 MA 有多个参数化产生相同 ACF，识别困难。
+MA(q) 自动平稳：有限个白噪声的加权和，均值和方差永远是常数。但辨识的钥匙在自相关函数（ACF）上：
 
-\subsection{ARMA(p,q) 的混合结构}
+\[
+\rho_k=0\quad\text{对 }k>q.
+\]
 
-ARMA(p,q) 模型为
+ACF 在滞后 \(q\) 后截尾——这跟 AR 的 PACF 截尾形成了对偶关系：
+
+\begin{itemize}
+\tightlist
+\item
+  AR(p)：ACF 拖尾，PACF 在滞后 \(p\) 后截尾；
+\item
+  MA(q)：ACF 在滞后 \(q\) 后截尾，PACF 拖尾。
+\end{itemize}
+
+画出 ACF 和 PACF，前者在某个滞后之后突然归零、后者缓缓衰减，你手上的大概率是 MA 过程。反过来，PACF 截断、ACF 拖尾，那就是 AR。这套对偶是 Box-Jenkins 方法里阶数识别的核心直觉——不需要解方程，两张图就能先把候选模型圈出来。
+
+\subsection{可逆性：MA 也有隐藏条件}
+
+平稳性是 AR 的约束（特征根在单位圆外）；MA 天然平稳，但它有另一条关卡：可逆性。
+
+MA(q) 写成滞后算子形式 \(X_t=\theta(B)\varepsilon_t\)，其中 \(\theta(B)=1+\theta_1B+\cdots+\theta_qB^q\)。可逆性要求 \(\theta(B)=0\) 的根在单位圆外。
+
+满足可逆性时，MA 可以形式化地转为 AR(\(\infty\))——当前的冲击能用历史观测值线性表示：
+
+\[
+\varepsilon_t=\theta(B)^{-1}X_t.
+\]
+
+不满足会怎样？多个不同的参数化会产生完全相同的 ACF。给你一组数据，ACF 算出来一模一样，你分不出背后到底是哪组参数。这对参数估计是不稳定性的根源：似然面上有多个谷底。可逆性条件实际上是唯一性条件——它选出那个能用历史数据``反推''出来当前冲击的参数化。
+
+\subsection{ARMA(p,q)：AR 和 MA 可以同居}
+
+真实序列往往既有惯性也有滞后冲击的吸收。把两者拼在一起：
 
 \[
 X_t=\phi_1X_{t-1}+\cdots+\phi_pX_{t-p}
 +\varepsilon_t+\theta_1\varepsilon_{t-1}+\cdots+\theta_q\varepsilon_{t-q}.
 \]
 
-用滞后算子写为 $\phi(B)X_t=\theta(B)\varepsilon_t$。平稳性由 $\phi(B)$ 的根决定（与 AR 相同），可逆性由 $\theta(B)$ 的根决定（与 MA 相同）。
+用滞后算子简洁书写：\(\phi(B)X_t=\theta(B)\varepsilon_t\)。
 
-ARMA 的 ACF 与 PACF 都拖尾，不能单独用来识别阶数。识别 ARMA 需要更细致的工具：扩展 ACF（EACF）、信息准则（AIC/BIC）或经验试错（先拟合 AR，检查残差的 ACF 是否像 MA）。
+平稳性由 \(\phi(B)\) 的根决定（跟纯 AR 一样）；可逆性由 \(\theta(B)\) 的根决定（跟纯 MA 一样）。两个条件各自独立检查，不需要联立求解。
 
-ARMA(1,1) 是最简单的混合模型：$X_t=\phi X_{t-1}+\varepsilon_t+\theta\varepsilon_{t-1}$。其 ACF 为
+辨识上的坏消息：ARMA 的 ACF 和 PACF 都拖尾，两者都不会干干净净地在某个滞后截断。单看这两张图只能排除纯 AR 或纯 MA，但给不出具体的 \(p\) 和 \(q\)。需要扩展 ACF（EACF）、信息准则（AIC/BIC），或者最原始的办法：先拟合几个候选模型，看残差的 ACF 像不像白噪声，再从候选中根据准则挑选。
+
+以 ARMA(1,1) 为例感受一下混合效果：
+
+\[
+X_t=\phi X_{t-1}+\varepsilon_t+\theta\varepsilon_{t-1}.
+\]
+
+它的 ACF 为
 
 \[
 \rho_1=\frac{(1+\phi\theta)(\phi+\theta)}{1+\theta^2+2\phi\theta},
 \qquad
-\rho_k=\phi\rho_{k-1}\ (k\ge2),
+\rho_k=\phi\rho_{k-1}\ (k\ge2).
 \]
 
-即滞后 1 后指数衰减，但首值由 $\phi,\theta$ 共同决定。这种``AR 的衰减 + MA 的首值调整''是 ARMA 的典型特征。
+从滞后 2 开始按 \(\phi\) 指数衰减——这是 AR 的典型行为。但 \(\rho_1\) 由 \(\phi\) 和 \(\theta\) 共同决定，不单独属于 AR 那半或 MA 那半。``AR 决定衰减速率，MA 调整首个自相关值''——这是 ARMA 混合效应的经典截面。
 
-\subsection{ARMA 与线性动力系统}
+\subsection{ARMA 与线性动力系统的深层联系}
 
-ARMA 是线性动力系统的一种参数化。状态空间形式（Part 13 的 Kalman filter）更一般：状态可以不可观测，观测可以是状态的线性组合。ARMA 是状态空间模型的特殊情形——状态就是历史值与历史冲击。
+ARMA 不是孤立的时间序列技巧。它和状态空间模型共享同一套数学骨架。
 
-这个联系解释了 ARMA 的预测与 Kalman 滤波的关系：ARMA 预测是最小均方误差预测，与 Kalman 预测在平稳 ARMA 下等价。状态空间框架的优势在于处理时变参数、缺失数据、以及非平稳初始条件；ARMA 的优势在于参数少、识别直接、理论成熟。
+在状态空间表述中，系统有一个不可直接观测的状态向量，观测值是状态的线性组合加上噪声。ARMA(p,q) 可以精确地改写为一个状态空间模型——状态由历史值和历史冲击共同组成。反过来，任何线性高斯状态空间模型在稳态下都可以写成 ARMA 形式。
 
-\subsection{ARMA 的边界}
+这个联系把 ARMA 的预测跟 Kalman 滤波对接上了：ARMA 的最小均方误差预测与 Kalman 对稳态系统的预测是等价的。状态空间框架的优势在于它天然处理时变参数、缺失数据和任意初始条件。ARMA 的优势在于它参数更少、识别更直观、理论更成熟。知道它们是同一枚硬币的两面，你就拥有了两套工具箱之间的便携转换手册。
 
-ARMA 假设线性、平稳、白噪声创新。以下情况需要扩展：
+\subsection{ARMA 画好的圈，和圈外的世界}
+
+ARMA 假设系统是线性的、平稳的、创新是白噪声。以下任何一条不成立时，需要越过 ARMA 的边界：
 
 \begin{itemize}
 \tightlist
 \item
-  \textbf{非平稳}：单位根或趋势，需要 ARIMA 或状态空间；
+  \textbf{非平稳}：存在单位根或确定性趋势，均值或方差随时间漂移——需要 ARIMA 或含趋势项的状态空间模型；
 \item
-  \textbf{长记忆}：ACF 按幂律衰减，需要 ARFIMA；
+  \textbf{长记忆}：ACF 不是指数衰减，而是按幂律极缓慢地拖尾——需要 ARFIMA（分数阶差分）；
 \item
-  \textbf{非线性}：条件均值非线性，需要 TAR、STAR 或神经网络；
+  \textbf{非线性}：条件均值对过去值的依赖不是线性的——需要 TAR、STAR 或丢掉参数化直接用神经网络；
 \item
-  \textbf{异方差}：创新方差时变，需要 GARCH；
+  \textbf{异方差}：创新的方差本身随时间变化、存在聚集效应——需要 GARCH 族；
 \item
-  \textbf{多元}：多个相关序列，需要 VAR（向量 AR）。
+  \textbf{多元联动}：多个序列互相影响——需要 VAR（向量 AR）放开维数。
 \end{itemize}
 
-ARMA 的价值在于它是``最简的完整模型''：有明确的识别工具（ACF/PACF）、有效的估计方法（Yule-Walker/MLE）、以及严格的预测理论（Box-Jenkins）。下一篇处理非平稳序列，把 ARMA 扩展为 ARIMA。
+这些扩展各有自己的辨识逻辑和估计难点，但 ARMA 之所以仍然是起点，是因为它是``最简的完整模型''：ACF/PACF 给出干净直觉，Yule-Walker 和极大似然给出可靠估计，Box-Jenkins 方法给出系统化的建模流程。下一篇处理非平稳序列，就从最自然的扩展——允许差分——开始。

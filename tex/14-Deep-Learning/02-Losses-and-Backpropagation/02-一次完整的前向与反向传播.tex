@@ -1,12 +1,15 @@
 \section{一次完整的前向与反向传播}
 \label{sec:14-Deep-Learning/02-Losses-and-Backpropagation/02}
 
-反向传播不是参数更新算法。它只做一件事：给定一个标量损失，利用计算图中的局部导数，高效算出损失对所有参数的梯度。梯度下降、Adam 或其他优化器随后才决定怎样使用这些梯度。
+损失函数告诉你方向：``往那边走会更好''。但``那边''具体是参数空间的哪个方向？对于一个有十万个参数的微型网络，你需要知道损失对每一个参数的偏导数，才能各自迈出大小不同的一步。
 
+计算十万个偏导数，每个都独立地用有限差分近似——每条导数都要跑一次完整前向，十万个导数就是十万次前向。一个 epoch 都跑不完。
 
-\subsection{先用一个标量网络看清链式法则}
+反向传播只做一件事：利用计算图的局部结构，一趟前向加一趟反向，把全部参数的梯度算出来。它不是参数更新算法——梯度下降、Adam 或其他优化器随后才决定怎样使用这些梯度。反向传播是一个计算方案，不是优化方案。
 
-考虑
+\subsection{先用一个标量网络看清链式法则在干什么}
+
+考虑一个最小网络：
 
 \[
 z=w_1x+b_1,\qquad
@@ -18,121 +21,146 @@ o=w_2h+b_2,
 L=\frac12(o-y)^2.
 \]
 
-取 \(x=2,w_1=0.5,b_1=0,w_2=-1,b_2=0,y=1\)。前向得到
+取一组具体数值把手算过程完整走通：\(x=2\), \(w_1=0.5\), \(b_1=0\), \(w_2=-1\), \(b_2=0\), 标签 \(y=1\)。
 
+前向传播从输入流向损失：
 \[
-z=1,\quad h=1,\quad o=-1,\quad L=2.
+z=0.5\times 2+0=1,\quad
+h=\max(0,1)=1,\quad
+o=(-1)\times 1+0=-1,\quad
+L=\frac12(-1-1)^2=2.
 \]
 
-从损失开始向后：
+前向途中，每算出一个中间值就把它存下来：\(z\), \(h\), \(o\)。反向传播要用到它们。
 
+现在从损失回头。\(L=\frac12(o-y)^2\) 对 \(o\) 的导数是直接的：
 \[
-\frac{\partial L}{\partial o}=o-y=-2,
+\frac{\partial L}{\partial o}=o-y=-1-1=-2.
 \]
 
+这个数 \(-2\) 的含义是：如果输出 \(o\) 增加一个微小量，损失大约增加 \(-2\) 倍于那个量。也就是说，想让损失下降，\(o\) 需要往正方向移动。
+
+接下来过 \(o=w_2h+b_2\) 这道门。\(o\) 是 \(w_2\) 乘 \(h\) 再加 \(b_2\)，\(h\) 在前向时存下来是 1。所以：
 \[
 \frac{\partial L}{\partial w_2}
-=\frac{\partial L}{\partial o}
-\frac{\partial o}{\partial w_2}
-=-2h=-2,
+=\frac{\partial L}{\partial o}\cdot\frac{\partial o}{\partial w_2}
+=(-2)\times h=-2,
 \qquad
-\frac{\partial L}{\partial b_2}=-2.
+\frac{\partial L}{\partial b_2}=(-2)\times 1=-2.
 \]
 
-传回隐藏单元：
-
+继续往回传，穿过 \(h=\relu(z)\)。ReLU 的导数在 \(z>0\) 时为 1，\(z<0\) 时为 0。前向时 \(z=1>0\)，导数就是 1。上游敏感度经过这一层：
 \[
 \frac{\partial L}{\partial h}
-=\frac{\partial L}{\partial o}w_2=2.
+=\frac{\partial L}{\partial o}\cdot\frac{\partial o}{\partial h}
+=(-2)\times w_2=2.
+\]
+（这里的 2 意味着：如果隐藏单元 \(h\) 变大，损失反而会变大——因为 \(w_2\) 是负的，\(h\) 增大让 \(o\) 更负，离 \(y=1\) 更远。）
+
+再穿一层到 \(z\)：
+\[
+\frac{\partial L}{\partial z}
+=\frac{\partial L}{\partial h}\cdot \relu'(z)
+=2\times 1=2.
 \]
 
-由于 \(z>0\)，ReLU 导数为 1，所以
-
+最后到达第一层参数：
 \[
-\frac{\partial L}{\partial z}=2,
-\quad
-\frac{\partial L}{\partial w_1}=2x=4,
-\quad
+\frac{\partial L}{\partial w_1}
+=\frac{\partial L}{\partial z}\cdot x
+=2\times 2=4,\qquad
 \frac{\partial L}{\partial b_1}=2.
 \]
 
-前向传播保存 \(x,z,h,o\) 等局部计算所需信息；反向传播从标量 1 或损失导数出发，把上游敏感度乘以局部导数。若一个变量沿多条路径影响损失，各路径贡献必须相加，而不是覆盖。
+四个梯度全部到手：\(w_2:-2\), \(b_2:-2\), \(w_1:4\), \(b_1:2\)。一趟前向、一趟反向，没有重复计算。
+
+关键动作只有两个：(1) 上游传下来的敏感度（``如果上一个量变一点，损失变多少''）乘以当前操作的局部导数；(2) 如果一个变量通过多条路径影响损失，各条路径的贡献必须相加。第二条在这个标量例子里没有出现——\(z\), \(h\), \(o\) 每个量只沿一条线通往损失。一旦网络有分支（比如跳过连接），反向传播就必须在汇合点做加法。
 
 \subsection{Batch 矩阵形式只是同一逻辑的压缩}
 
-采用``样本按行''的约定。设 batch 大小为 \(B\)，各层宽度为 \(d_0,d_1,d_2\)，则 \(X\in\R^{B\times d_0}\)，\(W_1\in\R^{d_0\times d_1}\)，\(W_2\in\R^{d_1\times d_2}\)，\(Z_1,H\in\R^{B\times d_1}\)，\(Z_2\in\R^{B\times d_2}\)。前向计算为
+标量算例把逻辑展示清楚了，但真实训练中你不会一条条样本、一个个标量地算。把 batch 内的所有样本压进矩阵，反向传播的公式只是标量逻辑按矩阵乘法的规则重新排布。
 
+采用``样本按行''的约定。batch 大小 \(B\)，各层宽度 \(d_0,d_1,d_2\)：
+\[
+X\in\R^{B\times d_0},\quad
+W_1\in\R^{d_0\times d_1},\quad
+W_2\in\R^{d_1\times d_2},
+\]
+\[
+Z_1\in\R^{B\times d_1},\quad
+H\in\R^{B\times d_1},\quad
+Z_2\in\R^{B\times d_2}.
+\]
+
+前向：
 \[
 Z_1=XW_1+\mathbf1b_1^{\trans},
 \qquad H=\phi(Z_1),
 \]
-
 \[
 Z_2=HW_2+\mathbf1b_2^{\trans},
 \qquad
 L=\frac1B\sum_{i=1}^B\ell(Z_{2i},y_i).
 \]
 
-若
-
+反向从损失对各样本 logits 的导数矩阵开始：
 \[
-G_2=\frac{\partial L}{\partial Z_2},
+G_2=\frac{\partial L}{\partial Z_2}\in\R^{B\times d_2}.
 \]
 
-逐样本看，\(Z_2\) 的第 \(i\) 行只参与第 \(i\) 个样本的损失，该样本对 \(\nabla_{W_2}L\) 的贡献是外积 \(h_ig_{2i}^{\trans}\)（\(h_i^{\trans}\)、\(g_{2i}^{\trans}\) 分别为 \(H\) 与 \(G_2\) 的第 \(i\) 行）。对 \(i\) 求和恰是矩阵乘积，于是第二层梯度为
-
+关键是逐样本看：\(Z_2\) 的第 \(i\) 行只出现在第 \(i\) 个样本的损失里，所以它对 \(W_2\) 梯度的贡献是第 \(i\) 个隐藏向量 \(h_i\)（行向量，长度 \(d_1\)）与第 \(i\) 个敏感度向量 \(g_{2i}\)（行向量，长度 \(d_2\)）的外积：一个 \(d_1\times d_2\) 矩阵。对 \(i\) 求和恰好等价于矩阵乘法 \(H^{\trans}G_2\)。于是：
 \[
-\nabla_{W_2}L=H^{\trans} G_2,
-\qquad
+\nabla_{W_2}L=H^{\trans} G_2,\qquad
 \nabla_{b_2}L=G_2^{\trans}\mathbf1.
 \]
 
-传回隐藏层（\(\odot\) 表示逐元素乘积）：
+bias 在前向中被广播到 batch 每一行——每一行都加同一个 \(b_2\)。反向时就需要沿 batch 轴求和，把各样本对 \(b_2\) 的贡献加在一起。
 
+继续往回。\(G_2\) 跨过矩阵乘法 \(Z_2=HW_2\)：对 \(H\) 的敏感度是 \(G_2W_2^{\trans}\)（样本维度保持，隐藏维度从 \(d_2\) 变回 \(d_1\)）。再逐元素乘以激活函数的导数：
 \[
 G_1
-=(G_2W_2^{\trans})\odot\phi'(Z_1),
+=(G_2W_2^{\trans})\odot\phi'(Z_1).
 \]
 
-于是
-
+然后第一层参数梯度：
 \[
-\nabla_{W_1}L=X^{\trans} G_1,
-\qquad
+\nabla_{W_1}L=X^{\trans} G_1,\qquad
 \nabla_{b_1}L=G_1^{\trans}\mathbf1.
 \]
 
-每个参数梯度 shape 必须与参数相同。bias 在前向被广播到 batch 中每一行，反向就要沿 batch 轴求和。若损失取 batch mean，\(1/B\) 应已经出现在 \(G_2\) 中；漏掉或重复这个因子会让学习率随 batch size 意外改变。
+每个参数梯度的 shape 必须与参数本身相同——检查这件事比检查具体数值更快、更不容易漏。
 
-对 softmax cross-entropy，
+这里有一个极易被 scale 掩盖的细节：如果损失用 batch mean，\(1/B\) 因子必须已经出现在 \(G_2\) 里。漏掉这个因子，梯度会比正确值大 \(B\) 倍，等效于学习率被意外放大 \(B\) 倍；重复除以 \(B\)，梯度又会被压到几乎没有。换 batch size 时学习率忽然不对，第一站就该查这个因子。
 
+对 softmax cross-entropy 这个最常见的组合，\(G_2\) 有一个极干净的闭合形式：
 \[
 G_2=\frac{P-Y}{B},
 \]
+其中 \(P\) 是 \(Z_2\) 逐行 softmax 后的概率矩阵，\(Y\) 是 one-hot 标签矩阵。这正是上一节末尾的 \(p-y\) 信号——预测减真实，逐样本、逐类别计算，然后除以 batch size。代入上面的矩阵反向公式，两层分类器的所有参数梯度就完整得到了。
 
-其中 \(P\) 是对 \(Z_2\) 逐行做 softmax 得到的概率矩阵，\(Y\) 是对应的 one-hot 标签矩阵；这正是上一节得到的 \(p-y\) 信号的 batch 形式。代入上式即可得到两层分类器的完整参数梯度。真实框架的 reverse-mode automatic differentiation 正是在更大计算图上执行同类 vector--Jacobian product，而不是显式构造每个巨大 Jacobian。
+真实框架（PyTorch、JAX、TensorFlow）的 reverse-mode automatic differentiation，在这个矩阵网络和千层 Transformer 上执行的是同一种运算：把上游梯度与局部 Jacobian 做 vector--Jacobian product，沿计算图反向传播。区别只在于计算图更大、节点更多，而框架替你维护了图结构和缓存。
 
-\subsection{梯度检查是局部证据}
+\subsection{梯度检查是局部证据，不是全局担保}
 
-对方向 \(v\)，中心有限差分
+反向传播的公式一眼看去并不复杂，但手写实现（或自定义 autograd 函数）时，transpose 方向搞反、in-place 修改缓存、多路径梯度忘记累加、broadcast 轴弄错——这些错误可以静默地让梯度变成一个与正确值毫无关系的张量，而训练 loss 可能照样下降（因为错误梯度也有一个下降方向，只是不是目标函数的方向）。
 
+梯度检查提供了一种独立验证。对方向向量 \(v\)，中心有限差分近似：
 \[
-\frac{
-L(\theta+\varepsilon v)
--L(\theta-\varepsilon v)
-}{2\varepsilon}
+\frac{L(\theta+\varepsilon v)-L(\theta-\varepsilon v)}{2\varepsilon}
 \approx
-\nabla L(\theta)^{\trans} v
+\nabla L(\theta)^{\trans} v.
 \]
 
-其中 Hessian 项在中心差分中相消，截断误差为 \(O(\varepsilon^2)\)。取若干随机方向即可核对整组梯度。使用 double precision、小网络和不过大也不过小的 \(\varepsilon\)；避开 ReLU 恰好在零点的不可微位置。检查相对误差，并单独测试 batch size 1、bias broadcast、mask 和共享参数。
+中心差分中 \(O(\varepsilon^2)\) 的 Hessian 项相消，截断误差比前向差分小得多。取几个随机方向分别核对即可——如果 transpose 或 reduction 出了错，几乎一定会破坏梯度与任意随机方向的内积关系。换一个随机方向再查一次，漏检概率进一步降低。
 
-梯度检查通过只说明当前点附近的导数实现大致正确，不说明模型、损失、数据切分或优化方案正确。in-place 修改缓存张量、无意 detach、transpose 约定混乱和多路径梯度未累加，都是自动微分图中常见错误。
+但梯度检查通过只说明一件事：在当前参数点附近，偏导数的数值实现大致正确。它不说明模型选对了、损失函数匹配了标签、数据切分隔离了、优化器配置合理了，更不说明训练会收敛。另外，ReLU 在零点的导数不可微（左右导数不等），有限差分在 \(z\approx0\) 附近可能给出不可靠的结果，应避开。
+
+自动微分框架中常见的静默错误清单：in-place 修改了需要反向的缓存张量；无意中 detach 了计算图；transpose 约定在网络和损失之间不一致；多路径贡献没有累加而是互相覆盖；broadcast 轴的 reduction 方向搞错。
 
 \subsubsection{手算后再交给框架}
 
-把标量例子改为两个隐藏单元，让两个单元的输出都进入同一个最终节点，就得到一个多路径计算图。手算每条路径对 \(x\) 的贡献并相加，所得总导数与自动微分的结果一致——多路径贡献必须累加，这正是框架在计算图上做的事。
+把标量例子扩展为两个隐藏单元，让两个单元的输出都汇入同一个最终节点——计算图出现了分支。手算每条从 \(x\) 到 \(L\) 的路径贡献并相加，总导数应与自动微分结果一致。分支处的加法正是框架在计算图上自动完成的工作。
 
-接着实现上面的 batch 网络，核对梯度不必逐元素检查所有参数：对一个随机方向做一次中心有限差分即可。directional check 之所以有效，是因为 transpose 与 reduction 类错误几乎总会破坏梯度与任意方向的内积关系；换一个随机方向再查一次，漏检的可能进一步降低。
+接着实现上面的 batch 两层网络。不必逐参数、逐元素核对梯度——对一个随机方向做一次中心有限差分即可。directional check 有效的理由如前：transpose 和 reduction 类错误几乎总会破坏梯度与随机方向的内积关系。
 
 矩阵微积分与计算图的通用形式见\hyperref[sec:10-Matrix-Calculus/04-Applications/03]{``计算图上的反向传播与自动微分''}。

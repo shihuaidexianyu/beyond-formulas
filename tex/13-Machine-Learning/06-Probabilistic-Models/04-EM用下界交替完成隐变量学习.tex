@@ -1,125 +1,166 @@
 \section{EM 用下界交替完成隐变量学习}
 \label{sec:13-Machine-Learning/06-Probabilistic-Models/04}
 
-隐变量模型的共同困难是：若隐变量已知，参数容易估计；若参数已知，隐变量后验容易计算；两者同时未知时，边缘 likelihood 却难直接优化。EM 把这个循环依赖变成两个可执行步骤。
+你手里有一批机台振动传感器的读数。你怀疑这些数据来自三种不同的运行工况，但你不知道每条记录属于哪个工况，也不知道每种工况的振动特征是什么。你只有一个合理的猜测：每种工况下的振动数据大致服从某个 Gaussian，不同工况的均值和散布不同。
+
+现在试着直接写出似然函数。令 \(z_i \in \{1,2,3\}\) 表示第 \(i\) 条记录的隐工况标签，\(\theta = (\pi_k, \mu_k, \Sigma_k)_{k=1}^3\) 收集全部参数。观测数据的边缘似然是
+
+\[
+\log p(x\mid\theta)
+= \sum_{i=1}^n \log\Bigl(\sum_{k=1}^3 \pi_k\,
+\mathcal N(x_i\mid\mu_k,\Sigma_k)\Bigr).
+\]
+
+对数里面套着一个求和。梯度呢？对 \(\mu_k\) 求导得到的是加权平均形式，分母恰好又是那个求和——没有封闭解，也不能把 \(\log\sum\) 拆成 \(\sum\log\)。直接在这个目标上做梯度下降当然可以，但每一步都要遍历全部样本和全部成分，而且这个曲面充满了对称性带来的局部最优——三个成分的编号可以任意置换，似然值完全不变。
+
+隐变量模型的共同困境就在这一行公式里：若隐变量 \(z\) 已知，把每条记录直接分到对应工况，参数就是分组统计量，几行算术就能算完；若参数 \(\theta\) 已知，每个 \(z_i\) 的后验概率也只是 Bayes 公式的一次代入。两者同时未知时，互相卡住。
+
+\subsection{一个下界把嵌套的困难拆成两步}
+
+直接最大化 \(\log p(x\mid\theta)\) 困难，但我们可以绕一步。引入任意一个分布 \(q(z)\)——暂时不规定它是什么，只要求它是一个合法的概率分布——然后写出以下恒等式：
 
 \begin{proposition}[边缘似然的下界分解]
 对任意分布 \(q(z)\)，有
 
 \[
 \log p(x\mid\theta)
-=\mathcal L(q,\theta)
-+\KL
-\bigl(q(z)\|p(z\mid x,\theta)\bigr),
+= \mathcal L(q,\theta)
++ \KL\bigl(q(z)\|p(z\mid x,\theta)\bigr),
 \]
 
 其中
 
 \[
 \mathcal L(q,\theta)
-=\E_q[\log p(x,z\mid\theta)]
-+H(q),
+= \E_q[\log p(x,z\mid\theta)]
++ H(q),
 \]
 
-\(H(q)=-\E_q[\log q(z)]\) 是 \(q\) 的熵。这个恒等式可以直接验证：把两项按定义展开，
+\(H(q) = -\E_q[\log q(z)]\) 是 \(q\) 的熵。
+\end{proposition}
+
+验证只需要展开定义。把第一项和第二项的期望写进同一个积分号：
 
 \[
 \mathcal L(q,\theta)
-+\KL\bigl(q(z)\|p(z\mid x,\theta)\bigr)
-=\E_q\left[
++ \KL\bigl(q(z)\|p(z\mid x,\theta)\bigr)
+= \E_q\left[
 \log\frac{p(x,z\mid\theta)}{q(z)}
-+\log\frac{q(z)}{p(z\mid x,\theta)}
-\right]
-=\log p(x\mid\theta),
++ \log\frac{q(z)}{p(z\mid x,\theta)}
+\right].
 \]
 
-因为两个 \(\log q(z)\) 项抵消，联合密度与条件密度之比恰好留下 \(p(x\mid\theta)\)，而它对 \(z\) 是常数，期望不起作用。
-\end{proposition}
+括号内两个 \(\log q(z)\) 抵消，剩下 \(\log\bigl(p(x,z\mid\theta)/p(z\mid x,\theta)\bigr) = \log p(x\mid\theta)\)。而 \(\log p(x\mid\theta)\) 不依赖 \(z\)，取期望后仍是它自己。这个恒等式没有近似——它对任意 \(q\) 严格成立。
 
-KL 散度非负，所以 \(\mathcal L\) 是 log-likelihood 的下界，也称证据下界（evidence lower bound, ELBO）。这个恒等式给 EM 两步以明确含义：一边让下界贴近真实目标，一边抬高这个下界。
+KL 散度非负意味着 \(\mathcal L(q,\theta) \le \log p(x\mid\theta)\)，即 \(\mathcal L\) 始终不高于真实对数似然。等号成立的唯一条件是 \(q(z) = p(z\mid x,\theta)\)——让 KL 项消失。
 
-\subsection{E 步把下界贴紧，M 步抬高下界}
+这就给了我们一个操作空间。直接爬 \(\log p(x\mid\theta)\) 这座山太陡，但我们可以造一个始终在山体内部的下界 \(\mathcal L\)，它的形状更容易攀爬。每当我们提高下界，真实似然至少不会下降；当我们把下界贴到当前参数处的真实似然表面，下界和真实目标在这一点重合。交替做这两件事，就是 EM。
 
-在第 \(t\) 轮，E 步令
+\subsection{E 步贴紧，M 步抬高}
+
+第 \(t\) 轮开始时，参数为 \(\theta^{(t)}\)。
+
+E 步做的是：令
 
 \[
-q^{(t)}(z)
-=p(z\mid x,\theta^{(t)}).
+q^{(t)}(z) = p(z\mid x,\theta^{(t)}).
 \]
 
-此时 KL 为零，下界在当前参数处恰好等于真实 log-likelihood。随后 M 步选择
+用此刻的参数精确计算隐变量的后验分布。代入下界公式，KL 项为零，\(\mathcal L(q^{(t)},\theta^{(t)}) = \log p(x\mid\theta^{(t)})\)——下界在 \(\theta^{(t)}\) 这一点贴到了真实似然表面上。
+
+M 步做的是：固定 \(q^{(t)}\)，寻找新参数抬高下界：
 
 \[
-\theta^{(t+1)}
-\in\argmax_\theta
-\E_{q^{(t)}}
-[\log p(x,z\mid\theta)].
+\theta^{(t+1)} \in \argmax_\theta\;
+\E_{q^{(t)}}[\log p(x,z\mid\theta)].
 \]
 
-因为 E 步之后熵 \(H(q^{(t)})\) 对 \(\theta\) 是常数，这等价于提高同一个 ELBO。新参数处的真实 log-likelihood 又至少等于该下界，于是
+注意 M 步的目标里没有 \(H(q^{(t)})\)——因为 E 步之后 \(q^{(t)}\) 已经固定，熵项对 \(\theta\) 是常数。最大化 complete-data 对数似然在 \(q^{(t)}\) 下的期望，就是最大化工件。
+
+现在检查似然是否真的上升了：
 
 \[
-\ell(\theta^{(t+1)})
-\ge\mathcal L(q^{(t)},\theta^{(t+1)})
-\ge\mathcal L(q^{(t)},\theta^{(t)})
-=\ell(\theta^{(t)}),
+\log p(x\mid\theta^{(t+1)})
+\ge \mathcal L(q^{(t)},\theta^{(t+1)})
+\ge \mathcal L(q^{(t)},\theta^{(t)})
+= \log p(x\mid\theta^{(t)}).
 \]
 
-其中 \(\ell(\theta)=\log p(x\mid\theta)\)（多样本时为各样本对数似然之和）。三步依次是：KL 非负给出下界，M 步提高下界，E 步已让下界在旧参数处贴紧。
+第一个不等号：KL 非负，下界永远不超过真实似然。第二个不等号：M 步选择 \(\theta^{(t+1)}\) 就是为了抬高这个下界。等号：E 步已经让下界在旧参数处贴紧。三步串起来，似然单调不减。
 
-这就是 EM 的单调性保证。它只保证似然不下降，不保证达到全局最大值，也不排除鞍点、退化解或极慢收敛。
+迭代停止时可以检查三项：对数似然的相对增量是否已小于阈值、参数变化是否已趋于零、是否已达最大轮数。单调性保证你不会越跑越差，但它不保证你跑到了最高点——也不保证最高点是你想要的解。
 
 \subsection{GMM 让两步变得具体}
 
-对 Gaussian mixture，E 步计算上一节的 responsibility \(\gamma_{ik}\)。令
+回到三种工况的例子。对 Gaussian mixture，E 步就是计算上一节定义的 responsibility：
 
 \[
-N_k=\sum_i\gamma_{ik},
+\gamma_{ik}
+= p(z_i = k\mid x_i,\theta^{(t)})
+= \frac{\pi_k\,\mathcal N(x_i\mid\mu_k,\Sigma_k)}
+{\sum_{j=1}^3 \pi_j\,\mathcal N(x_i\mid\mu_j,\Sigma_j)}.
 \]
 
-M 步得到加权统计量：
+它是一个 \(n\times 3\) 的矩阵，第 \(i\) 行是样本 \(i\) 在三个成分上的后验权重，每行之和为 1。
+
+令 \(N_k = \sum_{i=1}^n \gamma_{ik}\)——成分 \(k\) 的有效样本量。M 步的计算干净到只有加权平均：
 
 \[
-\pi_k^{\text{new}}=\frac{N_k}{n},
+\pi_k^{\text{new}} = \frac{N_k}{n},
 \]
 
 \[
-\mu_k^{\text{new}}
-=\frac1{N_k}\sum_i\gamma_{ik}x_i,
+\mu_k^{\text{new}} = \frac{1}{N_k}\sum_{i=1}^n \gamma_{ik}\,x_i,
 \]
 
 \[
-\Sigma_k^{\text{new}}
-=\frac1{N_k}
-\sum_i\gamma_{ik}
-(x_i-\mu_k^{\text{new}})
-(x_i-\mu_k^{\text{new}})^{\trans}.
+\Sigma_k^{\text{new}} = \frac{1}{N_k}
+\sum_{i=1}^n \gamma_{ik}\,
+(x_i - \mu_k^{\text{new}})(x_i - \mu_k^{\text{new}})^{\trans}.
 \]
 
-若 \(\gamma_{ik}\) 只有 0 和 1，这些式子就是按已知类别分组的普通均值与 covariance。EM 用 posterior 权重保留归属不确定性，硬猜标签再重训会丢掉这部分信息。
+如果每个 \(\gamma_{ik}\) 非 0 即 1——你知道每条记录的确切工况——这些公式就是按已知分组各自求均值与 covariance。EM 的 E 步给出的是软分配：\(\gamma_{ik} = 0.8\) 意味着``在当前参数下，这条记录有 80\% 的后验权重归成分 \(k\)''。保留这份不确定性再去估计参数，比硬猜一个标签再去拟合要稳定得多；后者丢弃了归属不确定性的信息，且一步猜错就会在后续迭代中被放大。
 
-例如用振动与温度数据区分机台运行工况时，\(\gamma_{ik}=0.8\) 可以读作：在当前混合模型与参数下，这条记录对第 \(k\) 个成分有较高 posterior responsibility。它不能直接改写成``机台有八成概率处于某个真实故障状态''。真实工况可能连续漂移，一个偏斜工况也可能被几个 Gaussian 成分共同近似；反过来，两个物理状态若在现有传感器上重叠，也可能被合成一个成分。
+不过这份后验权重有一个容易被误读的地方。\(\gamma_{ik} = 0.8\) 说的是：给定当前混合模型的假设（三个 Gaussian 成分，各自独立），这条记录的归属权重是 0.8。它不等于``机台有八成概率处于某个真实物理故障状态''。真实工况可能连续漂移，根本不是离散的三类；一个偏斜的工况也可能被两个 Gaussian 成分联合近似；反过来，两个物�的工况如果在现有传感器读数上重叠，也可能被合成一个成分。概率模型的归属权重和物理世界的事实之间，隔着一整层建模假设。
 
 \subsection{单调曲线仍可能通向坏答案}
 
-若初始均值都落在同一密集区域，EM 可能停在较差局部最优；若某个成分抓住单个样本，似然又可能朝上一节讨论过的 covariance 塌缩退化方向上升。单调性不能告诉我们模型选择对不对，也不能告诉我们最高似然解是否有科学意义。
+EM 的单调性保证是一把双刃剑。对数似然每轮都在上升，这条曲线看起�非常令人安心——但它上升的方向不一定是你想要的方向。
 
-可靠实现通常需要：
+几种典型的失败模式：
+
+一个成分塌缩到单个样本上。该样本的 responsibility 接近 1，covariance 的行列式趋近于零，似然却可以趋向无穷——因为 Gaussian 密度在 covariance 缩到一点时取值任意大。这不是``学到了一个尖锐的模式''，而是似然函数的退化边界。数学上似然无上界，实践上一个成分抓住了噪声。
+
+三个初始均值都被随机初始化到了同一密集区域。EM 可能把三个成分都困在这个区域，各自分走一部分样本，却漏掉了另外两个真实工况。似然也在上升——三个成分确实在拟合它们看到的那个子集——但这是局部最优，不是数据生成结构的恢复。
+
+更隐蔽的问题是：你跑出了几个不同的解，训练似然最高的那个，预测效果未必最好。这是因为似然衡量的是模型对整个训练分布的拟合程度，而非对未来样本的预测精度。一个用了十个成分的 GMM 几乎必然比三个成分的似然高，但十个成分中可能有一半在拟合噪声。
+
+可靠的实践至少需要这几道防线：
 
 \begin{itemize}
 \tightlist
 \item
-  在 log 域或用 log-sum-exp 归一化 E 步；
+  E 步在 log 域计算：用 log-sum-exp 替代先取指数再求和再取 log，避免下溢；
 \item
-  对 covariance、权重等参数施加有效约束；
+  对 covariance 施加最小行列式约束或先验，防止塌缩；
 \item
-  每轮记录真实 observed-data log-likelihood，而不只记录 complete-data 期望；
+  每轮记录 observed-data log-likelihood（而不只是 complete-data 期望），确认单调性确实在真实目标上发生；
 \item
-  用多个有差异的初值拟合；
+  从多个差异足够大的初始值出发，比较最终解的训练似然和预测表现；
 \item
-  以相对似然增量、参数变化和最大轮数共同停止；
-\item
-  在独立数据上比较解，而不是按训练似然单独排名。
+  在独立数据上比较不同解，而不是按训练似然单一排名。
 \end{itemize}
 
-若精确 E 步不可计算，就不能再直接声称使用标准 EM。变分 EM 用受限的 \(q\) 近似后验，Monte Carlo EM 用样本近似期望；generalized EM 则不完全最大化 M 步，只要求足够提高目标。每种变体都需要重新说明单调性或近似误差的条件。
+\subsection{精确 E 步不可计算时怎么办}
+
+EM 的 E 步要求精确计算 \(p(z\mid x,\theta)\)。这个要求在 GMM 中成立，因为后验只是 softmax 形式的闭式；在很多其他模型中——尤其是 z 连续、高维、或后验没有共轭结构时——精确 E 步根本不可行。
+
+三种退路对应三种不同程度的妥协：
+
+变分 EM 用一个受限的分布族 \(\mathcal Q\) 中的 \(q\) 逼近真实后验，E 步变成在 \(\mathcal Q\) 中最小化 \(\KL(q\|p(z\mid x,\theta))\)。它不再把下界完全贴紧——KL 项残留一个正数——但下界仍然是下界，M 步的逻辑照旧。代价是单调性保证变为``下界单调上升''而不是``似然单调上升''。
+
+Monte Carlo EM 用从后验中采样的方式估计 M 步所需的期望 \(\E_{q}[\log p(x,z\mid\theta)]\)。E 步变成采样步，M 步最大化样本平均。近似误差来自有限样本量，且每轮采样引入了随机波动——似然不再保证单调。
+
+Generalized EM 干脆放弃 M 步的完全最大化，只要求找到使下界上升的 \(\theta^{(t+1)}\)，不要求找到最大值。当 complete-data 对数似然的期望本身也难以优化时，这至少保留了``每轮改善''的底线。
+
+三种变体的共同信息是：一旦偏离了``精确 E 步 + 精确 M 步''的配方，就不能再不加说明地引用标准 EM 的单调性证明。需要逐项说明当前的近似在什么条件下受控，以及丢失了原版的哪些保证。下一篇将看到，变分推断把同一个下界的思想推到更一般的情形——不只是参数点估计，而是整个后验分布的近似。
