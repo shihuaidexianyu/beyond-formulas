@@ -1,186 +1,128 @@
 \section{从方向的集合到半正定锥}
 \label{sec:09-Convex-Optimization/02-Convex-Sets/03}
 
-上一节的凸组合要求权重非负且总和为一，因此表达的是``平均''。另一类集合关注的是``方向''：一旦某个方向可行，沿它放大任意非负倍数仍然可行。
+风控同事把三个因子的相关系数手工改了一遍，理由都很充分：因子 A 与 B 强正相关，取 \(0.9\)；A 与 C 也强正相关，取 \(0.9\)；B 与 C 在历史上常常此消彼长，取 \(-0.8\)。每个数都落在 \([-1,1]\) 里，逐项检查挑不出毛病。可蒙特卡洛采样器一跑就报错，说这个矩阵没法做 Cholesky 分解。
 
-集合 \(K\) 是锥，如果
-
-\[
-x\in K,\ \alpha\ge0
-\quad\Longrightarrow\quad
-\alpha x\in K.
-\]
-
-若它还对加法封闭，就等价于要求任意非负线性组合（先按锥的性质各自缩放，再相加）
+不用信采样器，手算就能看见问题。取权重 \(w=(1,-1,-1)\)，这个组合的方差是
 
 \[
-\alpha x+\beta y\in K,
-\qquad \alpha,\beta\ge0
+w^{\trans}Rw=3+2\bigl[(1)(-1)(0.9)+(1)(-1)(0.9)+(-1)(-1)(-0.8)\bigr]=3-5.2=-2.2.
 \]
 
-仍在 \(K\) 中，这样的集合称为凸锥。负数倍不在要求内。若连负数倍都必须保留，凸锥会变成线性子空间，而不只是锥。
+一个负的方差。三个相关系数各自合法，凑在一起却描述了一个不存在的世界：如果 B 和 C 都跟着 A 走，它们彼此就不可能强烈反向。合法性在这里不是逐元素的约束，而是整个矩阵要落进某个集合里。这一篇要说清楚那个集合的形状——它是一个锥，而且是凸的。
 
-\subsection{从非负数轴到二阶锥}
+\subsection{锥记录的是允许走的方向}
 
-最简单的凸锥是非负正交锥
+上一篇的凸组合权重非负且求和为一，描述的是``平均''。换一类要求：一旦某个方向可行，沿它放大任意非负倍数也可行。集合 \(K\) 叫\textbf{锥}，如果
 
 \[
-\R_+^n=\{x:x_i\ge0\}.
+x\in K,\ \alpha\ge0\quad\Longrightarrow\quad\alpha x\in K.
 \]
 
-它把``一维非负''逐坐标推广到向量。
+再加上对加法封闭，就得到\textbf{凸锥}，等价地要求任意非负组合 \(\alpha x+\beta y\in K\)（\(\alpha,\beta\ge0\)）仍在 \(K\) 内。负倍数不在要求之列；若连负倍数也保留，锥就退化成线性子空间。锥总以原点为顶点，它编码的是尺度无关的信息：方向可行与否，与走多远无关。
 
-二阶锥或 Lorentz 锥定义为
+最简单的例子是非负象限 \(\R_+^n=\set{x:x_i\ge0}\)，把一维的``非负''逐坐标搬到向量上。稍复杂一点是二阶锥（也叫 Lorentz 锥或冰淇淋锥）
 
 \[
-\mathcal Q^{n+1} = \{(t,x):\norm{ x}_2\le t\}.
+\mathcal{Q}^{n+1}=\set{(t,x)\in\R\times\R^n:\norm{x}_2\le t},
 \]
-它像一个冰淇淋锥。范数约束、鲁棒最小二乘和许多不确定性模型都能写成二阶锥约束。任取锥中两点 \((t,x)\) 与 \((s,y)\)，凸性来自三角不等式：
+
+它的凸性来自三角不等式：\(\norm{\theta x+(1-\theta)y}_2\le\theta\norm{x}_2+(1-\theta)\norm{y}_2\le\theta t+(1-\theta)s\)。范数约束、鲁棒最小二乘、带不确定性的资源模型都落在这个锥里。线性规划在非负象限上优化，二阶锥规划把可用的几何扩到范数锥，而接下来的这一个把``非负''搬到了矩阵上。
+
+\subsection{半正定锥是矩阵版的非负}
+
+设 \(\mathbb{S}^n\) 是 \(n\) 阶对称矩阵全体。称 \(X\in\mathbb{S}^n\) 半正定，记 \(X\succeq0\)，如果
 
 \[
-\norm{\theta x+(1-\theta)y}_2
-\le
-\theta\norm{ x}_2+(1-\theta)\norm{ y}_2
-\le
-\theta t+(1-\theta)s.
+z^{\trans}Xz\ge0\qquad\text{对一切}\ z\in\R^n.
 \]
 
-线性规划是在非负锥上优化，二阶锥规划把允许的几何扩大到范数锥，而半正定规划进一步把``非负''推广到矩阵。
+标量的 \(x\ge0\) 说的是一个数的符号，矩阵的 \(X\succeq0\) 说的是沿每个方向测到的二次能量都不为负。全体半正定矩阵构成\textbf{半正定锥} \(\mathbb{S}_+^n=\set{X\in\mathbb{S}^n:X\succeq0}\)。
 
-\subsection{矩阵怎样表示非负}
-
-对称矩阵 \(X\) 被称为半正定，记作 \(X\succeq0\)，若
+它是凸锥，一行验证：若 \(X,Y\succeq0\) 且 \(\alpha,\beta\ge0\)，则对任意 \(z\)，
 
 \[
-z^{\trans}Xz\ge0
-\qquad\text{对所有 }z\in\R^n.
+z^{\trans}(\alpha X+\beta Y)z=\alpha\,z^{\trans}Xz+\beta\,z^{\trans}Yz\ge0.
 \]
 
-这一定义把标量 \(x\ge0\) 推广为``沿每个方向测得的二次能量都非负''。全部半正定矩阵组成半正定锥
+取 \(\alpha=\theta\)、\(\beta=1-\theta\) 就是凸性，取 \(\beta=0\) 就是锥性。换个角度也能看到同一件事：固定 \(z\) 后，\(z^{\trans}Xz\) 是 \(X\) 各元素的线性函数，于是 \(\set{X:z^{\trans}Xz\ge0}\) 是 \(\mathbb{S}^n\) 里的一个半空间，而 \(\mathbb{S}_+^n\) 是这些半空间对所有 \(z\) 的交——上一篇的交集保凸直接给出结论，全程没有碰特征值。
+
+半正定有几种互相等价的说法，用起来场合不同：全部特征值非负，这是谱的说法；存在 \(B\) 使 \(X=B^{\trans}B\)，这是分解的说法；\(X\) 是某组向量的 Gram 矩阵 \(X_{ij}=\ip{v_i}{v_j}\)，这是几何的说法；二次型处处非负，这是定义本身。核方法要求核矩阵半正定，用的是 Gram 那一条；协方差矩阵半正定，用的是二次型那一条，因为对任意 \(z\)，\(z^{\trans}\Sigma z=\Var(z^{\trans}\xi)\ge0\)。开头那个 \(-2.2\) 正是这条恒等式被违反后的读数。特征值全为正时 \(X\succ0\)，它落在锥的内部；出现零特征值就落在边界上。
+
+\(2\times2\) 的情形可以整个画出来。对称矩阵
 
 \[
-\mathbb S_+^n = \{X\in\mathbb S^n:X\succeq0\}.
+X=\begin{bmatrix}a&b\\b&c\end{bmatrix}
 \]
-它确实是凸锥：若 \(X,Y\succeq0\) 且 \(\alpha,\beta\ge0\)，那么
+
+由三个数决定，半正定条件是 \(a\ge0\) 且 \(ac\ge b^2\)（此时 \(c\ge0\) 自动成立）。作代换 \(u=(a+c)/2\)、\(v=(a-c)/2\)，则 \(ac-b^2=u^2-v^2-b^2\)，条件化为
 
 \[
-z^{\trans}(\alpha X+\beta Y)z = \alpha z^{\trans}Xz+\beta z^{\trans}Yz
-\ge0.
-\]
-半正定性有几种等价表述：
-
-\begin{itemize}
-\tightlist
-\item
-  \(X\) 的全部特征值非负；
-\item
-  存在矩阵 \(B\) 使 \(X=B^{\trans}B\)；
-\item
-  \(X\) 是某组向量的 Gram 矩阵；
-\item
-  对所有 \(z\)，二次型 \(z^{\trans}Xz\) 非负。
-\end{itemize}
-
-这些表述连接了谱、几何和优化。若全部特征值严格为正，则 \(X\succ0\)，它位于半正定锥内部；若至少有一个零特征值，则位于边界。
-
-\subsection{一个二阶相关矩阵}
-
-考虑
-
-\[
-X=
-\begin{bmatrix}
-1&\rho\\
-\rho&1
-\end{bmatrix}.
+u\ge\sqrt{v^2+b^2},
 \]
 
-它的特征值是 \(1+\rho\) 和 \(1-\rho\)，因此
+一个不折不扣的二阶锥。所以 \(\mathbb{S}_+^2\) 在三维参数空间里就是那只冰淇淋筒。
 
-\[
-X\succeq0
-\quad\Longleftrightarrow\quad
-|\rho|\le1.
-\]
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[->,black!45] (-3.1,0) -- (3.3,0);
+  \node[font=\footnotesize,black!60] at (3.55,0) {\(b\)};
+  \draw[->,black!45] (0,-1.0) -- (0,4.9);
+  \node[font=\footnotesize,black!60,anchor=west] at (0.12,4.85) {\(u=\tfrac{a+c}{2}\)};
+  \draw[->,black!45] (1.5,-1.05) -- (-1.6,1.12);
+  \node[font=\footnotesize,black!60,anchor=east] at (-1.65,1.2) {\(v=\tfrac{a-c}{2}\)};
 
-这恰好给出相关系数的合法范围。协方差矩阵必须半正定：设随机向量 \(\xi\) 以 \(\Sigma\) 为协方差矩阵，则对任意向量 \(z\)，
+  \fill[blue!10] (0,0) -- (-2.2,3.9) -- (2.2,3.9) -- cycle;
+  \fill[blue!10] (0,3.9) ellipse (2.2 and 0.75);
+  \draw[very thick,blue!45!black] (0,0) -- (-2.2,3.9);
+  \draw[very thick,blue!45!black] (0,0) -- (2.2,3.9);
+  \draw[blue!45!black] plot[domain=0:180,samples=40,variable=\t]
+        ({2.2*cos(\t)},{3.9+0.75*sin(\t)});
+  \draw[blue!45!black,dashed] plot[domain=180:360,samples=40,variable=\t]
+        ({2.2*cos(\t)},{3.9+0.75*sin(\t)});
+  \draw[black!45,dashed] (0,0) -- (0,3.9);
 
-\[
-z^{\trans}\Sigma z = \Var(z^{\trans}\xi)\ge0,
-\]
+  \fill (0,0) circle (1.7pt);
+  \node[font=\footnotesize,anchor=north west] at (0.15,-0.15) {\(X=0\)};
+  \fill[blue!35!black] (0.45,2.7) circle (1.7pt);
+  \draw[black!50] (0.62,2.72) -- (2.9,3.15);
+  \node[font=\footnotesize,anchor=west] at (2.95,3.15) {内部：\(X\succ0\)};
+  \fill[blue!35!black] (-1.24,2.2) circle (1.7pt);
+  \draw[black!50] (-1.4,2.16) -- (-2.5,1.9);
+  \node[font=\footnotesize,anchor=east] at (-2.55,1.9) {边界：\(ac=b^2\)};
+  \draw[fill=white,draw=red!65!black,thick] (2.75,1.5) circle (2pt);
+  \node[font=\footnotesize,red!55!black,anchor=west] at (2.95,1.5) {外部：某方向能量为负};
+\end{tikzpicture}
 
-其中等号来自方差的双线性展开，不等号是因为方差非负。半正定约束由此自然出现在协方差估计、核方法、控制和矩阵补全中。
+\emph{\(2\times2\) 对称矩阵的三个参数张成一个空间，半正定条件在其中切出一只冰淇淋筒；锥轴是单位阵的正倍数 \(tI\)，筒壁上的矩阵有一个零特征值。}
+\end{center}
 
-\subsection{半正定不等于逐元素非负}
+图里那条虚线轴对应 \(b=0\)、\(a=c\)，也就是 \(tI\)（\(t\ge0\)）。开头那个被改坏的相关矩阵，在三维版本的同一幅图里落在筒外——离筒有多远，正是后面``把估计投影回锥内''这件事要度量的东西。
 
-矩阵
+\subsection{半正定和逐元素非负是两回事}
 
-\[
-\begin{bmatrix}
-1&-1\\
--1&1
-\end{bmatrix}
-\]
+这一点值得单独钉住，因为混淆的代价很实在。矩阵 \(\begin{bmatrix}1&-1\\-1&1\end{bmatrix}\) 带着负元素，特征值却是 \(0\) 和 \(2\)，半正定；矩阵 \(\begin{bmatrix}1&2\\2&1\end{bmatrix}\) 元素全为正，特征值是 \(3\) 和 \(-1\)，不半正定。按上面的 \(ac\ge b^2\) 复核也一样：前者 \(1\cdot1=1\ge(-1)^2\)，后者 \(1\cdot1=1<2^2\)。半正定描述的是二次型与谱，跟元素的符号没有对应关系。
 
-具有特征值 \(0\) 和 \(2\)，所以半正定，尽管它包含负元素。反过来，元素全非负的对称矩阵也可能有负特征值，例如
+由此定义的 Loewner 序 \(X\succeq Y\iff X-Y\succeq0\) 是一个偏序，不是逐元素比较，也不是全序：两个对称矩阵完全可以互不可比。它让协方差的``更大''、误差界的``被控制''这类说法有了确切含义，谱与二次型的背景见\hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/02]{``二次型与正定性：每个方向上的能量是否为正''}。
 
-\[
-\begin{bmatrix}
-1&2\\
-2&1
-\end{bmatrix}
-\]
+\subsection{矩阵不等式因此是凸约束}
 
-的特征值是 \(3\) 和 \(-1\)。因此半正定性描述的是二次型与谱，而不是逐元素符号。
-
-Loewner 序
-
-\[
-X\succeq Y
-\quad\Longleftrightarrow\quad
-X-Y\succeq0
-\]
-
-也是一种偏序，而非逐元素比较。它允许把矩阵不等式写成与标量不等式相似的形式。
-
-\subsection{线性矩阵不等式仍是凸约束}
-
-若
-
-\[
-F(x)=F_0+x_1F_1+\cdots+x_nF_n
-\]
-
-对 \(x\) 是仿射的，那么
+半正定锥的凸性带来一个直接的红利。若 \(F(x)=F_0+x_1F_1+\cdots+x_nF_n\) 关于 \(x\) 仿射且各 \(F_i\) 对称，那么
 
 \[
 F(x)\succeq0
 \]
 
-称为线性矩阵不等式。它是半正定锥在仿射映射下的原像，因此可行集合凸。许多看似非线性的谱限制、控制稳定条件和二次不等式都能通过辅助变量写成这种形式。
+叫\textbf{线性矩阵不等式}。满足它的 \(x\) 全体是 \(\mathbb{S}_+^n\) 在仿射映射 \(x\mapsto F(x)\) 下的原像，而凸集的仿射原像仍然凸，于是这个可行集凸——尽管它对 \(x\) 的依赖里藏着特征值这种非线性的东西。控制中的稳定性条件、谱范数的上界、Schur 补改写出来的二次约束，都是靠这条通道进入凸优化的，求解方法见\hyperref[sec:09-Convex-Optimization/04-Convex-Problems/04]{``半正定规划优化矩阵不等式''}。
 
-半正定锥在 trace 内积
+半正定锥在 trace 内积 \(\ip{X}{Y}=\trace(XY)\) 下自对偶：与所有半正定矩阵内积非负的对称矩阵，恰好就是半正定矩阵。两个方向各一句。若 \(X\succeq0\)，把 \(Y\succeq0\) 谱分解为 \(Y=\sum_i\lambda_iu_iu_i^{\trans}\)（\(\lambda_i\ge0\)），则 \(\ip{X}{Y}=\sum_i\lambda_i\,u_i^{\trans}Xu_i\ge0\)；反过来，若对称的 \(X\) 与一切半正定矩阵内积非负，取 \(Y=zz^{\trans}\)，由 \(\ip{X}{zz^{\trans}}=z^{\trans}Xz\) 知每个二次型非负。条件对账：正向用了谱定理（\(Y\) 对称才有），反向用了 \(zz^{\trans}\succeq0\) 与 \(X\) 对称。这个自对偶性是半正定规划对偶理论的地基。
 
-\[
-\langle X,Y\rangle=\trace(XY)
-\]
+用途上，除了协方差与核矩阵这类天然带半正定约束的对象，还有一条更主动的用法：把离散问题松弛成锥上的问题。Max-Cut 里的取值 \(x_i\in\set{-1,1}\) 难以直接优化，令 \(X=xx^{\trans}\)，目标变成 \(X\) 的线性函数，而 \(X\) 满足 \(\diag(X)=\ind\)、\(X\succeq0\) 且 \(\rank X=1\)；扔掉秩一这条非凸的要求，剩下的可行集是半正定锥与若干超平面的交，凸，可解。松弛解的质量与还原方法在\hyperref[sec:09-Convex-Optimization/09-Complexity-and-Approximation/02]{``凸松弛把 NP-hard 问题变成可解问题''}里讨论。矩阵补全、稀疏协方差估计、核学习中的多核组合，走的是同一条路。
 
-下还是自对偶的：与所有半正定矩阵内积非负的对称矩阵，恰好仍是半正定矩阵。两个方向各用一次已有工具。若 \(X\succeq0\)，把 \(Y\succeq0\) 谱分解为 \(Y=\sum_i\lambda_iu_iu_i^{\trans}\)（\(\lambda_i\ge0\)），则
+\subsection{数值上判断半正定要带尺度}
 
-\[
-\langle X,Y\rangle=\sum_i\lambda_i\,u_i^{\trans}Xu_i\ge0;
-\]
+理论上验证 \(X\succeq0\) 只需检查最小特征值是否非负，浮点算下来却常常得到 \(-3\times10^{-13}\) 这样的数。它可能只是相对于 \(\norm{X}_2\) 的舍入噪声，也可能是真实的不可行，判断得看比值而不是绝对值：把最小特征值除以最大特征值或矩阵范数，再和机器精度乘以矩阵维数的量级比较。固定阈值在不同尺度的数据上会一会儿太松、一会儿太紧。
 
-反过来，若对称矩阵 \(X\) 与所有半正定矩阵内积非负，取 \(Y=zz^{\trans}\)，由
+Cholesky 分解是判定严格正定的快速手段，但边界上的半正定矩阵会让它在某个对角元处失败，这不能反推出矩阵非半正定。把一个估计投影回锥内的标准做法是先对称化 \((X+X^{\trans})/2\)，再谱分解并把负特征值截为零；这一步在 Frobenius 范数下确实给出到 \(\mathbb{S}_+^n\) 的最近点。开头那个相关矩阵可以这样修，只是截断之后对角线不再全是一，还要重新标准化，而重新标准化又可能把它推出锥外——需要交替投影或直接求解一个带 \(\diag(X)=\ind\) 的锥上投影问题。
 
-\[
-\langle X,zz^{\trans}\rangle=z^{\trans}Xz
-\]
-
-可知每个二次型 \(z^{\trans}Xz\) 非负，即 \(X\succeq0\)。这一性质会在半正定规划的对偶中再次出现。
-
-\subsection{数值判断要带尺度}
-
-理论上，检查全部特征值非负即可判断 PSD；浮点计算中最小特征值可能出现 \(-10^{-12}\) 之类的小负数。它可能只是相对于矩阵范数的舍入误差，也可能是真实不可行。不能脱离矩阵尺度使用固定阈值。
-
-Cholesky 分解适合验证严格正定矩阵，但边界上的半正定矩阵可能因零特征值而分解失败；这不等于它非半正定。投影到半正定锥时，常先对称化，再做特征分解并把负特征值截为零。
+这个单元到此把可行域的几何讲完了：线段给出凸性，超平面与半空间搭出多面体，锥把方向和矩阵约束也纳了进来。剩下的一半在目标函数那一侧——可行域凸只保证走一步不会出界，走一步是否更接近最优，要由函数的形状来回答，从\hyperref[sec:09-Convex-Optimization/03-Convex-Functions/01]{``弦在图像上方意味着什么''}开始。

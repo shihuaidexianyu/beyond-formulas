@@ -1,114 +1,108 @@
 \section{KL 散度与 Fisher 度量的局部关系}
 \label{sec:12-Real-Analysis-Support/09-Information-Geometry/03}
 
-KL 散度 \(\KL(p\|q)\) 衡量``用 \(q\) 描述 \(p\) 的数据多付多少码长''，Fisher 信息衡量``参数微小改变时分布有多容易区分''。这两个量看似不同，实则在参数空间中是同一几何的两面：KL 散度在无穷小参数位移下的二阶展开，正是 Fisher 度量。
+调过策略优化算法的人都见过那行配置：\texttt{target\_kl = 0.01}。新旧策略之间的 KL 散度一旦超过它，这一轮更新就被截断或回退。奇怪的地方在于，人们想控制的明明是``别把策略改得太狠''，落到代码里却成了一个信息论的量。为什么不直接限制参数的移动幅度？答案藏在 KL 散度的一个局部性质里：在参数邻域内，它是一个二次型，而这个二次型的矩阵正是 Fisher 信息。
 
-\subsection{KL 的二阶展开回到 Fisher 信息}
+\subsection{一阶项因 score 期望为零而消失}
 
-设 \(p_\theta\) 是参数族，\(\theta\) 与 \(\theta+d\theta\) 是邻近参数。KL 散度为
-
-\[
-\KL(p_\theta\|p_{\theta+d\theta})
-=\E_\theta\!\left[
-\log\frac{p_\theta(X)}{p_{\theta+d\theta}(X)}
-\right].
-\]
-
-对 \(d\theta\) 做 Taylor 展开。记 \(s(x)=\nabla_\theta\log p_\theta(x)\) 为 score，则
+设 \(p_\theta\) 光滑地依赖参数，考察小位移 \(\Delta\) 带来的 KL：
 
 \[
-\log p_{\theta+d\theta}(x)
-=\log p_\theta(x)
-+s(x)^\trans d\theta
-+\frac12 d\theta^\trans\nabla_\theta s(x)\,d\theta
-+o(\norm{d\theta}^2).
+\KL\bigl(p_\theta\,\|\,p_{\theta+\Delta}\bigr)
+=\E_\theta\!\left[\log p_\theta(X)-\log p_{\theta+\Delta}(X)\right].
 \]
 
-代入 KL 并取期望。一阶项为
+记 score 为 \(s(x)=\nabla_\theta\log p_\theta(x)\)，把被积项对 \(\Delta\) 展开到二阶：
 
 \[
-\E_\theta[s(X)^\trans d\theta]=0,
+\log p_{\theta+\Delta}(x)=\log p_\theta(x)+s(x)^{\trans}\Delta
++\tfrac12\,\Delta^{\trans}\nabla_\theta^2\log p_\theta(x)\,\Delta
++o\bigl(\norm{\Delta}^2\bigr).
 \]
 
-因为 score 的期望为零。二阶项为
+代回去取期望，得到
 
 \[
--\frac12 d\theta^\trans\E_\theta[\nabla_\theta s(X)]\,d\theta.
+\begin{aligned}
+\KL\bigl(p_\theta\,\|\,p_{\theta+\Delta}\bigr)
+&=-\E_\theta[s(X)]^{\trans}\Delta
+-\tfrac12\,\Delta^{\trans}\E_\theta\bigl[\nabla_\theta^2\log p_\theta(X)\bigr]\Delta
++o\bigl(\norm{\Delta}^2\bigr)\\[2pt]
+&=\tfrac12\,\Delta^{\trans}I(\theta)\,\Delta+o\bigl(\norm{\Delta}^2\bigr).
+\end{aligned}
 \]
 
-由 Fisher 信息的二阶形式 \(I(\theta)=-\E_\theta[\nabla_\theta s]=\E_\theta[ss^\trans]\)，得到
+两步替换值得单独点出。一阶项整体消失，因为 \(\E_\theta[s(X)]=0\)：对恒等式 \(\int p_\theta\,d\mu=1\) 两边求导，导数穿过积分号后得到 \(\int\nabla_\theta p_\theta\,d\mu=0\)，而 \(\nabla_\theta p_\theta=p_\theta\,s\)。二阶项用的是信息等式 \(I(\theta)=\E_\theta[ss^{\trans}]=-\E_\theta[\nabla_\theta^2\log p_\theta]\)，它由同一个恒等式再求一次导得到，推导见\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}。
+
+条件对账：两次``求导穿过积分号''都需要支撑集不随 \(\theta\) 改变、并且有可积的控制函数，条件见\hyperref[sec:12-Real-Analysis-Support/04-Limits-and-Integration/03]{``求导穿过积分号需要控制差商''}。\(\Uniform(0,\theta)\) 这样的模型不满足前一条——支撑集端点就是参数本身，它的 KL 在局部不是二次的，Fisher 信息的通常公式也失效。另外还要求 \(I(\theta)\) 有限，且 \(\log p_\theta\) 关于 \(\theta\) 二阶连续可微。
+
+\subsection{等值线的形状由 Fisher 的特征分解决定}
+
+把上式反过来读：在 \(\theta_0\) 的一个小邻域里，\(\KL(p_{\theta_0}\|p_\theta)\approx\tfrac12(\theta-\theta_0)^{\trans}I(\theta_0)(\theta-\theta_0)\) 是一个正定二次型，它的等值集是椭球。
+
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+\begin{scope}[shift={(3.4,2.2)}]
+\draw[gray!60,dashed] (0,0) circle (1.0);
+\foreach \s in {1,1.414,2}
+  \draw[rotate around={30:(0,0)}] (0,0) ellipse ({1.0*\s} and {0.42*\s});
+\draw[->,thick,rotate around={30:(0,0)}] (0,0) -- (2.0,0);
+\draw[->,thick] (0,0) -- (0.42,-0.727);
+\fill (0,0) circle (0.06);
+\node[fill=white,inner sep=1pt,left] at (-0.10,-0.16) {\(\theta_0\)};
+\node[right] at (1.80,1.06) {\(I\) 的小特征值方向};
+\node[below right] at (0.46,-0.80) {大特征值方向};
+\draw[gray!70] (-1.45,1.32) -- (-0.50,0.866);
+\node[gray!80,left] at (-1.45,1.32) {欧氏圆};
+\draw[gray!70] (-2.05,-1.36) -- (-1.45,-1.17);
+\node[left] at (-2.10,-1.38) {\(\KL=\varepsilon,\,2\varepsilon,\,4\varepsilon\)};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\emph{KL 在 \(\theta_0\) 附近的等值线是椭圆，主轴方向与长短由 Fisher 矩阵的特征分解给出；参数空间的欧氏圆（虚线）与它一般不重合。}
+
+把 \(I(\theta_0)=U\Lambda U^{\trans}\) 特征分解，沿第 \(i\) 个特征方向走到 \(\KL=\varepsilon\) 需要的参数位移是 \(\sqrt{2\varepsilon/\lambda_i}\)。特征值大的方向上分布敏感，允许的参数位移小；特征值小的方向上分布迟钝，同样的 KL 预算可以换来很长的一步。椭圆被拉长的那一头，正是模型``不在乎''的方向。上一节信任域图里那个 Fisher 椭圆，与这里的 KL 等值线是同一个东西——所以约束``分布改变不超过 \(\varepsilon\)''与约束``二次型不超过 \(2\varepsilon\)''在局部是一回事。
+
+椭圆的形状还随位置改变。走到参数空间的另一处，\(I(\theta)\) 变了，椭圆的朝向和长短跟着变。固定半径的欧氏球做不到这种自适应，这也是限制参数范数与限制 KL 的分歧所在。
+
+\subsection{不对称性要到三阶才现身}
+
+KL 散度两个方向不相等，而二次型是对称的，这两件事需要对上账。把展开点固定在 \(\theta\)，反方向的 KL 给出
 
 \[
-\KL(p_\theta\|p_{\theta+d\theta})
-=\frac12 d\theta^\trans I(\theta)\,d\theta
-+o(\norm{d\theta}^2).
+\KL\bigl(p_{\theta+\Delta}\,\|\,p_\theta\bigr)
+=\tfrac12\,\Delta^{\trans}I(\theta)\,\Delta+o\bigl(\norm{\Delta}^2\bigr),
 \]
 
-在无穷小位移下，KL 散度就是 Fisher 度量下的平方距离的一半。Fisher 度量不是外加的几何，而是 KL 散度在参数空间中的局部化。
+与正方向的二阶项完全相同。差别从三阶项开始出现，由 \(I(\theta+\Delta)\) 与 \(I(\theta)\) 的偏离所贡献。于是有限位移下前向与反向 KL 的著名分歧——一个倾向覆盖住目标分布的全部支撑，一个倾向缩进目标分布的高密度区，见\hyperref[sec:07-Information-Theory/03-Divergences/02]{``Gibbs 不等式与 KL 的方向性''}——在无穷小极限下消失干净，两个方向诱导出同一个黎曼度量。度量的对称性由此而来，并不是额外加上去的假设。
 
-\subsection{为什么 KL 不对称，度量却对称}
+顺带说清楚一层关系：KL 本身不是距离的平方，它没有对称性也没有三角不等式。局部二次近似为它配上了一个合格的度量，而这个度量只在无穷小的意义上代表它。
 
-KL 散度不对称：\(\KL(p\|q)\ne \KL(q\|p)\)。但上面的展开式对 \(d\theta\) 是对称的（二次型）。这是因为展开只在 \(\theta\) 处做了一次，\(\KL(p_{\theta+d\theta}\|p_\theta)\) 的展开会给出
+\subsection{信任域方法约束的正是这个椭圆}
+
+回到开头的 \texttt{target\_kl}。TRPO 把一步更新写成
 
 \[
-\KL(p_{\theta+d\theta}\|p_\theta)
-=\frac12 d\theta^\trans I(\theta+d\theta)\,d\theta
-+o(\norm{d\theta}^2),
+\max_{\theta}\ \widehat L(\theta)
+\qquad\text{s.t.}\qquad
+\E_{s\sim d}\bigl[\KL(\pi_{\theta_{\rm old}}(\cdot\given s)\,\|\,\pi_\theta(\cdot\given s))\bigr]\le\delta .
 \]
 
-其中 Fisher 信息在 \(\theta+d\theta\) 处取值。当 \(d\theta\to0\) 时，\(I(\theta+d\theta)\to I(\theta)\)，两个方向的二阶项相同；不对称性只出现在三阶及更高阶项。在无穷小极限下，KL 的两个方向给出同一个度量——这正是黎曼度量对称性的来源。
-
-有限位移下 KL 的不对称性仍有意义：前向 KL（\(\KL(p\|q)\)）倾向覆盖 \(p\) 的支撑，反向 KL（\(\KL(q\|p)\)）倾向避开 \(p\) 的低密度区。这种不对称性在 Fisher 几何中对应``指数联络与混合联络''的区别，本书不展开；对优化而言，选择最小化哪个方向的 KL 就是选择不同的目标。
-
-\subsection{指数族的对偶几何}
-
-指数族 \(p_\theta(x)=h(x)\exp(\theta^\trans T(x)-A(\theta))\) 有一个特殊的结构：自然参数 \(\theta\) 与期望参数 \(\mu=\E_\theta[T(X)]=\nabla A(\theta)\) 互为 Legendre 对偶。定义
+把目标线性化、把约束按上面的展开换成二次型，这个问题的解就是自然梯度方向乘一个由 \(\delta\) 决定的步长：
 
 \[
-A^*(\mu)=\sup_\theta\bigl(\theta^\trans\mu-A(\theta)\bigr),
+\Delta^{\star}=\sqrt{\frac{2\delta}{\nabla \widehat L^{\trans}I^{-1}\nabla \widehat L}}\;I^{-1}\nabla \widehat L .
 \]
 
-则 \(\theta=\nabla A^*(\mu)\)，且 \(A(\theta)+A^*(\mu)=\theta^\trans\mu\)。
+上一节从信任域推出自然梯度时用的是同一套代数，只是那里的椭圆来自度量的定义，这里的椭圆来自 KL 的二阶展开——两条路走到同一个式子，是因为这两个椭圆本来就是一个。TRPO 的实现用共轭梯度求解 \(I^{-1}\nabla\widehat L\)，避开显式构造 \(I\)。
 
-在这对坐标下，KL 散度有显式形式：
+PPO 放弃了显式约束，改用截断的重要性比值或一个 KL 惩罚项，它保留``限制分布位移''的意图而牺牲了几何上的精确性。理解了椭圆的图像，几个工程现象就不再费解：\(\delta\) 应当按分布位移而不是按参数尺度来设，因此换一种网络参数化不必重调；策略接近确定性时 \(I\) 的某些特征值急剧变大，同样的 \(\delta\) 只允许极小的参数移动，训练看上去``卡住''；而在 \(I\) 近乎奇异的方向上，KL 约束几乎不起作用，需要阻尼来兜底。
 
-\[
-\KL(p_\theta\|p_{\theta'})
-=A(\theta')-A(\theta)-\mu^\trans(\theta'-\theta),
-\]
+\subsection{局部成立，不等于全局可用}
 
-即 \(A\) 在 \(\theta\) 与 \(\theta'\) 之间的 Bregman 散度。Bregman 散度是凸函数与其切平面之间的差，它自然不对称，且在无穷小位移下退化为 \(\frac12 d\theta^\trans\nabla^2A(\theta)\,d\theta\)——正是 Fisher 度量。
+二阶展开只在小邻域内有效。位移一大，KL 的真实值与二次型可以差出数量级，尤其在分布支撑几乎错开的地方——此时 KL 趋向无穷，而二次型仍是有限数。信任域算法里那道回退检查（算出候选步之后重新计算真实 KL，超了就缩步长）针对的就是这种失配。
 
-对偶参数 \(\mu\) 下的 KL 散度对应 \(A^*\) 的 Bregman 散度。两个坐标系、两个凸函数、两个 Bregman 散度，构成指数族的对偶几何。这解释了为什么指数族的 MLE 是 moment matching（\(\mu=\) 样本均值）：期望参数 \(\mu\) 是``数据可见的统计量''，自然参数 \(\theta\) 是``分布的坐标''，Legendre 变换在两者之间切换。
+另一处边界是退化。过参数化模型的 \(I(\theta)\) 有大量零特征值，椭圆在那些方向上退化成无界的柱体，二次型不再定义距离。实践中的阻尼把 \(I\) 换成 \(I+\lambda\mathrm{Id}\)，等价于给椭圆强行加上一个欧氏的下界。
 
-\subsection{从局部几何到全局问题}
-
-Fisher 度量描述无穷小行为，但统计问题常需要全局答案：两个分布有多远，参数空间是否弯曲，测地线长什么样。这些全局问题不能从局部展开直接读出。
-
-一个经典例子是 Bernoulli 流形。在 logit 坐标 \(\eta=\log(\theta/(1-\theta))\) 下，Fisher 度量为 \(g_\eta=(1/4)\operatorname{sech}^2(\eta/2)\,d\eta^2\)。计算从 \(\eta_1\) 到 \(\eta_2\) 的 Fisher--Rao 距离：
-
-\[
-d_{\mathrm{FR}}(\eta_1,\eta_2)
-=\int_{\eta_1}^{\eta_2}\sqrt{g_\eta}\,d\eta
-=\frac12\int_{\eta_1}^{\eta_2}\operatorname{sech}(\eta/2)\,d\eta.
-\]
-
-这个积分可以算出，但更重要的是：当 \(\theta\to0\) 或 \(1\)（\(\eta\to\mp\infty\)）时，距离发散——边界在 Fisher 几何下被推到无穷远。Bernoulli 流形在 Fisher 度量下是一个完备的、常负曲率的空间（双曲空间），这不是欧氏直觉能猜到的。
-
-全局几何影响算法：在弯曲空间中，直线坐标下降可能绕远；测地线下降（沿 Fisher 度量的最短路径）才是几何正确的方向。自然梯度是局部最速下降，测地线下降是全局最短路径，两者在小步长下一致，在大步长下不同。
-
-\subsection{落点：信息几何的三层结构}
-
-本单元把三层结构接成一条线：
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{局部}：Fisher 信息是 score 的方差，也是 KL 的二阶展开；
-\item
-  \textbf{几何}：Fisher 信息是统计流形上的黎曼度量，坐标不变；
-\item
-  \textbf{对偶}：指数族的自然参数与期望参数互为 Legendre 对偶，KL 是 Bregman 散度。
-\end{itemize}
-
-这条线从 KL 散度出发，经过 Fisher 信息，到黎曼度量，最后回到自然梯度。信息几何不是新数学，而是把已有概念按``参数即分布的坐标''这一原则重新组织。它的价值在于：当参数化、坐标选择或优化方向成为问题时，几何提供了一套不依赖坐标的标准答案。
+这三节走完，三个原本分属不同学科的量接在了一处：信息论用 KL 度量``用错模型要多付多少''，见\hyperref[sec:07-Information-Theory/03-Divergences/01]{``错误模型的代价：从交叉熵到 KL 散度''}；统计学用 Fisher 信息刻画``参数有多容易辨认''；优化用度量决定``一步该往哪儿迈''。局部展开表明它们说的是同一件事的三个侧面，而这正是信息几何在参数化、坐标选择与更新方向成为问题时能给出统一答案的原因。

@@ -1,116 +1,116 @@
 \section{Actor--Critic 在偏差与方差之间搭桥}
 \label{sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/10}
 
-\subsection{两条路各自的硬伤}
+抓取任务，一个回合两百步，成败在最后一步才见分晓。REINFORCE 跑了三天，回报曲线上下翻飞，五个随机种子给出五种走势。你粗算了一下噪声：每步奖励的方差是 \(\sigma^2\)，折扣 \(\gamma=0.99\) 时回报的方差大致是 \(\sigma^2/(1-\gamma^2)\approx50\sigma^2\)，而每一步动作拿到的梯度权重就是这个抖动了五十倍的数。梯度无偏，可单个样本的符号都不太可信。
 
-REINFORCE 等完整的 Monte Carlo 回报来更新策略。一条 200 步的轨迹，最后那个回报数是 200 个随机步骤累积出来的，波动直接灌进每一步的梯度。好处是不依赖价值函数近似——梯度在期望意义下无偏。代价是方差大到在长时域、稀疏奖励或高随机性的环境中，更新方向几乎是随机的。
+你想要的是在第 \(t\) 步当场给这个动作打分，不必等两百步之后。当场打分需要一个会预测未来的模型，模型一定有误差。于是选择摆在这里：等到底，估计正确但抖；当场打，估计稳定但偏。
 
-价值方法能用 Bellman bootstrap 一步步传播信息——TD(0) 不需要等到轨迹结束，每步都能更新。但价值方法只产出 Q 值或 V 值，策略需要额外抽出来（通常是 \(\argmax\)），不直接优化策略本身。
+\subsection{Critic 是策略梯度里被替换掉的那一项}
 
-把这两条路接到一起，就是 Actor-Critic：Actor 是参数化策略 \(\pi_\theta\)，Critic 估计当前策略下的价值函数，为 Actor 提供低方差的梯度方向。Actor 负责提议动作，Critic 负责打分。
-
-\subsection{Critic 怎样为 Actor 提供梯度信号}
-
-策略梯度定理等价于
+策略梯度定理可以写成
 
 \[
-\nabla_\theta J(\theta)
-= \E_\pi \Bigl[
-Q^\pi(S_t, A_t) \, \nabla_\theta \log \pi_\theta(A_t \mid S_t)
-\Bigr].
+\nabla_\theta J(\theta)=\E_\pi\big[Q^\pi(S_t,A_t)\,\nabla_\theta\log\pi_\theta(A_t\given S_t)\big],
 \]
 
-减去状态 baseline \(V^\pi(S_t)\) 得到 advantage：
+上一节用采样回报 \(G_t\) 当 \(Q^\pi\) 的无偏样本，代价已经看到了。换个做法：学一个 \(V_\phi\approx V^\pi\)，用它就地构造权重。减去状态基线得到优势 \(A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s)\)，而一步时序差分
 
 \[
-A^\pi(s, a) = Q^\pi(s, a) - V^\pi(s).
+\delta_t=R_{t+1}+\gamma V_\phi(S_{t+1})-V_\phi(S_t)
 \]
 
-Advantage 的正负分割比 Q 值更锐利：正数，这个动作比该状态的平均水平好，往上拉；负数，比平均水平差，往下压。
+正是优势的一个估计。骨架一行：在 \(V_\phi=V^\pi\) 的前提下，对下一状态取期望有 \(\E[R_{t+1}+\gamma V^\pi(S_{t+1})\given S_t,A_t]=Q^\pi(S_t,A_t)\)，减去 \(V^\pi(S_t)\) 便得 \(A^\pi(S_t,A_t)\)。条件对账只有一条，但它很硬：\(V_\phi\) 得等于 \(V^\pi\)。Critic 有多少误差，Actor 的梯度就带多少偏差，而且这偏差不随样本量增加而消失。
 
-实际算法用参数 \(\phi\) 的 Critic 近似 \(V^\pi\)。一步 TD 误差：
+于是两条更新交织进行，Actor 用
 
 \[
-\delta_t = R_{t+1} + \gamma V_\phi(S_{t+1}) - V_\phi(S_t).
+\theta\leftarrow\theta+\alpha_\theta\,\delta_t\,\nabla_\theta\log\pi_\theta(A_t\given S_t),
 \]
 
-关键性质：如果 \(V_\phi = V^\pi\)，那么 \(\E[\delta_t \mid S_t, A_t] = A^\pi(S_t, A_t)\)。于是用 \(\delta_t\) 替换真实 advantage 去更新 Actor：
+Critic 用半梯度 TD 最小化 \(\delta_t^2\)。同一条样本喂两个模型，一个学怎么做，一个学做得怎么样。
+
+\subsection{一步与整条之间是一条连续的轴}
+
+把真实奖励用满 \(n\) 步再接上估计，得到多步回报
 
 \[
-\theta \leftarrow \theta + \alpha_\theta \, \delta_t \, \nabla_\theta \log \pi_\theta(A_t \mid S_t),
+G_t^{(n)}=\sum_{k=0}^{n-1}\gamma^kR_{t+k+1}+\gamma^nV_\phi(S_{t+n}).
 \]
 
-同时用 TD 规则更新 Critic：最小化 \(\delta_t^2\) 或其半梯度变体。两个 loop 交织运行——每条样本同时喂给两个网络。
+\(n=1\) 是 TD(0)，\(n\) 取到回合结束就是 Monte Carlo。\(n\) 越大，进入估计量的真实奖励越多，对 \(V_\phi\) 的依赖越轻，偏差越小；同时被累加的随机步数越多，方差越大。Actor--Critic 的关键设计选择落在这个截断点的位置上，用了几个网络反倒是次要的。
 
-\subsection{偏差与方差的具体数字感}
+\begin{center}
+\begin{tikzpicture}[>=stealth,scale=0.9]
+\fill[gray!22] (0,0.35) -- (8,0.35) -- (8,1.85) -- cycle;
+\fill[gray!22] (0,2.3) -- (0,3.8) -- (8,2.3) -- cycle;
+\draw[->] (-0.3,0) -- (8.8,0);
+\foreach \x in {0,2.5,5,6.3,8} \draw (\x,-0.1) -- (\x,0.1);
+\node[below,font=\small] at (0,-0.12) {\(\lambda=0\)};
+\node[below,font=\small] at (2.5,-0.12) {\(0.5\)};
+\node[below,font=\small] at (5,-0.12) {\(0.9\)};
+\node[below,font=\small] at (6.3,-0.12) {\(0.95\)};
+\node[below,font=\small] at (8,-0.12) {\(1\)};
+\node[right,font=\small] at (5.6,1.0) {方差};
+\node[right,font=\small] at (0.5,2.75) {偏差};
+\node[above right,font=\small,align=left] at (-0.3,3.95) {TD(0)\\\(n=1\)};
+\node[above left,font=\small,align=right] at (8.6,3.95) {Monte Carlo\\\(n=\infty\)};
+\draw[dashed] (6.3,-0.1) -- (6.3,3.7);
+\node[above,font=\small] at (6.3,3.7) {常用取点};
+\end{tikzpicture}
+\end{center}
 
-比较三种信号源的差异。在一条轨迹中途的某个时间步：
+\emph{一条轴，两个楔形：左端偏差最厚、方差最薄，右端相反；\(\lambda\) 与 \(n\) 只是这条轴上的两种刻度。}
 
-\begin{itemize}
-\tightlist
-\item
-  Monte Carlo 回报 \(G_t\)：包含从 \(t\) 到终点的全部真实奖励。无偏，但方差来自几十上百步的累积噪声。如果每步奖励的方差是 \(\sigma^2\)，100 步的累积方差大致是 \(100\sigma^2\)。
-\item
-  一步 TD 目标 \(R_{t+1} + \gamma V_\phi(S_{t+1})\)：只含一步的真实奖励。方差约为 \(\sigma^2\)，但偏差取决于 \(V_\phi\) 逼近 \(V^\pi\) 的误差。
-\item
-  \(n\)-step 回报：折中。偏差随 \(n\) 增大递减（更多真实奖励进入），方差随 \(n\) 增大递增。
-\end{itemize}
+图上 \(\lambda\) 的刻度是不均匀的，这不是画歪了。\(\lambda\) 起作用是通过有效视界 \(1/(1-\gamma\lambda)\)：\(\gamma=0.99\) 时，\(\lambda=0.9\) 对应大约十步，\(\lambda=0.95\) 对应二十步，\(\lambda=0.99\) 一下子跳到五十步。旋钮在右端极其灵敏，调参时把 \(\lambda\) 从 \(0.95\) 改成 \(0.99\) 与从 \(0.5\) 改成 \(0.9\) 完全不是同一量级的改动。
 
-多步回报的正式写法：
+\subsection{GAE 把这条轴变成一个旋钮}
+
+不必在 \(n=1\) 和 \(n=\infty\) 之间二选一。把各阶多步优势按 \((\gamma\lambda)^l\) 指数加权平均，展开后所有中间项抵消，只剩下 TD 残差的加权和：
 
 \[
-G_t^{(n)} = \sum_{k=0}^{n-1} \gamma^k R_{t+k+1} + \gamma^n V_\phi(S_{t+n}).
+\widehat A_t^{\mathrm{GAE}(\lambda)}=\sum_{l=0}^{\infty}(\gamma\lambda)^l\,\delta_{t+l}.
 \]
 
-\(n = 1\) 是 TD(0)，\(n = \infty\)（或直到终止）是 Monte Carlo。Actor-Critic 的核心设计选择不在于是不是用两个网络，而在于是在这个谱上的哪个位置用价值近似截断 Monte Carlo。
-
-\subsection{GAE：用一个平滑旋钮调节偏差-方差}
-
-Generalized Advantage Estimation 把不同 \(n\)-step advantage 做指数加权平均。定义 TD 残差：
+两端可以直接验算。\(\lambda=0\) 时只剩 \(\delta_t\)，回到一步 TD。\(\lambda=1\) 时
 
 \[
-\delta_t^V = R_{t+1} + \gamma V_\phi(S_{t+1}) - V_\phi(S_t).
+\begin{aligned}
+\sum_{l\ge0}\gamma^l\delta_{t+l}
+&=\sum_{l\ge0}\gamma^l\big(R_{t+l+1}+\gamma V_\phi(S_{t+l+1})-V_\phi(S_{t+l})\big)\\
+&=G_t-V_\phi(S_t),
+\end{aligned}
 \]
 
-GAE 的 advantage 估计是这些残差的指数衰减和：
+价值项逐级抵消，只留下首项，得到 Monte Carlo 优势。\(\lambda\) 在中间时，近处的残差权重大、远处按 \(\gamma\lambda\) 衰减，偏差与方差的交换点被一个连续参数定住。TD(\(\lambda\)) 的资格迹是同一件事在增量形式下的写法。
+
+\subsection{两个学习器在互相追赶}
+
+Critic 要评估的是``当前策略''的价值，而 Actor 每一步都在改动当前策略。Critic 的目标一直在走。
+
+这带来一种独特的失效方式。Actor 跑得太快，Critic 手上的估计属于几十步之前那个策略，套到现在就是系统性偏差；Actor 依偏差方向走，策略再变，Critic 更追不上。两个误差可以互相喂养。理论分析通常要求两个时间尺度：Critic 的学习率显著大于 Actor，使它在 Actor 每走一步的时间里近似追上当前策略的价值。深度实现很难严格满足这类渐近条件，但这个视角解释了一批看似零散的技巧——更新频率比、相对学习率、Critic 侧的目标网络、延迟若干步再更新策略——它们调的是同一件事：两个学习器之间的相对节奏。
+
+策略侧的信赖域和比率裁剪也可以放进这个视角看：限制单次策略改动的幅度，等于给 Critic 留出追赶的时间。
+
+\subsection{离策略版本要额外付一份账}
+
+数据来自行为策略 \(\mu\)、优化目标是 \(\pi_\theta\) 时，残差需要按
 
 \[
-\widehat{A}_t^{\text{GAE}(\lambda)}
-= \sum_{l=0}^{\infty} (\gamma \lambda)^l \, \delta_{t+l}^V.
+\rho_t=\frac{\pi_\theta(A_t\given S_t)}{\mu(A_t\given S_t)}
 \]
 
-\(\lambda\) 是从 0 到 1 的旋钮。\(\lambda = 0\) 时，只剩 \(\delta_t^V\)——一步 TD。\(\lambda = 1\) 时，展开后各项抵消，还原为 Monte Carlo advantage \(G_t - V_\phi(S_t)\)。\(\lambda\) 在中间时，近期残差权重大、远期残差权重按 \(\gamma \lambda\) 指数衰减。
+加权，多步展开则要乘上一串比率。上一节说过这串乘积会怎样集中，V-trace 之所以对两个阈值分开处理，正是因为其中一个决定不动点对应哪个策略，另一个控制迹沿轨迹传播的强度。在 Actor--Critic 里这笔账要付两次：Critic 的目标需要校正到 \(\pi_\theta\) 上，Actor 的梯度也需要，两处的截断偏差会叠加。
 
-这个旋钮让偏差-方差交换变成连续可调的，不需在 \(n = 1\) 和 \(n = \infty\) 之间二选一。
+分布式训练里的滞后同样是这件事。采样器上跑的策略比学习器上的旧几十次更新，数据天然离策略，重要性权重的分布直接由这个滞后决定。把采样器与学习器的同步频率当作一个和 \(\lambda\) 同等重要的超参数，比事后调裁剪阈值有用。
 
-\subsection{Actor 和 Critic 在互相追赶}
+\subsection{共享表示要划清梯度边界}
 
-公式里 Critic 的目标是评估``当前策略''的价值，但 Actor 每步都在改变策略，Critic 的目标随之移动。一个会跑路的靶子。
+Actor 与 Critic 共用前几层能省参数和算力，两个目标的梯度却未必朝同一个方向：Critic 要求表示能准确预测价值，Actor 要求表示支持策略改进，两者有时互相促进，有时正面冲突。常见做法是给两侧的损失配上不同权重，或者干脆分成两个网络，用一点冗余换清晰。
 
-如果 Actor 改得太快，Critic 给出的 advantage 估计是给旧策略的，套在当前策略上是系统性偏差。如果 Critic 训练不足，Actor 沿偏差方向移动，又进一步改变策略，让 Critic 更追不上。两个误差可以互相放大。
+比权重更要紧的是梯度边界。优势 \(\widehat A_t\) 是由 Critic 算出来的，它出现在 Actor 的损失里；忘了在这里切断梯度，Actor 的损失就会顺着优势回传进 Critic，把 Critic 往``让优势更大''的方向拉——一个谁都没打算优化的目标。哪些量是被学习的、哪些量是当作常数的目标，应当在代码里显式写出来，别交给框架的默认行为。
 
-理论分析常要求两个时间尺度：Critic 学习率更大、更新更频繁，相对 Actor 足够快地逼近当前策略的真实价值。深度实现不一定严格满足渐近条件，但这个视角解释了更新频率比、相对学习率、target network 和延迟策略更新为何影响稳定性——它们控制的不是单个学习器的收敛速度，而是两个学习器之间的追赶节奏。
+\subsection{多一个网络不改变底层的困难}
 
-\subsection{离策略数据：分布不在你这边}
+Actor--Critic 压下了策略梯度的方差，同时请进了 Critic 的逼近误差、自举带来的偏差，以及两个目标互相牵动的非平稳性；离策略版本再叠上分布校正的方差与截断偏差。奖励函数写得对不对、探索够不够、状态是不是部分可观测、上线之后安不安全，这些问题一个也没有因为多训了一个网络而消失。判断训练是否健康，至少要同时看策略熵有没有过早塌缩、回报分布里有没有极端值在主导梯度、Critic 的预测与实际回报差多少、优势的量级是否合理、重要性比率有没有长尾，以及不同种子之间的差距是否还在可接受范围。只盯平均回报那一根曲线，看不出 Critic 是不是在乱说，也排除不了策略正在钻奖励函数的漏洞。
 
-前文 \hyperref[sec:16-Control-and-Reinforcement-Learning/02-Reinforcement-Learning/08]{``Off-policy 校正用权重交换分布偏差与方差''}给出了一般框架。在 Actor-Critic 中，如果数据来自行为策略 \(\mu\) 而优化目标是 \(\pi_\theta\)，用重要性比率
-
-\[
-\rho_t = \frac{\pi_\theta(A_t \mid S_t)}{\mu(A_t \mid S_t)}
-\]
-
-加权利。但多个时间步的比率相乘方差增长极快——两步的比率乘积累，三步再乘，十步后比率序列的方差已经爆炸。若 \(\mu(a \mid s) = 0\) 而目标策略给该动作正概率，没有任何比率能修复——分布的支持区间缺失不是权重能救的。
-
-实践中的应对：裁剪比率到 \([1-\epsilon, 1+\epsilon]\) 区间，限制单步策略更新幅度，或使用专门的离策略价值校正算法。裁剪改变了原始估计量——稳定性来自于有意识地接受这个偏差，而不是数学上仍在逼近同一个目标。
-
-\subsection{共享表示：两个任务的方向可能打架}
-
-Actor 和 Critic 共享前部网络层能减少参数和计算量，但两个目标的梯度方向不一定一致。Critic 的 loss 要求表示能准确预测价值；Actor 的 loss 要求表示支持策略改进。共享参数上这两个方向可能互相有助益，也可能直接冲突。
-
-实现中必须明确梯度边界——Critic 的 loss 对哪些参数求导，哪些量视为固定的 target（不传递梯度），不能靠框架默认行为糊弄过去。特别是如果 advantage 的计算路径经过了 Critic 网络，而 Actor loss 又包含 advantage，梯度可能通过 advantage 意外回传进 Critic——结果 Critic 的参数被两个不一致的目标同时拉扯。
-
-\subsection{多一个网络不解决强化学习的底层困难}
-
-Actor-Critic 降低了策略梯度的方差，但同时引入了 Critic 近似误差、bootstrap 偏差和双目标非平稳性。离策略版本再叠加上分布修正的方差和截断偏差。奖励设计、探索策略、部分可观测、安全部署——这些困难不会因为同时训练了两个网络而消失。
-
-可靠诊断需要分别监控：策略 entropy——是否过早塌缩成确定性；回报分布——有无极端值污染梯度；value error——Critic 预测与实际回报的差距是否持续偏大；TD error 的尺度——是否在稳定下降；advantage 的分布——均值和方差的量级是否合理；重要性比率——有无极值需要裁剪；以及不同随机种子下的表现差异是否在可接受范围。只看平均回报一根曲线，判断不了 Critic 是否精准，也排除不了策略在利用奖励函数漏洞。
+回头看这一路：动态规划要求模型已知，换来对整个状态空间的精确保证；采样方法放弃模型，换来只在被访问过的地方有效；函数逼近放弃逐状态的独立表示，换来大空间可处理，同时交出了压缩性；离策略放弃数据与目标一致，换来数据可复用，交出了分布的对齐。每放松一次，适用范围扩大一圈，能给出的保证削掉一层。这个单元想留下的判断只有一条：知道自己此刻站在哪一层，手里还剩下哪些保证。

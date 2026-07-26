@@ -1,28 +1,50 @@
-\(\int_{-\infty}^{\infty}\frac{dx}{1+x^2}\) 在实轴上需要 \(\arctan\)，但在复平面中只需求 \(z=i\) 处的一阶留数 \(1/(2i)\)，答案 \(2\pi i\cdot\frac{1}{2i}=\pi\) 直接得出。Fourier 分析在实轴上工作，但许多深刻性质只有进入复平面才能看清：解析延拓决定 Fourier 系数的衰减，奇点位置决定函数的光滑性，留数定理给出积分计算的通用工具。本单元回答三个问题：
+同一套谱方法，解一个问题二十项就到了机器精度，换一个问题两百项还差着好几位。两个被展开的函数在实轴上无穷次可微，都有界，画出来挑不出区别。差别在哪里，实轴上找不到。
 
-\begin{enumerate}
-\tightlist
-\item
-  解析延拓与 Fourier 衰减：函数能解析延拓到多宽的复条带，其 Fourier 系数就按多快的指数衰减。
-\item
-  留数定理计算实积分：把实积分变成复围道积分，奇点留数给出答案，无需显式求原函数。
-\item
-  特征函数反演与 Laplace 变换：概率论中的反演公式和生成函数的奇点分析，都依赖复平面上的围道移动。
-\end{enumerate}
+把它们各自延拓到复平面，答案马上出现：一个的最近奇点离实轴 \(1.32\)，另一个只有 \(0.199\)。收敛速度之比，恰好就是这两个数之比。
 
-这三个问题共用一条主线：复平面不是实轴的装饰，而是理解实函数性质的必要视角。许多在实轴上只能"声明"的结论，在复平面上有透明的证明。
+本章是支撑性的。它进入这本书，靠的不是复分析本身有多漂亮，而是这一句话：实轴上能观察到的性质，由复平面上奇点的位置控制。函数在实轴上有多光滑、Fourier 系数衰减多快、等距插值会不会发散、一个线性系统十秒后还剩多少抖动——这些问题的答案，都写在实轴之外，写在那些从实轴上完全看不见的点上。
+
+\begin{center}
+\begin{tikzpicture}[scale=0.95,font=\small,>=stealth]
+  \draw[black!25,dashed] (0,-0.9) -- (0,2.4);
+  \draw[->,black!55] (-1.3,0) -- (4.3,0) node[right,font=\footnotesize] {\(\operatorname{Re}\)};
+  \draw[->,black!55] (0,-1.05) -- (0,2.55) node[above,font=\footnotesize] {\(\operatorname{Im}\)};
+  \draw[black!70,thick] (2.24,1.34) -- (2.56,1.66);
+  \draw[black!70,thick] (2.24,1.66) -- (2.56,1.34);
+  \node[above,font=\footnotesize] at (2.4,1.72) {奇点 \(z_0\)};
+  \draw[black!35,dashed] (2.4,0) -- (2.4,1.5);
+  \draw[<->,black!65] (2.95,0) -- (2.95,1.5);
+  \node[right,font=\footnotesize,black!75] at (3.05,0.75) {\(d\)};
+  \draw[<->,black!65] (0,-0.55) -- (2.4,-0.55);
+  \node[below,font=\footnotesize,black!75] at (1.2,-0.55) {\(\sigma\)};
+  \node[right,font=\footnotesize,black!75] at (3.35,1.5) {\(d\) 大 \(\Rightarrow\) Fourier 系数 \(e^{-d\abs{k}}\) 衰减快};
+  \node[right,font=\footnotesize,black!75] at (3.35,1.05) {\(d\) 小 \(\Rightarrow\) 插值与求积吃力};
+  \node[right,font=\footnotesize,black!75] at (3.35,-0.55) {\(\sigma<0\Rightarrow\) 时域 \(e^{\sigma x}\) 衰减，系统稳定};
+  \node[right,font=\footnotesize,black!75] at (3.35,-1.0) {\(\sigma>0\Rightarrow\) 发散};
+\end{tikzpicture}
+
+\emph{一个奇点，两个坐标读数。离实轴的距离 \(d\) 管住实轴上的衰减有多快，实部 \(\sigma\) 管住时间轴上是收敛还是发散，虚部则给出振荡频率。本章三篇沿这两个方向各走一遍。}
+\end{center}
+
+第一篇把 \(d\) 这一侧说透：解析延拓能走多远由最近奇点决定，而条带的宽度直接给出 Fourier 系数的指数衰减率。顺带解释一件旧事——Runge 现象的病根不在实轴上的任何特征，在 \(\pm i/5\) 那对极点离区间太近。
+
+第二篇处理路径本身。上一篇只是把积分路径挪开而不碰奇点，这一篇把路径挪到圈住奇点：实积分变成围道积分，答案化为几个留数之和。重点不在算出多少个积分，在于围道怎么选、大圆弧上的贡献凭什么可以扔掉。
+
+第三篇走 \(\sigma\) 这一侧。特征函数反演需要复分析撑住合法性，Laplace 变换把微分方程变成代数方程，而解的长期行为由最右边那个奇点定夺。这与线性系统的特征值、常微分方程的特征根是同一处位置的三个名字。
 
 \subsection{怎么读这一章}
 
-第一次读，可以先把复平面想成实轴周围多出来的活动空间。积分路径能在这片空间里绕开难算的位置，也会在越过奇点时留下可计算的代价。第一篇解释奇点离实轴多远为何会影响 Fourier 衰减，第二篇说明留数怎样记录绕过奇点的代价，第三篇再把这套办法用于概率反演和渐近估计。前两篇依赖上一单元的频率观点，可先回看 \hyperref[ch:068]{``Fourier 与谱方法：把函数换到频率坐标中''}。
+第一次读，可以把复平面当成实轴周围多出来的一片活动空间。积分路径能在这片空间里挪动，挪动本身不花钱；只有当路径越过奇点时，才会留下一笔可以精确计算的代价。整章的技术内容基本就是这一个动作的三种用法。
+
+三篇按依赖排列，但若从具体困惑进入，也可以先打开最接近的一篇再往回补。前两篇会频繁回看 \hyperref[ch:068]{``Fourier 与谱方法：把函数换到频率坐标中''}里的频率观点，第三篇则同时用到 Part 05 的特征函数和 Part 15 的线性系统，那些地方都有链接标出。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/01]{``解析延拓与 Fourier 衰减''}；
-\item \hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/02]{``留数定理计算实积分''}；
-\item \hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/03]{``特征函数反演与 Laplace 变换''}。
+\item \hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/01]{``解析延拓与 Fourier 衰减''}：奇点离实轴多远，系数就衰减多快；
+\item \hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/02]{``留数定理计算实积分''}：把路径挪到圈住奇点，积分变成数留数；
+\item \hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/03]{``特征函数反演与 Laplace 变换''}：最右边的奇点写着长期行为。
 \end{itemize}
+
+三篇读完，围道技巧本身会忘掉大半，留下来的应该是一个习惯：碰到``为什么这个函数好算、那个不好算''，先问它在复平面上的奇点落在哪。

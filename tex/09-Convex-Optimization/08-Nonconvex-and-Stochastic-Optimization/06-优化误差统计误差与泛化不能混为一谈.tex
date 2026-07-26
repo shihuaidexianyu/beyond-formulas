@@ -1,102 +1,101 @@
 \section{优化误差、统计误差与泛化不能混为一谈}
 \label{sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/06}
 
-训练算法直接看到的是有限样本经验风险
+周会上要定这周干什么。方案一：花六万块标两万条新数据。方案二：让两个人调三天优化器，试试学习率日程、换 AdamW、加长训练。两个方案的成本差一个数量级，而手上的证据只有两个数——训练损失 \(0.08\)，验证损失 \(0.44\)。
+
+这个决定做错的代价不只是钱。选错的那一边通常还会给出``有一点效果''的假象：多训练两天训练损失能从 \(0.08\) 掉到 \(0.05\)，验证损失纹丝不动，于是继续训练；或者数据加了两万条，模型压根没利用上，得出``加数据没用''的错误结论。要避免这两种，先得知道自己面对的是哪一类误差。
+
+\subsection{三段落差，三个负责人}
+
+算法看得见的是有限样本上的经验风险 \(\widehat R_n(\theta)=\frac1n\sum_{i=1}^n\ell(\theta;Z_i)\)，部署时关心的是总体风险 \(R(\theta)=\E_{Z\sim P}[\ell(\theta;Z)]\)。在模型类 \(\Theta\) 上记
 
 \[
-\widehat R_n(\theta)
-=\frac1n\sum_{i=1}^n\ell(\theta;Z_i),
-\]
-
-部署真正关心的通常是总体风险
-
-\[
-R(\theta)=\E_{Z\sim P}[\ell(\theta;Z)].
-\]
-
-SGD、momentum 或 Adam 降低的是前者的某个实现版本；数据增强、weight decay 和 batch normalization 还可能让实际更新目标与纸面经验风险略有不同。即使经验目标被精确最小化，也没有控制总体风险。
-
-\subsection{一个分解暴露三类责任}
-
-在给定模型类 \(\Theta\) 中，令
-
-\[
-\theta^\star\in\argmin_{\theta\in\Theta}R(\theta),
-\qquad
+\theta^\star\in\argmin_{\theta\in\Theta}R(\theta),\qquad
 \widehat\theta\in\argmin_{\theta\in\Theta}\widehat R_n(\theta),
 \]
 
-训练算法在有限预算后输出 \(\theta_T\)。插入经验风险可得
+算法在有限预算后交出的是 \(\theta_T\)。把 \(R(\theta_T)-R(\theta^\star)\) 中间插入四个经验风险项，配对整理，得到
 
 \[
 \begin{aligned}
 R(\theta_T)-R(\theta^\star)
-={}&R(\theta_T)-\widehat R_n(\theta_T)\\
-&+\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta)\\
-&+\widehat R_n(\widehat\theta)-\widehat R_n(\theta^\star)\\
-&+\widehat R_n(\theta^\star)-R(\theta^\star).
+={}&\bigl[R(\theta_T)-\widehat R_n(\theta_T)\bigr]
++\bigl[\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta)\bigr]\\
+&+\bigl[\widehat R_n(\widehat\theta)-\widehat R_n(\theta^\star)\bigr]
++\bigl[\widehat R_n(\theta^\star)-R(\theta^\star)\bigr].
 \end{aligned}
 \]
 
-第三项不大于零，所以
+第三个方括号按 \(\widehat\theta\) 的定义不大于零，第一和第四个方括号都被同一个上确界控制，于是
 
 \[
-R(\theta_T)-R(\theta^\star)
-\le
-2\sup_{\theta\in\Theta}
-\abs{R(\theta)-\widehat R_n(\theta)}
-+
-\bigl[
-\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta)
-\bigr].
+R(\theta_T)-R(\theta^\star)\le
+2\sup_{\theta\in\Theta}\abs{R(\theta)-\widehat R_n(\theta)}
++\bigl[\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta)\bigr].
 \]
 
-右侧最后一项是\textbf{优化误差}：算法距离经验全局最优还有多远。上确界项是\textbf{统计或估计误差}：有限样本上的风险能否代表总体风险。若再把 \(\Theta\) 中最优风险与所有可测预测规则的 Bayes 风险比较，还会出现\textbf{近似误差}：模型类本身能否表达所需规则。
+后一项是\textbf{优化误差}：算法离经验风险的全局最小还差多少。前一项是\textbf{统计误差}：有限样本上的风险能不能代表总体风险，它由样本量、模型类的复杂度和损失的尾部行为决定，见\hyperref[sec:13-Machine-Learning/10-Learning-Theory/02]{``从联合界到一致收敛''}。把 \(R(\theta^\star)\) 再和所有可测预测规则能达到的 Bayes 风险比较，多出第三段：\textbf{近似误差}，模型类本身够不够表达要学的规则。
 
-增加迭代主要作用于优化误差；增加独立且代表性良好的数据主要作用于统计误差；改变表示或模型类主要作用于近似误差。三者可能相互影响，却不能用同一条 loss 曲线诊断。
+\begin{center}
+\begin{tikzpicture}[x=1.0cm,y=1.0cm,font=\small,>=stealth]
+  \draw[->,black!50] (0.45,0.15) -- (0.45,3.25);
+  \node[font=\footnotesize,black!65] at (0.45,3.52) {总体风险};
+  \foreach \y in {0.50,1.55,2.45,3.00}{\draw[black!55] (1.75,\y) -- (5.75,\y);}
+  \node[font=\footnotesize,black!75,anchor=east] at (1.65,3.00) {\(R(\theta_T)\)};
+  \node[font=\footnotesize,black!75,anchor=east] at (1.65,2.45) {\(R(\widehat\theta)\)};
+  \node[font=\footnotesize,black!75,anchor=east] at (1.65,1.55) {\(R(\theta^\star)\)};
+  \node[font=\footnotesize,black!75,anchor=east] at (1.65,0.50) {\(R^\star\)};
+  \node[font=\footnotesize,black!55,anchor=west] at (1.85,3.18) {算法交出来的参数};
+  \node[font=\footnotesize,black!55,anchor=west] at (1.85,2.63) {经验风险的最小点};
+  \node[font=\footnotesize,black!55,anchor=west] at (1.85,1.73) {模型类里最好的};
+  \node[font=\footnotesize,black!55,anchor=west] at (1.85,0.68) {Bayes 风险};
+  \draw[<->,black!70] (6.15,2.45) -- (6.15,3.00);
+  \draw[<->,black!70] (6.15,1.55) -- (6.15,2.45);
+  \draw[<->,black!70] (6.15,0.50) -- (6.15,1.55);
+  \node[font=\footnotesize,black!75,anchor=west] at (6.35,2.73) {优化误差：多训练、换优化器};
+  \node[font=\footnotesize,black!75,anchor=west] at (6.35,2.00) {统计误差：加数据、加正则};
+  \node[font=\footnotesize,black!75,anchor=west] at (6.35,1.03) {近似误差：换模型或表示};
+\end{tikzpicture}
 
-\subsection{非凸驻点界不能直接代替优化误差}
+\emph{示意图。三段落差叠加成最终风险，每段只对左侧那一列手段有反应；对着错的那一段用力，读数不会动。}
+\end{center}
 
-非凸理论常给出
+图上要读的是箭头和右侧文字的对应关系。三段落差相加构成你最终关心的那个数，而每段各有各的减法。多跑一万步只压最上面那段；标两万条数据只压中间那段；换个更合适的架构或特征只压最下面那段。开头那个决定的实质，就是判断 \(0.44\) 这个验证损失里，哪一段占的比重最大。
 
-\[
-\norm{\nabla\widehat R_n(\theta_T)}\le\varepsilon.
-\]
+要说明的是，上面那个不等式是一个上界，不是精确的三分。真实系统里三段互相牵连：模型类变大，近似误差降而统计误差升；正则化加强，统计误差降而近似误差升。图上的分层是用来指导诊断的坐标系，不是可以逐项测量的分解。
 
-若没有凸性、PL 条件或其他误差界，这并不能控制
+\subsection{三种症状，三张处方}
 
-\[
-\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta).
-\]
+把诊断落到可以当天做完的操作上。
 
-小梯度是一阶局部证据，而上面的风险分解需要函数值相对于经验全局最优的证据。把两者直接替换，会在推理中悄悄恢复已经失去的凸性。
+\textbf{训练损失就是降不下去。}这时问题在最上面那段，或者在实现里。最有效的一个测试是拿训练集的一个小子集——几百条足矣——关掉正则化、关掉数据增强，只在这个子集上训练。如果损失能压到接近零，说明模型容量够、梯度通路正确、优化器能工作，卡住的原因在数据规模或超参数上；如果连几百条都拟合不了，先怀疑实现：标签接错、学习率量级不对、某处梯度被截断或归零。这个测试比调三天学习率的信息量大得多。上一篇讨论的动量与自适应缩放、上上一篇讨论的学习率衰减，都只在这个测试通过之后才值得投入。
 
-反过来，经验优化误差很小也可能伴随较大总体风险。模型可以插值训练数据，甚至把随机标签拟合到零损失；这说明模型和算法容量足够，不说明部署分布上的规律已经被识别。
+\textbf{训练损失很低而验证损失居高不下。}这时问题在中间那段，与优化器无关。判断加数据是否有用的标准做法是画学习曲线：用 \(25\%\)、\(50\%\)、\(100\%\) 的训练数据各训一遍，把验证损失对样本量作图。如果曲线还在明显下降，加数据是直接有效的投入，因为统计误差正随 \(n\) 缩小；如果已经压平，再加同分布的数据收效甚微，该转向正则化、数据质量或模型结构。这条曲线比任何单点数值都更能支撑那个六万块的决定。
 
-\subsection{算法会在多个经验解之间作选择}
+\textbf{训练损失和验证损失都高，而且靠得很近。}这时最下面那段占了大头，模型类装不下要学的规律；也可能是任务本身的不可约噪声就在那个水平。区分办法是找一个参照：人在同样的输入上能做到多好，或者已有系统的表现如何。参照水平如果与当前损失接近，那么剩下的空间本来就不大。
 
-过参数化模型常有许多训练损失近乎相同的参数。初始化、batch 顺序、学习率、动量和停止时间会决定落到哪一个解，这称为优化算法的 implicit bias。此时算法会在经验等价解中实施额外选择。
+还有一种情形不在上面三段里：验证集表现良好而线上表现差。这既不是优化误差也不是通常意义的统计误差，而是评估协议出了问题——数据划分泄漏、时间上的分布漂移、验证集被超参数搜索反复使用而失去独立性。诊断和处置见\hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/04]{``数据划分、泄漏与分布偏移''}与\hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/03]{``交叉验证评估的是完整训练流程''}。
 
-这种选择可能改善泛化，但必须通过理论结构或独立数据验证。不能因为某种隐式偏置在一个任务上有效，就把它当作跨分布的普遍正则化定理。
+\subsection{梯度范数不能冒充优化误差}
 
-early stopping 也同时影响两个层次：它保留一定优化误差，却可能阻止模型继续拟合高方差方向。停止轮数因此是由验证过程选择的超参数，不是只看训练梯度达到阈值的数值容差。
+非凸理论交出来的结论，按本单元第一篇的推导，形如 \(\norm{\nabla\widehat R_n(\theta_T)}\le\varepsilon\)。而上面那个分解需要的是 \(\widehat R_n(\theta_T)-\widehat R_n(\widehat\theta)\)，一个函数值的差距。
 
-\subsection{报告``收敛''时明确对象}
+在凸情形下，或者在满足 PL 条件的情形下，前者能翻译成后者——PL 条件的作用恰好就是提供这个翻译，见本单元第三篇。一般非凸情形没有这个翻译。若在推理中把梯度范数小直接当成优化误差小，等于把已经丢掉的凸性偷偷加了回来。实践上的后果是低估了最上面那一段：你以为优化已经做到位，于是把所有精力转向数据，而实际上算法可能停在一个函数值还很高的鞍点邻域里。
 
-一次可信训练报告应区分：
+反方向的替换同样不成立。经验优化误差小，一点也不说明总体风险小。过参数化模型可以把完全随机的标签拟合到零训练损失，这件事说明的是容量和优化能力，与规律是否被识别无关，见\hyperref[sec:13-Machine-Learning/10-Learning-Theory/01]{``训练误差为何总是乐观''}。
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{数值收敛：}更新、梯度或残差是否达到给定尺度；
-\item
-  \textbf{经验优化：}训练目标相对于可达到基线下降了多少；
-\item
-  \textbf{统计泛化：}独立样本上的风险及不确定性如何；
-\item
-  \textbf{分布有效性：}验证与部署数据是否来自足够接近的机制；
-\item
-  \textbf{决策有效性：}损失和指标是否真正对应现实后果。
-\end{itemize}
+\subsection{early stopping 同时动了两段，所以它是超参数}
 
-优化器只能直接回答前两项的一部分。后三项需要数据划分、统计推断、分布偏移检查和决策目标共同提供证据。``训练成功''不能由一条下降曲线单独定义。
+有些手段不干净地只作用于一段。early stopping 是最典型的：提前停下来，最上面那段（优化误差）被主动保留了一部分，而中间那段常常因此变小——模型还没来得及去拟合那些高方差方向。在最小二乘这类问题上，这个效果可以精确地与 \(L_2\) 正则对应起来。
+
+由此得出一条操作准则：停止轮数要由验证过程选，不能由训练梯度是否达到某个数值容差决定。用梯度阈值停止，是在用最上面那段的指标去决定一个同时影响两段的量。同样的道理适用于上一篇提到的优化器隐式偏置——不同的更新规则会在训练损失相近的解里挑不同的一个，这个选择可能改善泛化，但它是否改善必须由独立数据验证，不能从优化器的性质直接推断。
+
+正则化系数、权重衰减、数据增强强度也都落在这一类里，它们的取值不该由训练损失决定。与偏差、方差和模型选择的完整对应关系见\hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/04]{``偏差---方差、正则化与模型选择''}。
+
+\subsection{报告收敛时要说清收敛的是什么}
+
+回到本单元开头那句被反复使用的``已收敛''。走完这六篇之后，这个词至少要拆成几个不同的断言：更新量或梯度范数落到了某个数量级，这是数值层面的；训练目标相对于一个可达基线降了多少，这是经验优化层面的；独立样本上的风险是多少、波动多大，这是统计层面的；验证数据与部署数据的生成机制是否足够接近，这是分布层面的。优化器能直接回答的只有前面一部分。
+
+也正因如此，凸优化那一套``交出目标值和对偶下界''的做法在这里退居其次。非凸训练拿不到那种证书，能拿到的是一组分层的证据。把证据放在正确的层次上，比让哪一条曲线更漂亮更要紧。
+
+到这里，Part 的主线还剩最后一个方向。前面讨论的全部是``能不能算准''——凸性、驻点、速率、噪声，都在问算法能逼近到什么程度。还有一类问题在更前面就卡住了：即使目标和约束都写得清清楚楚，找到精确最优解本身在计算上就不可行。下一单元从\hyperref[sec:09-Convex-Optimization/09-Complexity-and-Approximation/01]{``P、NP 与 NP-hard：给问题按计算难度分类''}接手这条线。

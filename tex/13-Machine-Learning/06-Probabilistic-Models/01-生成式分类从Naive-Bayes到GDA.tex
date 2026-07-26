@@ -1,91 +1,142 @@
 \section{生成式分类从 Naive Bayes 到 GDA}
 \label{sec:13-Machine-Learning/06-Probabilistic-Models/01}
 
-Logistic 回归直接描述 \(P(Y\mid X)\)。生成式分类换一个方向：先描述每个类别多常见，以及该类别会产生怎样的特征，
+一个垃圾邮件过滤器上线三周后，你陆续收到三个请求。风控同事想要一批``典型垃圾邮件''去做压力测试；数据同事发现约 \(12\%\) 的样本缺了发件域名这一列，问能不能照样打分；合规同事要知道模型对一封具体邮件的判断有多确信。手上的 Logistic 回归对这三个请求都无能为力——它学到的是一条切片 \(P(Y\given X)\)，给定完整特征时输出一个数，此外什么也不知道。它从来没有被要求描述邮件长什么样。
+
+生成式路线换一个提问方式：与其问``给了这些词该判哪一类''，不如问``一封垃圾邮件是怎样被写出来的''。先写下类别有多常见，再写下该类别会产生怎样的特征，
 
 \[
-P(Y=k)=\pi_k,\qquad p(x\mid Y=k),
+P(Y=k)=\pi_k,\qquad p(x\given Y=k),
 \]
 
-再由 Bayes 公式得到
+两者相乘就是完整的联合分布 \(p(x,y)\)。分类只是它的一个副产品，由 Bayes 公式给出：
 
 \[
-P(Y=k\mid x)
-=\frac{\pi_kp(x\mid Y=k)}
-{\sum_j\pi_jp(x\mid Y=j)}.
+P(Y=k\given x)
+=\frac{\pi_kp(x\given Y=k)}
+{\sum_j\pi_jp(x\given Y=j)}.
 \]
 
-这条路线的认知代价是必须为特征分布作假设；回报则是能表达数据生成机制、利用类别先验，并在模型合理时以较少数据估计决策边界。
+写下联合分布之后，采样、补缺失、给不确定性都变成同一个模型上的不同查询。代价也是明确的：你必须为每一个特征维度作出分布假设，而假设越多，出错的地方越多。
 
-\subsection{Naive Bayes 用条件独立拆开高维分布}
+\subsection{联合分布买到的东西比一条边界多}
 
-文本包含上万个词。直接估计每个类别下所有词共同出现的分布几乎不可能，因为组合数随维度爆炸。Naive Bayes 做了一个强而透明的假设：
+下图把两条路线放在同一批数据上。左边是生成式视角，每个类别被描述成特征空间里的一团密度，等高线画出它的形状与朝向；右边是判别式视角，同样的点，但模型只承诺一条分界线，线两侧的密度长什么样它不表态。
+
+\begin{center}
+\begin{tikzpicture}[>=stealth,scale=1.0]
+
+% ---------- 左：生成式 ----------
+\begin{scope}
+\draw[gray!55,->] (0.1,0.3) -- (4.9,0.3);
+\draw[gray!55,->] (0.3,0.1) -- (0.3,3.9);
+
+% 类别 A 的密度等高线
+\draw[blue!65,rotate around={28:(1.2,1.4)}] (1.2,1.4) ellipse (0.85 and 0.45);
+\draw[blue!35,rotate around={28:(1.2,1.4)}] (1.2,1.4) ellipse (1.35 and 0.72);
+% 类别 B 的密度等高线
+\draw[red!65,rotate around={28:(3.6,2.8)}] (3.6,2.8) ellipse (0.85 and 0.45);
+\draw[red!35,rotate around={28:(3.6,2.8)}] (3.6,2.8) ellipse (1.35 and 0.72);
+
+\foreach \p in {(0.8,1.2),(1.5,1.8),(1.1,0.95),(1.75,1.35),(0.95,1.75),(1.6,1.1),(0.65,1.05)}
+  \fill[blue!70] \p circle (1.7pt);
+\foreach \p in {(3.2,2.5),(3.9,3.1),(3.35,3.05),(4.1,2.75),(3.55,2.35),(3.05,2.95),(4.3,3.2)}
+  \fill[red!70] \p circle (1.7pt);
+
+\draw[black,thick] (3.36,0.46) -- (1.44,3.74);
+\fill[blue!70] (1.2,1.4) circle (2.4pt);
+\fill[red!70] (3.6,2.8) circle (2.4pt);
+\node[font=\scriptsize,anchor=west] at (0.45,0.62) {\(p(x\given Y=k)\)};
+\node[font=\scriptsize] at (2.5,-0.15) {生成式：先有密度，边界是推论};
+\end{scope}
+
+% ---------- 右：判别式 ----------
+\begin{scope}[shift={(5.8,0)}]
+\draw[gray!55,->] (0.1,0.3) -- (4.9,0.3);
+\draw[gray!55,->] (0.3,0.1) -- (0.3,3.9);
+
+\foreach \p in {(0.8,1.2),(1.5,1.8),(1.1,0.95),(1.75,1.35),(0.95,1.75),(1.6,1.1),(0.65,1.05)}
+  \fill[blue!70] \p circle (1.7pt);
+\foreach \p in {(3.2,2.5),(3.9,3.1),(3.35,3.05),(4.1,2.75),(3.55,2.35),(3.05,2.95),(4.3,3.2)}
+  \fill[red!70] \p circle (1.7pt);
+
+\draw[black,thick] (3.36,0.46) -- (1.44,3.74);
+\foreach \dx/\dy in {-0.43/-0.25, -0.22/-0.13, 0.22/0.13, 0.43/0.25}
+  \draw[black!25,dashed,shift={(\dx,\dy)}] (3.36,0.46) -- (1.44,3.74);
+\node[font=\scriptsize,anchor=west] at (0.45,0.62) {\(P(Y\given x)\)};
+\node[font=\scriptsize] at (2.5,-0.15) {判别式：只有边界，密度不表态};
+\end{scope}
+
+\end{tikzpicture}
+\end{center}
+
+\emph{同一批点，两种承诺：左边模型知道数据长什么样，右边模型只知道从哪儿切一刀。}
+
+两幅图的分界线可以一模一样，能回答的问题却相差很远。左边的模型可以从蓝色椭球里采出新样本，可以在某一维缺失时对该维积分再打分，也可以告诉你一个点落在两团密度都很稀薄的地方——这是判别式模型看不见的``两边都不像''。右边的模型省下了描述密度的全部工作，只回答被问到的那一个问题；当密度假设本来就不成立时，这种省略反而是优势。
+
+\subsection{Naive Bayes 用条件独立把高维分布拆开}
+
+文本特征动辄上万维。要估计一个类别下所有词共同出现的分布，需要的样本量随维数指数增长，现实中永远不够。Naive Bayes 用一个强而透明的假设换取可估计性：
 
 \[
-p(x\mid Y=k)=\prod_{j=1}^dp(x_j\mid Y=k).
+p(x\given Y=k)=\prod_{j=1}^dp(x_j\given Y=k).
 \]
 
-这里是``给定类别后条件独立''，不是说词语在整体语料中边际独立。类别本身就能制造边际相关：即使``球场''和``比分''在体育文章类别内近似独立，它们仍会因为共同出现在体育文章中而在全部文本里相关。
+这句话说的是``给定类别之后条件独立''，与``词语在整体语料中互相独立''完全两回事。类别本身就会制造边际相关：即便在体育版内部``球场''和``比分''近似独立，把体育版和财经版混在一起看，这两个词也会因为共同集中在体育版而强烈相关。条件独立性画在图上，就是所有特征节点都挂在同一个类别节点下、彼此之间没有边——这一结构化读法在\hyperref[sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/01]{``图结构把联合分布拆成局部因子''}里有系统展开。
 
-对于词频向量，multinomial Naive Bayes 用每类词概率描述文档；对于出现与否，Bernoulli 版本更自然；连续特征则可为每个类别和坐标配置一维 Gaussian。预测时在 log 域计算
+具体的一维分布随特征类型而变。词频向量对应 multinomial 版本，出现与否对应 Bernoulli 版本，连续测量则可以给每个类别、每个坐标配一个一维 Gaussian。预测时统一在 log 域计算判别分数
 
 \[
-\log\pi_k+\sum_j\log p(x_j\mid Y=k),
+\log\pi_k+\sum_{j=1}^d\log p(x_j\given Y=k),
 \]
 
-既把乘法变成加法，也避免大量小概率连乘下溢。
+乘法变成加法，同时避开上万个小概率连乘造成的下溢。
 
-假设训练语料中的``退款''从未出现在正常邮件。若直接用频率估计，测试邮件一旦含该词，正常类 likelihood 会变成零，其他所有证据都被一票否决。Dirichlet 或 Laplace 平滑相当于加入伪计数，使未见事件仍保留有限概率。
+平滑是这套方法绕不开的一环。假设训练语料里``退款''从未出现在正常邮件中，用频率直接估计会得到零概率；测试时只要出现这个词，正常类的 likelihood 整体归零，其余上万个词提供的证据被一票否决。Laplace 平滑或 Dirichlet 先验相当于给每个词预先记上一点伪计数，让未见事件保留有限概率——这正是\hyperref[sec:05-Probability/06-Common-Distributions/04]{``Uniform、Beta 与 Dirichlet 分布''}中共轭结构的最简用法，本单元后面还会回到它。
 
-Naive Bayes 即使独立性不准确，也可能有不错的分类边界，因为 argmax 有时对共同的概率误差并不敏感；但相关证据会被重复计算，posterior 往往过度自信。复制同一特征便是一个简单反例：信息没有增加，log-likelihood 贡献却被加了两次。
+有意思的是，独立性假设错得离谱时，Naive Bayes 的分类准确率仍可能不差。原因在于 \(\argmax\) 只关心哪个类别的分数最高，各类共同的估计偏差会被排序抵消掉。但概率本身会坏掉：相关的证据被重复计入，posterior 被推向 \(0\) 或 \(1\)。把同一个特征复制一份就是最干净的反例——信息一点没增加，它对 log-likelihood 的贡献却被加了两次。所以 Naive Bayes 常常排序尚可而校准很差，需要额外的概率校准步骤，判据见\hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/04]{``Proper scoring rule 与校准衡量概率是否诚实''}。
 
-\subsection{GDA 用椭球描述连续特征}
+\subsection{GDA 把类别画成特征空间里的椭球}
 
-对于连续测量，可以假设
+对连续测量，一个自然得多的假设是每类服从多元 Gaussian：
 
 \[
-X\mid Y=k\sim\mathcal N(\mu_k,\Sigma_k).
+X\given Y=k\sim\mathcal N(\mu_k,\Sigma_k).
 \]
 
-每个类别在特征空间中形成一个椭球云。分类不仅取决于点离均值多远，还取决于 covariance 所规定的方向尺度和类别先验。
+这就是上图左侧那两团等高线。covariance 决定椭球的朝向和各方向的尺度，于是``离哪个类更近''不再由欧氏距离决定，而由 Mahalanobis 距离决定：沿方差大的方向走同样远，付出的代价更小。
 
-若各类共享同一个 covariance \(\Sigma\)，比较两类 log density 时，把二次型 \((x-\mu_k)^{\trans}\Sigma^{-1}(x-\mu_k)\) 展开：其中 \(x\) 的二次项
+各类共享同一个 \(\Sigma\) 时，判别函数会塌成线性。把两类的 log density 相减，二次型 \((x-\mu_k)^{\trans}\Sigma^{-1}(x-\mu_k)\) 展开后，\(x\) 的二次项与 \(-\tfrac12\log\abs{\Sigma}\) 都与 \(k\) 无关而抵消：
 
 \[
--\frac12x^{\trans}\Sigma^{-1}x
+\begin{aligned}
+\log\bigl(\pi_kp(x\given Y=k)\bigr)
+&=-\tfrac12(x-\mu_k)^{\trans}\Sigma^{-1}(x-\mu_k)
++\log\pi_k+\text{const}\\
+&=-\tfrac12x^{\trans}\Sigma^{-1}x
++x^{\trans}\Sigma^{-1}\mu_k
+-\tfrac12\mu_k^{\trans}\Sigma^{-1}\mu_k
++\log\pi_k+\text{const},
+\end{aligned}
 \]
 
-以及 \(-\frac12\log|\Sigma|\) 等与 \(k\) 无关的项都会抵消，剩下
+去掉与 \(k\) 无关的部分，剩下
 
 \[
 \delta_k(x)
 =x^{\trans}\Sigma^{-1}\mu_k
--\frac12\mu_k^{\trans}\Sigma^{-1}\mu_k
+-\tfrac12\mu_k^{\trans}\Sigma^{-1}\mu_k
 +\log\pi_k.
 \]
 
-因此类别间边界是线性的。这通常称为 linear discriminant analysis；这里的 LDA 不要与 latent Dirichlet allocation 混淆。若每类有自己的 \(\Sigma_k\)，二次项不再抵消，边界成为 quadratic discriminant analysis。
+\(\delta_k\) 是 \(x\) 的仿射函数，类别之间的边界因此是超平面，这套做法通常叫 linear discriminant analysis（下一节专门讨论它的几何与高维失效；注意与 latent Dirichlet allocation 同名而不同物）。若允许每类保留自己的 \(\Sigma_k\)，二次项不再抵消，边界成为二次曲面，得到 quadratic discriminant analysis。
 
-二分类共享 covariance 时，posterior log-odds 是 \(x\) 的仿射函数，所以 posterior 也能写成 sigmoid。GDA 与 Logistic 回归由此可能得到同形状的边界，但学习逻辑不同：前者估计联合分布 \(p(x,y)\)，后者只估计条件分布 \(p(y\mid x)\)。当 Gaussian 假设合适时，生成式模型可能样本效率更高；当类条件分布错设时，直接判别学习通常更稳健。
+二分类且共享 covariance 时，posterior 的 log-odds 是 \(x\) 的仿射函数，于是 posterior 可以写成 sigmoid——与 Logistic 回归的函数形式完全相同。两者由此形成一组对照：GDA 通过估计 \(p(x,y)\) 间接得到这条 sigmoid，Logistic 回归直接拟合它。当 Gaussian 假设接近真实时，GDA 用更少的样本就能定住边界，因为它从每个样本身上提取了更多约束；当类条件分布被错设时，多余的假设变成偏差，直接判别通常更稳。
 
-\subsection{建模选择比公式更重要}
+\subsection{生成假设决定了这个模型在哪儿会失灵}
 
-高维小样本下，样本 covariance 可能奇异，不能直接求逆。共享、对角或收缩 covariance 都是在用结构换稳定性。选择哪一种，应结合样本量、相关结构和验证表现，而不是因为某个公式有闭式解。
+高维小样本下，样本 covariance 会奇异或接近奇异，求逆得到的方向被噪声主导，这一现象在\hyperref[sec:11-Mathematical-Statistics/09-Random-Matrix-Theory/01]{``样本协方差在高维为何会失真''}中有定量刻画。共享 covariance、对角 covariance、收缩 covariance 都是在拿结构换稳定性，选哪一种应当由样本量、特征间的相关强度和验证表现共同决定，而不是因为某个形式恰好有闭式解。
 
-类别 prior 也会进入 posterior。如果训练数据人为平衡了类别，而部署环境中阳性率仅为 1\%，直接输出的训练 posterior 不再代表部署概率。需要恢复真实 prior，必要时重新校准。
+类别 prior 会原封不动地进入 posterior，这既是生成式路线的便利也是它的陷阱。若训练集人为做了类别平衡，而部署环境中阳性率只有 \(1\%\)，那么 \(\log\pi_k\) 这一项对应的是训练世界而非真实世界，输出的概率整体偏高。好在补救很直接：只替换 \(\log\pi_k\) 而保留 \(\log p(x\given Y=k)\)，因为后者刻画的是类内的生成机制，通常在分布偏移中更稳定。这种``只改一处''的修补能力，判别式模型没有——它把先验和似然揉在一起学，拆不开。
 
-一个完整生成式分类流程应检查：
-
-\begin{itemize}
-\tightlist
-\item
-  特征表示与所选条件分布是否相容；
-\item
-  平滑或 covariance 收缩是否只在训练折估计；
-\item
-  posterior 是否归一、log-density 是否数值稳定；
-\item
-  分类排序、概率校准和阈值决策是否分别评估；
-\item
-  缺失模式、异常值与 prior shift 是否破坏生成假设。
-\end{itemize}
+还有一条边界值得先说在前面：拟合优度高不等于生成假设成立。同一批数据下 QDA 的 log-likelihood 几乎总是高于 LDA，因为它参数更多；这不能作为``类条件分布确实各有协方差''的证据。判断生成假设是否可信，要靠留出数据上的表现、对生成样本的直接检视，以及对残差结构的检查。本节把类别当作已知标签来建模，下一节先把 LDA 的几何看透，随后我们会松开这个前提：如果连标签本身都观测不到，同样的椭球该怎么估计。

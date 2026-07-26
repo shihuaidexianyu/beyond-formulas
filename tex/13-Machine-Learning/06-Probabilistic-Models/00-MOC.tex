@@ -1,36 +1,57 @@
-一个急诊科追踪三类患者的24小时恶化风险。第一类直接记录是否恶化（标签可见），用 Logistic 回归拟合风险分数。第二类只记录了分诊等级，但等级不是实情——轻症被误标为重症的比例未知（标签隐藏），需要用混合模型和 EM 同时在三种分诊等级和两个未知类别之间分配归属。第三类还要每小时观测一次生命体征，而体征变化以 Markov 方式依赖隐状态（序列依赖），HMM 在状态转移和观测误差之间计算滤波分布。本节从这三类问题中抽出一个通用结构：判别模型直接学习输入到输出的关系；生成式模型则描述类别、潜在状态和观测怎样共同产生。后一种路线承担更多假设，却能在标签缺失、归属不确定或状态随时间变化时，把不确定归属本身放进模型。
+一个急诊科同时盯着三类患者的二十四小时恶化风险。第一类的结局被完整记录下来，是否恶化写在表里，Logistic 回归直接拟合风险分数就够用。第二类只留下了分诊等级，而等级并不等于实情——轻症被误标为重症的比例谁也说不清，于是``患者究竟属于哪一类''本身成了未知量。第三类还要每小时测一次生命体征，体征的变化取决于一个看不见的、随时间演进的状态。三类问题的数据结构不同，可用的模型却可以出自同一个模板。
 
-概率模型、推断算法和现实解释是三个不同层级。模型规定允许哪些分布，算法计算或近似模型中的未知量，数据与外部证据才决定隐变量能否获得现实含义。
+这个模板就是生成式建模。判别式模型学的是从输入到输出的那条映射，它只回答被问到的那个问题，省力而稳健。生成式模型写下的是完整的联合分布：类别怎样出现、隐状态怎样转移、观测怎样从状态里产生。写下联合分布之后，采样、补缺失、给不确定性都变成同一个模型上的不同查询，标签缺失时也还有话可说。代价同样明确——你要为所有变量作出分布假设，假设越多，能出错的地方越多。
 
-本章沿``逐步拿走可见信息''的贯穿主线前进：先让类别标签可见，再隐藏类别，随后让隐状态沿时间相关；最后抽取指数族和共轭性这一反复出现的代数结构。
+\begin{center}
+\begin{tikzpicture}[>=stealth]
 
-\subsection{核心主线}
+% (a) 标签可见
+\begin{scope}
+\fill[black!18] (0.9,2.2) circle (0.32);
+\draw[black!70] (0.9,2.2) circle (0.32);
+\node[font=\scriptsize] at (0.9,2.2) {\(y\)};
+\fill[black!18] (0.9,0.9) circle (0.32);
+\draw[black!70] (0.9,0.9) circle (0.32);
+\node[font=\scriptsize] at (0.9,0.9) {\(x\)};
+\draw[black!70,->] (0.9,1.86) -- (0.9,1.24);
+\node[font=\scriptsize,anchor=north] at (0.9,0.35) {标签可见};
+\end{scope}
 
-\begin{enumerate}
-\tightlist
-\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/01]{``生成式分类：从 Naive Bayes 到 GDA''}：标签可见时，先学习各类怎样生成特征，再反推类别；
-\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/03]{``Gaussian 混合模型让类别成为隐变量''}：拿走标签后，用后验责任度保留软归属；
-\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/04]{``EM 用下界交替完成隐变量学习''}：把参数未知与归属未知的循环依赖变成两个可执行步骤；
-\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/05]{``HMM 把隐变量排列成时间链''}：加入时间依赖，并用动态规划合并共享前缀。
-\end{enumerate}
+% (b) 标签隐藏
+\begin{scope}[shift={(3.4,0)}]
+\draw[black!70] (0.9,2.2) circle (0.32);
+\node[font=\scriptsize] at (0.9,2.2) {\(z\)};
+\fill[black!18] (0.9,0.9) circle (0.32);
+\draw[black!70] (0.9,0.9) circle (0.32);
+\node[font=\scriptsize] at (0.9,0.9) {\(x\)};
+\draw[black!70,->] (0.9,1.86) -- (0.9,1.24);
+\node[font=\scriptsize,anchor=north] at (0.9,0.35) {标签隐藏};
+\end{scope}
 
-第一次阅读可先完成这四篇。它们共同回答``信息被隐藏后怎样仍然学习''。
+% (c) 隐变量成链
+\begin{scope}[shift={(6.4,0)}]
+\foreach \a/\t in {0.9/1, 2.4/2, 3.9/3}{
+  \draw[black!70] (\a,2.2) circle (0.32);
+  \node[font=\scriptsize] at (\a,2.2) {\(z_{\t}\)};
+  \fill[black!18] (\a,0.9) circle (0.32);
+  \draw[black!70] (\a,0.9) circle (0.32);
+  \node[font=\scriptsize] at (\a,0.9) {\(x_{\t}\)};
+  \draw[black!70,->] (\a,1.86) -- (\a,1.24);
+}
+\draw[black!70,->] (1.24,2.2) -- (2.06,2.2);
+\draw[black!70,->] (2.74,2.2) -- (3.56,2.2);
+\node[font=\scriptsize,anchor=north] at (2.4,0.35) {隐变量沿时间成链};
+\end{scope}
 
-\subsection{怎么读这一章}
+\end{tikzpicture}
+\end{center}
 
-首次阅读沿``标签可见—标签隐藏—时间相关''推进：生成式分类、GMM、EM、HMM。重点区分模型分布、后验推断与参数学习，并记住隐变量标签通常只在置换意义下可识别。LDA 几何、指数族与共轭先验适合第二遍回读，它们分别解释判别方向、矩匹配和闭式更新为何出现。EM 的单调性、共轭的闭式性和训练似然的提高都只是算法或模型内部性质，不等于全局最优、模型正确或现实解释成立。
+\emph{灰底表示能看见，白底表示看不见；这一章沿着从左到右的方向，逐步把信息拿走。}
 
-\subsection{几何与代数支线}
+图里那条从左到右的路线就是本章的顺序。\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/01]{``生成式分类从 Naive Bayes 到 GDA''}处理最左边的情形：标签可见，先描述每一类怎样产生特征，再用 Bayes 公式反推类别；条件独立与 Gaussian 假设各自能买到什么、各自在哪里失效，在这一节说清。\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/03]{``Gaussian 混合模型让类别成为隐变量''}把标签遮住，用后验责任保留软归属。\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/04]{``EM 用下界交替完成隐变量学习''}解开``参数未知''与``归属未知''的循环依赖。\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/05]{``HMM 把隐变量排列成时间链''}加进时间依赖，并用动态规划把指数条路径压成每列几个数。第一次读，这四篇连起来读完即可，它们共同回答一个问题：信息被藏起来之后，怎么还能学。
 
-\begin{itemize}
-\tightlist
-\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/02]{``LDA 与收缩判别方向的几何与高维失效''}从 Rayleigh 商解释判别方向，并处理高维 covariance 估计；
-\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/06]{``指数族把归一化、矩与似然连接起来''}说明 log-partition 的导数为何产生矩匹配；
-\item \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/07]{``共轭先验让 Bayesian 更新保持同一形式''}说明闭式更新来自同类项保持，而不来自先验天然正确。
-\end{itemize}
+其余三篇解释``为什么会长成这样''，适合第二遍回补。\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/02]{``LDA 与收缩：判别方向的几何与高维失效''}把线性判别方向还原成白化之后的均值连线，并说明为什么在高维小样本下崩掉的总是求逆那一步。\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/06]{``指数族把归一化、矩与似然连接起来''}指出前面所有 M 步的闭式解出自同一条恒等式：对数配分函数的梯度就是充分统计量的期望。\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/07]{``共轭先验让 Bayesian 更新保持同一形式''}接着说明，先验若与似然共用同一组坐标，Bayes 更新就退化成两个计数相加。
 
-这三篇适合在需要几何解释、统一符号或闭式 Bayesian 更新时回补。
+有几条判断贯穿全章，值得先摆出来。隐变量是一件建模装置，不是被发现的实体——它的作用是把一个复杂的边缘分布写成若干简单成分的混合，混合高斯、主题模型、因子分析都在做这件事。混合模型的成分可以整体重排而似然不变，所以``第 3 个成分''在跨运行时没有意义，比较两次拟合必须先做匹配。EM 是坐标上升，E 步把下界顶到与目标相切，M 步沿这张下界爬到顶点，似然因此单调不减，但只保证收敛到驻点；那个相切的几何图景比递推公式更值得记住。至于模型选择，似然更高从来不等于模型更对：成分数的选择需要额外准则，而不同准则给出的答案常常不一致，重跑一次也未必稳定。
 
-\subsection{贯穿判断}
-
-阅读每个模型时都问三次：假设允许哪些分布？算法实际计算了什么？现有数据凭什么支持我们赋予隐变量的名称？计算方便只能回答第二问，不能替代模型检验和现实证据。
+读每一节时，把三件事分开问：模型允许哪些分布，算法实际算出了什么，现有证据凭什么支持你给隐变量起的那个名字。计算上的便利只能回答第二问，它替代不了模型检验，更替代不了外部证据。

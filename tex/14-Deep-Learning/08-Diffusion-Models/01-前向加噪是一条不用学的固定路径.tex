@@ -1,0 +1,140 @@
+\section{前向加噪是一条不用学的固定路径}
+\label{sec:14-Deep-Learning/08-Diffusion-Models/01}
+
+你接手一份扩散模型的训练代码，想先弄清楚哪些东西在学。翻优化器的参数列表，只有一个网络在里面；负责``把图片弄脏''的那一段代码里没有任何可训练的量，只有一个长度一千的常数数组 \(\beta_1,\dots,\beta_T\)，是启动时按公式算好后就再没变过的。整个训练过程中，梯度一次也没有流经它。
+
+这不是实现上的省事，是这类模型的结构本身。生成建模的困难在于要把一个复杂分布对齐到数据；扩散模型的做法是把这件难事拆成两半，其中一半用手工规定的方式解决掉，另一半才交给网络。手工的那一半就是前向过程：一条从数据出发、终点是纯噪声的固定路径。数据分布长什么样、网络学得好不好，都不影响这条路径怎么走。
+
+固定的一端有一个立刻可用的好处。既然从 \(x_0\) 到 \(x_t\) 的规则是写死的，那么给定任何一张训练图片和任何一个时刻，你都可以直接算出对应的加噪样本，而不必去问模型。训练时于是可以随机挑时刻、随机挑图片，各自独立地构造出一个``输入-目标''对。这一节要说清楚的就是这条路径怎么定、为什么这样定，以及它把什么样的困难留给了后面几篇。
+
+\subsection{一步加噪的系数不是随便配的}
+
+单步的规则是：
+
+\[
+x_t = \sqrt{1-\beta_t}\,x_{t-1} + \sqrt{\beta_t}\,\varepsilon_t,
+\qquad \varepsilon_t\sim\mathcal N(0,I),
+\]
+
+各个 \(\varepsilon_t\) 相互独立、也与 \(x_0\) 独立，\(\beta_t\in(0,1)\)。
+
+为什么信号前面是 \(\sqrt{1-\beta_t}\) 而不是 \(1\)？如果写成 \(x_t = x_{t-1}+\sqrt{\beta_t}\varepsilon_t\)，每一步都在原样本上叠加方差，走一千步之后总方差是 \(\sum_t\beta_t\)，量级完全由链长决定，数值会一路涨上去。带上 \(\sqrt{1-\beta_t}\) 这个收缩因子就不一样了：假设 \(x_{t-1}\) 的各分量方差为 \(1\)，则
+
+\[
+\Var(x_t) = (1-\beta_t)\cdot 1 + \beta_t\cdot 1 = 1,
+\]
+
+方差被原封不动地保持住。这类前向过程因此叫``方差保持型''：每一步都拿走一点信号、补进等量的噪声，总能量守恒。数据事先做过标准化时，整条链上的样本尺度都在同一个量级，网络不需要额外处理输入幅度随 \(t\) 漂移的问题。
+
+\subsection{闭式跳步：训练可行的技术前提}
+
+递推式一步步套下去很快会变得难看，但两个独立高斯之和还是高斯，方差直接相加，这条性质让整条链坍缩成一步。记 \(\alpha_t = 1-\beta_t\)、\(\bar\alpha_t = \prod_{s\le t}\alpha_s\)。把 \(t-1\) 步的结论
+
+\[
+x_{t-1} = \sqrt{\bar\alpha_{t-1}}\,x_0 + \sqrt{1-\bar\alpha_{t-1}}\,\tilde\varepsilon
+\]
+
+代入单步规则：
+
+\[
+\begin{aligned}
+x_t &= \sqrt{\alpha_t}\left(\sqrt{\bar\alpha_{t-1}}\,x_0 + \sqrt{1-\bar\alpha_{t-1}}\,\tilde\varepsilon\right) + \sqrt{1-\alpha_t}\,\varepsilon_t\\
+&= \sqrt{\bar\alpha_t}\,x_0 + \underbrace{\sqrt{\alpha_t(1-\bar\alpha_{t-1})}\,\tilde\varepsilon + \sqrt{1-\alpha_t}\,\varepsilon_t}_{\text{两个独立零均值高斯之和}}.
+\end{aligned}
+\]
+
+括号里两项独立、均值为零，和仍是零均值高斯，方差是两者之和：
+
+\[
+\alpha_t(1-\bar\alpha_{t-1}) + (1-\alpha_t) = \alpha_t - \bar\alpha_t + 1 - \alpha_t = 1-\bar\alpha_t .
+\]
+
+于是存在一个标准高斯 \(\varepsilon\) 使得
+
+\[
+x_t = \sqrt{\bar\alpha_t}\,x_0 + \sqrt{1-\bar\alpha_t}\,\varepsilon,
+\qquad\text{等价地}\qquad
+q(x_t\given x_0) = \mathcal N\!\left(\sqrt{\bar\alpha_t}\,x_0,\;(1-\bar\alpha_t)I\right).
+\]
+
+条件对账值得停一下。这个闭式解用掉了三个条件，缺一不可。噪声必须独立，否则交叉项不为零、方差不能直接相加；噪声必须是高斯，否则和的分布一般写不出来（两个独立均匀分布之和是三角分布，再加一个就不是任何常见族了）；系数必须是确定的常数而非依赖 \(x_{t-1}\) 的函数，否则条件方差不是常数，坍缩失效。三条里任何一条被换掉，你都得老老实实模拟整条链。
+
+而``老老实实模拟整条链''意味着什么，直接决定这类模型能不能训。一个批次里每张图片都要跑一千步前向才能拿到一个训练样本，成本是现在的一千倍，并且这一千步的中间结果全部要留着——这条路是走不通的。闭式解把它变成一次采样：抽一个 \(t\)、抽一个 \(\varepsilon\)、按上式合成 \(x_t\)，代价与 \(t\) 无关。
+
+\subsection{调度决定信息按什么节奏被销毁}
+
+\(\bar\alpha_t\) 从 \(1\) 单调降到接近 \(0\)，链的末端就是几乎纯粹的噪声。但下降的\emph{形状}是可以设计的，这就是噪声调度 \(\{\beta_t\}\) 的作用。衡量它的合适刻度是信噪比
+
+\[
+\mathrm{SNR}(t) = \frac{\bar\alpha_t}{1-\bar\alpha_t},
+\]
+
+即信号方差与噪声方差之比。\(\mathrm{SNR}\) 很大时 \(x_t\) 几乎就是原图，\(\mathrm{SNR}\) 很小时 \(x_t\) 几乎不含原图的信息。
+
+早期的实现用线性调度：\(\beta_t\) 从 \(10^{-4}\) 线性增到 \(0.02\)。它的问题在于 \(\bar\alpha_t\) 是一串乘积，累积效应比 \(\beta_t\) 本身的线性增长猛得多——\(\log\bar\alpha_t\approx-\sum_{s\le t}\beta_s\) 随 \(t\) 呈二次下降，于是链走到大约四分之一处信息就已经基本被销毁，后面四分之三全在处理噪声中的噪声。余弦调度改成直接规定 \(\bar\alpha_t = \cos^2(\pi t/2T)\)，让 \(\bar\alpha_t\) 平缓地从 \(1\) 走到 \(0\)，中间区段被显著拉长。
+
+为什么中间区段值钱？两端的任务都不好用。\(\mathrm{SNR}\) 极大时，去噪几乎等于把输入原样输出，网络学不到关于数据结构的任何东西；\(\mathrm{SNR}\) 极小时，输入里已经没有可供恢复的信息，最优预测退化成输出数据的均值，网络同样学不到东西。真正有信息量的监督信号来自中段：还剩一点结构、但已经被破坏得足够多，模型必须靠对数据分布的知识才能补回来。调度决定了训练样本有多大比例落在这个区段里。
+
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+% ---- 左：线性调度 ----
+\begin{scope}
+  \fill[orange!12] (0.35,0) rectangle (1.71,2.6);
+  \draw[orange!55,dashed] (0.35,0) -- (0.35,2.6);
+  \draw[orange!55,dashed] (1.71,0) -- (1.71,2.6);
+  \draw[->,black!55] (0,0) -- (4.0,0) node[right,font=\footnotesize] {\(t\)};
+  \draw[->,black!55] (0,0) -- (0,3.05);
+  \draw[black!45] (-0.07,2.6) -- (0.07,2.6);
+  \node[left,font=\footnotesize] at (-0.1,2.6) {\(1\)};
+  \node[left,font=\footnotesize] at (-0.1,0) {\(0\)};
+  \draw[blue!70,thick]
+    plot[domain=0:1,samples=80] ({3.6*\x},{2.6*exp(-(0.05*\x+4.975*\x*\x))});
+  \draw[red!70,thick,densely dashed]
+    plot[domain=0:1,samples=80] ({3.6*\x},{2.6*sqrt(abs(1-exp(-(0.1*\x+9.95*\x*\x))))});
+  \node[font=\footnotesize,orange!70!black] at (1.03,2.88) {学得最多的区段};
+  \node[below,font=\footnotesize] at (1.8,-0.42) {线性调度};
+\end{scope}
+% ---- 右：余弦调度 ----
+\begin{scope}[shift={(5.3,0)}]
+  \fill[orange!12] (0.74,0) rectangle (2.87,2.6);
+  \draw[orange!55,dashed] (0.74,0) -- (0.74,2.6);
+  \draw[orange!55,dashed] (2.87,0) -- (2.87,2.6);
+  \draw[->,black!55] (0,0) -- (4.0,0) node[right,font=\footnotesize] {\(t\)};
+  \draw[->,black!55] (0,0) -- (0,3.05);
+  \draw[black!45] (-0.07,2.6) -- (0.07,2.6);
+  \node[left,font=\footnotesize] at (-0.1,2.6) {\(1\)};
+  \node[left,font=\footnotesize] at (-0.1,0) {\(0\)};
+  \draw[blue!70,thick]
+    plot[domain=0:1,samples=80] ({3.6*\x},{2.6*cos(90*\x)});
+  \draw[red!70,thick,densely dashed]
+    plot[domain=0:1,samples=80] ({3.6*\x},{2.6*sin(90*\x)});
+  \node[font=\footnotesize,orange!70!black] at (1.80,2.88) {学得最多的区段};
+  \node[below,font=\footnotesize] at (1.8,-0.42) {余弦调度};
+\end{scope}
+% ---- 图例 ----
+\draw[blue!70,thick] (0.15,-1.15) -- (0.85,-1.15)
+  node[right,font=\footnotesize,black] {\(\sqrt{\bar\alpha_t}\)（信号系数）};
+\draw[red!70,thick,densely dashed] (4.75,-1.15) -- (5.45,-1.15)
+  node[right,font=\footnotesize,black] {\(\sqrt{1-\bar\alpha_t}\)（噪声系数）};
+\end{tikzpicture}
+
+\emph{两幅图的起点和终点完全一样：信号系数从 \(1\) 降到 \(0\)，噪声系数从 \(0\) 升到 \(1\)。区别只在中间怎么走。线性调度的信号曲线一头栽下去，橙色区段（两条曲线量级相当、监督信号最有信息量的地方）只占链长的一小段；余弦调度把交叉点推到中央，同一个区段拉宽了一倍以上。调度不改变终点，只改变训练样本落在哪里。}
+\end{center}
+
+必须说清楚的是：调度的好坏是经验规律，不是定理。没有哪条结论证明余弦调度对所有数据都更优——它是在若干图像基准上比出来的，并且随着分辨率提高还要再调（高分辨率图像的相邻像素高度相关，同样的 \(\bar\alpha_t\) 破坏的有效信息更少，所以大图往往需要更激进的调度）。上图中橙色区段的边界也是我按 \(\mathrm{SNR}\) 落在某个范围随手划的，换个划法宽度会变，但两种调度的相对关系不变。把``中段最有价值''当成方向性的直觉可以，当成可以套公式的定量结论不行。
+
+\subsection{它是一个早就见过的随机过程}
+
+写成连续时间的形式，前向过程就是
+
+\[
+dX_t = -\tfrac12\beta(t)X_t\,dt + \sqrt{\beta(t)}\,dW_t,
+\]
+
+漂移项把样本往原点拉、扩散项往外摊。这正是 Ornstein--Uhlenbeck 过程，\hyperref[sec:06-Random-Processes/06-Diffusion-and-SDE/03]{``Itô 积分与随机微分方程''}里解过它的路径形式，\hyperref[sec:06-Random-Processes/06-Diffusion-and-SDE/02]{``Fokker--Planck 方程描述密度的流动''}里从密度侧算过它的平稳分布是零均值高斯。上面的离散递推就是这个方程的一种离散化，\(\beta_t\) 是时间步长与扩散强度的乘积。
+
+密度侧的图景解释了``为什么终点一定是高斯''这件事。密度 \(p_t\) 满足的 Fokker--Planck 方程是一个带漂移的热方程，属于抛物型；\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/02]{``三类典型方程行为迥异''}给出过抛物型方程的特征行为：高频分量按 \(e^{-\kappa k^2 t}\) 指数衰减，越精细的结构消失得越快。数据分布里那些让图片``像人脸''而不是像噪声的细节，正是高频的部分，它们最先被抹掉；漂移项则保证质量不会摊到无穷远去，最终停在标准高斯上。前向过程之所以不需要学，是因为热传导的抹平行为是方程本身的性质，与你喂进去的是什么分布无关。
+
+同一段理论也告诉你难的一半难在哪里。抛物型方程的时间箭头是单向的：\(e^{-\kappa k^2t}\) 把高频压到机器精度以下之后，那些信息在数值上就真的没有了，倒着解热方程是经典的不适定问题。所以反向过程绝不是``把前向方程倒过来算''，那样做只会把噪声放大成垃圾。它必须靠一个额外的东西——从数据中学到的、关于``什么样的结构是可能的''的知识——来补回被销毁的部分。\hyperref[sec:06-Random-Processes/06-Diffusion-and-SDE/04]{``数值模拟与时间反演的直觉''}里点出过这个额外的东西叫得分。
+
+固定路径这一侧至此就没有更多可讲的了：规则写死、闭式可跳、终点已知、调度是唯一的设计自由度。剩下的全部困难集中在一个问题上——网络到底该学什么，才能把这条路倒着走回去。下一节给出答案，而答案朴素得有点出乎意料：一个均方误差回归。

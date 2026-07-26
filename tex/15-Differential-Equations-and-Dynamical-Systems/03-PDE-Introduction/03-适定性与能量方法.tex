@@ -1,73 +1,91 @@
 \section{适定性与能量方法}
 \label{sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/03}
 
-ODE 的存在唯一性由 Lipschitz 条件一句话给出（\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/03]{``存在唯一性为什么需要 Lipschitz''}）。PDE 没有这样统一的定理，Hadamard 提出的三条适定性标准取而代之：解\textbf{存在}、\textbf{唯一}、并\textbf{连续依赖}于数据。三条独立，任何一条失败都是不同的灾难。
+手里有一张失焦的照片，想把它复原。失焦这个操作在数学上就是让图像沿时间跑一段热方程——高频细节被抹掉，边缘变糊。既然正向过程有明确的方程，反过来解一段不就复原了？把模糊图往回推的代码写起来只要几行，跑出来的结果却是一屏幕高频噪声，原图的影子都看不见。代码没写错，方程也没写错。问题出在这个反问题本身。
 
-\subsection{Hadamard 的反面教材：倒解的热方程}
+ODE 那边，存在唯一性由一句 Lipschitz 条件管住（见\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/03]{``存在唯一性为什么需要 Lipschitz''}）。PDE 没有这样一网打尽的定理，取而代之的是 Hadamard 提出的三条标准：解存在、解唯一、解连续依赖于数据。前两条读起来天经地义，第三条最容易被当成技术性附注跳过，而失焦复原失败的原因恰恰全在第三条。
 
-给热方程 \(\partial_tu=\partial_{xx}u\) 换时间方向，等价于问：能否从现在的温度反推过去？取初始（其实是``终端''）数据为高频正弦 \(u_0(x)=\frac1n\sin(nx)\)，向前倒解得到的形式解是
+\subsection{第三条不成立时，误差不是变大，是变成主角}
 
-\[
-u(t,x)=\frac1n e^{n^2t}\sin(nx).
-\]
-
-在 \(t=-1\)（比如``昨天''），幅度是 \(\frac1n e^{n^2}\)：初始扰动只有 \(1/n\) 大小，倒推一天却放大 \(e^{n^2}\) 倍。取 \(n\to\infty\)，数据误差趋于零，解的差异趋于无穷——连续依赖性彻底失败。这就是\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/02]{``三类典型方程行为迥异''}中``抛物方程时间不能反演''的定量含义：倒解热方程把高频衰减机制逆转成高频爆炸，而任何测量都有高频噪声。
-
-同样的把戏适用于 Laplace 方程的``初值问题''：对 \(\partial_{xx}u+\partial_{yy}u=0\) 沿 \(y\) 给初始数据，高频成分按 \(e^{ny}\) 放大。Hadamard 正是用这类例子说明：不满足三条标准的问题，在物理与计算上都毫无意义——噪声会把答案淹没。
-
-\subsection{能量方法：一条不等式同时给唯一与稳定}
-
-能量方法是 PDE 中最接近 ODE Lyapunov 函数的工具（\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}），而且不需要知道解的公式。以带齐次 Dirichlet 边界的热方程为例，定义能量
+把热方程 \(\partial_tu=\partial_{xx}u\) 的时间方向掉个头，等价于问：能不能从此刻的温度反推一小时前的温度。取一段高频扰动作为当前数据，\(u_0(x)=\frac1n\sin(nx)\)，形式解是
 
 \[
-E(t)=\frac12\int_0^L u(t,x)^2\,dx.
+u(t,x)=\frac1n\,e^{n^2 t}\sin(nx).
 \]
 
-对时间求导，把方程代入，再分部积分（边界项因 \(u=0\) 消失）：
+往前推（\(t>0\)）它迅速归零，往后推就换成 \(e^{n^2\abs{t}}\) 的放大。数据上一个幅度只有 \(1/n\) 的抖动，倒推同样一段时间之后幅度变成 \(\frac1n e^{n^2\abs{t}}\)。令 \(n\to\infty\)：数据端的误差趋于零，答案端的误差趋于无穷。这两者之间没有任何一致的界，连续依赖彻底破产。
+
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+  \begin{scope}
+    \draw[->] (0,0) -- (3.4,0) node[right] {\small \(x\)};
+    \draw[thick] plot[domain=0:3.2,samples=120,variable=\x]
+      ({\x},{1.1+0.5*sin(56.25*\x)});
+    \draw[dashed] plot[domain=0:3.2,samples=200,variable=\x]
+      ({\x},{1.1+0.5*sin(56.25*\x)+0.06*sin(720*\x)});
+    \node at (1.6,2.55) {\small 观测数据：两条几乎重合};
+  \end{scope}
+
+  \begin{scope}[shift={(5.0,0)}]
+    \draw[->] (0,0) -- (3.4,0) node[right] {\small \(x\)};
+    \draw[thick] plot[domain=0:3.2,samples=120,variable=\x]
+      ({\x},{1.1+0.5*sin(56.25*\x)});
+    \draw plot[domain=0:3.2,samples=500,variable=\x]
+      ({\x},{1.1+0.5*sin(56.25*\x)+0.68*sin(720*\x)});
+    \node at (1.6,2.55) {\small 倒推结果：面目全非};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\emph{肉眼分不开的两组数据，倒着解一段热方程后分道扬镳；放大倍数只由噪声的频率决定。}
+
+图里那点几乎看不见的虚线抖动，正是任何真实观测都躲不掉的传感器噪声或量化误差。它在正向问题里无关痛痒，在反向问题里被 \(e^{n^2\abs{t}}\) 挑出来放到最前面。上一节说抛物方程不能反演，定量版本就写在这个指数里：正向的抹平机制被逆转成高频爆炸，而噪声天然富含高频。
+
+同样的把戏对 Laplace 方程的``初值问题''也有效。若对 \(\partial_{xx}u+\partial_{yy}u=0\) 沿 \(y\) 方向给出初始数据，高频分量按 \(e^{ny}\) 增长，结论一样。Hadamard 当年拿这类例子说明的正是：三条标准缺一条的问题，在物理上和计算上都无法交付。
+
+\subsection{放大倍数就是条件数，只是它现在没有上界}
+
+这件事在数值分析里已经有名字。\hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/03]{``条件数衡量问题本身的敏感性''}把相对误差的放大倍数定义为条件数，并强调它属于问题而非算法——条件数大的问题，再稳定的算法也救不回精度。反解热方程把这套语言推到极端：离散之后的算子在频率 \(k\) 上的奇异值是 \(e^{-\kappa k^2t}\)，求逆就是除以它，条件数随网格加密指数增长，没有上界可言。换更好的求解器、用双精度、加迭代次数，都不解决问题。
+
+实践中的出路是承认这一点，然后改问题。给目标函数加一项 \(\lambda\norm{\nabla u}^2\) 或 \(\lambda\norm{u}^2\)，即 Tikhonov 正则化，等于人为给小奇异值设一个下限，把无界的放大截断在 \(1/\lambda\) 的量级；代价是分辨率——被截掉的那部分高频，本来就已经被正向过程消灭得低于噪声水平，任何方法都无法诚实地恢复。去模糊、CT 重建、地震反演，做法都是这一套。扩散模型的逆向采样也不去倒解前向方程，而是另训一个网络来估计得分（见\hyperref[sec:06-Random-Processes/06-Diffusion-and-SDE/05]{``得分匹配：怎样从样本学习得分''}），用学到的先验补上被抹掉的信息。
+
+\subsection{能量方法用一条不等式同时买下唯一与稳定}
+
+正向问题这边，好消息是不需要知道解的公式也能把适定性论证清楚。能量方法是 PDE 里最接近 Lyapunov 函数的工具（见\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}）：造一个非负泛函，证明它沿解不增。
+
+以齐次 Dirichlet 边界下的热方程为例，取
 
 \[
-E'(t)=\int u\,\partial_tu\,dx
-=\kappa\int u\,\partial_{xx}u\,dx
-=-\kappa\int(\partial_xu)^2\,dx\le0.
+E(t)=\frac12\int_0^L u(t,x)^2\,dx .
 \]
 
-能量只减不增。三条结论立刻到手：
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{唯一性}：若 \(u,v\) 是同数据的两个解，差 \(w=u-v\) 满足齐次方程与零初值；\(E_w(0)=0\) 且 \(E_w\) 不增，故恒为零，\(w\equiv0\)。
-\item
-  \textbf{连续依赖（\(L^2\) 意义）}：初值差 \(L^2\) 范数小，则以后各时刻差的能量同样小——误差不会自发放大。
-\item
-  \textbf{衰减}：进一步用 Poincar\'e 不等式 \(\int u^2\le C\int(\partial_xu)^2\)（齐次边界下成立），得 \(E'(t)\le-2\kappa C^{-1}E(t)\)，能量指数衰减——这正是``抹平''的定量版。
-\end{itemize}
-
-波动方程有同样结构的能量
+对 \(t\) 求导，把方程代进去，再对空间分部积分。边界项因为 \(u\) 在两端为零而消失：
 
 \[
-E(t)=\frac12\int\left[(\partial_tu)^2+c^2(\partial_xu)^2\right]dx,
+\begin{aligned}
+E'(t)&=\int_0^L u\,\partial_tu\,dx
+=\kappa\int_0^L u\,\partial_{xx}u\,dx\\
+&=\kappa\Bigl[u\,\partial_xu\Bigr]_0^L-\kappa\int_0^L(\partial_xu)^2\,dx
+=-\kappa\int_0^L(\partial_xu)^2\,dx\le0 .
+\end{aligned}
 \]
 
-求导后代入方程恰好为零：能量守恒。这解释了波动为什么不衰减，也给唯一性。
+骨架就这么长，值得对账的是用掉了哪些条件。求导与积分交换需要解有足够正则性，分部积分需要 \(\partial_xu\) 在 \([0,L]\) 上平方可积，边界项归零需要齐次 Dirichlet 条件——换成齐次 Neumann 条件（\(\partial_xu=0\)）边界项照样消失，结论不变；换成非齐次边界，边界项就是外界注入的能量，不等式要相应改写。\(\kappa>0\) 也是必需的，符号一反整个论证倒过来，这正是上一小节那个反问题的来处。
 
-\subsection{存在性从哪里来}
+唯一性由此立刻到手。设 \(u\) 与 \(v\) 是同一组数据下的两个解，令 \(w=u-v\)，则 \(w\) 满足齐次方程、零初值、零边界，于是 \(E_w(0)=0\) 且 \(E_w\) 不增，非负泛函被夹死为零，\(w\equiv0\)。连续依赖同理：两组初值的 \(L^2\) 距离控制住此后所有时刻解的 \(L^2\) 距离，误差不会自己长大。再补一条 Poincaré 不等式 \(\int u^2\le C\int(\partial_xu)^2\)（齐次边界下成立），可得 \(E'\le-2\kappa C^{-1}E\)，能量指数衰减——这是``抹平''的定量说法。
 
-能量估计只给``如果解存在''的结论。存在性通常由别的构造给出：分离变量写出级数解（下一节）、半群理论、或先离散再取极限（数值格式本身就是构造性存在证明的候选）。对本书的三个典型线性方程，初边值问题在通常光滑性要求下都适定；适定性失败主要出现在：时间方向弄反、数据类型与方程类型不匹配（上一节的分类）、边界条件过多或过少。
-
-\subsection{弱解：当先验估计比经典解更可靠}
-
-能量估计只用到积分与分部积分，不要求解处处二次可微。这提示一条更宽的路：把方程从逐点形式改写成积分形式。以 Poisson 方程 \(-\Delta u=f\) 为例，乘试验函数 \(v\) 并分部积分，得
+波动方程有结构相同的能量，只是配方里多了动能项：
 
 \[
-\int\nabla u\cdot\nabla v\,dx=\int fv\,dx
-\qquad\text{对所有试验函数 }v.
+E(t)=\frac12\int_0^L\Bigl[(\partial_tu)^2+c^2(\partial_xu)^2\Bigr]dx .
 \]
 
-满足这个积分恒等式的 \(u\) 称为弱解。它只需一阶导数在积分意义下存在（Sobolev 空间的对象），允许经典导数不存在的函数入场。变分法与有限元正是建立在弱形式上：\hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/02]{``从插值多项式到梯形与 Simpson 求积''}一系方法中``有限元通过弱形式控制残差''一句，指的就是这个框架。弱解若额外光滑，自动是经典解；弱形式因此在不损失经典结论的前提下扩大了问题的合法答案集。
+同样求导、代方程、分部积分，两项恰好相消，\(E'(t)=0\)。能量守恒既给出唯一性，也解释了波形为什么不衰减。数值格式好不好用，一条快速检验就是看它离散之后这个量是否也守恒——耗散型格式会让波幅慢慢矮下去，那是格式的黏性，不是物理。
 
-HJB 方程的黏性解（\hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/03]{``HJB 方程与动态规划''}末尾提到）是同一思想在非线性一阶方程上的版本：值函数有折角、经典导数不存在时，用检验函数在折角处的单侧条件代替逐点等式，保住唯一性。
+\subsection{存在性得靠构造，估计本身不生产解}
 
-\subsection{落点}
+能量估计的前提是``设解存在''，它管的是唯一与稳定，产不出解。存在性要另找路子：分离变量把解写成级数（下一节），半群理论把演化写成算子指数，或者先离散再让网格趋于零——一个收敛的数值格式本身就是一份构造性的存在证明草稿。
 
-ODE 里一句 Lipschitz 完成的事，在 PDE 中拆成了三件事：分类决定该给什么数据，能量方法给唯一与稳定，弱形式给更宽的解概念。这套语言足以读懂本书后面所有涉及 PDE 的论断；继续深入（半群、Sobolev 空间、椭圆正则性）时，能量估计仍是第一条主线。
+对本节涉及的三个线性原型，在通常的光滑性与相容性要求下，初边值问题都是适定的。适定性出问题的场合反倒有规律可循：时间方向弄反，数据类型与方程类型不匹配，边界条件给多了或给少了。三种情形分别对应第三条、第一条、前两条的失败。
+
+至此，``解''这个字仍默认是逐点满足方程的经典解。下一节先把这类解在规则区域上完整地算出来，第五节再回头追问：当解本身就不可微时，方程该怎么写。

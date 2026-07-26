@@ -1,33 +1,56 @@
-一个三分类问题，模型给正确类的概率为 0.9，则单样本 cross-entropy 损失为 \(-\log 0.9\approx 0.105\) nat；若信心满满地错判为另一类（给正确类 0.01），损失暴增为 \(-\log 0.01\approx 4.605\) nat。但这个损失同时等于真实分布 \(p\)（one-hot）的 entropy 加上 \(\KL(p\|q)\)——因为 one-hot 的 entropy 为零，cross-entropy 就是 KL。若非 one-hot 而是有噪声的软标签（如 \((0.7,0.2,0.1)\)，entropy 约 0.802 nat），同一个 \(q=(0.9,0.05,0.05)\) 的 cross-entropy 和 KL 就不再相等。这一区分是本章入口。
+一份训练日志上的损失停在 3.09 不动了，一份只剩汇总统计的数据要你补出一个分布，一场评审会在争论多出来的八个参数值不值，一个下游团队问你倒数第二层的输出该留多少维。四件事发生在不同的项目里，看不出有什么关系。它们的共同点是：每一件都需要一个数值判据，而手边现成的判据要么单位不对，要么在你的数据量下不稳。
 
-信息论进入机器学习时，最容易出现两种误解：一是把 entropy、cross-entropy 和 KL 当成可互换的名称；二是只要目标里出现 mutual information，就认为泛化或鲁棒性已有理论支撑。本单元从可严格推导的关系出发，再逐步讨论它们怎样参与建模。
+这一章把这四件事放到同一把尺子上。尺子的刻度是比特。
 
-\begin{enumerate}
-\tightlist
-\item
-  交叉熵训练其实在最小化 KL 差异：连接概率编码、最大似然、proper scoring rule 与稳定分类训练。
-\item
-  最大熵从约束中选择最少假设的分布：研究只知道若干期望约束时，怎样避免凭空加入额外结构，并由此得到指数族。
-\item
-  MDL 把拟合与描述长度放在同一尺度：把模型自身与模型解释不了的数据都写成码长，重新理解复杂度惩罚。
-\item
-  信息瓶颈在压缩与预测之间权衡：讨论表示应忘掉多少输入细节、保留多少任务信息，以及 mutual information 估计的实际困难。
-\end{enumerate}
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+  \node[draw,align=left,inner sep=3pt,anchor=west] (a) at (0,4.2)
+    {\footnotesize 交叉熵 \(H(p,q_\theta)\)\\\footnotesize 预测离真相多远};
+  \node[draw,align=left,inner sep=3pt,anchor=west] (b) at (0,2.9)
+    {\footnotesize 最大熵 \(\max H(p)\)\\\footnotesize 约束之外承诺多少};
+  \node[draw,align=left,inner sep=3pt,anchor=west] (c) at (0,1.6)
+    {\footnotesize 描述长度 \(L(M)+L(D\given M)\)\\\footnotesize 讲清楚要多少};
+  \node[draw,align=left,inner sep=3pt,anchor=west] (d) at (0,0.3)
+    {\footnotesize 信息瓶颈 \(I(X;Z),\,I(Z;Y)\)\\\footnotesize 表示留下多少};
+  \draw[thick] (6.4,-0.3) -- (6.4,4.8);
+  \foreach \y in {-0.1,0.3,0.7,1.1,1.5,1.9,2.3,2.7,3.1,3.5,3.9,4.3,4.7}{
+    \draw (6.4,\y) -- (6.6,\y);}
+  \node[rotate=-90,anchor=north] at (6.75,2.3) {\footnotesize 同一把尺子：比特};
+  \draw[->] (a) -- (6.3,4.2);
+  \draw[->] (b) -- (6.3,2.9);
+  \draw[->] (c) -- (6.3,1.6);
+  \draw[->] (d) -- (6.3,0.3);
+\end{tikzpicture}
+\end{center}
 
-这四节分别从概率预测、分布选择、模型选择和表示学习切入，但都遵守同一原则：先说明随机变量、分布和约束，再解释目标；先区分精确量与 variational bound，再讨论经验效果。
+\emph{四个看起来不相干的判据共用一套单位，它们之间的比较因此第一次成为可能。}
 
-\subsection{怎么读这一章}
+四个方框对应本章的四节。它们量的东西不同，读数的单位相同。
 
-随手阅读时，先看第一篇的数值例子与 \(H(p,q)=H(p)+\KL(p\|q)\)，第二篇的最大熵约束集和骰子例子，第三篇的 \(L(M)+L(D\mid M)\) 和传感器曲线例子，第四篇的 \(I(X;Z)-\beta I(Z;Y)\) 和离散表示例子。想理解来源，再读 Lagrange 对偶、Kraft 不等式和数据处理不等式。真正使用这些目标时，最后检查哪些分布被固定、支持与基准测度是什么、编码协议是否完整，以及优化的究竟是精确信息量还是 variational bound。
+\subsection{这一章要立住的几条判断}
+
+第一条是等价关系。交叉熵可以分解成 \(H(p)+\KL(p\|q_\theta)\)，前一项与参数无关，所以最小化交叉熵与最小化 KL 是同一件事。推论是训练损失有一个地板，等于数据自身的不确定性；困惑度是它的指数，地板跟着做同一个变换。判断模型还有没有提升空间，先要知道地板画在哪。
+
+第二条是来源。指数族与 softmax 不是为了数学方便挑出来的形状，它们是``匹配给定的矩、其余一概不假设''这个优化问题的解。约束一变，最大熵分布跟着变；约束来自有限样本时，把估计值写成精确等号本身就是一个建模决定。
+
+第三条是尺度统一。最小描述长度把模型自身与模型解释不了的残差都换算成码长，于是复杂度与拟合可以相加比较。它带来的一个视角转换是：正则项不是外挂在损失上的惩罚，而是参数编码长度的一部分，正则系数对应着你对参数分布的编码假设。
+
+第四条要小心着讲。信息瓶颈给出了``什么算好表示''的一个可写下来的定义，两条边界与权衡曲线是站得住的数学。但确定性网络里 \(I(X;T)\) 的定义有实质困难，相关实验结论对估计器高度敏感。有定论的部分和有争议的部分必须分开转述。
+
+\subsection{与信息论那一部分的分工}
+
+\hyperref[ch:059]{``信息与学习：哪些数据值得看，哪些表示值得保留''}处理的是这些量本身：熵是什么、KL 为什么不对称、Fano 不等式怎样把条件熵翻译成错误率的硬下界。本章处理的是它们在训练流程里怎样出现、在哪一步被近似掉、以及读数不对时该查什么。凡是涉及定义与定理证明的地方，本章会指过去而不重复推导。
+
+若你从具体困惑进入，可以直接打开最接近的一节，再沿节内链接回补。第一节适合损失曲线压不下去的时候读，第二节适合只有汇总统计却必须写出分布的时候读，第三节适合模型选型有争议的时候读，第四节适合有人拿信息论论断为某个架构辩护的时候读。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/01]{``交叉熵训练其实在最小化 KL 差异''}；
-\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/02]{``最大熵从约束中选择最少假设的分布''}；
-\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/03]{``MDL 把拟合与描述长度放在同一尺度''}；
-\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/04]{``信息瓶颈在压缩与预测之间权衡''}。
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/01]{``交叉熵训练其实在最小化 KL 差异''}：损失的分解、困惑度的地板，以及改动 target 之后最优解怎样跟着挪；
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/02]{``最大熵从约束中选择最少假设的分布''}：从矩约束推出指数族，以及``最少假设''依赖的支持与基准测度；
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/03]{``MDL 把拟合与描述长度放在同一尺度''}：两段式码长、正则化的编码解读，以及不同账单选出不同模型；
+\item \hyperref[sec:13-Machine-Learning/11-Information-Theoretic-Learning/04]{``信息瓶颈在压缩与预测之间权衡''}：率与相关度的权衡曲线、互信息估计的实际困难，以及哪些结论仍在争议中。
 \end{itemize}
+
+四节按概念依赖排列，读完之后你手上会多出四个数值判据，也会多出四份关于它们何时失效的说明。后者比前者更常用得上。

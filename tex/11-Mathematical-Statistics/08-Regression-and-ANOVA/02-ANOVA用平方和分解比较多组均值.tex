@@ -1,90 +1,139 @@
 \section{ANOVA 用平方和分解比较多组均值}
 \label{sec:11-Mathematical-Statistics/08-Regression-and-ANOVA/02}
 
-\subsection{比较多组，不能靠反复做两两检验}
+\subsection{三组两两比一遍，报告就已经不干净了}
 
-设想比较三种洗衣程序的平均耗电量。分别对每一对程序做 \(t\) 检验，会随着比较次数增加而放大``至少误报一次''的概率；而且它没有先回答更整体的问题：这些程序的总体均值是否有任何差别。
+实验室里摆着四种洗衣程序，每种跑十次，记录耗电量。同事把四组均值列成一张表，接着对每一对做 \(t\) 检验，六个 \(p\) 值里挑出两个小于 \(0.05\) 的，写进结论：程序 B 显著省电。
 
-单因素 ANOVA 写成
+问题出在挑这个动作上。每次检验各自把误报概率控制在 \(0.05\)，但六次检验里``至少误报一次''的概率远不止 \(0.05\)。若六个比较近似独立，这个概率是 \(1 - 0.95^6 \approx 0.26\)。四组变成六组，比较数升到十五个，全组均值明明相同时，你也有大约一半的机会捡到一个显著结果，然后为它编一套解释。
 
+所以先得换一个问题。不问``B 和 C 差不差''，而先问一个整体的、只回答一次的问题：这几组的总体均值是否完全相同。单因素模型写成
 \[
-Y_{ij}=\mu+\alpha_i+\varepsilon_{ij},
-\qquad i=1,\ldots,g,\quad j=1,\ldots,n_i,
+Y_{ij} = \mu + \alpha_i + \varepsilon_{ij},\qquad i = 1,\ldots,g,\quad j = 1,\ldots,n_i,
+\]
+其中 \(\mu + \alpha_i\) 是第 \(i\) 组的总体均值，\(n = \sum_i n_i\)。参数有冗余，约束 \(\sum_i n_i \alpha_i = 0\) 或指定一组作基准都可以，拟合值和检验结论不随记账方式改变。零假设是
+\[
+H_0:\ \alpha_1 = \cdots = \alpha_g = 0 .
 \]
 
-其中 \(\mu+\alpha_i\) 是第 \(i\) 组均值。为消除参数冗余，可以约束 \(\sum_i n_i\alpha_i=0\)，也可以选一组作基准；拟合值与检验结论不依赖这两种记账方式的选择。
+\subsection{一个观测的偏差被劈成正交的两段}
 
-零假设为
-
+任取一个观测，把它到总均值的偏差从组均值 \(\bar Y_i\) 处断开：
 \[
-H_0:\alpha_1=\cdots=\alpha_g=0,
+Y_{ij} - \bar Y = \underbrace{(\bar Y_i - \bar Y)}_{\text{组均值离总均值多远}} + \underbrace{(Y_{ij} - \bar Y_i)}_{\text{个体离本组多远}} .
 \]
-
-也就是所有组均值相同。
-
-\subsection{总变异恰好拆成组间与组内}
-
-记第 \(i\) 组均值为 \(\bar Y_i\)，总均值为 \(\bar Y\)。对每个观测，
-
+这一步是加减同一个数，谈不上洞见。有意思的是平方求和之后交叉项的下场：
 \[
-Y_{ij}-\bar Y
-=(\bar Y_i-\bar Y)+(Y_{ij}-\bar Y_i).
+\begin{aligned}
+\sum_{i,j}(Y_{ij}-\bar Y)^2
+&= \sum_{i,j}(\bar Y_i - \bar Y)^2 + \sum_{i,j}(Y_{ij}-\bar Y_i)^2
+ + 2\sum_i (\bar Y_i - \bar Y)\sum_j (Y_{ij}-\bar Y_i) \\
+&= \underbrace{\sum_i n_i(\bar Y_i - \bar Y)^2}_{\operatorname{SSB}}
+ + \underbrace{\sum_{i,j}(Y_{ij}-\bar Y_i)^2}_{\operatorname{SSW}} ,
+\end{aligned}
 \]
+因为组内偏差之和 \(\sum_j (Y_{ij} - \bar Y_i)\) 逐组为零，整个交叉项蒸发。总平方和 \(\operatorname{SST}\) 干净地劈成组间与组内两块。
 
-平方后求和，交叉项因每组残差和为零而消失，得到
-
+交叉项为零这件事，在 \(\R^n\) 里就是勾股定理。把 \(n\) 个观测排成一个向量 \(Y\)，总均值向量 \(\bar Y\mathbf{1}\) 是 \(Y\) 在常数方向上的投影，组均值向量 \(\widehat Y\) 是 \(Y\) 在组指示变量张成的子空间上的投影，而常数方向包含在这个子空间里。于是 \(Y - \widehat Y\) 与 \(\widehat Y - \bar Y \mathbf{1}\) 落在互相正交的两个子空间中，两条直角边的平方和等于斜边的平方。自由度跟着一起拆：
 \[
-\underbrace{\sum_{i,j}(Y_{ij}-\bar Y)^2}_{\operatorname{SST}}
-=
-\underbrace{\sum_i n_i(\bar Y_i-\bar Y)^2}_{\operatorname{SSB}}
-+
-\underbrace{\sum_{i,j}(Y_{ij}-\bar Y_i)^2}_{\operatorname{SSW}}.
+n - 1 = (g-1) + (n-g),
 \]
+分别是两个子空间的维数。
 
-这条结论来自正交投影的勾股分解：只含截距的模型投影到常数方向，加入组指示变量后投影到更大的列空间；两次残差平方和之差就是组间平方和。它有明确几何依据，无须当成经验口诀。
+\begin{center}
+\begin{tikzpicture}[scale=0.9]
+% ---- 左：数据视角 ----
+\draw[->,>=stealth] (0,0) -- (5.7,0) node[below] {\footnotesize 组别};
+\draw[->,>=stealth] (0,0) -- (0,3.6) node[left] {\footnotesize 耗电量};
+\draw[gray] (0.15,1.8) -- (5.2,1.8);
+\node at (0.55,2.06) {\footnotesize \(\bar Y\)};
+\draw[very thick] (0.35,1.25) -- (1.25,1.25);
+\draw[very thick] (1.75,1.85) -- (2.65,1.85);
+\draw[very thick] (3.15,2.55) -- (4.05,2.55);
+\node at (0.8,0.55) {\footnotesize A};
+\node at (2.2,0.55) {\footnotesize B};
+\node at (3.6,0.55) {\footnotesize C};
+\foreach \px/\py in {0.5/1.55, 0.8/1.05, 1.1/1.15,
+                     1.9/2.15, 2.2/1.60, 2.5/1.80,
+                     3.3/2.35, 4.0/2.70}
+  \fill[gray] (\px,\py) circle (1.6pt);
+\fill (3.62,2.95) circle (2pt);
+\draw[dashed] (3.62,1.8) -- (3.62,2.55);
+\draw[dashed] (3.62,2.55) -- (3.62,2.95);
+\draw[dotted] (3.62,2.55) -- (4.4,2.55);
+\draw[<->,>=stealth] (4.4,1.8) -- (4.4,2.55);
+\draw[<->,>=stealth] (4.4,2.55) -- (4.4,2.95);
+\node[right] at (4.5,2.15) {\footnotesize 组均值离总均值};
+\node[right] at (4.5,2.82) {\footnotesize 个体离本组};
+\node at (2.4,-0.75) {\footnotesize 一个观测的偏差断成两段};
 
-自由度也相应分解：
+% ---- 右：向量视角 ----
+\begin{scope}[shift={(9.4,0.45)}]
+  \draw[->,>=stealth,thick] (0,0) -- (2.8,0);
+  \draw[->,>=stealth,thick] (2.8,0) -- (2.8,2.0);
+  \draw[->,>=stealth,thick] (0,0) -- (2.8,2.0);
+  % 手绘直角标记
+  \draw (2.52,0) -- (2.52,0.28) -- (2.8,0.28);
+  \fill (0,0) circle (1.6pt);
+  \node at (-0.55,-0.05) {\footnotesize \(\bar Y\mathbf{1}\)};
+  \fill (2.8,0) circle (1.6pt);
+  \node at (3.15,-0.3) {\footnotesize \(\widehat Y\)};
+  \fill (2.8,2.0) circle (1.6pt);
+  \node at (3.05,2.2) {\footnotesize \(Y\)};
+  \node at (1.4,-0.42) {\footnotesize \(\sqrt{\operatorname{SSB}}\)};
+  \node at (3.55,1.0) {\footnotesize \(\sqrt{\operatorname{SSW}}\)};
+  \node at (0.95,1.35) {\footnotesize \(\sqrt{\operatorname{SST}}\)};
+  \node at (1.4,-1.2) {\footnotesize 同一次分解的向量记法};
+\end{scope}
+\end{tikzpicture}
+\end{center}
 
+\emph{左边把一个观测到总均值的距离断成``到组均值''与``组均值到总均值''两段，右边说明这两段在 \(\R^n\) 里彼此正交，平方和才能相加。}
+
+\subsection{\(F\) 比的是两个都在估计 \(\sigma^2\) 的量}
+
+有了正交分解，检验统计量几乎是自己写出来的。把两块平方和各自除以自己的自由度，得到两个均方：
 \[
-n-1=(g-1)+(n-g).
+\operatorname{MSB} = \frac{\operatorname{SSB}}{g-1},
+\qquad
+\operatorname{MSW} = \frac{\operatorname{SSW}}{n-g},
+\qquad
+F = \frac{\operatorname{MSB}}{\operatorname{MSW}} .
 \]
+组内均方永远在估计 \(\sigma^2\)：它只用到每组内部的散布，跟组均值之间的差距无关。组间均方则不然，\(\E[\operatorname{MSB}] = \sigma^2 + \frac{1}{g-1}\sum_i n_i \alpha_i^2\)。\(H_0\) 成立时右边第二项消失，两个均方估计同一个量，比值应该在 1 附近晃荡；组均值一旦分开，分子被抬高而分母不动。在各组独立、同方差、误差为 Gaussian 的模型下，\(H_0\) 成立时 \(F \sim F_{g-1,\,n-g}\)。
 
-在各组独立、同方差且误差为 Gaussian 的模型下，零假设成立时
+回到左图：分母度量的是每组内部那团点的厚度，分子度量的是三条粗横线彼此拉开的距离。厚度大而横线挨得近，差别就淹没在噪声里；横线拉开的幅度超过厚度所能解释的程度，才构成证据。
 
+\subsection{ANOVA 与回归是同一次投影的两种记账}
+
+上面那句``两个子空间的投影''值得停下来看清楚。把组别编成 \(g-1\) 个指示变量，设计矩阵
 \[
-F=
-\frac{\operatorname{MSB}}{\operatorname{MSW}}
-=
-\frac{\operatorname{SSB}/(g-1)}{\operatorname{SSW}/(n-g)}
-\sim F_{g-1,n-g}.
+X = \begin{bmatrix} \mathbf{1} & D_2 & \cdots & D_g \end{bmatrix},
+\qquad
+(D_i)_j = \ind\{\text{第 } j \text{ 个观测属于第 } i \text{ 组}\},
 \]
-
-若各组真实均值相同，组间与组内均方都在估计同一个 \(\sigma^2\)；组间均方异常大才构成反对 \(H_0\) 的证据。
-
-\subsection{显著只说明至少一组不同}
-
-拒绝总体零假设，并没有指出哪几组不同。事后查看全部两两差异又会回到多重比较问题；Tukey、Holm 或预先规定的 contrasts 分别对应不同的比较族与错误控制目标。应先定义真正关心的是所有两两差异、相对基准组，还是某个有科学含义的线性对比。
-
-效应大小也不能由 \(p\) 值代替。可以报告
-
+对 \(Y\) 做最小二乘，拟合值恰好是各组的样本均值，残差平方和恰好是 \(\operatorname{SSW}\)。只含截距的约束模型，拟合值是总均值，残差平方和是 \(\operatorname{SST}\)。于是
 \[
-\eta^2=\frac{\operatorname{SSB}}{\operatorname{SST}},
+\operatorname{SSB} = \operatorname{SST} - \operatorname{SSW} = \operatorname{RSS}_0 - \operatorname{RSS}_1 ,
 \]
+代进上一节嵌套模型的 \(F\) 统计量，\(p_1 - p_0 = g-1\)，\(n - p_1 = n - g\)，得到的正是本节的 \(F\)。单因素 ANOVA 是以组指示变量为特征的回归，方差分析表是那张回归输出换了一套栏目名。
 
-但它仍依赖研究设计、组别范围和样本组成。样本足够大时，很小的实际差异也可能显著；样本很少时，重要差异又可能因功效不足而未显著。
+认下这一点有实际好处。协变量可以直接加进 \(X\)，就得到协方差分析；组内相关可以写成随机效应加进模型；不平衡设计带来的麻烦，用回归的语言看就是各列不再正交，因而``先扣哪个因素''会改变分给每个因素的平方和——软件里 I 型、II 型、III 型平方和的分歧根源在此，而不在某种统计流派。看到这三种表格给出不同数字时，要问的是它们各自比较的是哪一对嵌套模型。
 
-\subsection{双因素设计把主效应与交互作用分开}
+\subsection{每条假设各挡住一种失效}
 
-若同时改变洗衣程序与装载量，可写
+独立性来自抽样与随机分配的设计，残差图证明不了它。重复测量、同一个班级的学生、同一台机器的连续批次，误差成簇同向，\(\operatorname{SSW}\) 被压小，\(F\) 虚高。补救的方向是把层次写进模型，用混合效应或按簇的误差项，而不是换一个检验。
 
-\[
-Y_{ijk}=\mu+\alpha_i+\beta_j+(\alpha\beta)_{ij}+\varepsilon_{ijk}.
-\]
+同方差撑着``分母在估计一个公共 \(\sigma^2\)''这句话。各组方差差得远时，尤其组容量还不相等，名义显著性水平会明显失准；此时 Welch 型 ANOVA 放弃合并方差，改用逐组方差与近似自由度，是更稳的默认选项。诊断只需按组画残差的散布宽度。
 
-交互作用表示一个因素的效应随另一个因素水平而变。例如某程序只在满载时节电，那么只报告``程序平均节电多少''会掩盖结构。平衡设计中平方和分解最整齐；不平衡设计下，不同类型平方和对应不同条件比较，必须先说明比较的是哪个模型，而不能只抄软件表格。
+Gaussian 假设给的是 \(F\) 的精确分布。样本量不小时它可以松，但重尾和离群值会同时抬高 \(\operatorname{SSW}\) 与扰动组均值，让检验既不敏感也不稳；先看数据再决定要不要用置换检验或秩方法，比事后解释一个可疑的 \(p\) 值划算。置换检验的正当性依赖可交换性，见\hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/02]{``置换检验依赖可交换性''}。
 
-\subsection{模型边界比 ANOVA 表更重要}
+\subsection{拒绝之后，问题才刚开始}
 
-独立性通常来自抽样或随机分配设计，不能由残差图证明。同方差严重失效时可考虑 Welch ANOVA；重尾或异常值会让均值与平方和非常敏感；只想检验分布整体相同时，置换方法需要相应可交换性。重复测量、班级或家庭内数据还带有组内相关，不能把所有行当作独立样本。
+\(F\) 检验显著只说明这几组均值不全相等，它不指认是哪几组。事后逐对比较又把开头那个多重比较问题请了回来，Tukey 方法、Holm 校正、事先声明的线性对比，各自对应不同的比较族和不同的错误控制目标，取舍标准见\hyperref[sec:11-Mathematical-Statistics/05-Hypothesis-Testing/04]{``多重比较改变错误的计量单位''}。要点是在看数据之前就说清关心的是全部两两差异、还是相对某个基准组、还是某个有科学含义的加权对比。
 
-ANOVA 的主要价值，是迫使分析者写出变异来自哪些层次、每个比较使用哪个误差项，以及结论能推广到哪些实验单位；一个 \(F\) 数字无法承载这些信息。把这些问题写清后，它才真正成为回归模型的一种结构化设计，不会沦为另一张公式表。
+效应大小也得单独报。\(\eta^2 = \operatorname{SSB}/\operatorname{SST}\) 给出组别解释掉的变异比例，但它随设计、组别取值范围和样本构成而变，跨研究比较时要谨慎。样本足够大时，一个毫无实践意义的差异也会显著；样本太小时，一个值得重视的差异又可能被功效不足埋掉。\(p\) 值和效应量回答的不是同一个问题，见\hyperref[sec:11-Mathematical-Statistics/05-Hypothesis-Testing/02]{``\(p\) 值不是原假设为真的概率''}。
+
+因素超过一个时，模型写成 \(Y_{ijk} = \mu + \alpha_i + \beta_j + (\alpha\beta)_{ij} + \varepsilon_{ijk}\)，交互项刻画一个因素的效应随另一个因素水平而变。某程序只在满载时省电，那么一句``该程序平均省电多少''就把结构抹平了。交互项显著时，主效应的边际解读需要格外小心。
+
+一张方差分析表能报的东西到此为止：变异来自哪几个层次、每个比较用了哪个误差项、结论能推广到哪一类实验单位。这三件事都由设计决定，表格只是把设计的后果算了出来。至于两组数据之间的差异是否源于处理本身，平方和分解无从判断——那需要随机化，或者一套明确写下来的因果假设。

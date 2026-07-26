@@ -1,157 +1,128 @@
 \section{形状先于公式，布局必须声明}
 \label{sec:10-Matrix-Calculus/01-Derivative-Conventions/02}
 
-同一个表达式在两本资料中相差一个转置，未必有人算错。矩阵微积分存在两种常见布局：
+你照着一篇论文实现某个层的反向传播，式子抄下来是 \(\nabla_W L=\delta x^{\trans}\)，跑起来报形状不匹配。把它改成 \(x\delta^{\trans}\)，通过了，数值梯度也对得上。论文没有错，你的代码现在也没有错。两边差的那一个转置，来自双方对``导数排成什么形状''采用了不同的约定，而这个约定通常没有写在纸上。
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{输出按行、输入按列}：\(J_{ij}=\partial y_i/\partial x_j\)；
-\item
-  \textbf{输入按行、输出按列}：\(J_{ij}=\partial y_j/\partial x_i\)，即第一种约定的整体转置。
-\end{itemize}
+这一次是幸运的：形状不匹配当场报错，几分钟就定位了。真正难查的是另一种——当输入维数与输出维数碰巧相等时，转置错误完全通得过形状检查。矩阵是方的，乘法照样能做，训练也能跑，只是梯度指向了一个被转置过的方向。损失下降得比预期慢，你会先怀疑学习率、初始化、数据管道，很可能查上两天才想起去核对那一个转置。
 
-本知识库采用第一种约定。若
+所以在矩阵微积分里，``这个公式对不对''是一个不完整的问题。补上布局约定之后它才有答案。
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \node[font=\footnotesize] at (0.8,2.55) {分子布局：\((J)_{ij}=\partial y_i/\partial x_j\)};
+  \foreach \i in {0,1,2,3}
+    \foreach \j in {0,1,2}
+      \draw[black!65,fill=blue!7] (0.4*\i,0.2+0.4*\j) rectangle (0.4+0.4*\i,0.6+0.4*\j);
+  \fill[orange!30] (0.8,0.6) rectangle (1.2,1.0);
+  \draw[black!65] (0.8,0.6) rectangle (1.2,1.0);
+  \node[font=\footnotesize,black!70] at (0.8,1.80) {\(n\) 列：输入分量};
+  \node[font=\footnotesize,black!70,rotate=90] at (-0.62,0.8) {\(m\) 行：输出分量};
+  \node[font=\footnotesize] at (0.8,-0.36) {形状 \(m\times n\)};
+  \draw[<->,black!60] (2.25,0.8) -- (5.05,0.8);
+  \node[font=\footnotesize,black!70] at (3.65,1.06) {互为转置};
+  \node[font=\footnotesize,black!70] at (3.65,0.48) {同一个 \(\partial y_i/\partial x_j\)};
+  \begin{scope}[shift={(6.0,0)}]
+    \node[font=\footnotesize] at (0.6,2.55) {分母布局：\((J)_{ij}=\partial y_j/\partial x_i\)};
+    \foreach \i in {0,1,2}
+      \foreach \j in {0,1,2,3}
+        \draw[black!65,fill=blue!7] (0.4*\i,0.4*\j) rectangle (0.4+0.4*\i,0.4+0.4*\j);
+    \fill[orange!30] (0.4,0.8) rectangle (0.8,1.2);
+    \draw[black!65] (0.4,0.8) rectangle (0.8,1.2);
+    \node[font=\footnotesize,black!70] at (0.6,2.00) {\(m\) 列：输出分量};
+    \node[font=\footnotesize,black!70,rotate=90] at (-0.62,0.8) {\(n\) 行：输入分量};
+    \node[font=\footnotesize] at (0.6,-0.36) {形状 \(n\times m\)};
+  \end{scope}
+\end{tikzpicture}
+
+\emph{同一批偏导数，两种摆法；橙色格子是同一个数，落在互为转置的位置上。}
+\end{center}
+
+图里没有任何一格算错。左右两块装的是同一批偏导数，区别只在于谁沿行走、谁沿列走。上一节说导数是一个线性映射、矩阵只是它的账本，布局就是记账时的行列分工——账本换个方向誊写，映射一点没变，可写出来的公式全体差一个转置。既然两种记法都自洽，判断一个公式对不对就必须先问它按哪一种记。
+
+\subsection{本书按输出走行、输入走列}
+
+约定写清楚。设 \(y=f(x)\)，\(x\in\R^n\)，\(y\in\R^m\)，本书取
 
 \[
-y=f(x),\qquad
-x\in\R^n,\ y\in\R^m,
-\]
-
-则
-
-\[
-dy=J_f(x)\,dx,
+(J_f)_{ij}=\frac{\partial y_i}{\partial x_j},
 \qquad
-J_f\in\R^{m\times n}.
+J_f(x)\in\R^{m\times n},
+\qquad
+\mathrm dy=J_f(x)\,\mathrm dx.
 \]
 
-这与许多数值分析、机器学习和自动微分资料一致。阅读其他来源时，应先寻找作者的 Jacobian 定义，而不是直接复制公式。
+这叫分子布局：分子里的输出编号 \(i\) 走行，分母里的输入编号 \(j\) 走列。它与多数数值分析、自动微分和机器学习资料一致，好处是 \(\mathrm dy=J\,\mathrm dx\) 读起来与线性映射的作用方向同向。另一种是分母布局，输入走行、输出走列，得到的矩阵是前者的整体转置；概率与统计文献里它并不罕见。读别人的材料时，先去找作者对 Jacobian 的定义，再决定要不要照抄公式。
 
-\subsection{四种输入输出决定基本形状}
+标量输出是一个需要留神的角落。按分子布局严格写，\(f:\R^n\to\R\) 的 Jacobian 是 \(1\times n\) 的行向量 \(\nabla f^{\trans}\)；而优化和深度学习里的梯度习惯保留成与输入同形的列向量 \(\nabla f\in\R^n\)。两者不矛盾：前者是导数映射的矩阵表示，后者是内积从这个映射里识别出来的向量，上一节已经把这两步拆开过。之所以要提醒，是因为一串链式法则写到一半时，你必须知道手里那个 \(n\) 维对象现在是行是列，否则下一次乘法就会摆错顺序。
 
-{\def\LTcaptype{none} % do not increment counter
+\subsection{四种定义域的形状可以先写下来}
+
+在动笔求导之前，形状是能确定的。
+
+{\def\LTcaptype{none}
 \begin{longtable}{@{}lll@{}}
 \toprule\noalign{}
-映射 & 导数作为线性映射 & 本书常用表示 \\
+映射 & 导数作为线性映射 & 本书的表示与形状 \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-\(f:\R\to\R\) & 标量到标量 & \(f'(x)\) \\
-\(f:\R\to\R^m\) & 标量到向量 & \(dy/dx\in\R^m\) \\
-\(f:\R^n\to\R\) & 向量到标量 & 梯度 \(\nabla f\in\R^n\)，且 \(df=\nabla f^{\trans}dx\) \\
-\(f:\R^n\to\R^m\) & 向量到向量 & Jacobian \(J_f\in\R^{m\times n}\) \\
+\(f:\R\to\R\) & 标量到标量 & \(f'(x)\)，一个数 \\
+\(f:\R\to\R^m\) & 标量到向量 & \(\mathrm dy/\mathrm dx\in\R^m\) \\
+\(f:\R^n\to\R\) & 向量到标量 & \(\nabla f\in\R^n\)，且 \(\mathrm df=\nabla f^{\trans}\mathrm dx\) \\
+\(f:\R^n\to\R^m\) & 向量到向量 & \(J_f\in\R^{m\times n}\) \\
+\(f:\R^{m\times n}\to\R\) & 矩阵到标量 & \(\nabla_X f\in\R^{m\times n}\) \\
 \end{longtable}
 }
 
-对标量输出，Jacobian 若按``输出行''严格写是一个 \(1\times n\) 行向量：
+最后一行是实践中出现频率最高的一种，值得单独念一遍：输入是 \(m\times n\) 的矩阵、输出是标量，梯度必然是 \(m\times n\)。它与输入同形，与函数长什么样无关，与你用哪条求导公式无关。参数更新 \(W\leftarrow W-\eta\nabla_W L\) 要求两边可加，这就把形状锁死了。
+
+据此可以立一个可执行的动作：先对形状，再对公式。拿到一个待验证的梯度表达式，第一步不是逐项核对偏导数，而是数一遍每个因子的行列，看乘法能不能连起来、结果是不是与被求导的变量同形。手推的梯度和框架实现对不上时，先查形状，绝大多数分歧在这一步就现形了。这个动作不需要理解那个函数，也不需要重新推导，几十秒就能做完。
+
+\subsection{一次线性层就演完了前推与回拉}
+
+设 \(y=Ax+b\)，\(A\in\R^{m\times n}\)。扰动关系是 \(\mathrm dy=A\,\mathrm dx\)，所以 Jacobian 就是 \(A\)，形状 \(m\times n\)。某份资料若在这里给出 \(A^{\trans}\)，要么它用的是分母布局，要么它错了，二者必居其一。
+
+接上一个标量损失 \(\ell(y)\)，记 \(\nabla_y\ell\in\R^m\)。代入微分并整理成内积形式：
 
 \[
-J_f=\nabla f^{\trans}.
+\mathrm d\ell=(\nabla_y\ell)^{\trans}\mathrm dy
+=(\nabla_y\ell)^{\trans}A\,\mathrm dx
+=\bigl(A^{\trans}\nabla_y\ell\bigr)^{\trans}\mathrm dx,
 \]
 
-但优化中通常把梯度保留为与输入同形的列向量。两种形状分别对应``导数映射的矩阵表示''与``由内积识别出的梯度''，因此并不矛盾（见上一节``梯度来自内积，而不只是偏导排列''）。
+于是 \(\nabla_x\ell=A^{\trans}\nabla_y\ell\in\R^n\)，形状与 \(x\) 一致。同一个 \(A\)，在前向里把输入方向推到输出空间，在反向里以转置的身份把输出的敏感度拉回输入空间。这个转置不是记号上的小动作，它是线性映射的伴随；正因如此，反向传播的每一步几乎都在跟某个 \(A^{\trans}\) 打交道。至于为什么必须以``乘一个转置''而不是``存下整个 Jacobian''的方式进行，是\hyperref[sec:10-Matrix-Calculus/02-Differentials/02]{``链式法则就是线性映射复合''}要算的账。
 
-\subsection{维度检查能发现大多数转置错误}
+\subsection{方阵是形状检查的盲区}
 
-设
+形状对账很强，但它有一个明确的失效区域：\(m=n\) 时，\(J\) 与 \(J^{\trans}\) 形状相同，摆错也照样能乘。批大小等于隐藏维、注意力里的 \(d_k=d_v\)、自编码器的对称结构，都会制造这种巧合。此时形状检查一路绿灯，错误留到损失曲线上才露头，而损失曲线是出了名的什么都能解释。
+
+对策很朴素：验证梯度时刻意挑一个各维互不相等的小例子。把 \(3\times 5\) 的权重、批大小 \(7\)、输出维 \(2\) 拼起来，跑一次数值差分，比在 \(64\times 64\) 上跑一百次更能发现问题。所有维度互异时，任何一个摆错位置的转置都会立刻撞上形状错误。同一个道理也适用于阅读别人的推导：看到方阵场景下的公式，不要默认它已经被验证过。
+
+\subsection{JVP 与 VJP 让布局之争失去意义}
+
+实践中很少有人真的需要那个 \(m\times n\) 的 Jacobian，需要的是它作用在某个方向上的结果。给定输入方向 \(v\in\R^n\)，乘积 \(J_f(x)v\) 称为 Jacobian-向量积（JVP），回答``沿 \(v\) 轻微移动一下，各个输出怎么变''。给定输出侧的一个线性评价 \(u\in\R^m\)，乘积 \(J_f(x)^{\trans}u\) 称为向量-Jacobian 积（VJP），回答``输出上的这份敏感度怎样传回输入''。
+
+前向模式的自动微分传播的是 JVP，反向模式传播的是 VJP；标量损失的梯度就是从输出端播下种子 \(1\) 之后的一串 VJP；Hessian-向量积则是对梯度再做一次 JVP。这几件事在\hyperref[sec:10-Matrix-Calculus/04-Applications/03]{``计算图上的反向传播与自动微分''}里会展开。
+
+值得注意的是它们对本节问题的影响。JVP 与 VJP 都是``给一个向量、还一个向量''，两端的形状由定义域和陪域直接决定，中间那个矩阵从来不必显式出现，布局之争也就无从发生。深度学习框架要求自定义算子实现的正是这两种作用之一，而不是交出一个 Jacobian——这既省掉了 \(mn\) 个数的存储，也顺带取消了一个常见的错误来源。矩阵到矩阵的映射尤其如此：那里完整的导数要用四阶数组来放，形状极易搞混，保留算子写法 \(Df(X)[H]\) 反而更清楚。
+
+\subsection{逐元素记号是核对工具而非推导工具}
+
+分量形式 \((J_f)_{ij}=\partial f_i/\partial x_j\) 在两种场合有用：核对某一个具体条目，以及处理广播、切片这类索引本身就复杂的操作。但用它做主线推导，代价是线性结构被淹没在求和指标里，而且每多一层复合就多一组哑指标。
+
+比较顺手的次序是这样的。先把输入与输出的形状写在纸上；再用微分或方向导数取得导数的线性作用，得到一个不含指标的表达式；有疑问时才落到某个分量上核对一处；最后确认得到的对象能与它要参与的乘法合法相接。公式表只在同一布局、同一定义域、同一形状下成立，脱离这三个前提去照抄符号，是矩阵求导里最常见的翻车方式。
+
+\subsection{受约束的变量还要声明扰动空间}
+
+还有一种形状正确却仍然算错的情形。若 \(X\) 被限制为对称矩阵，那么允许的扰动 \(H\) 也必须对称，而``梯度''这个词此时指的是环境空间里的哪个代表元就变得含糊了：只要两个矩阵在所有对称 \(H\) 上给出相同的 Frobenius 内积，它们代表同一个受约束导数。通常取对称化
 
 \[
-y=Ax+b,
-\qquad
-A\in\R^{m\times n}.
+\operatorname{sym}(G)=\tfrac12\bigl(G+G^{\trans}\bigr)
 \]
 
-扰动满足
+作代表元。理由是斜对称部分与任何对称矩阵的 Frobenius 内积为零，故对对称的 \(H\) 有 \(\ip{G}{H}_F=\ip{\operatorname{sym}(G)}{H}_F\)，而 \(\operatorname{sym}(G)\) 自身留在约束空间内。协方差矩阵、核矩阵、图的邻接结构上求导时，这一步不做，得到的``梯度''会带着一个不属于问题的斜对称分量。
 
-\[
-dy=A\,dx.
-\]
+正交矩阵、概率单纯形、低秩流形上的变量也是同类。可行扰动不再填满整个环境空间，欧氏梯度照样能算出来，但沿它走一步会立刻离开可行集，需要投影到切空间才有意义。布局对了不等于约束几何处理好了，这是两层独立的检查。
 
-所以 Jacobian 必须是 \(A\)，形状 \(m\times n\)。若某公式给出 \(A^{\trans}\)，它要么使用了转置布局，要么确实错误。
-
-再设标量损失 \(\ell(y)\) 的梯度 \(\nabla_y\ell\in\R^m\)。把 \(dy=A\,dx\) 代入微分：
-
-\[
-d\ell=(\nabla_y\ell)^{\trans}dy
-=(\nabla_y\ell)^{\trans}A\,dx
-=(A^{\trans}\nabla_y\ell)^{\trans}dx,
-\]
-
-读出与 \(x\) 同形的梯度，即链式法则
-
-\[
-\nabla_x\ell = A^{\trans}\nabla_y\ell
-\in\R^n.
-\]
-\(A\) 把输入方向向前推到输出空间，\(A^{\trans}\) 把输出的敏感度向后拉回输入空间。转置由线性映射的伴随自然产生。
-
-\subsection{JVP 与 VJP 比完整 Jacobian 更接近实际需求}
-
-给定输入方向 \(v\in\R^n\)，
-
-\[
-J_f(x)v
-\]
-
-称为 Jacobian-vector product，简称 JVP。它回答``沿输入方向 \(v\) 轻微移动，所有输出怎样变化''。
-
-给定输出余向量（对输出作线性评价的行向量）\(u\in\R^m\)，
-
-\[
-u^{\trans}J_f(x)
-\]
-
-称为 vector-Jacobian product，简称 VJP；以列向量表示梯度时常写成 \(J_f(x)^{\trans}u\)。它回答``输出的某个线性评价怎样反传到输入''。
-
-很多应用只需要这两种作用，而不需要存储 \(mn\) 个 Jacobian 元素：
-
-\begin{itemize}
-\tightlist
-\item
-  正向自动微分传播 JVP；
-\item
-  反向自动微分传播 VJP；
-\item
-  标量损失的梯度是从输出种子 \(1\) 开始的一串 VJP；
-\item
-  Hessian-vector product 是对梯度再做一次 JVP。
-\end{itemize}
-
-面对矩阵到矩阵的映射，完整导数需要高阶数组表示，形状更容易混乱。保留算子写法 \(Df(X)[H]\) 或直接计算 JVP/VJP，更清楚也更高效。
-
-\subsection{逐元素记号何时有用}
-
-分量形式
-
-\[
-(J_f)_{ij} = \frac{\partial f_i}{\partial x_j}
-\]
-适合核对某个条目、处理复杂索引或广播。但它容易掩盖线性结构，并产生大量求和指标。推荐顺序是：
-
-\begin{enumerate}
-\tightlist
-\item
-  先写输入与输出形状；
-\item
-  用微分、方向导数或计算图得到线性作用；
-\item
-  必要时再用分量核对；
-\item
-  最后确认结果能与所需向量或矩阵合法相乘。
-\end{enumerate}
-
-公式表只能在同一布局、同一定义域和同一形状下使用。只看符号名称而不看这些前提，是矩阵求导最常见的错误来源。
-
-\subsection{受约束矩阵还需要说明变量空间}
-
-若 \(X\) 被限制为对称矩阵，允许扰动 \(H\) 也必须对称。环境空间中的两个矩阵梯度，只要它们在所有对称 \(H\) 上给出相同 Frobenius 内积，就代表同一个受约束导数。取对称化
-
-\[
-\operatorname{sym}(G)=\frac12(G+G^{\trans})
-\]
-
-作为代表元：它自身对称，且斜对称部分与任何对称矩阵的 Frobenius 内积为零，故对对称 \(H\) 有 \(\langle G,H\rangle_F=\langle\operatorname{sym}(G),H\rangle_F\)。
-
-同样，正交矩阵、概率单纯形或低秩流形上的变量，其可行扰动不再填满整个环境空间。普通欧氏梯度仍可计算，但真正的可行下降方向需要投影到切空间。布局正确并不等于已经处理约束几何。
+形状和布局定下来之后，剩下的问题是怎么把导数算出来而不陷进逐元素的展开里。下一单元给出的办法是先写微分、再把结果整理成内积形式，让梯度自己从括号里显现出来。

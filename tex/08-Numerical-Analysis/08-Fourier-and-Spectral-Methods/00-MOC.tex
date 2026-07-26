@@ -1,35 +1,49 @@
-用 48 kHz 采样 60 Hz 正弦，每秒产生 \(N=48000\) 个样本。直接计算全部 DFT 系数需要处理约 \(2.3\times10^9\) 个求和项，FFT 把它压缩到约 \(7.5\times10^5\) 量级的运算。正弦和复指数构成一组正交坐标，"找周期"只是它们的用途之一。进入频率空间后，微分变成乘以频率，卷积变成逐点相乘，函数光滑性表现为高频系数衰减。连续函数被采样后又会出现混叠、频谱泄漏和离散周期性；FFT 只加速 DFT，并不会修复这些信息损失。而当频率成分随时间变化时，Fourier 坐标还会抹掉"何时"；加窗与小波给出两种把时间与频率（尺度）联合起来的折中。
+一段以 48 kHz 采样的音频，每秒四万八千个数。你想知道里面有没有 60 Hz 的工频噪声。
 
-\begin{enumerate}
-\tightlist
-\item
-  从 Fourier 级数到连续变换
-\item
-  采样、混叠与可恢复性
-\item
-  DFT 是变换，FFT 是算法
-\item
-  谱方法：用光滑性换高精度
-\item
-  时频局部化：Fourier 丢掉了"何时"
-\item
-  小波与多尺度分解
-\end{enumerate}
+按定义逐个算 DFT 系数，要处理约 \(2.3\times10^9\) 个求和项；用 FFT，降到 \(7.5\times10^5\) 量级。三个数量级的差距让这件事从``跑一夜''变成``眨眼之间''，而变换本身一个字没改。
 
-\subsection{怎么读这一章}
+但速度只是这套工具最表层的好处。真正的理由是：换到频率坐标之后，几件麻烦事同时变简单——卷积退化成逐点相乘，微分退化成乘以 \(i\omega\)，而函数的光滑程度直接显示为高频系数衰减得多快。原本纠缠在一起的操作被拆成一个个独立的频率通道，这与线性代数里``挑一组合适的基''是同一个动作，只不过这里的基是复指数。
 
-第一次读不必急着记变换公式。先抓住两条线：前三篇说明把信号换到频率坐标后能看见什么，以及采样和有限观察会丢掉什么。后三篇说明怎样利用这些坐标做计算，以及当频率随时间变化时为什么还要引入窗口和尺度。若想先熟悉"根据最终目标选择计算形式"的思路，可以回看上一单元 \hyperref[ch:067]{``机器学习中的稳定计算''}。
+代价藏在两个地方，这一章要把它们说清楚。第一，从连续函数到离散样本，采样率不够时高频会伪装成低频，而且事后无法分辨——这不是精度损失，是信息被永久销毁。第二，Fourier 坐标彻底抹掉了时间：它告诉你信号里有哪些频率，不告诉你它们何时出现。对一段转速在变的振动记录，这个缺陷是致命的。
 
-\subsection{本章篇目}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[black!45,fill=blue!9] (0,1.5) rectangle (3.3,2.9);
+  \node[align=center] at (1.65,2.2) {换到\\频率坐标};
+  \draw[black!45,fill=green!8] (4.9,3.35) rectangle (12.9,4.25);
+  \node[align=left,anchor=west] at (5.1,3.8) {卷积 \(\to\) 逐点相乘，微分 \(\to\) 乘 \(i\omega\)（第一节）};
+  \draw[black!45,fill=green!8] (4.9,2.25) rectangle (12.9,3.15);
+  \node[align=left,anchor=west] at (5.1,2.7) {光滑性 \(\to\) 系数衰减，换来谱精度（第四节）};
+  \draw[black!45,fill=red!7] (4.9,1.15) rectangle (12.9,2.05);
+  \node[align=left,anchor=west] at (5.1,1.6) {采样不足 \(\to\) 混叠，信息不可复原（第二节）};
+  \draw[black!45,fill=red!7] (4.9,0.05) rectangle (12.9,0.95);
+  \node[align=left,anchor=west] at (5.1,0.5) {频率有了，时间没了（第五、六节补救）};
+  \draw[->,black!55] (3.35,2.35) -- (4.85,3.8);
+  \draw[->,black!55] (3.35,2.25) -- (4.85,2.7);
+  \draw[->,black!55] (3.35,2.05) -- (4.85,1.6);
+  \draw[->,black!55] (3.35,1.95) -- (4.85,0.5);
+  \node[align=center,font=\footnotesize,black!65] at (1.65,0.5) {绿色：换坐标\\买到的东西\\[3pt]红色：换坐标\\付出的代价};
+\end{tikzpicture}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+\emph{第三节的 FFT 不在这张图上，因为它不改变这笔账的任何一项——它只是让上面所有事情算得起。变换是数学对象，算法是实现手段，这个区分值得从一开始就守住。}
+\end{center}
 
-\begin{itemize}
-\tightlist
-\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}；
-\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/02]{``采样、混叠与可恢复性''}；
-\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/03]{``DFT 是变换，FFT 是算法''}；
-\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/04]{``谱方法：用光滑性换高精度''}；
-\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/05]{``时频局部化：Fourier 丢掉了``何时'''}；
-\item \hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/06]{``小波与多尺度分解''}。
-\end{itemize}
+\subsection{三条判断，读完这一章要能自己用}
+
+\textbf{光滑性可以换精度，但那是一场赌注。}谱方法对解析函数的误差按指数下降，多加一个基函数误差就乘以一个小于 1 的常数；有限差分只能按 \(h^p\) 下降。这个差距大到值得为之改写整个求解器——前提是解真的足够光滑。一旦出现间断或角点，收敛立刻退回代数阶，Gibbs 过冲还会污染全局。用谱方法之前先问一句：我凭什么相信解是光滑的。
+
+\textbf{混叠销毁信息，而不是降低精度。}两条频率不同的正弦可以在所有采样点上取值完全相同，事后没有任何算法能把它们分开。所以采样率、抗混叠滤波这些决定必须在采集时做对，事后补救是无效的。深度学习里 stride 卷积与池化做的正是降采样，同样的风险在那里原样存在。
+
+\textbf{时间与频率的分辨率不能同时提高。}窗开窄了时间定位准、频率糊；窗开宽了反过来。这个取舍有下界，不是工程实现不够好——它是不确定性原理在信号处理里的形式。小波的贡献不是绕开这个下界，而是把有限的分辨率按频率重新分配：高频处用窄窗，低频处用宽窗。
+
+\subsection{怎么读这六节}
+
+\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}与\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/03]{``DFT 是变换，FFT 是算法''}是地基，前者给出变换买到了什么，后者说清计算怎样才做得起。
+
+\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/02]{``采样、混叠与可恢复性''}篇幅不长，却是本章唯一一条``做错了无法补救''的判断，做数据采集或降采样的读者请务必读完。
+
+\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/04]{``谱方法：用光滑性换高精度''}面向解微分方程的读者；不解方程的话可以略读，但其中``光滑性换精度''这条权衡在别处会反复遇到。
+
+\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/05]{``时频局部化''}与\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/06]{``小波与多尺度分解''}应当连读，它们是同一个问题的两轮回答：前者指出取舍的存在与下界，后者给出重新分配分辨率的办法。音频、振动、非平稳时间序列都从这里进入。
+
+这一章反复出现的追问是：换到这组坐标之后，什么变简单了，什么被抹掉了。系数衰减快慢背后还有一层更深的原因——它由函数在复平面上离实轴多远才出现奇点决定，那笔账留给\hyperref[ch:069]{``复分析与留数：奇点决定函数的深层结构''}。

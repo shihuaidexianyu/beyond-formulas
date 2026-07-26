@@ -1,0 +1,134 @@
+\section{残差与归一化让深层可训}
+\label{sec:14-Deep-Learning/05-Attention-and-Sequence-Models/04}
+
+一个六层的 Transformer 训得很顺，你把层数改成 48，其余一行没动。前两百步 loss 几乎不降，第三百步开始上升，第四百步出现 NaN。你把学习率砍到十分之一，模型不炸了，但 loss 卡在一个明显偏高的位置再也不动。换个角度看这件事：六层能训、48 层不能训，这中间发生的不是``模型太大''，而是某个量随层数指数变化了。
+
+把梯度沿层数的传递写出来，那个指数就浮出来。
+
+\subsection{恒等项在梯度里买了一条不衰减的通路}
+
+把一层写成两种形式对照。没有残差时 \(x_{l+1}=F_l(x_l)\)，反向传播要连乘雅可比：
+
+\[
+\frac{\partial x_L}{\partial x_0} = J_{L-1}J_{L-2}\cdots J_0,
+\qquad J_l \eqdef \frac{\partial F_l}{\partial x_l}.
+\]
+
+范数满足 \(\norm{\partial x_L/\partial x_0}\le\prod_l\norm{J_l}\)。若各层雅可比的谱范数典型值是 \(\lambda\)，整条链的量级就是 \(\lambda^{L}\)。\(\lambda=0.9\)、\(L=48\) 给出 \(0.9^{48}\approx 0.006\)；\(\lambda=1.1\) 给出 \(1.1^{48}\approx 100\)。这条曲线在 \(\lambda=1\) 附近陡得离谱，而没有任何机制把 \(\lambda\) 钉在 1 上。六层时 \(0.9^{6}\approx0.53\)，感觉不到问题；48 层时同样的每层衰减就成了两个数量级。
+
+加上残差，\(x_{l+1}=x_l+F_l(x_l)\)，单层雅可比变成
+
+\[
+\frac{\partial x_{l+1}}{\partial x_l} = I + J_l,
+\]
+
+整条链是 \(\prod_{l}(I+J_l)\)。展开这个乘积：
+
+\[
+\prod_{l=0}^{L-1}(I+J_l) = I + \sum_l J_l + \sum_{l<m} J_m J_l + \cdots
+\]
+
+第一项是 \(I\)，它的增益恒为 1，与 \(L\) 无关。梯度不再必须穿过 \(L\) 个雅可比才能回到底层——它有一条不经过任何变换的直达通道。后面那些项对应``经过 1 层、2 层……''的各条路径，深层路径仍然会衰减，但它们不再是唯一的路径。
+
+这句话要说得准确，不能说成``残差保证梯度不消失''。\(\prod(I+J_l)\) 里的各项完全可能相消，\(I+J_l\) 的最小奇异值也可能接近零。残差保证的是\emph{存在}一条增益为 1 的路径，而不是总梯度有下界。经验上这一条已经足够管用，但它是结构性的便利，不是定理给的保证。\hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/01]{``训练动力学与数值稳定''}讨论的雅可比连乘问题，在这里被换了一种拓扑绕开，而不是被解决。
+
+残差还带来一个副作用，正好引出下半篇。前向方向上 \(x_{l+1}=x_l+F_l(x_l)\) 意味着每一层都往主干上\emph{加}东西。如果各层的贡献大致独立，\(\Var(x_L)\approx\Var(x_0)+\sum_l\Var(F_l)\)，方差随层数线性累加。48 层之后主干的尺度可能是输入的好几倍，把它直接喂进下一层的 softmax 或激活函数，麻烦立刻回来。所以残差和归一化是配套的：一个负责让梯度有路可走，一个负责让前向的尺度不漂。
+
+\subsection{归一化锁住的是尺度假设}
+
+归一化最容易被记成``让分布更好看''，实际作用要具体得多：它维持了下游模块所依赖的尺度假设。
+
+\hyperref[sec:14-Deep-Learning/05-Attention-and-Sequence-Models/01]{``Self-Attention 是内容决定的加权读取''}里的 \(\sqrt{d_k}\) 缩放建立在一个前提上——\(q\) 与 \(k\) 的各分量大致零均值、单位方差，点积的标准差才是 \(\sqrt{d_k}\)。如果上一层的输出尺度涨了三倍，点积尺度涨九倍，\(\sqrt{d_k}\) 就压不住了，softmax 迅速逼近 one-hot，梯度进饱和区。归一化把每层输入的尺度重新钉回去，让这个前提在整个深度上持续成立。它不是让优化更快的润滑剂，是让后面模块的设计假设不被前面的漂移打破。
+
+LayerNorm 对每个位置 \(t\) 沿特征维统计：
+
+\[
+\mu_t = \frac1d\sum_{j=1}^{d} x_{tj},\qquad
+\sigma_t^2 = \frac1d\sum_{j=1}^{d}(x_{tj}-\mu_t)^2,\qquad
+\hat x_{tj} = g_j\,\frac{x_{tj}-\mu_t}{\sqrt{\sigma_t^2+\epsilon}}+b_j .
+\]
+
+统计量只用到这一个位置自己的 \(d\) 个数。BatchNorm 则沿 batch 维统计，第 \(j\) 个特征的均值是这一批样本在该特征上的平均。差别看起来只是求和的下标换了个方向，后果却是决定性的。
+
+序列模型里 batch 维统计量根本靠不住。序列变长，同一 batch 里不同样本在时间步 \(t\) 上有的是真实 token、有的是 padding，参与统计的有效样本数逐步递减，靠后的时间步统计量噪声极大。自回归推理更直接：每次只生成一条序列，batch 就是 1，样本方差是 0。BatchNorm 只能改用训练期滑动平均的统计量，于是训练时和推理时跑的是两个不同的函数——这正是 \hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/03]{``归一化与 Dropout 改变训练时的随机系统''}反复强调的那个裂缝。LayerNorm 不跨样本，训练与推理是同一个确定性函数，batch 是 1 还是 1024 完全无关。
+
+在序列模型里选 LayerNorm 不是``它效果更好''，而是 BatchNorm 的前提在这里根本不成立。
+
+RMSNorm 把中心化那一步去掉，只保留缩放：
+
+\[
+\hat x_{tj} = g_j\,\frac{x_{tj}}{\sqrt{\frac1d\sum_{k}x_{tk}^2+\epsilon}} .
+\]
+
+省掉了求均值和减均值，也省掉了偏置 \(b\)。大量替换实验显示指标基本持平，很多大模型直接采用。这说明 LayerNorm 起作用的主要成分是尺度约束，中心化贡献有限——这是一条经验结论，来自替换实验的一致性，不是从哪个定理推出来的。
+
+\subsection{Pre-LN 与 Post-LN 是同一条通路的两种切法}
+
+归一化放在残差加法之前还是之后，只差一个位置，对那条恒等通路的影响却相反。
+
+\begin{center}
+\begin{tikzpicture}[scale=0.95]
+% ---------- Post-LN ----------
+\begin{scope}
+\node at (0,0.9) {\footnotesize Post-LN};
+\node[anchor=south] at (0,0.25) {\footnotesize \(x_l\)};
+\draw[->,>=stealth] (0,0.2) -- (0,-0.55);
+\node[draw,fill=black!8,minimum width=1.7cm,minimum height=0.6cm] (a1) at (0,-0.9) {\footnotesize 子层 \(F\)};
+\draw[->,>=stealth] (0,-1.25) -- (0,-1.9);
+\node[draw,circle,inner sep=1.2pt] (p1) at (0,-2.15) {\footnotesize \(+\)};
+\draw[->,>=stealth,line width=1.1pt] (0,-2.4) -- (0,-3.0);
+\node[draw,fill=black!22,minimum width=1.7cm,minimum height=0.6cm] (n1) at (0,-3.35) {\footnotesize LN};
+\draw[->,>=stealth] (0,-3.7) -- (0,-4.3);
+\node[anchor=north] at (0,-4.3) {\footnotesize \(x_{l+1}\)};
+% skip
+\draw[line width=1.1pt] (0,0.1) -- (-1.7,0.1) -- (-1.7,-2.15);
+\draw[->,>=stealth,line width=1.1pt] (-1.7,-2.15) -- (-0.28,-2.15);
+\node[anchor=east,align=right] at (-1.85,-1.1) {\footnotesize 恒等\\[-2pt]\footnotesize 支路};
+\draw[->,>=stealth,black!70] (1.9,-3.35) -- (1.0,-3.35);
+\node[anchor=west,align=left] at (1.9,-3.35) {\footnotesize 在这里被\\[-2pt]\footnotesize 重新缩放};
+\end{scope}
+% ---------- Pre-LN ----------
+\begin{scope}[shift={(7.6,0)}]
+\node at (0,0.9) {\footnotesize Pre-LN};
+\node[anchor=south] at (0,0.25) {\footnotesize \(x_l\)};
+\draw[->,>=stealth] (0,0.2) -- (0,-0.55);
+\node[draw,fill=black!22,minimum width=1.7cm,minimum height=0.6cm] (n2) at (0,-0.9) {\footnotesize LN};
+\draw[->,>=stealth] (0,-1.25) -- (0,-1.9);
+\node[draw,fill=black!8,minimum width=1.7cm,minimum height=0.6cm] (a2) at (0,-2.25) {\footnotesize 子层 \(F\)};
+\draw[->,>=stealth] (0,-2.6) -- (0,-3.1);
+\node[draw,circle,inner sep=1.2pt] (p2) at (0,-3.35) {\footnotesize \(+\)};
+\draw[->,>=stealth,line width=1.1pt] (0,-3.6) -- (0,-4.3);
+\node[anchor=north] at (0,-4.3) {\footnotesize \(x_{l+1}\)};
+% skip
+\draw[line width=1.1pt] (0,0.1) -- (-1.7,0.1) -- (-1.7,-3.35);
+\draw[->,>=stealth,line width=1.1pt] (-1.7,-3.35) -- (-0.28,-3.35);
+\node[anchor=east,align=right] at (-1.85,-1.6) {\footnotesize 恒等\\[-2pt]\footnotesize 支路};
+\draw[->,>=stealth,black!70] (1.9,-3.9) -- (0.9,-4.0);
+\node[anchor=west,align=left] at (1.9,-3.9) {\footnotesize 一路无阻挡};
+\end{scope}
+\end{tikzpicture}
+\end{center}
+
+\emph{粗线是恒等支路。Post-LN 里它汇合之后还要整体过一次 LN，从底层到顶层的直达通道被 \(L\) 个归一化逐段重新缩放；Pre-LN 里它从输入一直通到输出，中间不经过任何模块。两张图的唯一差别是 LN 的位置，决定的却是 \(\partial x_{l+1}/\partial x_l\) 里有没有那个干净的 \(I\)。}
+
+写成式子，Post-LN 是 \(x_{l+1}=\mathrm{LN}(x_l+F(x_l))\)，
+
+\[
+\frac{\partial x_{l+1}}{\partial x_l} = J_{\mathrm{LN}}\,(I+J_F).
+\]
+
+恒等项被 \(J_{\mathrm{LN}}\) 乘掉了。\(J_{\mathrm{LN}}\) 含一个 \(1/\sigma\) 因子和一个把去均值方向投影掉的算子，既不是单位阵也不保范数，\(L\) 层连乘之后主干上的``直达''已经名存实亡。这解释了为什么深的 Post-LN 模型对初期学习率极其敏感，必须靠 warmup 让参数先漂到一个 \(J_{\mathrm{LN}}\) 尺度合理的区域，否则前几百步就发散——正是本篇开头那个现象。
+
+Pre-LN 是 \(x_{l+1}=x_l+F(\mathrm{LN}(x_l))\)，
+
+\[
+\frac{\partial x_{l+1}}{\partial x_l} = I + J_F J_{\mathrm{LN}},
+\]
+
+恒等项原样保留。梯度尺度对层数不敏感，warmup 可以很短甚至省掉，学习率范围宽得多。几乎所有几十层以上的模型默认这么搭。
+
+代价也真实存在。Pre-LN 的主干 \(x_l\) 从头到尾没有被归一化过，方差随层数累加，而残差分支的输出 \(F(\mathrm{LN}(x_l))\) 因为经过 LN 而尺度稳定。两者相比，越深的层其分支贡献相对主干越小，深层逐渐趋近恒等映射——有效深度小于名义深度。在同等层数、同等预算下调好的 Post-LN 模型最终指标常常略优于 Pre-LN，这个差距在多组对比中稳定出现。实践里的折中是 Pre-LN 加一个最终的 LN，或者在残差分支上加可学习的缩放，把两头的好处各拿一部分。
+
+这是一个权衡，不是新方法取代旧方法：Post-LN 用更难的优化换更好的终点，Pre-LN 用略低的上限换可靠的收敛。选哪个取决于你有多少调参预算和模型有多深。
+
+到这里，注意力欠下的两笔账——位置和深度稳定性——都补上了。第三笔账没法用结构补，只能算清楚：分数矩阵是 \(n\times n\) 的，序列一长，账单就按平方涨。

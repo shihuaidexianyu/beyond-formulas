@@ -1,158 +1,128 @@
 \section{最大似然选择最能解释数据的参数}
 \label{sec:11-Mathematical-Statistics/02-Point-Estimation/03}
 
-矩估计把问题转化成``让样本特征等于总体特征，再反解参数''。它用汇总统计量做桥梁，不直接碰整个分布。但还有一条更直接的思路：在候选参数里，找一个让已观测数据``最不意外''的。
+代码评审里有人提了个 issue。拟合脚本给一批位移传感器读数拟合正态分布，日志打印 \texttt{loglik = 1246.5}。评审意见写着：概率不超过 \(1\)，对数不可能是正数，这里有 bug。
 
-什么叫``最不意外''？拿到观测 \(x_1,\ldots,x_n\)。对每个候选 \(\theta\)，模型 \(P_\theta\) 给这组数据分配了一个概率（离散情形）或概率密度（连续情形）。如果一个 \(\theta\) 赋予这组数据的概率密度远高于另一个 \(\theta'\)，那在``解释已看到的东西''这件事上，\(\theta\) 比 \(\theta'\) 更强。让这个值最大的那个 \(\theta\)，就是最大似然估计。
+没有 bug。读数以毫米为单位，量程窄，拟合出的 \(\hat\sigma=0.02\)。正态密度在峰值处是 \(1/(\hat\sigma\sqrt{2\pi})\approx 19.9\)，远大于 \(1\)。\(500\) 个观测各贡献大约 \(\log 19.9-0.5\approx 2.5\)，加起来正是一千二百多。把单位换成米，\(\hat\sigma\) 变成 \(2\times 10^{-5}\)，同一份数据的对数似然跳到四千七——数据没变，模型没变，只是刻度尺换了。
 
-给定观测 \(x = (x_1,\ldots,x_n)\)，似然函数把联合密度（或联合概率质量）视为参数的函数：
+这两件事——似然值可以大于 \(1\)，似然值本身随参数化改变——都不是意外，它们直接来自似然的定义。这一节讲清楚这个定义，以及为什么由它出发的估计方法成了从 logistic 回归到语言模型预训练的共同底座。
+
+\subsection{似然是参数的函数，不是参数上的分布}
+
+固定一组观测 \(x=(x_1,\dots,x_n)\)，模型族 \(\set{p_\theta}\) 里的每个 \(\theta\) 都给这组数据分配一个概率（离散情形）或一个密度值（连续情形）。把这个值看成 \(\theta\) 的函数，就是似然：
+
 \[
-L(\theta;x) = p_\theta(x).
+L(\theta;x)=p_\theta(x).
 \]
-注意写法：\(x\) 固定，\(\theta\) 在变。这不是参数的概率分布——没有先验时，\(L(\theta;x)\) 对 \(\theta\) 积分不要求等于 1，也不需要归一化。似然只是说：如果真实参数是 \(\theta\)，观测到这组数据的概率（密度）有多大。把它当作 \(\theta\) 的函数，比较不同 \(\theta\) 下数据出现的相对可能性。
 
-最大似然估计选取：
+符号和联合密度一模一样，读法完全相反。写 \(p_\theta(x)\) 时，\(\theta\) 固定、\(x\) 在变，它对 \(x\) 积分等于 \(1\)。写 \(L(\theta;x)\) 时，\(x\) 固定、\(\theta\) 在变，它对 \(\theta\) 积分等于什么，没有人规定——通常不是 \(1\)，而且在 \(\theta\) 无界的参数空间上可能根本发散。
+
+于是开头那个 issue 的两个疑点各自落地。连续模型下 \(L\) 是密度而非概率，密度只受``对 \(x\) 积分为一''的约束，任何一点上的取值都可以任意大，见\hyperref[sec:05-Probability/03-Random-Variables/03]{``连续分布、密度与分位数''}。至于换单位就变值，因为密度带量纲，量纲一换数值当然变——但两个 \(\theta\) 的似然之比是无量纲的，换单位不变。这暗示了正确的用法：似然的绝对值没有意义，比值才有。\(L(\theta_1;x)/L(\theta_2;x)=10\) 说的是，在这组数据上 \(\theta_1\) 的解释力是 \(\theta_2\) 的十倍。整个假设检验的一大支柱建立在这个比值上，见\hyperref[sec:11-Mathematical-Statistics/05-Hypothesis-Testing/03]{``似然比比较两个模型对数据的解释力''}。
+
+最大似然估计就是让这个函数取到峰的参数：
+
 \[
-\hat\theta_{\mathrm{MLE}} \in \argmax_{\theta\in\Theta} L(\theta;x).
+\hat\theta_{\mathrm{MLE}}\in\argmax_{\theta\in\Theta}L(\theta;x).
 \]
-它回答的问题是：在候选模型族中，哪个参数让已经发生的事实看起来最不令人惊讶？
 
-\subsection{为什么总是转到对数似然}
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \draw[->,black!65] (-0.35,0) -- (4.55,0) node[font=\footnotesize,black!70,right] {\(\theta\)};
+  \draw[->,black!65] (-0.35,0) -- (-0.35,3.05);
+  \node[font=\footnotesize,black!70,anchor=south,rotate=90] at (-0.62,1.30) {\(L(\theta;x)/L(\hat\theta;x)\)};
+  \draw[dashed,black!50] (2,0) -- (2,2.62);
+  \node[font=\footnotesize,black!70,anchor=north] at (2,-0.10) {\(\hat\theta\)};
+  \draw[black!32,line width=0.8pt]
+    plot[domain=0:4,samples=90] (\x,{2.4*exp(-0.889*(\x-2)*(\x-2))});
+  \draw[black!55,line width=0.9pt]
+    plot[domain=0.6:3.4,samples=80] (\x,{2.4*exp(-3.556*(\x-2)*(\x-2))});
+  \draw[black!88,line width=1.1pt]
+    plot[domain=1.3:2.7,samples=80] (\x,{2.4*exp(-14.22*(\x-2)*(\x-2))});
+  \node[font=\footnotesize,black!55,anchor=west] at (3.30,0.72) {\(n=10\)};
+  \node[font=\footnotesize,black!62,anchor=west] at (2.72,1.55) {\(n=40\)};
+  \node[font=\footnotesize,black!75,anchor=west] at (2.32,2.42) {\(n=160\)};
+  \draw[<->,black!55] (1.25,0.60) -- (2.75,0.60);
+  \node[font=\footnotesize,black!55,anchor=north] at (2.00,0.55) {宽度 \(\propto 1/\sqrt{n}\)};
+\end{tikzpicture}
 
-iid 样本的似然是 \(n\) 项乘积：
+\emph{同一个模型、样本量翻两番的三条似然曲线，都按各自的峰高归一；峰的位置回答``估计是多少''，峰的宽窄回答``这个估计有多可信''。}
+\end{center}
+
+图上纵轴写的是似然与峰值的比，因为绝对高度不可比、也不重要。三条曲线的峰几乎在同一位置，宽窄却差了四倍：样本从 \(10\) 涨到 \(160\)，曲线两侧塌下去的速度快了一个量级。宽度按 \(1/\sqrt{n}\) 收缩，这个速率后面还会再遇到一次。另外注意这三条曲线下的面积各不相同，也都不等于 \(1\)——横轴是参数不是数据，没有任何东西要求它们归一。
+
+\subsection{对数把连乘变连加，顺带救了浮点数}
+
+\(\iid\) 样本的似然是 \(n\) 项连乘，\(L(\theta;x)=\prod_i p_\theta(x_i)\)。这个形式在纸上没问题，在机器上是灾难。语言模型给单个 token 的概率量级常在 \(10^{-4}\)，一段一千 token 的文本，联合概率大约 \(10^{-4000}\)，而双精度浮点的最小非零值在 \(10^{-308}\) 附近。乘到第八十个 token 就已经是零，后面九百多项乘的都是零。
+
+取对数，因为 \(\log\) 严格单调，峰的位置一个不动：
+
 \[
-L(\theta;x) = \prod_{i=1}^n p_\theta(x_i).
+\ell(\theta;x)=\sum_{i=1}^n\log p_\theta(x_i).
 \]
-每一项都是 0 到 1 之间的数（密度可以大于 1，但乘积在 \(n\) 大时以极高概率趋近于零）。\(0.6^{100} \approx 6.5\times 10^{-23}\)——还没算完就已经下溢成零，浮点精度完全兜不住。数值上，概率乘积是灾难。
 
-取对数，最大化点不变——\(\log\) 严格单调递增：
+连乘变连加，量级从 \(10^{-4000}\) 变成 \(-9200\) 左右，浮点数轻松装下。求导也跟着变简单：连乘的导数要用 \(n\) 项乘积法则，连加的导数就是 \(n\) 个导数相加。整个训练流程从头到尾待在对数域里，softmax、交叉熵、logsumexp 都是这条原则的具体实现，通用的改写手法见\hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/01]{``在对数域中稳定计算概率''}。
+
+\subsection{两个能一路解到底的例子}
+
+\(X_i\sim\Bernoulli(\theta)\)，记 \(S=\sum_i X_i\)。对数似然与它的导数是
+
 \[
-\ell(\theta;x) = \log L(\theta;x) = \sum_{i=1}^n \log p_\theta(x_i).
+\begin{aligned}
+\ell(\theta)&=S\log\theta+(n-S)\log(1-\theta),\\
+\ell'(\theta)&=\frac{S}{\theta}-\frac{n-S}{1-\theta},
+\end{aligned}
 \]
-乘积变求和。没有下溢。求导时：
+
+令 \(\ell'=0\) 解出 \(\hat\theta=S/n=\bar X\)。条件对账：这个推导要求 \(\theta\in(0,1)\) 开区间，且 \(0<S<n\)。全部成功或全部失败时导数在开区间内不过零，峰落在边界上，得直接比较 \(\theta=0\) 与 \(\theta=1\) 两个端点的似然。这不是边角料——线上做 A/B 时某个分层零转化是常事，无约束优化器在那里会一路推向边界然后报奇怪的错。
+
+上一节的矩估计在 Bernoulli 上给出同一个 \(\bar X\)，两条路线在这里重合。换成正态就分开了。\(N(\mu,\sigma^2)\) 的对数似然
+
 \[
-\frac{\partial}{\partial\theta}\prod_i p_\theta(x_i)
-\quad\text{vs}\quad
-\frac{\partial}{\partial\theta}\sum_i \log p_\theta(x_i).
+\ell(\mu,\sigma^2)=-\frac{n}{2}\log(2\pi\sigma^2)-\frac{1}{2\sigma^2}\sum_i(x_i-\mu)^2
 \]
-前者是 \(n\) 项乘积法则的噩梦，后者是 \(n\) 项简单相加。所有实际计算都在对数尺度上完成。
 
-似然的直觉不是概率本身：在连续模型中，任何一组具体 \(x\) 的概率都严格为零（积分在零测集上消失）。似然比较的是密度高度——两个 \(\theta\) 在观测点上的相对密度之比。如果 \(L(\theta_1;x)/L(\theta_2;x) = 10\)，意思是``在这组数据上，\(\theta_1\) 的解释力是 \(\theta_2\) 的 10 倍''。这不是概率的比值，而是证据的权重。
+对 \(\mu\) 求偏导得 \(\hat\mu=\bar x\)，与 \(\sigma^2\) 无关；把 \(\sigma^2\) 当作一个整体参数求偏导并令零，得
 
-\subsection{Bernoulli MLE}
-
-设 \(X_i \sim \operatorname{Bernoulli}(\theta)\)，令 \(S = \sum_i X_i\)，则：
 \[
-L(\theta) = \theta^S (1-\theta)^{n-S}.
+\hat\sigma^2_{\mathrm{MLE}}=\frac1n\sum_i(x_i-\bar x)^2 .
 \]
-对 \(0<\theta<1\)：
+
+分母是 \(n\)。这个 \(n\) 常被当成笔误改掉，它不是。最大似然的目标是让手上这份数据在模型下最不意外，无偏性根本不在这个目标函数里。由恒等式 \(\sum_i(X_i-\bar X)^2=\sum_i(X_i-\mu)^2-n(\bar X-\mu)^2\) 取期望得 \((n-1)\sigma^2\)，所以 \(\E[\hat\sigma^2_{\mathrm{MLE}}]=\frac{n-1}{n}\sigma^2\)，系统性低估，偏差是 \(-\sigma^2/n\)。\(n=10\) 时平均低估一成；拿这个方差去定报警阈值，阈值会偏窄，误报率比设计值高。换成 \(n-1\) 做分母能修掉偏差，但那个估计不再是似然的峰。两条评价原则给出两个答案，选哪个取决于这个数字接下来要拿去做什么。
+
+\subsection{训练目标本来就是负对数似然}
+
+把模型改成条件形式 \(p_\theta(y\given x)\)，最大似然写成最小化：
+
 \[
-\ell(\theta) = S\log\theta + (n-S)\log(1-\theta).
+\hat\theta=\argmin_\theta\ -\frac1n\sum_{i=1}^n\log p_\theta(y_i\given x_i).
 \]
-Score（对数似然的一阶导）：
+
+这就是经验风险最小化，损失恰好取成负对数似然。常见的训练目标基本都是这个式子的特例。分类模型里 \(p_\theta(\cdot\given x_i)\) 是 softmax 输出，\(-\log p_\theta(y_i\given x_i)\) 正是真实标签的独热分布与预测分布之间的交叉熵，两者不是``很像''，是同一个表达式，见\hyperref[sec:07-Information-Theory/03-Divergences/01]{``错误模型的代价：从交叉熵到 KL 散度''}。回归模型假设 \(y_i=f_\theta(x_i)+\varepsilon_i\)、\(\varepsilon_i\sim N(0,\sigma^2)\)，负对数似然去掉常数就是平方损失除以 \(2\sigma^2\)；把噪声换成 Laplace，出来的是绝对误差损失。损失函数与噪声模型的这层对应关系，见\hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/03]{``目标函数与噪声模型的对应：从生成机制到优化目标''}。
+
+这个视角有实际用处：选损失函数就是在声明噪声的分布。谁都知道平方损失怕离群点，从似然角度看原因是明摆着的——高斯尾巴衰减太快，一个远点在它眼里概率低到必须靠挪动整条曲线来解释。想要稳健，就换一个厚尾的噪声模型，Huber 损失差不多就是这么来的。
+
+MLE 还有一条性质在工程上很省事：参数变换下不变。若 \(\eta=g(\theta)\) 是一一映射，则 \(\hat\eta_{\mathrm{MLE}}=g(\hat\theta_{\mathrm{MLE}})\)。换参数化只是给同一族分布换标签，似然的排序不会变，所以不必为 \(\log\sigma\) 和 \(\sigma\) 各优化一次。下一节的 MAP 没有这条性质，原因也在下一节交代。
+
+\subsection{渐近最优是一张大样本的期票}
+
+回到那张图。峰的宽度按 \(1/\sqrt{n}\) 收缩，这个速率是有定理撑着的。在一组正则条件下——真参数落在参数空间内部、密度对参数光滑、模型可识别、Fisher 信息有限且非奇异——MLE 一致，且
+
 \[
-\ell'(\theta) = \frac{S}{\theta} - \frac{n-S}{1-\theta}.
+\sqrt n\,(\hat\theta_n-\theta_0)\overset{d}{\longrightarrow}N\bigl(0,\,I(\theta_0)^{-1}\bigr).
 \]
-令其为零：
-\[
-\frac{S}{\theta} = \frac{n-S}{1-\theta}
-\;\Longrightarrow\;
-\hat\theta = \frac{S}{n} = \bar X.
-\]
-结果与矩估计相同。在 Bernoulli 模型上，两条构造路径汇合到同一个估计量——不是因为一种方法包含了另一种，而是因为这个模型恰好让矩方程（匹配均值）和似然方程（score 零点）重叠。
 
-二阶导数为负，内部驻点是极大值。但注意边界：如果 \(S=0\)（全不合格）或 \(S=n\)（全合格），内部驻点不存在——score 不会在 \((0,1)\) 内过零。MLE 在边界上需要直接比较端点值 \(\theta=0\) 和 \(\theta=1\) 处的似然。边界是完整优化问题的一部分，不能只依赖在开区间内求导。
+\(I(\theta_0)\) 是 Fisher 信息，等于对数似然曲率的期望，也就是那条曲线在峰附近有多陡。曲率大意味着稍微挪动参数似然就掉得厉害，数据把参数钉得紧；曲率平意味着一大片参数值对数据的解释力差不多，估计自然晃。这条链路的严格版本在\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}里展开。渐近方差 \(I(\theta_0)^{-1}/n\) 恰好达到 Cramér--Rao 下界，所以 MLE 渐近有效，见\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/03]{``Cramér--Rao 界给无偏估计设下限''}。
 
-\subsection{正态 MLE 与``分母为什么是 \(n\)''}
+一致、渐近正态、渐近有效，三条听起来无懈可击，但它们都带一个前缀。正态方差那个 \(-\sigma^2/n\) 的偏差就在这里：渐近上它趋于零，\(n=10\) 时它是一成。承诺在 \(n\to\infty\) 处兑现，报表交付在 \(n=10\) 处。
 
-对 \(N(\mu,\sigma^2)\) iid 样本：
-\[
-\ell(\mu,\sigma^2) = -\frac{n}{2}\log(2\pi\sigma^2)
-                     - \frac{1}{2\sigma^2}\sum_i (x_i-\mu)^2.
-\]
-对 \(\mu\) 求偏导：
-\[
-\frac{\partial\ell}{\partial\mu} = \frac{1}{\sigma^2}\sum_i (x_i-\mu),
-\]
-令零得 \(\hat\mu = \bar x\)。均值的 MLE 不依赖方差——在正态模型下，不管 \(\sigma^2\) 是多少，最佳猜测始终是样本均值。
+前提失效的场合也不少见。真参数落在边界上时（方差分量为零、混合权重为零），Taylor 展开的前提就没了，抽样分布不再是正态。混合模型和隐 Markov 模型的分量标签可以互换，参数不可识别，信息矩阵奇异。高维回归里参数维度随 \(n\) 一起长，经典渐近框架整个不适用。模型错设时 MLE 仍会收敛，但收敛到 KL 散度意义下最接近真实分布的那个伪真参数，此时 \(I^{-1}\) 给出的方差是错的，需要三明治估计做修正。把``大样本下 MLE 渐近正态''当口号背，等于把这一串前提一起丢掉。
 
-代入 \(\hat\mu\) 后对 \(\sigma^2\) 求偏导（把 \(\sigma^2\) 作为一个整体参数，不分两步取平方根）：
-\[
-\frac{\partial\ell}{\partial\sigma^2}
-= -\frac{n}{2\sigma^2} + \frac{1}{2\sigma^4}\sum_i (x_i-\bar x)^2,
-\]
-令零：
-\[
-\hat\sigma^2_{\mathrm{MLE}} = \frac{1}{n}\sum_i (x_i-\bar x)^2.
-\]
-分母是 \(n\)，不是 \(n-1\)。
+\subsection{峰可能不存在，也可能不止一个}
 
-这不是笔误，也不是``近似''。MLE 的使命是最大化似然——找到让已观测数据在模型下最不意外的参数值。无偏性不在它的目标函数里。由恒等式：
-\[
-\sum_i (X_i-\bar X)^2 = \sum_i (X_i-\mu)^2 - n(\bar X-\mu)^2,
-\]
-取期望得 \(n\sigma^2 - \sigma^2 = (n-1)\sigma^2\)，因此：
-\[
-\E[\hat\sigma^2_{\mathrm{MLE}}] = \frac{n-1}{n}\sigma^2,
-\]
-有限样本中略向下偏。使用 \(n-1\) 得无偏估计，但那个估计不再是原似然的最大点。
+最大似然是个优化问题，优化问题的通病它一样不少。
 
-``MLE''和``无偏''是两条不同的评价原则，不能用一个术语替代另一个。MLE 追求似然最优——它不关心期望偏差；无偏追求期望准确——它不关心似然排序。正态方差恰好让两个目标给出不同答案，这种分歧在其他模型中也反复出现。
+Gaussian 混合模型有一个著名的病态：让某个分量的方差趋于零、均值对准某个样本点，那一点的密度可以任意大，似然发散到无穷。这个模型的 MLE 不存在。优化器一路往下跑不停，日志上看是损失持续下降，看着像训练顺利。这类症状和\hyperref[sec:09-Convex-Optimization/07-Applications/01]{``光滑经验风险与 \(L_2\) 正则化''}里线性可分时 logistic 回归参数范数发散是同一种毛病——凸性或光滑性保证不了最优解存在，需要额外的约束或惩罚把解拉回有限处。
 
-\subsection{Score、曲率与信息}
+非凸和多峰则是复杂模型的常态。算法停在一个驻点，只说明梯度小了，不说明这是全局峰。多组初值、profile likelihood、把似然面沿着关心的那几个方向切一刀画出来，都是必要的功课。报告里区分开``算法没找到''和``峰根本不存在''，比报告一个终止时的参数值有用得多。
 
-Score 定义为对数似然的梯度：
-\[
-U(\theta) = \nabla_\theta \ell(\theta).
-\]
-在内部极大点，\(U(\hat\theta) = 0\)——score 方程是 MLE 的一阶必要条件。
-
-负 Hessian：
-\[
--\nabla_\theta^2 \ell(\theta)
-\]
-衡量对数似然在 \(\theta\) 处的曲率。峰越尖，参数在局部越容易被数据区分——稍微偏离极大点，似然就迅速下降。曲率大意味着数据``锁定''参数的能力强，曲率平意味着数据对参数的区分力弱。
-
-这个曲率（取期望后）就是 Fisher 信息，它是 MLE 渐近方差的逆——峰越尖，估计越精确。下一单元将严格展开这一串关系。
-
-MLE 有一个值得一提的不变性：如果 \(\eta = g(\theta)\) 是一一参数变换，那么 \(\hat\eta_{\mathrm{MLE}} = g(\hat\theta_{\mathrm{MLE}})\)。因为换参数只是给同一个分布换标签，似然的排序不变。这不是数学巧合——它意味着你不需要为不同的参数化重新优化。Bayesian 的后验众数（MAP）一般不具有这个性质，因为先验密度在参数变换下不保持。
-
-\subsection{大样本优良性质有前提}
-
-在正则条件下——真参数在参数空间内部、模型光滑、可识别、Fisher 信息有限且非奇异——MLE 一致且渐近正态：
-\[
-\sqrt{n}(\hat\theta - \theta_0) \overset{d}{\longrightarrow} N(0, I(\theta_0)^{-1}),
-\]
-其中 \(I(\theta_0)\) 为 Fisher 信息矩阵。这一结果把 MLE 放在了渐近最优的位置：在正则条件下，不存在一致估计量能有比 \(I(\theta_0)^{-1}\) 更小的渐近方差。
-
-但这些条件不是装饰。它们会失败：
-\begin{itemize}
-\tightlist
-\item 边界参数：真 \(\theta_0\) 在 \(\Theta\) 的边界上，展开和正态逼近失效；
-\item 混合模型、隐 Markov 模型：分量标签可交换导致不可识别，或信息矩阵奇异；
-\item 参数维度随 \(n\) 增长（高维回归的 \(p \gg n\)）：经典渐近理论不适用；
-\item 重尾分布：矩不存在，信息可能无限或为零，常规渐近框架站不住。
-\end{itemize}
-``大样本下 MLE 渐近正态''是对 MLE 性质的常见总结，但它不是独立定理——是一组前提的结论。忘掉前提就只剩口号。
-
-\subsection{似然可能无界，MLE 可能不存在}
-
-Gaussian 混合模型中的一个典型病态：让某个分量的方差趋零并对准单个样本点，该点的密度可以任意大，似然发散到 \(+\infty\)。此时 MLE 根本不存在——没有有限的参数值达到最大似然。优化器发散不一定是代码有 bug，可能是模型本身的数学结构没有定义良好的 MLE。
-
-似然的多峰也是常态。复杂模型的 log-likelihood 几乎必然非凸，有多个局部极大。算法停在一个驻点，不等于找到了全局 MLE。两者之间的距离，没有任何通用定理替你弥合。
-
-\subsection{模型错设与数值优化}
-
-如果真实分布不在模型族中，MLE 仍可能收敛——收敛到在 KL 散度意义下最接近真实分布的伪真参数。此时普通的 Fisher 信息逆不再给出正确的渐近方差。需要 sandwich variance estimator 做稳健修正——用观测信息矩阵夹住 score 外积，校正模型错设带来的方差膨胀。
-
-数值实现中的若干提醒：
-\begin{itemize}
-\tightlist
-\item 始终使用 log-likelihood，不要碰概率乘积——下溢是一个会真实发生的数值灾难；
-\item 对概率和协方差参数使用稳定参数化——log-尺度、logit 变换、Cholesky 分解；
-\item 显式检查参数空间边界与约束——不要只依赖无约束优化器加裁切；
-\item 报告优化终止状态、梯度和 Hessian 条件数——区分``算法没找到''和``MLE 不存在''；
-\item 多组初值、profile likelihood、对似然面的可视化检查——非凸优化的基本功。
-\end{itemize}
-
-复杂模型的 log-likelihood 面值得你花时间去理解。看不到的面，优化器替你做了决定，但你不知道它做的是不是你想做的那个决定。
+至此估计量完全由数据决定：似然峰在哪儿，答案就在哪儿。可实际工作中，动手之前往往已经知道点什么——退货率不会是 \(0\%\)，回归系数不会大到 \(300\)，某个分组的转化率大概率贴近全站均值。本单元开头那个把估计往全站均值拉一半的做法，是把这类信息硬塞进估计量；下一节给它一个正式的位置：把先验乘进似然，再取峰。

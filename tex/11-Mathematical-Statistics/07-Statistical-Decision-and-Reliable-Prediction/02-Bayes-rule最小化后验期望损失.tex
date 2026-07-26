@@ -1,78 +1,109 @@
 \section{Bayes rule 最小化后验期望损失}
 \label{sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/02}
 
-给未知状态加入 prior \(\pi(\theta)\) 后，观察 \(X=x\) 得到 posterior \(\pi(\theta\mid x)\)。Bayesian 决策直接为每个候选行动计算后验期望损失，无须先把 posterior 压成一个``最佳参数''：
+阈值该定在哪，是模型上线前最后一个、也最常被随手处理的问题。常见的三种答案是：用默认的 \(0.5\)；扫一遍验证集，取 F1 最高的那个点；或者让运营先试一周再说。三种都能给出一个数，都不需要回答``一次漏检比一次误报贵多少''。
+
+这一节给的答案只需要回答那一个问题。做法是把``给出概率''和``做出决定''拆成两步：第一步算后验，与代价无关；第二步按损失挑行动，与数据无关。拆开之后，阈值有闭式解，而且只依赖损失的比值。
+
+\subsection{先算后验，再按损失挑行动}
+
+给未知状态配上先验 \(\pi(\theta)\)，观测到 \(X=x\) 后得到后验 \(\pi(\theta\given x)\)。对每个候选行动，把损失在后验下取期望，得到后验期望损失
 
 \[
-\rho(a\mid x)
-=
-\E\!\left[L(\theta,a)\mid X=x\right].
+\rho(a\given x)=\E\!\left[L(\theta,a)\given X=x\right],
 \]
 
-Bayes rule 选择
+Bayes rule 就是逐点取最小的那个行动：
 
 \[
-\delta_\pi(x)
-\in
-\argmin_{a\in\mathcal A}
-\rho(a\mid x).
+\delta_\pi(x)\in\argmin_{a\in\mathcal A}\ \rho(a\given x).
 \]
 
-Posterior 描述仍可能的状态，损失决定这些状态怎样影响行动。只报告 posterior 而不说明行动代价，仍没有完成决策。
+这里没有``先把后验压成一个最佳参数、再拿它当真值去决策''这道工序。后验描述的是还有哪些状态没被排除，损失决定这些状态各自该被计多重的分量，两者在同一个积分里相遇。反过来说，只交付一个后验分布或一列概率而不写明行动代价，决策并没有完成，只是把最后一步转移给了下游那个未必知情的人。
 
-\subsection{Posterior mean 来自平方损失}
+分类问题里这个式子摊开就是一行算术：类别 \(y\) 的后验概率为 \(P(y\given x)\)，行动 \(a\) 的期望损失是 \(\sum_y L(y,a)P(y\given x)\)，取最小的那个 \(a\)。多分类、多种处置方式、行动数与类别数不相等，都套这一行。
 
-令 \(m(x)=\E[\theta\mid X=x]\)。平方损失下
+\subsection{阈值由损失比决定，与 0.5 没有关系}
+
+二分类是最常用的特例。记 \(p=P(y=1\given x)\)，行动集是拦截与放行，误报代价 \(c_{\mathrm{FP}}\)，漏检代价 \(c_{\mathrm{FN}}\)，判对不计代价。两个行动的后验期望损失是
+
+\[
+\rho(\text{拦截}\given x)=c_{\mathrm{FP}}(1-p),
+\qquad
+\rho(\text{放行}\given x)=c_{\mathrm{FN}}\,p .
+\]
+
+比较两式，拦截当且仅当
+
+\[
+p\ \ge\ t^\ast=\frac{c_{\mathrm{FP}}}{c_{\mathrm{FP}}+c_{\mathrm{FN}}}
+=\frac{1}{1+c_{\mathrm{FN}}/c_{\mathrm{FP}}} .
+\]
+
+阈值只依赖比值 \(c_{\mathrm{FN}}/c_{\mathrm{FP}}\)。这一点在实践中很省事：让业务方给出两笔代价的绝对金额往往要开三次会，而问``漏一个比误报一个严重多少倍''，多数人当场能给出一个数量级，量级正是这个公式需要的全部输入。
+
+\begin{center}
+\begin{tikzpicture}[font=\footnotesize,>=stealth]
+  \begin{scope}[x=3.1cm,y=1.9cm]
+    \draw[->,black!70] (-0.04,0) -- (1.16,0) node[below] {\(p\)};
+    \draw[->,black!70] (0,-0.05) -- (0,1.2) node[above,anchor=south west] {期望损失};
+    \draw[black!85,thick] (0,1) -- (1,0);
+    \draw[black!85,thick,dashed] (0,0) -- (1,1);
+    \draw[black!40] (0.5,0) -- (0.5,0.5);
+    \node[anchor=north,black!60] at (0.5,-0.04) {\(t^\ast=0.5\)};
+    \node[anchor=east,black!85] at (0.98,0.12) {拦截};
+    \node[anchor=west,black!85] at (0.62,0.95) {放行};
+    \node[anchor=north,black!70] at (0.5,-0.28) {\(c_{\mathrm{FN}}=c_{\mathrm{FP}}\)};
+  \end{scope}
+  \begin{scope}[shift={(5.4,0)},x=3.1cm,y=1.9cm]
+    \draw[->,black!70] (-0.04,0) -- (1.16,0) node[below] {\(p\)};
+    \draw[->,black!70] (0,-0.05) -- (0,1.2) node[above,anchor=south west] {期望损失};
+    \draw[black!85,thick] (0,0.125) -- (1,0);
+    \draw[black!85,thick,dashed] (0,0) -- (1,1);
+    \draw[black!40] (0.111,0) -- (0.111,0.111);
+    \node[anchor=north west,black!60] at (0.08,-0.04) {\(t^\ast\approx 0.11\)};
+    \node[anchor=west,black!85] at (0.66,0.18) {拦截};
+    \node[anchor=west,black!85] at (0.62,0.95) {放行};
+    \node[anchor=north,black!70] at (0.5,-0.28) {\(c_{\mathrm{FN}}=8c_{\mathrm{FP}}\)};
+  \end{scope}
+\end{tikzpicture}
+
+\emph{两个行动的期望损失都是 \(p\) 的直线，交点就是阈值。漏检变贵，实线整条压低，交点向左滑；概率模型一个字没改。}
+\end{center}
+
+图里值得盯住的是右边那幅：交点从 \(0.5\) 滑到 \(0.11\)，两条直线的斜率与截距全由代价决定，横轴上的 \(p\) 来自模型，纵轴上的高度来自业务。上一节开头那家风控团队的数字代进去，\(c_{\mathrm{FP}}=20\)、\(c_{\mathrm{FN}}=8000\)，阈值是 \(20/8020\approx 0.0025\)，交点已经贴到纵轴上了。把线上阈值从 \(0.5\) 改成 \(0.0025\)，模型不用重训，代码改一个常数。
+
+代价换一组，结论跟着换。门诊里安排一次额外检查的代价约 \(600\) 元加一次不算轻的等待，漏掉一次早期病变按赔付与预后折算到 \(1.5\) 万元，比值 \(25\)，阈值 \(1/26\approx 0.038\)：后验概率超过 \(3.8\%\) 就该查。营销外呼那头则相反，打扰一次用户记 \(3\) 元，错失一次成单少赚 \(50\) 元，阈值 \(3/53\approx 0.057\)。三个场景阈值都远离 \(0.5\)，而且没有一个是靠扫验证集扫出来的。
+
+两个附加条件要对账。其一，公式里的 \(p\) 必须是校准过的概率：\(p=0.0025\) 得当真意味着``这样的一千笔里约有两三笔是欺诈''，否则阈值只是一个数值刻度，字面含义已经丢了，这件事第四节专讲。其二，\(p\ge t^\ast\) 的样本量得对得上处置能力，风控日流水十万笔时，\(0.25\%\) 的命中率意味着每天两百多条要人处理，第六节把容量作为约束正式接进来。
+
+\subsection{损失变一下，最优行动就换一个}
+
+连续参数上同一套逻辑给出几个熟脸。平方损失下，记 \(m(x)=\E[\theta\given X=x]\)，有
 
 \[
 \begin{aligned}
-\E\!\left[(\theta-a)^2\mid X=x\right]
-&=
-\Var(\theta\mid X=x)
-+\bigl(m(x)-a\bigr)^2.
+\E\!\left[(\theta-a)^2\given X=x\right]
+&=\Var(\theta\given X=x)+\bigl(m(x)-a\bigr)^2 ,
 \end{aligned}
 \]
 
-第一项不依赖 \(a\)，所以最优行动是 posterior mean。这个结论来自平方损失对大误差的二次惩罚，并不说明均值天然更``真实''。
+第一项与 \(a\) 无关，最优行动是后验均值。这个结论来自平方项对大偏差的加倍惩罚，不说明均值比别的位置更接近真相。绝对损失下任一后验中位数最优；状态离散且用 0-1 损失时后验众数最优。
 
-Absolute loss 下，任一 posterior median 最优；若状态是离散的并使用 0--1 loss，posterior mode 最优。连续参数上的点对点 0--1 loss 几乎处处相同，不能用这条结论无条件为连续 MAP 辩护。MAP 还依赖参数化，而 posterior mean 与 median 也分别随损失和坐标改变。
+最后这条常被拿来给连续参数的 MAP 撑腰，撑不住：连续参数上点对点的 0-1 损失几乎处处相等，最优行动无从定义，MAP 还随参数化改变——对 \(\theta\) 取众数和对 \(\log\theta\) 取众数会落在不同的地方，而后验均值与中位数各自也只在自己那个损失下最优。这些点估计之间的差别在\hyperref[sec:11-Mathematical-Statistics/02-Point-Estimation/04]{``MAP 把先验与似然合在一个点上''}里已经比过一轮，那里讨论的是估计，这里的读法是：它们是三个不同决策问题的解，选哪个由损失说了算。
 
-\subsection{同一个 posterior 可以产生不同正确行动}
+\subsection{Bayes 最优不等于对每个状态都最优}
 
-设 \(Y\in\{0,1\}\)，看到数据后患病概率为 \(p\)。行动 \(a=1\) 表示进一步检查，\(a=0\) 表示不检查。若不必要检查损失为 \(c_{10}\)，漏诊损失为 \(c_{01}\)，则两项后验风险是
-
-\[
-\rho(1\mid x)=c_{10}(1-p),
-\qquad
-\rho(0\mid x)=c_{01}p.
-\]
-
-选择检查当且仅当
+规则 \(\delta\) 的 Bayes 风险是频率风险按先验的平均：
 
 \[
-p>
-\frac{c_{10}}{c_{01}+c_{10}}.
+r(\pi,\delta)=\int_\Theta R(\theta,\delta)\,\pi(\theta)\,\mathrm d\theta .
 \]
 
-概率没有改变，代价改变就会改变阈值。把所有概率大于 \(1/2\) 的对象判为阳性，只对应两种错误代价相同的特殊情形。
+逐个 \(x\) 最小化后验期望损失，同时也最小化了这个平均，这是 Bayes rule 值得一用的形式理由。两种风险之间没有立场冲突：同一条规则既有对每个固定 \(\theta\) 的风险曲线，也有按先验加权后的一个数。
 
-\subsection{Bayes risk 是对频率风险的 prior 平均}
+代价藏在``平均''二字里。先验质量小的区域可以被牺牲掉，换取高先验区域的改善，所以 Bayes 最优的规则在某些 \(\theta\) 上可以相当难看。若先验是真实的历史频率，这笔交换划算；若先验只是为了共轭好算而选的，就该做先验预测检查与敏感性分析，把先验在合理范围内挪一挪，看行动是否翻转。行动翻转说明结论是先验撑起来的，不是数据。
 
-规则 \(\delta\) 的 Bayes risk 为
+还有一点在近似推断里容易吃亏。完整后验难算时，人们用变分近似或采样代替，评价近似质量看的是 ELBO 或全局 KL。但决策只用到后验的一小部分信息——某个期望、某个尾概率、两个行动的损失差。近似在全局指标上看着不错，尾部质量丢一点，稀有但昂贵的那个行动就可能被翻掉。可行的做法是直接用后验样本估各行动的 \(\rho(a\given x)\)，并按最终决策而不是全局拟合指标来验收近似。
 
-\[
-r(\pi,\delta)
-=
-\int_\Theta
-R(\theta,\delta)\,\pi(\theta)\,d\theta.
-\]
-
-逐个 \(x\) 最小化后验期望损失，也会最小化这项 prior 平均风险。这里没有频率风险与 Bayesian 决策的逻辑冲突：同一规则既有每个固定 \(\theta\) 下的风险曲线，也有按 prior 加权后的平均。
-
-Bayes 最优不表示对每个 \(\theta\) 都最优。prior 质量很小的区域可以承担较大风险，以换取高 prior 区域的改善。若 prior 只是计算方便而非可信知识，应做 prior predictive check 和敏感性分析，并展示改变合理 prior 后行动是否翻转。
-
-\subsection{决策所需 posterior 可能比参数估计简单}
-
-有时完整 posterior 难算，但行动只依赖某个 posterior expectation、tail probability 或损失差。Monte Carlo 可以直接估计各行动的后验风险，而不必先寻找一个代表全部 posterior 的点。
-
-反过来，posterior 近似在 KL 或 ELBO 上看似不错，也不保证关键决策风险准确。若损失主要集中在稀有尾部，漏掉少量 posterior tail mass 就可能改变行动。近似推断的质量应按最终需要的函数量和损失检查，而不只看一个全局拟合指标。
+按先验平均是收拢风险曲线的一种方式，不是唯一的方式。下一节换成盯住曲线的最高点，看看由此得到的规则与 Bayes rule 差在哪里，以及怎样判断一条规则该不该留在候选名单上。

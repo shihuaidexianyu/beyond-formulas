@@ -92,7 +92,7 @@ Gauss--Kronrod 就是为这笔账设计的补丁。它在 \(n\) 个 Gauss 节点
 前面讨论的都是固定网格：节点在哪由公式决定，与被积函数长什么样无关。可被积函数的困难往往集中在很小的一块。
 
 \begin{center}
-\begin{tikzpicture}[x=1.6cm,y=1.5cm,font=\small,>=stealth]
+\begin{tikzpicture}[x=1.7cm,y=1.5cm,font=\small,>=stealth]
   \draw[black!30] (-0.05,0) -- (4.2,0);
   \draw[black!45] (0,0) -- (0,1.55);
   \draw[black!85,very thick] plot[smooth] coordinates {
@@ -101,9 +101,9 @@ Gauss--Kronrod 就是为这笔账设计的补丁。它在 \(n\) 个 Gauss 节点
     (2.9,0.406) (3.0,0.283) (3.1,0.255) (3.2,0.250) (3.6,0.250) (4.0,0.250)};
   \draw[black!35,dashed] (2.2,0) -- (2.2,1.45);
   \draw[black!35,dashed] (3.0,0) -- (3.0,1.45);
-  \foreach \t in {0,0.25,...,4} \fill[black!70] (\t,-0.30) circle (1.6pt);
-  \foreach \t in {0,0.5,1,1.5,2,2.2,2.35,2.45,2.5,2.55,2.6,2.65,2.7,2.75,2.85,3,3.2,3.6,4}
-    \fill[blue!75] (\t,-0.62) circle (1.6pt);
+  \foreach \t in {0,0.25,...,4} \fill[black!70] (\t,-0.30) circle (1.4pt);
+  \foreach \t in {0,0.6,1.2,1.8,2.1,2.2,2.3,2.375,2.45,2.525,2.6,2.675,2.75,2.825,2.9,3,3.2,3.6,4}
+    \fill[blue!75] (\t,-0.62) circle (1.4pt);
   \node[right,font=\footnotesize,black!75] at (4.15,-0.30) {均匀 \(17\) 点};
   \node[right,font=\footnotesize,blue!75] at (4.15,-0.62) {自适应 \(19\) 点};
   \node[font=\footnotesize,black!70] at (1.05,1.15) {平坦段};

@@ -1,20 +1,41 @@
-上一单元确认了：条件合适时，初值问题有唯一解，解是一族互不相交的曲线。这一单元换一个问题——不写出解的公式，能否说出解的长期去向？答案是把解当作状态空间中的几何对象来研究：轨迹流向哪里、在哪里停住、绕什么打转，这些问题可以不依赖公式回答。
+上一单元确认了一件事：条件合适时初值问题有唯一解，解是一族互不相交的曲线。这一单元换个问法——不写出解的公式，能不能说出它的长期去向？
 
-\begin{enumerate}
-\tightlist
-\item
-  相平面：把解画成几何：二维自治系统的向量场与轨迹，不动点按线性化特征值分类，极限环作为系统自产的周期行为。
-\item
-  稳定性与 Lyapunov 函数：线性化失效的临界情形下，用一个沿轨迹单调下降的``能量''函数证明稳定，并把梯度流与优化算法接上。
-\item
-  离散动力系统、分岔与混沌：迭代映射的不动点判据，Logistic 映射从稳定到倍周期再到混沌的完整剧情，以及对初值敏感为何让长期预测失效。
-\end{enumerate}
+办法是把解当成状态空间里的几何对象：轨迹流向哪里、在哪里停住、绕着什么打转。这些问题都可以不依赖公式回答，而且往往只有这条路可走，因为绝大多数非线性方程根本没有公式。
 
-三节依次放弃的东西越来越多：第一节还要向量场的解析表达式，第二节只需一个能量函数，第三节只剩一条迭代规则——但保留的始终是同一个判断：系统长期去向哪里。
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+  \begin{scope}
+    \draw plot[domain=0:11,samples=70,variable=\t]
+      ({0.95*exp(-0.11*\t)*cos(\t r)},{0.95*exp(-0.11*\t)*sin(\t r)});
+    \fill (0,0) circle (1.5pt);
+    \node at (0,-1.35) {\small 相图看走向};
+  \end{scope}
+  \begin{scope}[shift={(3.0,0)}]
+    \draw[gray] (0,0) ellipse (1.0 and 0.7);
+    \draw[gray] (0,0) ellipse (0.55 and 0.385);
+    \draw[gray] (0,0) ellipse (0.2 and 0.14);
+    \draw[->,very thick] (0.98,0.18) -- (0.2,0.42);
+    \fill (0,0) circle (1.5pt);
+    \node at (0,-1.35) {\small 能量只降不升};
+  \end{scope}
+  \begin{scope}[shift={(6.0,0)}]
+    \draw[very thick] plot[smooth] coordinates {(-1.0,0) (-0.3,0.08) (0.2,0.35) (0.7,0.5) (1.0,0.95)};
+    \draw[very thick,dashed] plot[smooth] coordinates {(-1.0,0) (-0.3,-0.04) (0.2,-0.3) (0.7,-0.55) (1.0,-0.95)};
+    \fill (-1.0,0) circle (1.5pt);
+    \node at (0,-1.35) {\small 初值敏感};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\emph{三节各出一件工具：几何分类、单调下降的能量、以及对初值敏感所划出的预测边界。}
+
+第一节把二维自治系统画成向量场，用 Jacobi 矩阵的特征值给不动点分类，并引入极限环这种由系统自己定下振幅的周期行为。第二节处理线性化失声的临界情形：找一个沿轨迹单调下降的函数就能证明稳定，不必求解；顺带把梯度流与优化算法接进同一套语言。第三节把时间拧成离散，看 Logistic 映射从稳定定态一路走到倍周期与混沌，并解释确定性系统为何仍然会长期不可预测。
+
+三节依次放弃的东西越来越多：第一节还要向量场的解析表达式，第二节只需一个能量函数，第三节只剩一条迭代规则。始终保留的是同一个判断——系统的长期去向。
 
 \subsection{怎么读这一章}
 
-首次阅读先掌握三件事：线性化只在双曲平衡点附近可靠；Lyapunov 函数给出的是带条件的稳定性证书；确定性迭代也可能对初值极敏感。Hartman--Grobman、LaSalle 原理和分岔参数的计算属于回读层。尤其不要把``没有找到 Lyapunov 函数''当成不稳定证明，也不要把正 Lyapunov 指数简单等同于所有意义下的混沌。
+首次阅读抓牢三件事：线性化只在双曲平衡点附近可靠；Lyapunov 函数给出的是带作用域的稳定性证书；确定性迭代也可能对初值极端敏感。Hartman--Grobman 定理、LaSalle 原理和分岔参数的具体计算属于回读层。两个误读要提前避开——``没找到 Lyapunov 函数''不是不稳定的证明，正的 Lyapunov 指数也不等于所有意义下的混沌。
 
 \subsection{本章篇目}
 
@@ -26,3 +47,5 @@
 \item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}；
 \item \hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/03]{``离散动力系统、分岔与混沌''}。
 \end{itemize}
+
+读完这三节，判断长期行为的手段就齐了：能线性化时查谱，临界时找能量，离散迭代时看乘子。剩下的问题不再是系统会去哪里，而是能不能把它送到你想要的地方——那是控制的题目。

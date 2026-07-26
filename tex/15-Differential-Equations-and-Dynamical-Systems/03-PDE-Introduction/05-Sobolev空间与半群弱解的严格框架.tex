@@ -1,68 +1,113 @@
 \section{Sobolev 空间与半群：弱解的严格框架}
 \label{sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/05}
 
-\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/03]{``适定性与能量方法''}中，弱解通过积分恒等式定义，但``一阶导数在积分意义下存在''只是直觉说法。Sobolev 空间把这个说法变成严格的函数空间，半群理论则把演化方程写成 \(u(t)=e^{tA}u_0\)，其中 \(A\) 是无界算子。这两者共同支撑了弱解、有限元、以及抛物方程的正则性理论。
+一条单车道公路上，前方车流放慢，后车追上来，密度剖面越来越陡。用交通流模型算下去会发现，某个时刻剖面变成竖直的一段——密度在一点上跳变，空间导数不存在。这不是模型算崩了，是路上真实发生的事：你开车撞上堵车队尾时，减速确实发生在几米之内。可方程写的是 \(\partial_t\rho+\partial_x q(\rho)=0\)，那一点上 \(\partial_x\rho\) 根本没有定义，方程在那里无从谈起。
 
-\subsection{Sobolev 空间：弱导数与 \(W^{k,p}\)}
+要求解处处二次可微，是前面四节一直默认的前提。这个前提把激波、尖角、间断系数下的解全部挡在门外，而那些恰恰是流体、交通、材料界面里最常见的解。本节把方程的要求降到积分意义上，让这些函数合法入场。
 
-设 \(\Omega\subseteq\R^d\) 是区域，\(u\in L^p(\Omega)\)。若存在 \(v\in L^p(\Omega)\) 使
+\subsection{把导数从解身上搬到试验函数身上}
 
-\[
-\int_\Omega u\,\partial_i\varphi\,dx
-=-\int_\Omega v\,\varphi\,dx
-\qquad\text{对所有 }\varphi\in C_c^\infty(\Omega),
-\]
-
-则称 \(v\) 是 \(u\) 的弱偏导数 \(\partial_iu\)。弱导数若存在则唯一（几乎处处），且与经典导数在光滑函数上一致——分部积分公式正是把经典导数``转移''到试验函数上的结果。
-
-Sobolev 空间 \(W^{k,p}(\Omega)\) 是所有弱导数到 \(k\) 阶都在 \(L^p\) 中的函数，范数为各阶弱导数的 \(L^p\) 范数之和。特别地，\(H^1=W^{1,2}\) 是 Hilbert 空间，内积为
+分部积分是全部技巧的来源。若 \(u\) 光滑，对任意在边界附近为零的光滑函数 \(\varphi\in C_c^\infty(\Omega)\)，
 
 \[
-\langle u,v\rangle_{H^1}
-=\int_\Omega(uv+\nabla u\cdot\nabla v)\,dx.
+\int_\Omega u\,\partial_i\varphi\,dx=-\int_\Omega(\partial_iu)\,\varphi\,dx ,
 \]
 
-弱解的严格定义是：\(u\in H_0^1(\Omega)\)（\(H^1\) 中边界迹为零的函数）满足
+边界项因为 \(\varphi\) 在边界附近取零而消失。等式右端出现的是 \(u\) 的导数，左端只用到 \(u\) 本身。于是可以反过来定义：若存在 \(v\in L^p(\Omega)\) 使得
 
 \[
-\int_\Omega\nabla u\cdot\nabla v\,dx
-=\int_\Omega fv\,dx
-\qquad\text{对所有 }v\in H_0^1(\Omega).
+\int_\Omega u\,\partial_i\varphi\,dx=-\int_\Omega v\,\varphi\,dx
+\qquad\text{对一切 }\varphi\in C_c^\infty(\Omega),
 \]
 
-这与\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/03]{``适定性与能量方法''}中的积分恒等式相同，只是现在空间定义严格了。\(H_0^1\) 是 \(C_c^\infty\) 在 \(H^1\) 范数下的闭包，边界条件通过闭包自然进入。
+就称 \(v\) 为 \(u\) 的弱偏导数，仍记作 \(\partial_iu\)。它若存在则几乎处处唯一，且在光滑函数上与经典导数一致——新定义没有推翻旧的，只是把定义域放宽了。
 
-Sobolev 嵌入定理给出弱导数与连续性的关系：\(W^{1,p}(\Omega)\subseteq C(\bar\Omega)\) 当 \(p>d\)（一维时 \(p>1\)）。这解释了为什么一维弱解自动连续，高维弱解可能不连续——维数与可积性共同决定正则性。
+一个折线函数是最短的例子：它在折点处没有经典导数，弱导数却存在，是一个分段常值的阶梯函数，折点那一个点在积分里不占分量。
 
-\subsection{半群理论：把演化方程写成 \(e^{tA}\)}
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+  \begin{scope}
+    \draw[->] (0,0) -- (3.3,0) node[right] {\small \(x\)};
+    \draw[gray] plot[smooth] coordinates
+      {(0,1.30) (0.6,1.24) (1.2,0.98) (1.8,0.55) (2.4,0.28) (3.0,0.22)};
+    \draw[dashed] plot[smooth] coordinates
+      {(0,1.30) (0.9,1.26) (1.5,1.06) (1.9,0.50) (2.3,0.28) (3.0,0.22)};
+    \draw[thick] (0,1.30) -- (1.6,1.28) -- (2.0,1.20);
+    \draw[thick] (2.0,1.20) -- (2.0,0.26);
+    \draw[thick] (2.0,0.26) -- (3.0,0.22);
+    \node at (1.65,1.75) {\small 波前变陡，直到竖直};
+  \end{scope}
 
-热方程 \(\partial_tu=\Delta u\) 的形式解是 \(u(t)=e^{t\Delta}u_0\)，但 \(\Delta\) 是无界算子（定义域只是 \(L^2\) 的稠密子集）。半群理论把``无界算子的指数''严格化。
+  \begin{scope}[shift={(5.2,0)}]
+    \draw[->] (0,0) -- (3.0,0) node[right] {\small \(x\)};
+    \draw[thick] (0.2,0.25) -- (1.3,1.35) -- (2.6,0.40);
+    \fill (1.3,1.35) circle (1.6pt);
+    \node at (1.4,1.75) {\small \(u\)：折点处无经典导数};
+    \draw[gray] (0.2,-0.9) -- (2.6,-0.9);
+    \draw[thick] (0.2,-0.55) -- (1.3,-0.55);
+    \draw[dotted] (1.3,-0.55) -- (1.3,-1.25);
+    \draw[thick] (1.3,-1.25) -- (2.6,-1.25);
+    \node at (1.4,-1.65) {\small 弱导数：一个阶梯，折点不占分量};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
 
-设 \(A\) 是 Banach 空间 \(X\) 上的闭稠定算子。若存在 \(C_0\)-半群 \(T(t)\)（强连续、\(T(0)=I\)、\(T(t+s)=T(t)T(s)\)）使
+\emph{左边的解自己走向不可微，右边说明不可微的函数照样有导数可用——只要在积分意义下谈论它。}
+
+\subsection{Sobolev 空间给弱导数一个可用的家}
+
+把弱导数存在的函数收拢起来：\(W^{k,p}(\Omega)\) 是所有直到 \(k\) 阶弱导数都属于 \(L^p(\Omega)\) 的函数，范数取各阶弱导数 \(L^p\) 范数的组合。\(p=2\) 时得到 Hilbert 空间 \(H^k=W^{k,2}\)，其中 \(H^1\) 用得最多，内积是
 
 \[
-\lim_{h\to0}\frac{T(h)u-u}{h}=Au
-\qquad\text{对 }u\in D(A),
+\ip{u}{v}_{H^1}=\int_\Omega\bigl(uv+\nabla u\cdot\nabla v\bigr)\,dx .
 \]
 
-则称 \(A\) 是 \(T(t)\) 的生成元，\(T(t)=e^{tA}\)。
+这个内积把``函数值差多少''和``斜率差多少''一起计入距离，正是能量方法里反复出现的两项。齐次 Dirichlet 条件用 \(H_0^1(\Omega)\) 表达，它是 \(C_c^\infty(\Omega)\) 在 \(H^1\) 范数下的闭包；边界条件通过取闭包这一步进入空间的定义，不必再额外声明。
 
-热算子 \(\Delta\) 在适当边界条件下生成解析半群 \(e^{t\Delta}\)：\(T(t)\) 对 \(t>0\) 解析，且把 \(L^2\) 数据映到 \(H^2\) 甚至 \(C^\infty\)。这是``热方程抹平''的严格版本：解算子立即把任意 \(L^2\) 初始数据正则化，正则性来自半群的解析性，不是初始数据的光滑性。
+于是 Poisson 方程 \(-\Delta u=f\) 的弱解有了严格说法：求 \(u\in H_0^1(\Omega)\) 使得
 
-Lumer--Phillips 定理给出生成元的判据：\(A\) 耗散（\(\langle Au,u\rangle\le0\)）且 \(\rangesp(I-A)=X\)。耗散性对应能量衰减（\(\frac d{dt}\|u\|^2=2\langle u,Au\rangle\le0\)），这正是\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/03]{``适定性与能量方法''}中能量不等式的算子形式。
+\[
+\int_\Omega\nabla u\cdot\nabla v\,dx=\int_\Omega fv\,dx
+\qquad\text{对一切 }v\in H_0^1(\Omega).
+\]
 
-\subsection{HJB 方程与黏性解的半群视角}
+左端是 \(H_0^1\) 上的双线性型，右端是有界线性泛函，Lax--Milgram 定理据此给出存在唯一性；所需条件是双线性型的有界性与强制性，后者由 Poincaré 不等式提供，与第三节能量估计用的是同一条不等式。
 
-HJB 方程 \(\partial_tV+H(x,\nabla V)=0\) 是非线性的，经典半群理论不适用。但黏性解的严格理论仍用半群语言：把 HJB 写成 \(u(t)=T(t)u_0\)，其中 \(T(t)\) 是非线性半群，由动态规划原理定义。黏性解的比较原理（两个解若初值有序则永远有序）对应半群的单调性。
+弱到什么程度就不再连续？Sobolev 嵌入定理给出的界与维数有关：\(W^{1,p}(\Omega)\subseteq C(\bar\Omega)\) 当 \(p>d\)。一维里 \(H^1\) 的函数自动连续，三维里 \(H^1\) 的函数可以有奇点。同一个空间在不同维数下的``好坏''不一样，这一点在高维问题里经常被低估。
 
-这与\hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/03]{``HJB 方程与动态规划''}中的``黏性解允许值函数不光滑，同时保留动态规划原理与解的唯一性''一致：黏性解是使半群性质（动态规划、比较原理）成立的最弱解概念，不需要逐点可微。
+\subsection{弱解与经典解要对一次账}
 
-\subsection{与本书已有内容的连接}
+放宽定义之后必须回头核对两件事。其一，弱解若碰巧足够光滑，把上面的恒等式反向分部积分即可退回 \(-\Delta u=f\) 逐点成立——旧结论一条没丢。其二，经典解一定是弱解，因为它满足更强的要求。两个方向都通，说明弱形式扩大的是解的集合，而不是改变了问题。
 
-\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/03-PDE-Introduction/03]{``适定性与能量方法''}中的弱解定义，在这里获得严格的 Sobolev 空间框架；\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/02-Stability-and-Dynamical-Systems/02]{``稳定性与 Lyapunov 函数''}中的能量方法，在这里对应耗散算子的半群；\hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/03]{``HJB 方程与动态规划''}中的黏性解，在这里对应非线性半群的单调性。
+由此也能看清有限元为什么天然建立在弱形式上。\hyperref[sec:08-Numerical-Analysis/06-ODE/04]{``边值问题：从打靶到全局离散''}里的做法是把 \(H_0^1\) 换成一个有限维子空间——分片线性的帽子函数张成的空间，然后要求积分恒等式对这个子空间里的所有 \(v\) 成立。帽子函数在节点处有折角，二阶导数不存在，若坚持逐点形式它们连候选解都算不上；在弱形式下它们完全合法，收敛性分析也就有了落脚点。
 
-Sobolev 空间与半群理论不是 PDE 的装饰，而是弱解、有限元、以及演化方程正则性的共同语言。有限元的收敛性分析、抛物方程的光滑化、以及 HJB 方程的黏性解唯一性，都建立在这个框架上。
+同样的道理落在物理信息神经网络上就要小心一点。常见的做法是把 \(\norm{\partial_tu_\theta-\kappa\Delta u_\theta}^2\) 在一批配点上求和作为损失，这是逐点残差，隐含假定解处处二阶可微。对光滑解它工作得很好；碰上激波或界面，网络会被逼着在间断处磨出一个假的光滑过渡，或者干脆收敛到错误的弱解。把损失改写成弱形式的积分残差——用一组试验函数与 \(u_\theta\) 做内积，导数搬到试验函数上——就绕开了这个假定。选择哪种写法，取决于你预期解落在哪个空间里。
 
-\subsection{落点}
+\subsection{半群把演化方程写成一个算子指数}
 
-Sobolev 空间把``弱导数''从直觉变成函数空间，半群理论把``演化方程''从形式解变成算子指数。这两者共同支撑了现代 PDE 理论：弱解的存在唯一性、有限元的收敛性、以及抛物方程的正则性，都在这个框架中严格建立。Part 15 的 PDE 单元至此有了从经典到现代的完整阶梯：分离变量（经典）→ 能量方法（先验估计）→ Sobolev/半群（弱解与算子）。
+线性 ODE 组 \(x'=Ax\) 的解是 \(x(t)=e^{tA}x_0\)（见\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/02]{``线性系统与矩阵指数''}）。热方程 \(\partial_tu=\Delta u\) 的形式解写成 \(u(t)=e^{t\Delta}u_0\) 看起来只是照抄，麻烦在于 \(\Delta\) 是无界算子，定义域只是 \(L^2\) 的一个稠密子集，指数级数不能逐项收敛。
+
+半群理论把这个记号变成合法的。设 \(X\) 是 Banach 空间，一族有界算子 \(T(t)\) 若满足 \(T(0)=I\)、\(T(t+s)=T(t)T(s)\) 且对每个 \(u\) 强连续，就称 \(C_0\)-半群；它的生成元是
+
+\[
+Au=\lim_{h\to0^+}\frac{T(h)u-u}{h},
+\qquad u\in D(A),
+\]
+
+并记 \(T(t)=e^{tA}\)。半群性质 \(T(t+s)=T(t)T(s)\) 说的就是``先演化 \(t\) 再演化 \(s\)，与一口气演化 \(t+s\) 相同''，与 ODE 的流映射是同一件事。
+
+哪些算子能生成半群？Lumer--Phillips 定理给出的判据是 \(A\) 耗散且 \(\rangesp(I-A)=X\)。耗散的含义是 \(\ip{Au}{u}\le0\)，而
+
+\[
+\frac{d}{dt}\norm{u}^2=2\ip{u}{Au}\le0
+\]
+
+正是第三节那条能量不等式换成算子语言的写法。带齐次边界条件的 Laplace 算子满足这个判据，而且生成的是解析半群：对每个 \(t>0\)，\(e^{t\Delta}\) 把 \(L^2\) 数据映进 \(H^2\)，进而映进 \(C^\infty\)。``热方程瞬间抹平''这句话至此有了严格版本——正则性来自解算子本身，与初值光滑与否无关。反过来，\(t<0\) 时这族算子根本不存在，倒推热方程的病态在这个框架里表现为半群只朝一个方向存在。
+
+波动方程也生成半群，但生成元的耗散性取等号，半群保范而不改善正则性；抹平与搬运的分野，在算子层面就是解析半群与保范半群的分野。
+
+\subsection{非线性的入口留在黏性解上}
+
+HJB 方程 \(\partial_tV+H(x,\nabla V)=0\) 是非线性的，上面的线性半群理论直接用不上，可思路仍能移植。值函数在最优控制的切换面上通常有折角，经典导数不存在；黏性解的办法是用光滑检验函数在折角处的单侧不等式代替逐点等式，保住唯一性与比较原理，同时让动态规划原理继续成立。\hyperref[sec:16-Control-and-Reinforcement-Learning/01-Optimal-Control/03]{``HJB 方程与动态规划''}正是在这个意义上说值函数不必光滑。
+
+弱解、Sobolev 空间、半群这三样东西合起来，是一条把``解''这个词重新定义得足够宽、又不至于宽到失去唯一性的路。宽多少是有讲究的：放得不够，激波与折角进不来；放得太宽，唯一性丢失，同一组数据能配出无穷多个``解''，熵条件与黏性极限就是用来把多余的候选者剔除的。本单元到此为止只处理线性方程，非线性守恒律里的熵条件、椭圆正则性理论、以及有限元的误差估计，都从这里继续往下走。

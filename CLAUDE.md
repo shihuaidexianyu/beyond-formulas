@@ -6,7 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Beyond Formulas**（《从公式到结构、判断与可信计算》）is a Chinese-language mathematics knowledge framework written in LaTeX (`ctexbook`). It spans mathematical language, calculus, linear algebra, discrete math, probability, stochastic processes, information theory, numerical analysis, convex optimization, matrix calculus, mathematical statistics, real analysis, machine learning, deep learning, dynamical systems, and control/RL.
 
-There is no package manager, no build system, and no test suite — the entire project is LaTeX prose. Current scale: 17 `\part`s, 139 `\chapter*`s, ~609 `.tex` files under `tex/`, ~1500 PDF pages.
+There is no package manager, no build system, and no test suite — the entire project is LaTeX prose. Current scale: 18 `\part`s, 145 `\chapter*`s, 648 `.tex` files under `tex/`, ~1600 PDF pages, ~700 TikZ figures.
+
+The last `\part` before the references is **收束** (`tex/17-Synthesis/`) — a closing part that introduces no new mathematics. It re-orders the existing material twice: once along a system's lifecycle (定义问题 → 数据 → 模型族 → 训练 → 评估 → 部署), once along the handful of recurring mathematical actions (线性化 / 换基 / 迭代到不动点 / 不变量 / 交换次序). It is dense with cross-part `\hyperref`s by design; edits elsewhere in the book can invalidate its links, so re-verify them when renaming sections.
 
 **Entry point**: `main.tex`
 
@@ -45,7 +47,7 @@ python tmp/readability/scan_tail_bullets.py # 以单条 itemize 结尾的篇
 
 ### Structural check
 
-Every section file must be reachable from `main.tex`. Two files currently on disk are *not* `\input` anywhere (`13-Machine-Learning/11-Information-Theoretic-Learning/02-…`, `16-Control-and-Reinforcement-Learning/01-Classical-Control/04-Kalman滤波…`) — they do not appear in the book. When adding a file, adding it to `main.tex` is not optional; diff the `\input{...}` set against `tex/**/*.tex` if unsure.
+Every section file must be reachable from `main.tex`. **As of now there are zero orphans**: all 648 `.tex` files under `tex/` are `\input` exactly once (the two former orphans have been resolved — the duplicate 最大熵 file was removed, and the Kalman section was folded into `16-…/01-Optimal-Control/` as its 04, with the old 05/06/07 renumbered). When adding a file, adding it to `main.tex` is not optional; diff the `\input{...}` set against `tex/**/*.tex` if unsure — a one-liner that does this is worth re-running before any commit that adds files.
 
 ## Architecture
 
@@ -60,7 +62,9 @@ tex/知识地图.tex               # knowledge map             → ch:002
 tex/学习路线.tex               # learning paths            → ch:003
 tex/问题索引.tex               # problem index             → ch:138
 tex/洞见索引.tex               # insight index             → ch:139
-tex/01-Mathematical-Language/ … tex/17-References/
+tex/01-Mathematical-Language/ … tex/16-Control-and-Reinforcement-Learning/
+tex/17-Synthesis/              # closing part              → ch:143 / 144 / 145
+tex/18-References/             # references                → ch:137
 ```
 
 Each `tex/NN-Subject/` is a **Part**; each subdirectory inside it is a **unit = one book chapter**; each `NN-中文标题.tex` inside a unit is a **篇 (section)**.
@@ -120,7 +124,9 @@ These are enforced on new and revised material; legacy files migrate opportunist
 
 ### Known drift
 
-The corpus predates some of these rules. As of now roughly 41 files (concentrated in `tex/07-Information-Theory/`) still use `$...$`, ~96 curly quotes remain, and a handful of `^\top` / `\Pr` sites survive. Fix these in files you are already editing; do not launch unrelated sweeps.
+The drift that used to live here is **gone**: a full-corpus scan now reports zero `$...$`, zero curly quotes `“”`, zero straight quotes, zero `^\top`, and zero `\Pr` outside `tex/macros.tex` (where line 17 legitimately defines the `\Prob` compatibility alias). Keep it that way — a new violation is now a regression, not legacy.
+
+One trap the obvious scanner misses. A straight quote written as `\"中文` is **not** flagged by a rule that excludes `\"` to spare `H\"older`, yet it is wrong: `\"` is the umlaut accent macro, so it silently puts a diaeresis on a CJK character. It compiles with zero errors and zero overfull boxes, and only shows up in the rendered PDF. Eleven such pairs were found in the front-matter navigation chapters. Any quote scanner must carry a separate `\\"[一-鿿]` rule.
 
 ## Content conventions
 

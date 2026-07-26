@@ -53,7 +53,7 @@ y_{n+1}=y_n+h\sum_{i=1}^{s}b_ik_i .
   \draw[thick,black!80] plot[domain=0:2,samples=140] (\x,{1/(1+exp(-9*(\x-1)))});
   \foreach \t in {0,0.35,0.62,0.8,0.9,0.96,1,1.04,1.1,1.2,1.38,1.65,2}
     \fill[blue!70] (\t,{1/(1+exp(-9*(\t-1)))}) circle (1.5pt);
-  \draw[->,>=stealth,black!50] (0.26,0.58) -- (0.36,0.09);
+  \draw[->,>=stealth,black!50] (0.26,0.58) -- (0.2,0.06);
   \node[above,font=\footnotesize,black!70] at (0.28,0.58) {平缓处一步跨过去};
   \draw[->,>=stealth,black!50] (1.42,0.42) -- (1.06,0.44);
   \node[right,font=\footnotesize,black!70] at (1.4,0.42) {陡峭处自动加密};

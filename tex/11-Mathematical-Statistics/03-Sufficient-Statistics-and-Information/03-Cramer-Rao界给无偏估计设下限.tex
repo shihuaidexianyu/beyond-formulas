@@ -1,135 +1,106 @@
 \section{Cramér--Rao 界给无偏估计设下限}
 \label{sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/03}
 
-Fisher 信息不仅描述似然曲率，还能限制无偏估计量的方差。若 \(T(X)\) 无偏估计标量函数 \(g(\theta)\)，
+上线评审会上卡住的是一个宽度。某项关键指标的 \(95\%\) 区间是 \(\pm 1.8\) 个百分点，而做决策需要它窄到 \(\pm 0.8\)。会上出现两种意见：一种认为估计方法太粗糙，应该换个更聪明的估计量，或者把模型做复杂些；另一种认为这批数据本来就答不到那个精度，要窄只能加样本或改采集方式。
+
+两种意见指向的行动完全不同，一个是几天的算法工作，一个是几周的数据工作，选错代价不小。而它们之间的仲裁不必靠争论——上一节的 Fisher 信息已经把``这份数据对参数说得有多死''量化成了一个数，剩下的一步是把它翻译成方差的下限。
+
+\subsection{下界来自一条协方差恒等式}
+
+设 \(T(X)\) 无偏估计标量函数 \(g(\theta)\)，即 \(\E_\theta[T]=g(\theta)\) 对每个 \(\theta\) 成立。在正则条件下
 
 \[
-\E_\theta[T]=g(\theta),
+\Var_\theta(T)\ \ge\ \frac{[g'(\theta)]^2}{I_n(\theta)}.
 \]
 
-在正则条件下，
-
-\[
-\Var_\theta(T)
-\ge
-\frac{[g'(\theta)]^2}{I_n(\theta)}.
-\]
-
-这就是 Cramér--Rao lower bound。信息越大，无偏估计可能达到的方差下限越小。
-
-\subsection{下界来自一个协方差恒等式}
-
-令样本 score 为
-
-\[
-U_\theta(X) = \frac{\partial}{\partial\theta}
-\log p_\theta(X).
-\]
-因为 \(\E[U]=0\)（上一节已证），
-
-\[
-\Cov(T,U) = \E[TU].
-\]
-在可交换求导与积分的条件下，
+推导只有三步。第一步把 \(g'\) 写成一个协方差：对无偏性两边求导，并用 \(\partial_\theta p_\theta=U_\theta\,p_\theta\)，
 
 \[
 \begin{aligned}
-g'(\theta)
-&=
-\frac{\partial}{\partial\theta}
-\E_\theta[T]\\
-&=
-\int T(x)
-\frac{\partial p_\theta(x)}{\partial\theta}
-dx\\
-&=
-\int T(x)\,U_\theta(x)\,p_\theta(x)\,dx\\
-&=
-\E_\theta[TU].
+g'(\theta)&=\frac{\partial}{\partial\theta}\int T(x)\,p_\theta(x)\,dx
+=\int T(x)\,U_\theta(x)\,p_\theta(x)\,dx=\E_\theta[TU_\theta].
 \end{aligned}
 \]
 
-第三步把密度导数写成 \(\partial p_\theta/\partial\theta=U_\theta\,p_\theta\)，正是 score 的定义。所以
+第二步利用上一节的 \(\E_\theta[U_\theta]=0\)，把它读成 \(\Cov(T,U_\theta)=g'(\theta)\)。第三步对协方差用 Cauchy--Schwarz：
 
 \[
-\Cov(T,U)=g'(\theta).
+[g'(\theta)]^2=\Cov(T,U_\theta)^2\le\Var(T)\,\Var(U_\theta)=\Var(T)\,I_n(\theta),
 \]
 
-Cauchy--Schwarz 给
+移项就是下界。
+
+条件对一遍，每一条都在推导里露过面。无偏性用在第一步，它保证求导的对象是 \(g\) 而不是别的函数。求导与积分可交换也用在第一步，支持集随参数移动的模型在这里就断了。score 期望为零用在第二步，它同样依赖那组正则条件。两个方差有限用在第三步，否则 Cauchy--Schwarz 无话可说。最后，\(I_n(\theta)\) 必须与 \(T\) 在同一参数化下计算，换尺子量参数时分子分母要一起换。
+
+\subsection{Bernoulli 的样本均值正好压在界上}
+
+\(n\) 个独立 Bernoulli 观测的信息是 \(I_n(\theta)=n/(\theta(1-\theta))\)。估计 \(g(\theta)=\theta\) 时 \(g'=1\)，下界为 \(\theta(1-\theta)/n\)。而样本均值的方差恰好是 \(\theta(1-\theta)/n\)。
+
+也就是说，在这个模型里，任何无偏估计量的方差都不可能比样本均值更小，一个字节的改进空间都没有。这类估计量称为有效估计量。
+
+等号成立需要 \(T-g(\theta)\) 与 score 线性相关，这是 Cauchy--Schwarz 的取等条件，只有指数族这类结构才容易对所有 \(\theta\) 同时满足。多数模型里下界够不着，某个无偏估计量的方差高于下界，未必说明它不够好，也可能是下界本身不紧。
+
+\begin{center}
+\begin{tikzpicture}[x=0.85cm,y=1.05cm,font=\small,>=stealth]
+  \fill[black!12] plot[domain=1:9.4,samples=61] (\x,{2.4/\x}) -- (9.4,0) -- (1,0) -- cycle;
+  \draw[->,black!55] (0.8,0) -- (10.2,0) node[right,font=\footnotesize] {样本量 \(n\)};
+  \draw[->,black!55] (1,0) -- (1,4.6) node[above,font=\footnotesize] {方差};
+  \draw[thick,dashed,blue!55!black,domain=1:9.4,samples=61,smooth] plot (\x,{2.4/\x});
+  \draw[black!60,domain=1.15:9.4,samples=61,smooth] plot (\x,{4.6/\x});
+  \foreach \nx in {1.5,2.5,4,6,8.5}
+    \fill[blue!55!black] (\nx,{2.4/\nx+0.11}) circle (2.4pt);
+  \node[font=\footnotesize,anchor=west] at (9.5,0.255) {\(1/I_n(\theta)\)};
+  \draw[black!45] (3.2,1.44) -- (4.9,1.95);
+  \node[font=\footnotesize,anchor=west,black!65] at (4.95,1.95) {某个次优的无偏估计量};
+  \draw[black!45] (4,0.71) -- (4.9,1.15);
+  \node[font=\footnotesize,anchor=west] at (4.95,1.15) {贴着下界走的有效估计量};
+  \draw[->,black!45] (2.95,-0.42) -- (2.4,0.5);
+  \node[font=\footnotesize,black!60,anchor=west] at (3.0,-0.5) {灰色区域里没有无偏估计量};
+\end{tikzpicture}
+
+\emph{两条曲线都按 \(1/n\) 下降，但灰色区域对无偏估计封闭；想往下走，得加数据或者换模型，换估计量没有用。}
+\end{center}
+
+\subsection{它区分的是换估计量与换数据}
+
+图里那块灰色区域是这条定理最有用的部分。落在灰区上方的估计量还有改进余地，换个方法可以往下压；一旦贴上了虚线，再怎么调算法都不会更好，因为限制不在方法上，而在这份数据能提供的信息量上。开头会上那两派意见于是可以裁决：算出手头模型下的 \(1/I_n(\theta)\)，如果它对应的半宽已经大于 \(0.8\) 个百分点，那么把工程量投在估计量上是白费的。
+
+虚线本身也在动，它按 \(1/n\) 下降。样本量翻四倍，下界降到四分之一，半宽减半。要把 \(\pm1.8\) 压到 \(\pm0.8\)，在这个模型下大约需要五倍的数据——这个数在会上比任何一句判断都管用，它把``加数据''从态度变成了预算。
+
+同类的判断在别处出现过。\hyperref[sec:07-Information-Theory/06-Information-and-Learning/04]{``分类、神经网络与信息论边界''}里的 Fano 不等式说，特征没覆盖住的那部分标签不确定性会转化成错误率的地板，任何算法都够不着地板以下。两条结论的形式完全一致：先量出信息，再把信息翻译成某个性能指标的极限，从而把``模型还不够好''与``信息本来就不够''分开。区别只在量的是什么——Fisher 信息量的是似然曲面在真值附近的曲率，条件熵量的是标签里没被特征解释掉的部分。
+
+还有一个共同点值得记住：两条界都依赖你写下的那个模型。换一个模型，\(I_n(\theta)\) 变了，下界跟着变。所以``这份数据问不出更多''的准确说法是``在当前模型设定下问不出更多''，引入更强的结构假设、更好的特征或更精细的似然，确实可能让下界下移。代价是这些假设写错了，估计得再有效也指向别处。
+
+\subsection{有偏估计可以走到灰区里去}
+
+定理只约束无偏估计量。这不是一句免责声明，而是一个可以主动利用的缺口。放弃无偏性以后，方差可以低于 \(1/I_n(\theta)\)，均方误差也可能一起降下来。收缩估计、岭回归、带惩罚的极大似然都在做这件事：接受一点系统性偏差，换回一大块方差。
+
+带偏版本的界说明了缺口在哪。设偏差 \(b(\theta)=\E_\theta[T]-g(\theta)\)，同样的推导给出
 
 \[
-\Cov(T,U)^2
-\le
-\Var(T)\Var(U).
+\Var_\theta(T)\ \ge\ \frac{[g'(\theta)+b'(\theta)]^2}{I_n(\theta)},
 \]
 
-而 \(\Var(U)=I_n(\theta)\)，整理即得下界。
+分子里多出来的 \(b'(\theta)\) 就是那点余地：偏差随 \(\theta\) 变化得越快，方差被允许的下限越低。评价这类估计量应当直接比 \(\MSE_\theta(T)=\Var_\theta(T)+b(\theta)^2\)，只盯方差会把代价那一半藏起来。正则化强度怎么选、用什么标准选，见\hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/04]{``偏差---方差、正则化与模型选择''}。
 
-这个证明直接揭示所有关键条件：无偏性、score 均值为零、求导积分可交换和有限方差。
+顺带说清一件容易误传的事：有偏估计能压低方差，不意味着可以无限压低 MSE。在正则模型里，能对某些参数点做得特别好的估计量，通常要在别的参数点付出代价，这种取舍在\hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/03]{``Minimax 与可容许性比较整条风险曲线''}里以风险曲线的形式出现。
 
-\subsection{Bernoulli 样本均值达到下界}
+\subsection{正则条件一失效，界就不适用}
 
-对 \(n\) 个 Bernoulli\((\theta)\) 样本，上一节已算出单个观测 \(I_1(\theta)=1/(\theta(1-\theta))\)，独立样本信息相加，
+Uniform\((0,\theta)\) 又一次是反例。支持集随 \(\theta\) 移动，求导与积分不能交换，score 的期望也不是零，推导的第一步就走不下去。结果是这个模型里的估计精度按 \(1/n\) 而不是 \(1/\sqrt n\) 收敛：\(\E_\theta[\max_i X_i]=n\theta/(n+1)\)，误差量级是 \(1/n\)，比任何按 \(1/\sqrt n\) 走的下界都快得多。这不是定理被推翻了，是定理从一开始就没覆盖这类模型。
+
+看到有人报告``低于 CRLB''的结果，按顺序查三件事：估计量是不是有偏的，模型是不是非正则的，信息是不是按同一个参数化算的。三条里通常有一条中。混合模型、截断分布、边界上的参数都是常见的非正则场景，此时该换用 Chapman--Robbins、van Trees 这类不依赖光滑性的界。
+
+\subsection{渐近有效不等于有限样本有效}
+
+正则模型下极大似然估计满足
 
 \[
-I_n(\theta) = \frac{n}{\theta(1-\theta)}.
-\]
-估计 \(g(\theta)=\theta\) 时，
-
-\[
-\Var(T)
-\ge
-\frac{\theta(1-\theta)}n.
+\sqrt n\,(\hat\theta-\theta)\ \overset{d}{\longrightarrow}\ N\bigl(0,\,I_1(\theta)^{-1}\bigr),
 \]
 
-样本均值满足
+方差在大样本极限上贴住下界，称为渐近有效。这句话很容易被读成 MLE 在任何样本量下都最优，而它只说了极限。
 
-\[
-\Var(\bar X) = \frac{\theta(1-\theta)}n,
-\]
-恰好达到下界，所以在正则内部参数下是有效无偏估计量。
+正态方差的 MLE 就是现成的反例，它在有限样本下有偏，除以 \(n\) 而不是 \(n-1\)，却有漂亮的渐近性质。类似地，逻辑回归在样本量与参数个数可比时，系数会系统性偏大。报告``效率''时必须交代是哪一种，把渐近结论当成有限样本保证，是小样本分析里最常见的越界。
 
-达到等号要求 \(T-g(\theta)\) 与 score 线性相关（Cauchy--Schwarz 的取等条件）。并非每个模型都存在能对所有 \(\theta\) 同时达到下界的估计量。
-
-\subsection{下界不是对所有估计规则的禁令}
-
-Cramér--Rao 的经典形式限制无偏估计量。带偏估计量可以有更小方差甚至更小 MSE；收缩估计正是例子。
-
-若偏差为
-
-\[
-b(\theta)=\E_\theta[T]-g(\theta),
-\]
-
-可推导带偏版本：
-
-\[
-\Var(T)
-\ge
-\frac{[g'(\theta)+b'(\theta)]^2}
-{I_n(\theta)}.
-\]
-
-但评价带偏估计更自然地看完整 MSE，而不是只比较方差下界。
-
-此外，下界可能不紧。它告诉我们不能低于某个数，却不保证有估计量达到；离散参数、有限支持、边界和非正则模型还需要 Chapman--Robbins、van Trees 等其他界。
-
-\subsection{正则条件失败的典型例子}
-
-Uniform\((0,\theta)\) 的支持随 \(\theta\) 变化——第一节已用同一模型说明支持条件如何携带参数信息。样本最大值能以 \(1/n\) 量级而非常见 \(1/\sqrt n\) 量级逼近边界参数（\(\E_\theta[\max_i X_i]=n\theta/(n+1)\)，误差为 \(1/n\) 量级），经典 score 期望与 Cramér--Rao 推导不能直接套用。
-
-混合模型、截断分布和参数边界也常破坏正则渐近。看到一个``低于 CRLB''的估计器时，应先检查它是否有偏、模型是否非正则、信息是否按同一参数化计算，而不是立即断言定理被违反。
-
-\subsection{渐近效率与有限样本效率不同}
-
-在正则模型中，MLE 常满足
-
-\[
-\sqrt n(\hat\theta-\theta)
-\overset d\to
-N(0,I_1(\theta)^{-1}),
-\]
-
-称为渐近有效。它的方差在大样本极限接近信息下界。
-
-这不表示 MLE 在每个有限样本中无偏或达到 CRLB。正态方差 MLE 就有有限样本偏差，却具有良好渐近性质。报告效率时必须说明是有限样本还是渐近概念。
+本单元到这里合成了一条链。充分统计量说明哪些数据可以扔，Fisher 信息说明剩下的数据把参数按得有多紧，Cramér--Rao 界把这个紧度换算成方差的硬下限。三者共同回答的是``最多能知道多少''，还没有回答``该报出什么''。会上真正要交付的不是一个方差数值，而是一个区间，以及这个区间凭什么可以被信任——那需要先弄清楚``\(95\%\)''这三个字符究竟在描述谁，见\hyperref[sec:11-Mathematical-Statistics/04-Interval-Estimation/01]{``置信度属于程序，而非这次参数''}。
