@@ -1,44 +1,42 @@
-复数在线性代数里不是为了增加抽象难度。它把``伸缩''和``旋转''放进同一种乘法，让振荡、相位与周期结构可以像普通坐标一样处理。真正需要适应的新规则只有一条：涉及长度和正交时，转置必须升级为共轭转置。
+到上一单元为止，特征值这套工具一直顺手：找出不变方向，把演化拆成几个独立的伸缩。碰上旋转矩阵，它突然交白卷——平面上每一条直线都被转走，没有任何方向被保留。系统本身并无异常，轨迹在圆上走得规规矩矩；缺的是能表达``边转边缩''的标量。实数只会沿一条直线拉伸，要让每个方阵都有特征值，就必须把标量域扩到 \(\C\)。代数基本定理保证这一步之后不用再扩，所以复数是这件事上能付的最小代价。
 
-\subsection*{一个五分钟试算}
+代价的另一半是一条必须改写的规则：凡涉及长度和正交，转置要换成共轭转置。这不是为了形式对称。在 \(\C^n\) 上照抄 \(x^{\trans}x\)，非零向量 \((1,i)^{\trans}\) 会得到零长度，整套几何随即失效；补上共轭，\(x^{\conj}x=\sum_j\abs{x_j}^2\) 才重新变回正定的量。跨过这道分水岭之后，实对称矩阵的全部好性质原封不动地迁移过来，只需把 \(A^{\trans}=A\) 换成 \(A^{\conj}=A\)，这样的矩阵叫 Hermitian。
 
-旋转矩阵
-\[
-R=\begin{bmatrix}0&-1\\1&0\end{bmatrix}
-\]
-把 \((1,0)^{\trans}\) 转到 \((0,1)^{\trans}\)，但实数里找不到 \(v\) 满足 \(Rv=\lambda v\)——它会把一切向量转开。改到复数域：特征值 \(i\) 和 \(-i\)，特征向量取
-\[
-v_1=\frac{1}{\sqrt{2}}\begin{bmatrix}1\\-i\end{bmatrix},\qquad
-v_{-1}=\frac{1}{\sqrt{2}}\begin{bmatrix}1\\i\end{bmatrix}.
-\]
-验证 \(Rv_1=iv_1\)：左边是 \(\frac{1}{\sqrt{2}}(i,1)^{\trans}\)，右边是 \(\frac{1}{\sqrt{2}}(i,1)^{\trans}\)，吻合。复数把二维平面上的旋转表达成了标量乘法，这就是本单元全部技术的出发点。
+收益在第三篇兑现。周期序列上的循环移位是正规矩阵，凡与它交换的算子——也就是所有循环卷积——共享同一组特征向量。这组向量就是离散复指数，即 Fourier 基。卷积在这组坐标下退化成逐频率相乘，频域滤波、大核卷积的快速算法、卷积网络的频域解读，全部出自这一条。
 
-\medskip
-本单元用三节完成线性代数的收束：
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,>=stealth]
+  \draw[black!55,fill=blue!8] (0,0) rectangle (5.6,1.0);
+  \node[align=center] at (2.8,0.5) {旋转矩阵在 \(\R^2\) 中没有不变方向};
+  \draw[->,black!65] (2.8,-0.05) -- (2.8,-0.85);
+  \node[right,black!70] at (2.95,-0.45) {把标量域扩到 \(\C\)};
+  \draw[black!55,fill=blue!8] (0,-1.9) rectangle (5.6,-0.9);
+  \node[align=center] at (2.8,-1.4) {每个方阵都有特征值（代数封闭）};
+  \draw[->,black!65] (2.8,-1.95) -- (2.8,-2.75);
+  \node[right,black!70] at (2.95,-2.35) {长度必须仍然正定};
+  \draw[black!55,fill=red!8] (0,-3.8) rectangle (5.6,-2.8);
+  \node[align=center] at (2.8,-3.3) {转置升级为共轭转置 \(A^{\conj}\)};
+  \draw[->,black!65] (2.0,-3.85) -- (0.5,-4.55);
+  \draw[->,black!65] (3.6,-3.85) -- (5.1,-4.55);
+  \draw[black!55] (-1.8,-6.0) rectangle (2.8,-4.6);
+  \node[align=center] at (0.5,-5.3) {Hermitian 与正规矩阵\\谱定理原样保留};
+  \draw[black!55] (2.8,-6.0) rectangle (7.4,-4.6);
+  \node[align=center] at (5.1,-5.3) {循环卷积的公共特征基\\Fourier 与 FFT};
+\end{tikzpicture}
 
-\begin{enumerate}
-\tightlist
-\item
-  为什么线性代数需要复数：从旋转碰壁出发，引入复内积、伴随与酉变换。
-\item
-  Hermitian 矩阵与复谱定理：说明实对称矩阵的谱结构如何完整迁移到复空间，并扩展到正规矩阵。
-\item
-  Fourier 基与 FFT：把复指数看成周期信号的正交坐标，理解 DFT、循环卷积与快速算法之间的关系。
-\end{enumerate}
+\emph{一条主线分出两个去处：向左是对称结构在复空间中的正确写法，向右是平移不变结构被同一组坐标一次性对角化。整个单元只有``必须共轭''这一处需要重新养成习惯。}
+\end{center}
 
-前两节建立语言，第三节展示这套语言为何值得学习。之后在概率、数值分析和信息论中遇到频域方法时，不必把 Fourier 变换当作一张新公式表；它只是一次精心选择的酉换基。
-
-\subsection{怎么读这一章}
-
-若只想快速抓住主线，先记住三个对应：复数把幅值与相位放进一次乘法，共轭转置在复空间中恢复长度与正交，Fourier 基则把循环移位变成逐坐标乘法。可以先读每篇开头的``核心洞见''，然后直接跳到第三篇的移位特征向量与卷积定理。需要核对严格性时，再回补 Hermitian 与正规矩阵的谱定理。
-
-第一遍的停点是：能解释 Fourier 基为何由平移结构逼出，为何酉性意味着能量不变，以及为何周期边界、采样不足和非线性会阻断``换到频域就全部解耦''的直觉。随后可进入\hyperref[ch:068]{``Fourier 与谱方法''}研究连续函数与数值计算，或进入\hyperref[ch:126]{``卷积网络''}研究局部性、参数共享与非线性复合。
-
-\subsection{本章篇目}
+\subsection{三篇各自改变什么判断}
 
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/01]{``为什么线性代数需要复数''}；
-\item \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/02]{``Hermitian 矩阵与复谱定理''}；
-\item \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/03]{``Fourier 基与 FFT''}。
+\item
+  \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/01]{``为什么线性代数需要复数''}：把复数从``人为扩充的记号''改判为``让特征值总是存在的最小代价''，并说清共轭转置为何不可省略。特征值 \(re^{i\theta}\) 的模长管衰减、幅角管频率，这个读法后面在动力系统与控制里一直用得上。
+\item
+  \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/02]{``Hermitian 矩阵与复谱定理''}：\(H=H^{\conj}\) 是对称条件的正确推广，实特征值与正交特征基原样保留；再往外一层是正规矩阵，它标出``能被酉对角化''的确切边界。
+\item
+  \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/03]{``Fourier 基与 FFT''}：Fourier 基不是凭经验挑出来的一堆正弦，而是循环移位算子的特征基被唯一逼出来的结果；卷积定理与 \(O(n\log n)\) 的快速算法都是这个事实的推论。
 \end{itemize}
+
+三篇顺读最省事，第一篇的共轭内积是后两篇的公共前提。若已经熟悉复内积，可以从第二篇的谱定理骨架起步，遇到符号疑问再回看第一篇。前置知识只需要\hyperref[ch:022]{``对称矩阵、二次型与正定性''}里的实谱定理——本单元做的事就是把它搬到复空间，然后看看搬过去以后能多做什么。读完之后，\hyperref[ch:068]{``Fourier 与谱方法''}会把离散的换基推广到连续函数与数值求解，\hyperref[ch:126]{``卷积网络''}则处理这套线性图景在非线性、下采样与有限边界下还剩多少。

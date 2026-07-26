@@ -13,6 +13,28 @@
 
 这两条路的分岔口，就是开环（open-loop）与闭环（closed-loop）反馈的根本区别。判断标准很简单，跟有没有精细计算毫无关系：新的动作是否使用了刚刚观察到的结果。日常生活里``边看边调''就是反馈最朴素的形态——在你喊出``反馈''这个词之前，身体已经这样做了。
 
+\begin{center}
+\begin{tikzpicture}[>=stealth,
+  block/.style={draw,rounded corners=2pt,minimum width=1.8cm,minimum height=0.75cm,fill=blue!6},
+  every node/.style={font=\small}]
+  \node (r) at (-4,0) {目标 \(r\)};
+  \node[draw,circle,minimum size=0.65cm] (sum) at (-2.7,0) {\(+\)};
+  \node[block] (ctrl) at (-1,0) {控制器};
+  \node[block] (plant) at (1.5,0) {被控对象};
+  \node (out) at (3.8,0) {输出 \(x\)};
+  \draw[->,thick] (r) -- (sum);
+  \draw[->,thick] (sum) -- node[above] {误差 \(e\)} (ctrl);
+  \draw[->,thick] (ctrl) -- node[above] {输入 \(u\)} (plant);
+  \draw[->,thick] (plant) -- (out);
+  \draw[->,thick] (3.3,0) -- (3.3,-1.25) -- (-2.7,-1.25) -- (sum)
+    node[pos=0.55,below] {测量反馈};
+  \node at (-2.95,-0.28) {\(-\)};
+  \draw[->,gray!80] (1.5,1.25) -- (plant) node[midway,right] {扰动 \(w\)};
+\end{tikzpicture}
+
+\emph{闭环的关键不是控制器多复杂，而是输出被测量并返回比较点；扰动造成的偏差因此能影响下一次动作。}
+\end{center}
+
 \subsection{先用开环把一切都算清楚}
 
 把场景抽象成一台恒温水箱。目标 60 度。水温记 \(x(t)\)，环境温度 20 度。散热使水温按 \(-a(x - 20)\) 的速率向环境滑落，\(a = 0.1\)。加热器的功率称为输入 \(u\)：

@@ -1,49 +1,47 @@
-\(X\ge0\) 且 \(\E[X]=5\)。Markov 不等式给出 \(P(X\ge 20)\le 5/20=0.25\)。若还知道 \(\Var(X)=4\)，Chebyshev 给出 \(P(|X-5|\ge 10)\le 4/100=0.04\)。界很松不表示事件危险，只表示仅凭一阶矩或二阶矩无法排除它——这就是不等式与精确分布计算的根本区别。
+一个 A/B 实验跑了两周，实验组的转化率比对照组高出 \(1.2\) 个百分点。要不要据此上线？真实的差异是一个未知量，它的完整分布你拿不到——手上只有样本量、每个用户的取值范围，以及一个样本均值。
 
-完整分布往往很难求。许多独立随机量相加时，逐次卷积越来越繁琐；面对尾部事件时，我们可能只知道均值、方差或取值范围。概率论因此发展出两类压缩工具：
+概率论中大量的现实问题都是这个形状：分布要么算不出来，要么根本没有可用的解析形式，可你仍然必须对某个坏事件给出承诺。本章准备两套压缩工具。
 
-\begin{itemize}
-\tightlist
-\item
-  变换把分布编码成函数，并把独立和的卷积变成乘法；
-\item
-  不等式用有限信息给出尾部或坏事件的上界。
-\end{itemize}
+第一套是变换。独立随机变量之和的分布是各自分布的卷积；两个变量还能忍，十个变量的嵌套卷积没人愿意手算。把分布编码成一个函数——\(\E[z^X]\)、\(\E[e^{tX}]\) 或 \(\E[e^{itX}]\)——之后，卷积退化成函数相乘。加法在变换域里变成乘法，这是本章前半部分的全部内容。
 
-本单元依照``可用信息逐渐增多，界逐渐变强''的顺序阅读：
+第二套是不等式。放弃精确概率，改求上界，而上界的紧度由你肯交出多少信息决定。这条兑换关系可以画成一段楼梯。
 
-\begin{enumerate}
-\tightlist
-\item
-  生成函数、矩母函数与特征函数：比较三种变换的适用对象、存在条件和求和规则。
-\item
-  从 Union Bound 到 Markov 与 Chebyshev：只用事件分解、均值或方差控制概率。
-\item
-  Jensen 不等式与随机凸性：平均与非线性运算为何不能随意交换。
-\item
-  Chernoff 方法与 Hoeffding 集中界：利用指数矩和独立性得到指数衰减的尾界。
-\end{enumerate}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,>=stealth]
+  \draw[->,black!70] (-0.3,0) -- (9.4,0);
+  \node[below,black!70] at (4.5,-0.25) {用到的信息};
+  \draw[->,black!70] (-0.3,0) -- (-0.3,4.4);
+  \node[above,black!70,rotate=90] at (-0.55,1.6) {界的强度};
+  \draw[very thick,blue!65]
+    (0,0.6) -- (2.2,0.6) -- (2.2,1.5) -- (4.4,1.5) -- (4.4,2.4)
+    -- (6.6,2.4) -- (6.6,3.3) -- (8.8,3.3);
+  \draw[black!30] (0,0) -- (0,0.6);
+  \draw[black!30] (2.2,0) -- (2.2,1.5);
+  \draw[black!30] (4.4,0) -- (4.4,2.4);
+  \draw[black!30] (6.6,0) -- (6.6,3.3);
+  \node[align=center] at (1.1,1.0) {Union bound\\只用可加性};
+  \node[align=center] at (3.3,1.9) {Markov\\非负 \(+\) 均值};
+  \node[align=center] at (5.5,2.8) {Chebyshev\\\(+\) 方差};
+  \node[align=center] at (7.7,3.7) {Chernoff\\整条矩母函数};
+  \node[align=center,black!70] at (1.1,0.28) {\(\sum_i P(A_i)\)};
+  \node[align=center,black!70] at (3.3,0.28) {\(\E[X]/a\)};
+  \node[align=center,black!70] at (5.5,0.28) {\(1/k^2\)};
+  \node[align=center,black!70] at (7.7,0.28) {\(e^{-cn}\)};
+\end{tikzpicture}
 
-概率界给的是上界，不是精确概率。界很松并不意味着事件常发生，只说明现有信息不足以排除它；界很强也必须建立在相应独立性、矩存在或有界性条件上。
+\emph{尾部界的精度阶梯。每上一级台阶都要多交出一样关于分布的信息，换回一个衰减更快的上界。最低那级从不失效，最高那级要求矩母函数存在。}
+\end{center}
 
-\subsection{一个具体算例}
+这段楼梯是本章的主线，比其中任何一条单独的不等式都值得记住。它同时解释了两件常让人困惑的事：为什么 Markov 给出的界看上去松得离谱（它只知道一个均值），以及为什么统计学习理论几乎处处是指数型的界（它把独立性和有界性都用上了）。
 
-抛 100 枚公平硬币，正面数 \(X\sim\Binomial(100,0.5)\)。Chebyshev：\(P(|X-50|\ge 10)\le 25/100=0.25\)。Chernoff/Hoeffding：\(P(|X-50|\ge 10)\le 2e^{-2\cdot 100/100}=2e^{-2}\approx 0.27\)（Hoeffding 对一般有界情形），或 \(2e^{-2\cdot 10^2/100}=2e^{-2}\approx 0.27\)——好不到哪去因为方差太大。改用 \(n=10000\)：Chebyshev 给出 \(P(|X-5000|\ge 100)\le 2500/10000=0.25\)，Hoeffding 给出 \(2e^{-2\cdot 100^2/10000}=2e^{-2}\approx 0.27\)——两者在 \(n\) 不大时都不精确；\(n\) 极大时 Hoeffding 才给出指数衰减。
-
-Jensen 不等式实例：\(\E[X^2]\ge(\E[X])^2\)（取 \(\varphi(x)=x^2\)，凸函数），等号成立当且仅当 \(X\) 几乎处处为常数。因此方差 \(\Var(X)=\E[X^2]-(\E[X])^2\ge 0\) 是 Jensen 的直接推论。
-
-\subsection{怎么读这一章}
-
-若目标是识别或组合分布，先读第一篇，并在使用 PGF、MGF、特征函数前分别检查取值类型、存在域与独立性。若目标只是控制坏事件，按可用信息选择：只有事件概率用 Union Bound，只有非负均值用 Markov，有有限方差用 Chebyshev 或 Cantelli，有独立有界结构再用 Hoeffding；Jensen 则负责判断非线性运算与平均的先后代价。
-
-\subsection{本章篇目}
-
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+站在楼梯旁边的还有 Jensen 不等式。它不给尾部界，管的是另一件事：期望穿过一个非线性函数时会往哪一边偏。对数似然的期望与期望的对数不能互换，变分下界与 EM 算法都从这个缺口里长出来。
 
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/01]{``生成函数、矩母函数与特征函数''}；
-\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/02]{``从 Union Bound 到 Markov 与 Chebyshev''}；
-\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/03]{``Jensen 不等式与随机凸性''}；
-\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/04]{``Chernoff 方法与 Hoeffding 集中界''}。
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/01]{``生成函数、矩母函数与特征函数''}：把卷积换成乘法，并说清三种变换各自在什么时候存在；
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/02]{``从 Union Bound 到 Markov 与 Chebyshev''}：楼梯的前三级，附一张把三条界叠在同一条尾部曲线上的对照图；
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/03]{``Jensen 不等式与随机凸性''}：凸性在概率里的形态，以及它锁定的不等号方向；
+\item \hyperref[sec:05-Probability/07-Transforms-and-Bounds/04]{``Chernoff 方法与 Hoeffding 集中界''}：楼梯的顶级，以及``要多少样本''这个问题的直接答案。
 \end{itemize}
+
+四篇按依赖顺序排列，前两篇是主线。读完之后请守住一条纪律：界是上界，不是概率。界很松只说明你对这个分布知道得太少，不说明坏事件很可能发生；界很紧则永远附带条件——独立、有界、矩存在，其中任何一条塌掉，那个漂亮的指数就不再受保护。

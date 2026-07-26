@@ -1,137 +1,114 @@
 \section{任意矩阵的奇异值分解}
 \label{sec:03-Linear-Algebra/07-SVD-and-Data-Applications/01}
 
-\subsection{特征向量为什么不够用}
+手上一个 \(100\times 30\) 的设计矩阵：100 条观测，每条 30 个特征。你想知道这个映射把参数空间的哪些方向放大了、哪些方向压平了。唯一称得上结构工具的是特征向量，于是照着写下 \(Av=\lambda v\)——左边落在 \(\R^{100}\)，右边落在 \(\R^{30}\)，等号连写都写不成。
 
-我们花了很多篇幅研究特征向量：寻找那些被矩阵作用后只缩放、不转向的方向。\(Av=\lambda v\)——输入和输出落在同一条直线上。这个问题从一开始就把输入空间和输出空间当成了同一个空间，因此整个讨论只对方阵有意义。
+毛病不在矩阵，在提问方式。\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/01]{``不变方向与特征值：寻找矩阵最自然的坐标轴''}问的是哪些方向被作用之后不转向，这句话已经预设输入和输出是同一个空间。长方形矩阵没有这个前提；就算是方阵，也得凑齐足够多的独立特征向量才好用。
 
-但数据矩阵几乎从来不方。一个 \(100\times 30\) 的设计矩阵，把 30 维参数空间映射到 100 维观测空间。\(Av=\lambda v\) 要求等式两边向量的长度相等，而 \(Av\) 在 \(\R^{100}\) 中，\(v\) 在 \(\R^{30}\) 中——这个等式根本没有定义。
+那就把要求降一档：不再要求方向不变，只要求某组互相垂直的输入方向，在映射之后的像仍然互相垂直。这个条件弱得多，几何上却几乎白送。
 
-那么应该问一个什么问题来替代它？把问题的前提放宽：不再要求输入方向在映射后保持不变，只要求某些互相垂直的输入方向，在映射后的像也互相垂直。如果存在这样两组正交方向，矩阵在它们之间就只需做彼此独立的伸缩。
+\subsection{单位球的像是一个椭球}
 
-从几何上想象这个情景。把一个 \(2\times 2\) 矩阵作用在单位圆上，像通常是一个椭圆。椭圆有两条互相垂直的主轴，它们对应最长和最短的输出方向。而这两条主轴在原始单位圆上的原像，也是互相垂直的。高维也完全一样：单位球被压成一个可能在某方向退化（半轴长度为零）的椭球，椭球各半轴的方向和长度，正是 SVD 要找的左右奇异向量和奇异值。
+拿一个 \(2\times2\) 矩阵作用在单位圆上。像总是一个椭圆，可能很扁，极端时退化成线段。椭圆有两条互相垂直的主轴：长半轴指向 \(A\) 放大得最狠的输出方向，短半轴指向放大得最弱的。现在回到圆上看这两条半轴的原像——它们也互相垂直。
 
-"原像也互相垂直"目前只是几何观察。下面用 \(A^{\trans}A\) 把它变成严格推导。
+高维照旧。单位球被送成一个椭球，某些半轴长度可能是零，那个方向被彻底压平。椭球半轴的长度就是奇异值，方向就是左奇异向量，它们在球上的原像是右奇异向量。剩下的工作只是把这句几何观察写成矩阵等式。
 
-\subsection{\texorpdfstring{从 \(A^{\trans} A\) 推出 SVD}{从 A^{\trans} A 推出 SVD}}
+\begin{center}
+\begin{tikzpicture}[>=stealth,every node/.style={font=\small}]
+  \begin{scope}[xshift=-4.2cm]
+    \draw[blue!70!black,thick] (0,0) circle (1);
+    \draw[->] (0,0) -- (0.75,0.65) node[above] {\(v_1\)};
+    \draw[->] (0,0) -- (-0.65,0.75) node[left] {\(v_2\)};
+    \node at (0,-1.35) {输入单位圆};
+  \end{scope}
+  \draw[->,thick] (-2.9,0) -- (-1.8,0) node[midway,above] {\(V^{\trans}\)};
+  \begin{scope}
+    \draw[blue!70!black,thick] (0,0) ellipse [x radius=1.45,y radius=0.65];
+    \draw[->] (0,0) -- (1.35,0) node[above] {\(\sigma_1\)};
+    \draw[->] (0,0) -- (0,0.58) node[right] {\(\sigma_2\)};
+    \node at (0,-1.35) {独立伸缩};
+  \end{scope}
+  \draw[->,thick] (1.75,0) -- (2.85,0) node[midway,above] {\(U\)};
+  \begin{scope}[xshift=4.2cm,rotate=28]
+    \draw[blue!70!black,thick] (0,0) ellipse [x radius=1.45,y radius=0.65];
+    \draw[->] (0,0) -- (1.35,0) node[above] {\(u_1\)};
+    \draw[->] (0,0) -- (0,0.58) node[right] {\(u_2\)};
+  \end{scope}
+  \node at (4.2,-1.35) {输出椭圆};
+\end{tikzpicture}
 
-设 \(A\in\R^{m\times n}\)。直接问特征向量不行，但 \(A^{\trans}A\) 始终是 \(n\times n\) 的方阵：
+\emph{SVD 把任意线性映射拆成``换坐标—沿正交轴伸缩—放回输出空间''；真正改变长度的只有中间的 \(\Sigma\)。}
+\end{center}
+
+图上出现的三个符号还没有定义，下面的推导就是把它们逐个交出来。
+
+\subsection{\texorpdfstring{用 \(A^{\trans}A\) 把观察坐实}{用 A 转置乘 A 把观察坐实}}
+
+推导只需要一件已经在手的工具。设 \(A\in\R^{m\times n}\)。\(A\) 本身不是方阵，但 \(A^{\trans}A\) 一定是 \(n\times n\) 的对称阵，而且半正定，因为对任意 \(x\) 都有 \(x^{\trans}A^{\trans}Ax=\norm{Ax}_2^2\ge0\)。谱定理立刻生效（见\hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/01]{``对称矩阵与谱定理：什么时候特征方向一定正交''}）：存在标准正交的 \(v_1,\ldots,v_n\)，满足
 
 \[
-A^{\trans}A \in \R^{n\times n}.
+A^{\trans}Av_i=\lambda_i v_i,\qquad
+\lambda_1\ge\lambda_2\ge\cdots\ge\lambda_n\ge0 .
 \]
 
-更重要的是，\(A^{\trans}A\) 是对称的——\((A^{\trans}A)^{\trans}=A^{\trans}A\)。而且它是半正定的：
-
-\[
-x^{\trans}A^{\trans}Ax = \|Ax\|_2^2 \ge 0.
-\]
-
-对称半正定矩阵的谱定理立刻生效：存在一组标准正交向量 \(v_1,\ldots,v_n\)，使得
-
-\[
-A^{\trans}Av_i = \lambda_i v_i,
-\qquad
-\lambda_1\ge\lambda_2\ge\cdots\ge\lambda_n\ge 0.
-\]
-
-\(\lambda_i\) 全部非负，所以可以定义奇异值
-
-\[
-\sigma_i = \sqrt{\lambda_i}.
-\]
-
-\(\sigma_i\) 就是 \(A\) 作用在 \(v_i\) 上时，输出向量的长度：\(\|Av_i\|^2=v_i^{\trans}A^{\trans}Av_i=\lambda_i=\sigma_i^2\)。
-
-现在进入关键步骤。对于 \(\sigma_i>0\) 的那些方向（即 \(Av_i\ne 0\)），定义
-
-\[
-u_i = \frac{Av_i}{\sigma_i}.
-\]
-
-\(u_i\) 是单位向量。它们彼此正交吗？对 \(i\ne j\),
+特征值非负，于是可以开方，记 \(\sigma_i=\sqrt{\lambda_i}\)。这串数的含义马上浮出来：\(\norm{Av_i}^2=v_i^{\trans}A^{\trans}Av_i=\lambda_i\)，所以 \(\sigma_i\) 就是 \(v_i\) 被送出去之后的长度。对 \(\sigma_i>0\) 的那些方向定义 \(u_i=Av_i/\sigma_i\)，它们是单位向量，而且彼此正交：
 
 \[
 u_i^{\trans}u_j
-= \frac{v_i^{\trans}A^{\trans}Av_j}{\sigma_i\sigma_j}
-= \frac{\lambda_j v_i^{\trans}v_j}{\sigma_i\sigma_j}
-= \frac{\lambda_j\cdot 0}{\sigma_i\sigma_j}=0.
+=\frac{v_i^{\trans}A^{\trans}Av_j}{\sigma_i\sigma_j}
+=\frac{\lambda_j\,v_i^{\trans}v_j}{\sigma_i\sigma_j}=0,
+\qquad i\ne j .
 \]
 
-推导只用了 \(v_i\) 的正交性——\(A^{\trans}A\) 是对称矩阵的谱定理直接提供了这个性质。因此我们得到了想要的结构：正交输入方向 \(\{v_i\}\) 被送到正交输出方向 \(\{u_i\}\)，缩放因子是 \(\sigma_i\)：
+一步就完，用掉的只有 \(v_i\) 之间的正交性。写成 \(Av_i=\sigma_iu_i\)：正交进去，正交出来，中间各自缩放。几何观察至此坐实。
+
+设 \(r=\rank(A)\)。当 \(i>r\) 时 \(\sigma_i=0\)，也就是 \(\norm{Av_i}=0\)，这些输入方向被 \(A\) 压成一个点。把存活的 \(r\) 项拼起来，
 
 \[
-Av_i = \sigma_i u_i.
+A=\sum_{i=1}^{r}\sigma_i u_i v_i^{\trans}=U_r\Sigma_r V_r^{\trans}.
 \]
 
-设 \(r=\rank(A)\)，即非零奇异值的个数。对于 \(i>r\)，\(\sigma_i=0\)，即 \(\|Av_i\|^2=0\)，所以 \(Av_i=0\)——这些方向被 \(A\) 完全压平。
+要验证这个等式，把两边同时作用在任一 \(v_j\) 上：右边因为 \(v_i^{\trans}v_j=\delta_{ij}\) 只剩一项，得 \(\sigma_j u_j\)，正是 \(Av_j\)。两个矩阵在 \(\R^n\) 的一组基上作用相同，故相等。把 \(\{u_i\}\) 与 \(\{v_i\}\) 分别补成 \(\R^m\)、\(\R^n\) 的完整正交基，就是完整形式 \(A=U\Sigma V^{\trans}\)。
 
-现在构造矩阵 \(\sum_{i=1}^{r}\sigma_i u_i v_i^{\trans}\)。把它作用在任意 \(v_j\) 上：因为 \(v_i^{\trans}v_j=\delta_{ij}\)，只有 \(i=j\) 的项存活，结果是 \(\sigma_j u_j=Av_j\)。由于 \(\{v_1,\ldots,v_n\}\) 是 \(\R^n\) 的一组基，两个矩阵在一组基上的作用完全相同，因此两矩阵相等。这就得到紧致 SVD：
+回到上面那张图，现在每个符号都有了出处：\(V^{\trans}\) 把输入改写成右奇异向量下的坐标，\(\Sigma\) 逐坐标伸缩（有些坐标乘以零），\(U\) 把结果摆进输出空间。两侧的正交变换保长，矩阵全部的放大、压缩与信息丢失都被逼进 \(\Sigma\) 的对角线。
 
-\[
-A = U_r\Sigma_r V_r^{\trans}
-= \sum_{i=1}^{r}\sigma_i u_i v_i^{\trans},
-\]
+特征分解要方阵、要可对角化，才能得到形式上类似的 \(A=P\Lambda P^{-1}\)；SVD 一个前提都不要。代价也说得清：左右两侧用的是两组不同的正交基，所以 SVD 不描述``迭代 \(A\) 很多次会怎样''这类需要输入输出同基的问题。选哪一个，看你问的是演化还是几何。
 
-其中 \(U_r\in\R^{m\times r}\) 的列是 \(u_1,\ldots,u_r\)（正交），\(V_r\in\R^{n\times r}\) 的列是 \(v_1,\ldots,v_r\)（正交），\(\Sigma_r=\diag(\sigma_1,\ldots,\sigma_r)\)。如果把两组向量分别补成 \(\R^m\) 和 \(\R^n\) 的完整正交基，就得到完整 SVD：\(A=U\Sigma V^{\trans}\)。
+\subsection{一个映射的四块地}
 
-按从右向左的顺序读这个分解：\(V^{\trans}\) 把输入改写为"特殊输入方向"的坐标，\(\Sigma\) 对每个坐标独立伸缩（某些方向可能被压到零），\(U\) 把结果放到输出空间。正交变换 \(V^{\trans}\) 和 \(U\) 不改变向量长度，矩阵所有的放大、压缩和信息丢失，全部集中在 \(\Sigma\) 的对角线上。
+分解写完，矩阵的全部结构信息就摆在两组正交向量和一条对角线上了。\hyperref[sec:03-Linear-Algebra/02-Vector-Spaces/03]{``矩阵的四个基本子空间：输入、输出与丢失的信息''}提出的四个子空间，在这里各自拿到一组现成的标准正交基。
 
-\subsection{一个长方形矩阵的完整图景}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \node at (1.5,3.05) {\(\R^n\)（输入）};
+  \draw[black!55,fill=blue!14] (0,0.2) rectangle (3,2.6);
+  \node[align=center] at (1.5,1.4) {行空间\\\(v_1,\ldots,v_r\)};
+  \draw[black!55,fill=black!5] (0,-2.4) rectangle (3,-0.2);
+  \node[align=center] at (1.5,-1.3) {零空间 \(N(A)\)\\\(v_{r+1},\ldots,v_n\)};
+  \node at (10.5,3.05) {\(\R^m\)（输出）};
+  \draw[black!55,fill=blue!14] (9,0.2) rectangle (12,2.6);
+  \node[align=center] at (10.5,1.4) {列空间\\\(u_1,\ldots,u_r\)};
+  \draw[black!55,fill=black!5] (9,-2.4) rectangle (12,-0.2);
+  \node[align=center] at (10.5,-1.3) {\(N(A^{\trans})\)\\\(u_{r+1},\ldots,u_m\)};
+  \draw[->,thick] (3.15,1.4) -- (8.85,1.4) node[midway,above] {\(v_i\mapsto\sigma_i u_i\)};
+  \node[font=\footnotesize,black!70] at (6,0.95) {一一对应，可以反解};
+  \draw[->,thick,black!60] (3.15,-1.3) -- (5.5,-1.3);
+  \fill (5.75,-1.3) circle (2pt);
+  \node[right,font=\footnotesize] at (5.9,-1.3) {\(0\)};
+  \node[font=\footnotesize,black!70] at (4.3,-0.85) {压平};
+\end{tikzpicture}
 
-取最简单的长方形矩阵：
+\emph{右奇异向量把输入空间切成``有用''与``被消灭''两块，左奇异向量把输出空间切成``能到达''与``永远到不了''两块。可反解的只有左上到右上这条通道，宽度是 \(r\)。}
+\end{center}
 
-\[
-A=
-\begin{bmatrix}
-2&0\\
-0&1\\
-0&0
-\end{bmatrix}.
-\]
+这些断言不必逐条硬记。\(i>r\) 时 \(\norm{Av_i}^2=v_i^{\trans}A^{\trans}Av_i=0\)，靠后的右奇异向量自然落在 \(N(A)\) 里；而 \(A=\sum_{i\le r}\sigma_iu_iv_i^{\trans}\) 表明每个输出都是前 \(r\) 个 \(u_i\) 的组合、每一行都是前 \(r\) 个 \(v_i\) 的组合，列空间与行空间的基就此确定。
 
-它把 \(\R^2\) 嵌入 \(\R^3\)：第一坐标伸长两倍，第二坐标原样保留，第三坐标永远为 0。
+零奇异值不是一次不走运的舍入。看 \(B=\begin{bmatrix}1&1\\1&1\end{bmatrix}\)：沿 \((1,1)^{\trans}\) 的输入被放大两倍原方向送出，沿 \((1,-1)^{\trans}\) 的输入被抹成零。差异这个维度在正向映射里就丢了，求 \(B^{-1}\) 时算法崩溃，不是实现有 bug，而是你要的东西在数学上不存在。数据里的近似共线是同一件事的连续版本——奇异值不是零而是 \(10^{-8}\)，于是崩溃换成了一个看着正常、实则不可信的解。下一节专门处理这一类。
 
-计算 \(A^{\trans}A=\begin{bmatrix}4&0\\0&1\end{bmatrix}\)。特征向量显然是 \(v_1=e_1\)、\(v_2=e_2\)（标准基），对应奇异值 \(\sigma_1=2\)、\(\sigma_2=1\)。输出方向：\(u_1=Ae_1/2=(1,0,0)^{\trans}=e_1\)，\(u_2=Ae_2/1=(0,1,0)^{\trans}=e_2\)。第三个输出方向 \(e_3\) 永远不会被 \(A\) 产生——它属于 \(A^{\trans}\) 的零空间。
+\subsection{哪些东西是唯一的}
 
-这个例子虽小，已经把四个基本子空间在 SVD 中的位置展示清楚：
+奇异值是唯一的，奇异向量不是。每一对 \((u_i,v_i)\) 可以同时变号而分解不变；某个奇异值若重复，对应子空间里任意一组正交基都同样合法。做数据解释时这条边界经常被忽略：拿到``第三主方向''之后先看 \(\sigma_3\) 与 \(\sigma_2,\sigma_4\) 是否分得开，两个几乎相等的奇异值意味着对应的单个方向没有被数据定下来，换一批样本它就会在那个平面里转一圈。稳定的是子空间，不是坐标轴。
 
-\begin{itemize}
-\tightlist
-\item
-  \(v_1,\ldots,v_r\) 张成 \(A\) 的行空间（输入中"有用"的方向）；其余右奇异向量张成 \(N(A)\)（输入中被压平的方向）；
-\item
-  \(u_1,\ldots,u_r\) 张成 \(A\) 的列空间（输出中可到达的方向）；其余左奇异向量张成 \(N(A^{\trans})\)（输出中永远到不了的方向）。
-\end{itemize}
+奇异值与特征值也不要混。奇异值恒为非负实数，对任意矩形矩阵都有；特征值可以为负、为复数，描述的是方阵的不变方向。两者只在特殊情形有简单关系：\(A\) 实对称时，奇异值等于特征值的绝对值——负特征值的那个符号被 \(u_i=Av_i/\sigma_i\) 吸收进了左奇异向量。
 
-这些断言可以逐条验证。\(i>r\) 时 \(\|Av_i\|^2 = v_i^{\trans}A^{\trans}Av_i = 0\)，故靠后的右奇异向量确实在 \(N(A)\) 中。而 \(A=\sum_{i\le r}\sigma_i u_i v_i^{\trans}\) 表明：每个输出都是前 \(r\) 个 \(u_i\) 的组合，故列空间恰由它们张成；每一行都是前 \(r\) 个 \(v_i\) 的组合，故行空间恰由它们张成。
-
-因此 SVD 不只是一个计算公式。它同时给出了输入中被保留的方向、被消灭的方向，以及输出中可以到达和永远到不了的方向。一个线性映射完整的信息结构，全部陈列在两组正交向量和一条对角线上。
-
-再看一个秩一矩阵：
-
-\[
-B=\begin{bmatrix}1&1\\1&1\end{bmatrix}.
-\]
-
-沿 \(v_1=(1,1)^{\trans}/\sqrt{2}\) 的输入被放大两倍并送到同一方向；沿 \(v_2=(1,-1)^{\trans}/\sqrt{2}\) 的输入被完全压成零。奇异值：\(\sigma_1=2\)，\(\sigma_2=0\)。
-
-零奇异值不是一个不幸的计算误差。它告诉你一件结构上的事：输入的"差异方向"一旦被抹掉，就无法从输出中恢复。如果你试图求 \(B^{-1}\)，算法会崩溃——不是因为实现有 bug，而是因为你要求的事情在数学上就不可能。
-
-\subsection{需要保留的边界}
-
-奇异值是唯一的，但奇异向量并不总是唯一。每一对 \((u_i,v_i)\) 可以同时乘以 \(-1\) 而不改变 SVD。如果某个奇异值重复（比如 \(\sigma_2=\sigma_3\)），对应子空间内的任意正交基都同样合法。因此，当你试图解释数据中的"第几个奇异向量"时，先确认对应的奇异值是否与邻近值充分分离。两个几乎相等的奇异值意味着对应方向尚未被数据可靠地定下来——任何正交旋转都是近似等价的。
-
-还要区分奇异值与特征值。奇异值总是非负实数，适用于任意矩形矩阵。特征值可以为负、为复数，描述方阵的不变方向，且只在可对角化（或至少能走 Jordan 形）时才有完整的谱刻画。只有对实对称（或更一般地对正规矩阵的奇异值），才有简单关系：奇异值等于特征值的绝对值。
-
-SVD 对所有矩阵无条件存在。这是它与特征分解的根本区别。下一节会把 SVD 用于求解看似不可解的线性方程组——当逆矩阵不存在时，SVD 给出了一个信息损失最小的替代方案。
-
-\subsection{延伸与来源}
-
-\begin{itemize}
-\tightlist
-\item
-  MIT 18.06SC：Singular Value Decomposition
-\item
-  MIT 18.065：Matrix Methods in Data Analysis, Signal Processing, and Machine Learning
-\end{itemize}
+SVD 对一切矩阵无条件存在，这是它与特征分解最实用的区别，也是数据分析普遍拿它当默认工具的原因。下一节先用它对付看似无解或解太多的线性方程组：当逆矩阵不存在时，\(\Sigma\) 的对角线告诉你哪些方向还能反解回去，哪些只能承认丢了。

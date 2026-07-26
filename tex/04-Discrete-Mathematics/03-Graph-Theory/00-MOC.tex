@@ -1,70 +1,39 @@
-图把对象压缩成顶点，把成对关系压缩成边。它刻意忽略对象内部细节，以便研究连通、路径、环、匹配和冲突。关键问题是：只知道谁与谁相邻，能对整个网络推出什么？
+一份两列的表：每行一对 ID，意思是这两个对象之间存在某种关系。它可以是互相关注、模块互相引用、两条记录指同一个人、两门课有共同学生。这四件事的业务含义毫无共同点，能问的问题却出奇地一致——有没有异常集中的节点，会不会碎成互不往来的几块，能不能用更少的连接维持全局，哪些对象注定不能共存。
 
-考虑一张 5 人的社交图：每人是一个顶点，握过手就在两人间连边。若每人至少握过两次手，握手定理（度数之和为边数两倍）迫使总度数至少 10，至少 5 条边。一个人至少两次握手却不能排除网络是两条独立的链——可见度数全局和中藏着约束，但连通与否要看路径，不是度数之和。
+这一章处理的就是这张表。把它抽象成图，等于宣布：只保留``谁和谁有连接''，其余一律不记。顶点在纸上的位置、边画成直线还是弧线、顶点按什么顺序排列，全部丢掉。代价是任何依赖``两点离得近''的结论都问不出来；回报是凡是只依赖连接关系的结论，都不受画法影响，也不受重新命名影响。整章的定理都活在这个回报里。
 
-\begin{enumerate}
-\tightlist
-\item
-  图的语言与度数
-\item
-  路径、环与连通性
-\item
-  树与生成树
-\item
-  二分图与匹配
-\item
-  图着色与冲突安排
-\item
-  稳定匹配与延迟接受
-\item
-  欧拉回路与一笔画：从七桥问题抽出度数奇偶，证明存在判据并把证明变成构造算法。
-\item
-  哈密顿回路与旅行商：把``走遍边''换成``走遍点''，辨认必要条件、充分条件、计算困难与近似的适用边界。
-\item
-  平面图与 Euler 公式：从三屋三井追问一张图是否真的画得下，用顶点、边、面的计数识别非平面障碍。
-\item
-  图同构与可达性：区分图的画法与结构，用置换矩阵表达重命名，并由布尔矩阵幂读出多步可达。
-\item
-  割与覆盖参数：用点连通度、边连通度、支配集和覆盖数衡量网络的脆弱性与最小保障成本。
-\end{enumerate}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[black!60] (0,1.2) -- (-1.1,0.4) -- (-0.7,-0.9) -- (0.7,-0.9) -- (1.1,0.4) -- (0,1.2);
+  \draw[black!60] (0,1.2) -- (-0.7,-0.9);
+  \foreach \x/\y in {0/1.2,-1.1/0.4,-0.7/-0.9,0.7/-0.9,1.1/0.4}
+    {\fill (\x,\y) circle (2.3pt);}
+  \draw[->,black!55] (1.5,0.7) -- (2.4,1.5);
+  \draw[->,black!55] (1.5,0.1) -- (2.4,0.1);
+  \draw[->,black!55] (1.5,-0.5) -- (2.4,-1.3);
+  \node[right,align=left,font=\footnotesize] at (2.5,1.5)
+    {走得通吗？\\\textcolor{black!60}{度数、连通分量、树与生成树}};
+  \node[right,align=left,font=\footnotesize] at (2.5,0.1)
+    {怎样配对、怎样避开冲突？\\\textcolor{black!60}{匹配、着色、稳定匹配}};
+  \node[right,align=left,font=\footnotesize] at (2.5,-1.3)
+    {换个画法还成立吗？\\\textcolor{black!60}{遍历、平面性、不变量与割}};
+\end{tikzpicture}
 
-画图适合建立直觉，证明则要回到顶点、边和路径的定义。一张看似不同的图可能只是顶点重命名；一张好看的布局也不能改变连通性。最后两篇正面处理这条边界：先认清哪些量不随画法改变，再问移除多少节点或边才会让网络真正断开。
+\emph{同一张图，三类问法，对应本章的三条线索。左边这五个顶点怎么摆无关紧要，右边三行问题的答案都不会因此改变。}
+\end{center}
 
-\subsection{怎么读这一章}
+\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/01]{``图的语言与度数''}先把建模约定钉住：边代表什么关系，这个关系对不对称，要不要带权重。然后是本章第一个非平凡结论——把``边的端点''这批东西数两遍，得到度数之和等于边数的两倍，于是奇度顶点必定成对出现。这是\hyperref[sec:04-Discrete-Mathematics/01-Combinatorics/02]{``二项式与双重计数''}那套手法在图上最容易画出来的一次应用，也是后面判断一笔画、判断配对可行性的第一道筛子。这一节还提醒了一件容易被均值掩盖的事：真实网络的度分布常常是重尾的，按平均度数估容量的算法会死在几个超级节点上。
 
-这一章不必顺序读完。先读第一篇，固定``顶点、边、方向、权重与重边''的建模约定，然后可按问题进入四条路线：
+\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/02]{``路径、环与连通性''}把一步邻接累积成任意多步的可达。在无向图上可达是等价关系，于是顶点自动切成互不相交的连通分量——实体归并之后``到底剩多少个真实对象''问的就是分量个数。这一节还给出一个反复要用的计数：每加一条边，分量数最多减一，所以连通至少需要 \(n-1\) 条边。
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{连通骨架：}路径与连通性 \(\rightarrow\) 树与生成树 \(\rightarrow\) 割与连通度，理解``至少有一条路''、``刚好连通''和``有多少独立备用路''的区别；
-\item
-  \textbf{配对与冲突：}二分图与匹配 \(\rightarrow\) 图着色 \(\rightarrow\) 稳定匹配，分清数量最大、资源不冲突和没有阻塞对是三种目标；
-\item
-  \textbf{走遍与可画：}欧拉回路 \(\rightarrow\) 哈密顿回路 \(\rightarrow\) 平面图，对比局部奇偶判据、计算困难与全局嵌入约束；
-\item
-  \textbf{结构与不变量：}图同构与可达性 \(\rightarrow\) 割与覆盖参数，先忽略画法和命名，再选择与容错、服务覆盖或责任分配相匹配的量。
-\end{itemize}
+\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/03]{``树与生成树''}把这个下界顶到等号。恰好 \(n-1\) 条边的连通图处在临界：删任何一条断开，加任何一条成环，而且连通、无环、边数 \(n-1\) 这三件事任意两条能推出第三条。最小生成树的贪心之所以正确，靠的正是``加边必成环''——环从割的一侧出去还要回来，于是总能用轻边换掉重边。层次聚类的合并轨迹与 Kruskal 是同一个过程。
 
-第一遍的停点是：面对一个网络问题，能先说清边表示什么，再指出所求是可行解、最优解、存在性证书还是不可能性障碍。细长定理的完整证明可在需要时回补。
+配对与冲突是第二条线索，三节共用一个母题：把``不能同时''翻译成图上的约束。\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/04]{``二分图与匹配''}处理两类对象之间的分配，核心是增广路——它把``是不是全局最大''这个难问的问题换成``能不能找到一条交替路''这个可搜索的问题；Hall 定理进一步说明配不上时一定有一撮左顶点的邻域太小，失败是局部可诊断的；König 定理让最大匹配与最小覆盖顶到一起，是线性规划对偶最早的组合样本。\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/05]{``图着色与冲突安排''}放开``只有两组''的限制，把资源分配变成给顶点涂色：团和奇环给下界，贪心给上界，两头夹逼。\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/06]{``稳定匹配与延迟接受''}换掉了前两节的隐含假设——被安排的人有自己的偏好，目标从``总量最大''变成``没有人想私下另找搭档''。
 
-本章主要是组合图论。若要把邻接关系变成特征向量，继续读\hyperref[sec:13-Machine-Learning/05-Clustering-and-Data-Geometry/02]{``谱聚类把连通性变成特征向量''}；若要在图上传播局部概率信息，读\hyperref[ch:115]{``概率图与序列模型''}或\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/04]{``稀疏图码与消息传递''}。Laplacian 和消息传递使用本章的图结构，但加入了额外的线性代数或概率语义。
+第三条线索问的是图能被怎样走遍、怎样画下。\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/07]{``欧拉回路与一笔画''}要求用尽每条边，判据出人意料地简单，就是度数的奇偶，而且证明本身可以改写成构造算法。\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/08]{``哈密顿回路与旅行商''}只把``走遍边''改成``走遍点''，问题的难度立刻换了一个量级——这一节的重点是分清必要条件、充分条件与计算困难各自管到哪里，以及近似算法的适用边界。\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/09]{``平面图与 Euler 公式''}追问一张图是否真的画得下，顶点、边、面的计数把非平面的障碍限制成了两种。
 
-\subsection{本章篇目}
+最后两节回到开头那句抽象。\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/10]{``图同构与可达性：结构不依赖画法''}区分画法与结构：顶点重命名就是一次置换，邻接矩阵作相应的相似变换，而布尔矩阵的幂直接读出多步可达。\hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/11]{``割与覆盖参数：网络脆弱性不只看是否连通''}把``连通''这个是非题换成程度问题：要打掉几个节点才会断开，要多少顶点才能盖住全部边。连通性只承诺至少有一条路，不承诺短、不承诺有备份、也不承诺容量够。
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+这一章不必顺着读完。第一节的建模约定是公共前提，之后可以直接跳到最接近当下困惑的那一节，再沿篇内的链接回补。读到能做这样一件事就算过关：拿到一个网络问题，先说清顶点和边各代表什么，再指出自己要的是可行解、最优解、存在性证书，还是一个不可能性的证明。这四类目标对应的工具完全不同，混起来最容易白费力气。
 
-\begin{itemize}
-\tightlist
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/01]{``图的语言与度数''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/02]{``路径、环与连通性''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/03]{``树与生成树''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/04]{``二分图与匹配''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/05]{``图着色与冲突安排''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/06]{``稳定匹配与延迟接受''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/07]{``欧拉回路与一笔画''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/08]{``哈密顿回路与旅行商''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/09]{``平面图与 Euler 公式''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/10]{``图同构与可达性：结构不依赖画法''}；
-\item \hyperref[sec:04-Discrete-Mathematics/03-Graph-Theory/11]{``割与覆盖参数：网络脆弱性不只看是否连通''}。
-\end{itemize}
+本章讲的是组合图论，图结构本身就是结论。若要把邻接关系变成向量、用特征值读出聚类，接着看\hyperref[sec:13-Machine-Learning/05-Clustering-and-Data-Geometry/02]{``谱聚类把连通性变成特征向量''}；若要在图上传播局部的概率信息，看\hyperref[ch:115]{``概率图与序列模型：用条件独立压缩联合分布''}或\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/04]{``稀疏图码与消息传递''}。那些地方用的还是这一章的图，只是在边上另外挂了线性代数或概率的语义。

@@ -1,39 +1,38 @@
-无限不是``算得非常多''。数列收敛要求尾部全部进入任意小误差窗口；无穷级数则是部分和数列的极限。单项趋于零只说明后来每次新增很小，却不保证无数次新增的总量有限——调和级数正是最重要的认知冲突：$\sum_{n=1}^\infty 1/n$ 的项 $1/n\to0$，但按长度翻倍分组后每组至少贡献 $1/2$，无穷多组使部分和无界。
+一个迭代算法跑到第 \(n\) 轮，本轮的修正量已经小到日志里看不出变化。这轮修正是 \(1/n\) 量级——听起来完全可以忽略。那么整个训练过程累积下来的漂移量呢？也可以忽略吗？
 
-建议按以下顺序阅读：
+不可以。\(\sum_{n\le N}1/n\) 大约是 \(\ln N\)，没有上界。每一步都微不足道，走上无穷多步，照样可以走到任意远的地方。反过来，若每轮修正是 \(1/n^2\) 量级，累计漂移就被压在 \(\pi^2/6\) 以内，永远越不过去。两种衰减在图上几乎分不开，命运却完全相反。
 
-\begin{enumerate}
-\tightlist
-\item
-  数列怎样收敛
-\item
-  无穷级数与部分和
-\item
-  正项级数的比较
-\item
-  交错与绝对收敛
-\item
-  幂级数是一族函数
-\item
-  Taylor 展开与余项
-\end{enumerate}
+本章处理的就是这一类判断：一个无限过程，什么时候产生有限的结果。答案不取决于单次增量有多小，而取决于尾部衰减得够不够快。全章的判别工具——比较、积分、比值、根值——回答的都是同一个问题，只是各自拿了不同的尺子去量同一段尾巴。
 
-判别法通过比较尾部衰减速度来判断收敛，不能简化成猜测级数``像哪一种题''。幂级数与 Taylor 级数随后把这一问题从数的求和提升为函数表示，并迫使我们区分形式展开、局部近似和真正收敛到原函数。
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \fill[red!8]  (0,-0.5) rectangle (6.4,0.5);
+  \fill[blue!8] (6.4,-0.5) rectangle (13.2,0.5);
+  \draw[black!45] (0,-0.5) rectangle (13.2,0.5);
+  \draw[->,black!55] (0.2,0) -- (13.0,0);
+  \draw[black!75,thick] (6.4,-0.8) -- (6.4,0.8);
+  \node[above,black!70] at (3.2,0.6) {部分和无界};
+  \node[above,black!70] at (9.8,0.6) {部分和有上界};
+  \fill (1.3,0) circle (1.7pt);  \node[below] at (1.3,-0.1)  {\(1/\sqrt n\)};
+  \fill (3.3,0) circle (1.7pt);  \node[below] at (3.3,-0.1)  {\(1/n\)};
+  \fill (5.3,0) circle (1.7pt);  \node[below] at (5.3,-0.1)  {\(1/(n\ln n)\)};
+  \fill (7.6,0) circle (1.7pt);  \node[below] at (7.6,-0.1)  {\(1/(n\ln^2 n)\)};
+  \fill (9.9,0) circle (1.7pt);  \node[below] at (9.9,-0.1)  {\(1/n^2\)};
+  \fill (12.1,0) circle (1.7pt); \node[below] at (12.1,-0.1) {\(2^{-n}\)};
+  \node[black!60,font=\footnotesize] at (13.0,0.75) {衰减更快};
+\end{tikzpicture}
 
-\subsection{怎么读这一章}
+\emph{同一条轴上，越往右尾部衰减越快。分界线不在``趋于零''这里——所有这些项都趋于零——而在一个细得出奇的位置：\(1/(n\ln n)\) 落在发散侧，只多一个对数因子的 \(1/(n\ln^2 n)\) 就落到了收敛侧。}
+\end{center}
 
-先分清数列项趋于零与级数部分和收敛。正项级数可用大小比较，含符号级数还要区分条件与绝对收敛。幂级数是一整族随 \(x\) 改变的级数，Taylor 展开最后必须用余项说明近似误差。
+进入这条主线之前要先把地基铺好。\hyperref[sec:02-Calculus/05-Sequences-and-Series/01]{``数列怎样收敛''} 把``越来越接近''换成可检验的窗口条件，并给出单调有界定理——它让你在算不出极限的情况下断言极限存在，这在递推数列和迭代算法里是常态。
 
-\subsection{本章篇目}
+\hyperref[sec:02-Calculus/05-Sequences-and-Series/02]{``无穷级数与部分和''} 解释为什么``无限次加法''这个说法需要重新定义：加法是二元运算，无限步做不完，出路是把无穷和改写成部分和数列的极限。调和级数在这里第一次登场，把``项趋于零''和``和有限''之间那道裂缝撕开。
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+\hyperref[sec:02-Calculus/05-Sequences-and-Series/03]{``正项级数的比较''} 是上图的正文。正项级数的部分和只能上行，于是收敛等价于有上界，所有判别法都在给这个上界找证据。这一节也会指出学习率序列为什么被要求满足 \(\sum\alpha_t=\infty\) 与 \(\sum\alpha_t^2<\infty\)——它就是一道 \(p\) 级数题。
 
-\begin{itemize}
-\tightlist
-\item \hyperref[sec:02-Calculus/05-Sequences-and-Series/01]{``数列怎样收敛''}；
-\item \hyperref[sec:02-Calculus/05-Sequences-and-Series/02]{``无穷级数与部分和''}；
-\item \hyperref[sec:02-Calculus/05-Sequences-and-Series/03]{``正项级数的比较''}；
-\item \hyperref[sec:02-Calculus/05-Sequences-and-Series/04]{``交错与绝对收敛''}；
-\item \hyperref[sec:02-Calculus/05-Sequences-and-Series/05]{``幂级数是一族函数''}；
-\item \hyperref[sec:02-Calculus/05-Sequences-and-Series/06]{``Taylor 展开与余项：匹配局部变化信息''}。
-\end{itemize}
+允许出现负号之后，情况变得更奇怪。\hyperref[sec:02-Calculus/05-Sequences-and-Series/04]{``交错与绝对收敛''} 会证明一件反直觉的事：条件收敛的级数可以通过重新排列项的顺序，收敛到你指定的任何一个数。求和顺序无关不是加法的自带属性，它是绝对收敛买来的。
+
+最后两节把问题从数抬到函数。\hyperref[sec:02-Calculus/05-Sequences-and-Series/05]{``幂级数是一族函数''} 说明同一个形式级数对不同的 \(x\) 有不同命运，收敛半径划出了它有意义的地盘；\hyperref[sec:02-Calculus/05-Sequences-and-Series/06]{``Taylor 展开与余项：匹配局部变化信息''} 则把重点放在余项上——展开式能信到多远，由余项决定，而不由它写得多整齐。
+
+读完这一章，看到一个无限求和你会先问尾巴的衰减尺度，而不是先找套路；看到一个近似展开你会先问余项界，而不是先数项数。若只想解决眼前的困惑，可以直接跳到最接近的一节，再沿链接回补前置。

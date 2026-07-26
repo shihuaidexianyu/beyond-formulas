@@ -4,7 +4,101 @@
 
 一行公式压缩了所有这些东西，却一个也不显示。
 
-再举一个更小的例子。用最小二乘拟合三个点 \((1, 2.1), (2, 3.8), (3, 6.2)\)。设计矩阵 \(X = \begin{bmatrix}1&1\\1&2\\1&3\end{bmatrix}\)，\(X^\top X = \begin{bmatrix}3&6\\6&14\end{bmatrix}\)，求逆得 \(\frac{1}{6}\begin{bmatrix}14&-6\\-6&3\end{bmatrix}\)，最终 \(\hat{\beta} \approx (0.93, 1.73)^\top\)。一行公式 \(\hat{\beta} = (X^\top X)^{-1}X^\top y\) 在这里干净利落。但 \(X^\top X\) 的条件数约为 109——输入数据的微小扰动就可能放大两个数量级。公式正确和数值可靠之间，隔着一个条件数；而这三个点背后的数据收集机制，又决定你得到的是一条真实规律，还是一个恰好被这三点"选中"的巧合。
+再看一个很小的例子。用直线 \(y=\beta_0+\beta_1x\) 拟合三个点
+\[
+(0,1),\qquad (1,2),\qquad (2,2).
+\]
+把每个预测写成``截距加斜率乘输入''，就得到
+\[
+X=
+\begin{bmatrix}
+1&0\\
+1&1\\
+1&2
+\end{bmatrix},
+\qquad
+y=
+\begin{bmatrix}
+1\\2\\2
+\end{bmatrix}.
+\]
+第一列全为 \(1\)，负责截距；第二列记录输入 \(x\)，负责斜率。最小二乘不是要求直线穿过三个点——这通常做不到——而是让三个竖直残差的平方和最小。
+
+设参数向量为 \(\beta=(\beta_0,\beta_1)^{\trans}\)。三个预测值可以一次写成 \(X\beta\)，所以残差向量和要最小化的平方和分别是
+\[
+r(\beta)=y-X\beta,
+\qquad
+S(\beta)=\norm{y-X\beta}^{2}
+=\sum_{i=1}^{3}(y_i-x_i^{\trans}\beta)^2,
+\]
+其中 \(x_i^{\trans}\) 是 \(X\) 的第 \(i\) 行。现在追问：为什么最优解会出现 \(X^{\trans}X\)？
+
+先对任意一个参数 \(\beta_j\) 求偏导。第 \(i\) 个残差对 \(\beta_j\) 的变化率是 \(-X_{ij}\)，由链式法则
+\[
+\frac{\partial S}{\partial\beta_j}
+=-2\sum_{i=1}^{3}X_{ij}(y_i-x_i^{\trans}\beta).
+\]
+把 \(j=0,1\) 的两个偏导叠成一个向量，求和恰好就是一次矩阵转置乘法：
+\[
+\nabla_\beta S(\beta)
+=-2X^{\trans}(y-X\beta).
+\]
+有些教材把转置写成 \(X'\)，所以 \(X'X\) 与这里的 \(X^{\trans}X\) 是同一个对象。转置并非凭空加入：\(X\) 先把参数变化变成三个预测值的变化，\(X^{\trans}\) 再把三个残差分别沿截距和斜率两个参数方向汇总回来。
+
+最小点处若没有约束，梯度必须为零。因此
+\[
+\begin{aligned}
+-2X^{\trans}(y-X\hat\beta)&=0,\\
+X^{\trans}y-X^{\trans}X\hat\beta&=0,\\
+X^{\trans}X\hat\beta&=X^{\trans}y.
+\end{aligned}
+\]
+最后一行就是正规方程。这里 \(X^{\trans}X\) 出现的原因很具体：把括号中的 \(X\hat\beta\) 左乘 \(X^{\trans}\)，结合律给出 \(X^{\trans}(X\hat\beta)=(X^{\trans}X)\hat\beta\)。
+
+代入本例的数据，
+\[
+X^{\trans}X=
+\begin{bmatrix}
+3&3\\
+3&5
+\end{bmatrix},
+\qquad
+X^{\trans}y=
+\begin{bmatrix}
+5\\6
+\end{bmatrix},
+\]
+若 \(X\) 的两列线性无关，则 \(X^{\trans}X\) 可逆，因此
+\[
+\hat\beta=(X^{\trans}X)^{-1}X^{\trans}y
+=
+\begin{bmatrix}
+7/6\\[2pt]1/2
+\end{bmatrix}.
+\]
+拟合直线是 \(\hat y=7/6+x/2\)。三个预测值为 \(7/6,5/3,13/6\)，残差为 \((-1/6,1/3,-1/6)^{\trans}\)；它们并不全为零，但满足 \(X^{\trans}(y-X\hat\beta)=0\)。这句话才是公式的几何含义：剩余误差已经垂直于模型能够调整的两个方向，再沿截距或斜率方向移动都不能继续降低平方误差。
+
+\begin{center}
+\begin{tikzpicture}[x=2cm,y=1.25cm,>=stealth]
+  \draw[->] (-0.2,0) -- (2.55,0) node[right] {\(x\)};
+  \draw[->] (0,-0.1) -- (0,2.65) node[above] {\(y\)};
+  \draw[blue!70!black,thick] (-0.1,1.1167) -- (2.35,2.3417)
+    node[right] {\(\hat y=7/6+x/2\)};
+  \foreach \x/\y/\yh in {0/1/1.1667,1/2/1.6667,2/2/2.1667}{
+    \draw[dashed,gray!80] (\x,\y) -- (\x,\yh);
+    \fill (\x,\y) circle (2.2pt);
+  }
+  \node[below] at (1,0) {\(1\)};
+  \node[below] at (2,0) {\(2\)};
+  \node[left] at (0,1) {\(1\)};
+  \node[left] at (0,2) {\(2\)};
+  \node[right] at (1.05,1.84) {残差};
+\end{tikzpicture}
+
+\emph{最小二乘允许每个点留下残差；它要求的是所有残差合起来不能再被模型方向解释。}
+\end{center}
+
+但这行公式仍然藏着条件：\(X\) 的列是否独立，形成 \(X^{\trans}X\) 会不会放大条件数，数据是否足以支持``这条线代表真实规律''。代数上算出一条线、数值上稳定地算出它、统计上相信它能够外推，是三种不同的判断。Beyond Formulas 要做的，就是把这些被一行公式压在一起的问题重新分开。
 
 Beyond Formulas 想做的事其实很朴素：把这一行拆开，看清每一层折叠进去的结构。它不是绕开公式，而是让公式恢复本来的厚度——它压缩了哪些对象和关系，依赖什么条件，经过了怎样的推理，能不能被可靠地计算，又需要什么证据才能支撑一个判断。
 

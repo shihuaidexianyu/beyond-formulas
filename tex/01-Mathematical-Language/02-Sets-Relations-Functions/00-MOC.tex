@@ -1,35 +1,47 @@
-在 \(\Z\) 上考虑模 3 同余：两个整数如果除以 3 的余数相同，就归为一类。比如 \(1,4,7,10,\ldots\) 余数都是 1，它们构成一个等价类；\(0,3,6,9,\ldots\) 构成另一个等价类。总共三个等价类，恰好把全体整数分成三个互不相交的区块——这就是等价关系做分类的基本画面。
+一张客户表里躺着三条记录：``张三，尾号 0001''、``张 三，尾号 0001''、``ZHANG SAN，尾号 0001''。下游所有的统计口径都压在一个判断上：这是三位客户还是一位客户？
 
-逻辑告诉我们怎样表述判断，集合则回答``正在谈论哪些对象''。从两个集合的笛卡尔积中挑出若干有序对，就得到关系；若每个输入恰好对应一个输出，这个关系又成为函数。三者逐层累加结构。
+同一批数据还排着别的问题。本次分析该纳入哪些行、排除哪些行？两个预处理任务谁必须排在前面，谁其实可以并行？把原始字段换成模型能吃的编码之后，还能不能反推回原值？
 
-阅读顺序如下：
+这几个问题分别落在几种不同的结构上，而它们是一层层搭起来的。集合回答``正在谈论哪些对象''；从两个集合的全部配对里挑出一部分，就得到关系；关系再加条件，会分岔成截然不同的两种东西——补上对称性，它把对象归并成类；补上反对称性，它把对象排出层次。函数是约束最紧的一类关系：每个输入恰好对应一个输出。正因为约束紧，才谈得上能不能倒着走回去。
 
-\begin{enumerate}
-\tightlist
-\item
-  集合与集合运算：元素、子集、运算、幂集与笛卡尔积。
-\item
-  关系与等价类：用有序对描述``相等到某种程度''，理解等价类如何形成划分。
-\item
-  偏序与可比较性：区分先后、包含与大小，理解不必所有对象都能比较。
-\item
-  函数与可逆性：从特殊关系出发理解定义域、值域、单射、满射、复合与逆。
-\end{enumerate}
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth,
+  box/.style={draw,rounded corners=3pt,fill=black!5,
+    minimum width=2.1cm,minimum height=0.8cm,align=center}]
+  \node[box] (s) at (0,0) {集合};
+  \node[box] (r) at (3.9,0) {关系};
+  \node[box] (e) at (8.6,1.7) {等价关系};
+  \node[box] (p) at (8.6,0) {偏序};
+  \node[box] (f) at (8.6,-1.7) {函数};
+  \draw[->] (s) -- (r);
+  \draw[->] (r) -- (e);
+  \draw[->] (r) -- (p);
+  \draw[->] (r) -- (f);
+  \node[align=center,black!60] at (1.95,0.64) {取 \(A\times B\) 的子集};
+  \node[black!60] at (6.3,1.15) {对称};
+  \node[black!60] at (6.3,0.3) {反对称};
+  \node[black!60] at (5.4,-1.4) {每个输入一个输出};
+\end{tikzpicture}
 
-这些概念会反复出现在后续课程中：等价关系通过商集构造新对象，偏序支撑上确界与递归结构，函数是微积分和概率论的基本对象。
+\emph{同一批有序对，加上不同的性质要求，就成了用途完全不同的三种结构。}
+\end{center}
+
+上一章的逻辑语言在这里全程在场：子集关系是一条蕴含，交并补是且或非的改写，``两个等价类要么相等要么不交''的证明是一次标准的双向包含。若对``若……则''和量词否定还不顺手，可以先回 \hyperref[ch:005]{``逻辑：把含混判断变成可检验命题''}。
 
 \subsection{怎么读这一章}
 
-按``对象--对象间关系--顺序--映射''阅读。集合说明有哪些对象，等价关系负责归类，偏序只比较一部分对象，函数则追踪输入怎样变成输出。每一篇都优先看反例，避免把相近概念误当成同一个。
+四篇按结构累加的顺序排列，第一次阅读建议顺着走：
 
-\subsection{本章篇目}
-
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
-\begin{itemize}
+\begin{enumerate}
 \tightlist
-\item \hyperref[sec:01-Mathematical-Language/02-Sets-Relations-Functions/01]{``集合与集合运算''}；
-\item \hyperref[sec:01-Mathematical-Language/02-Sets-Relations-Functions/02]{``关系与等价类''}；
-\item \hyperref[sec:01-Mathematical-Language/02-Sets-Relations-Functions/03]{``偏序与可比较性''}；
-\item \hyperref[sec:01-Mathematical-Language/02-Sets-Relations-Functions/04]{``函数与可逆性''}。
-\end{itemize}
+\item \hyperref[sec:01-Mathematical-Language/02-Sets-Relations-Functions/01]{``集合与集合运算''}：为什么``相同''只看成员不看写法，以及筛选条件怎样变成交并补；
+\item \hyperref[sec:01-Mathematical-Language/02-Sets-Relations-Functions/02]{``关系与等价类''}：哪三条性质才配得上``归为一类''，以及相似度阈值为什么几乎总在传递性上翻车；
+\item \hyperref[sec:01-Mathematical-Language/02-Sets-Relations-Functions/03]{``偏序与可比较性''}：不可比不是信息不足，而是结构本身没有规定顺序；
+\item \hyperref[sec:01-Mathematical-Language/02-Sets-Relations-Functions/04]{``函数与可逆性''}：一次映射有没有丢信息，可以从单射与满射两个方向分别读出来。
+\end{enumerate}
+
+如果眼下的麻烦是去重规则把不该合并的记录并到了一起，可以直接从第二篇进入；如果是想弄清某个编码能否还原，直接读第四篇，再回补前面的记号。
+
+\subsection{读完后应发生什么变化}
+
+目标不是背下 \(\in\) 和 \(\subseteq\) 的区别，而是拿到任何一条``判定两个对象是否算同一个''或者``判定谁该排在谁前面''的规则时，能立刻问出该问的问题：成员资格的检验规则说清楚了吗？这条关系满足哪几条性质，缺的那条会以什么形式反噬？这次映射把哪些差异抹掉了，抹掉之后还能不能还原？后面的商结构、概率事件、依赖调度和特征编码，反复调用的都是这几个动作。

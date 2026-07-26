@@ -1,35 +1,47 @@
-电话、请求、故障和顾客到达都可先忽略具体内容，只记录累计事件数 $N(t)$。计数过程的路径从零开始、只向上跳；同一过程既可以从``固定时间数事件''观察，也可以从``固定事件数看等待时间''观察。
+一份网关日志摊在屏幕上，几十万行，每行有用的信息只有一个时间戳。你想从中读出点别的：现在的容量够不够、这次超时告警是不是真的异常、如果流量翻倍队列会堆到多长。这些问题的形状是一样的——事件零散地落在一条时间轴上，而你要对下一段时间说点什么。
 
-\begin{enumerate}
-\tightlist
-\item
-  Bernoulli 过程与离散到达：先在离散时隙中理解计数、到达时刻与等待间隔。
-\item
-  Poisson 过程与独立增量：把时隙缩短，得到连续时间的稳定稀疏到达模型。
-\item
-  到达时刻、指数等待与条件均匀性：连接 Poisson 计数、Exponential 间隔、Gamma 到达时刻与次序统计量。
-\item
-  更新过程与长期更新率：放弃无记忆性后，怎样处理一般寿命与重复更新。
-\end{enumerate}
+计数过程给这件事一套记法。记 \(N(t)\) 为到时刻 \(t\) 为止累计发生的事件数，路径从零出发、只往上跳、跳幅是整数。整条路径由事件时刻完全决定，于是同一份数据可以从两头读：圈定一段时间数里面有几个事件，或者盯住某个事件序号问它什么时候到。这两种读法在本章会来回切换。
 
-Poisson 是最重要的基准模型，但并不是``所有到达数据''的默认答案。聚集、季节变化、容量限制和个体异质性都会破坏其独立平稳增量。
+主干只有一句话。若到达满足三条极简假设——不相交时段互不影响（独立增量）、等长时段的统计行为相同（平稳增量）、同一瞬间不会挤进两个事件——过程就被唯一确定了，速率 \(\lambda\) 是仅有的自由参数。此时计数服从 Poisson、相邻间隔服从 Exponential、第 \(k\) 次到达服从 Gamma。这三件事不是三条各自成立的结论，它们是同一个过程被三种方式读出来的样子；分布层面的对照见\hyperref[sec:05-Probability/06-Common-Distributions/03]{``Poisson 计数、Exponential 等待与 Gamma 时间''}，本章关心的是过程层面。
 
-例如，某网站平均每小时 120 次访问。若访问完全随机且独立，则每分钟计数应近似 Poisson(2)，相邻到达间隔 Exponential(2)。但若一次访问后用户更可能在随后几秒点击另一个链接，到达就会聚集——同窗口内的方差超过 Poisson 方差，间隔中会出现比 Exponential 更多的短间隔。这正是从 Poisson 基准出发的判断：数据偏离了哪个方向，就对应哪种替代结构。
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,>=stealth]
+  \draw[black!45,fill=blue!6] (0,0) rectangle (3.4,2.3);
+  \node at (1.7,1.95) {三条假设};
+  \node at (1.7,1.35) {独立增量};
+  \node at (1.7,0.85) {平稳增量};
+  \node at (1.7,0.35) {瞬时不重叠};
+  \draw[->,black!65] (3.55,1.15) -- (4.35,1.15);
+  \draw[black!45,fill=blue!14] (4.5,0.55) rectangle (7.2,1.75);
+  \node at (5.85,1.35) {Poisson 过程};
+  \node at (5.85,0.85) {唯一参数 \(\lambda\)};
+  \draw[->,black!65] (7.35,1.15) -- (8.15,1.15);
+  \draw[black!45,fill=blue!6] (8.3,0) rectangle (11.7,2.3);
+  \node at (10.0,1.95) {三种读法};
+  \node at (10.0,1.35) {计数 \(N(t)\)：Poisson};
+  \node at (10.0,0.85) {间隔 \(W_r\)：Exponential};
+  \node at (10.0,0.35) {到达 \(T_r\)：Gamma};
+  \draw[->,black!55,dashed] (1.0,-0.15) -- (1.0,-1.05);
+  \node[right,black!70] at (1.15,-0.6) {放松平稳增量 \(\Rightarrow\) 非齐次 Poisson};
+  \draw[->,black!55,dashed] (1.0,-1.25) -- (1.0,-2.15);
+  \node[right,black!70] at (1.15,-1.7) {放松单位跳跃 \(\Rightarrow\) 复合 Poisson};
+  \draw[->,black!55,dashed] (8.6,-0.15) -- (8.6,-1.05);
+  \node[right,black!70] at (8.75,-0.6) {放松指数间隔 \(\Rightarrow\) 更新过程};
+\end{tikzpicture}
 
-\subsection{怎么读这一章}
+\emph{本章的骨架。左边三条假设合起来只留下一个参数；右边是同一个过程的三种读数。要动脑的地方在虚线上：每放松一条假设，模型往哪个方向走。}
+\end{center}
 
-先记住同一过程的三种读法：固定时间看计数 $N(t)$，固定事件序号看到达时刻 $T_r$，相邻事件之间看等待 $W_r$。Poisson、Exponential 与 Gamma 不是三套孤立公式，而是这三种读法在同一模型中的对应结果。
-
-若要做模型判断，再重点阅读独立增量、平稳增量与无记忆性分别排除了什么；若数据出现聚集、周期变化或老化效应，则进入非齐次 Poisson 或更新过程。长期更新率和检查悖论的推导可以在需要计算时间平均与随机观察偏差时再细读。
+先在离散时隙里把两种读法建立起来，再让时隙长度趋于零得到连续时间的版本，然后逐条松绑。速率随时间变化（白天与凌晨的流量差一个数量级）松的是平稳增量；一次到达携带一个随机大小（一笔订单的金额、一个请求的字节数）松的是单位跳跃；间隔带记忆（硬盘随役龄老化、用户等到不耐烦就走）松的是指数间隔本身，这时要换成更新过程。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/01]{``Bernoulli 过程与离散到达''}；
-\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/02]{``Poisson 过程与独立增量''}；
-\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/03]{``到达时刻、指数等待与条件均匀性''}；
-\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/04]{``更新过程与长期更新率''}。
+\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/01]{``Bernoulli 过程与离散到达''}：在按秒轮询的粗粒度世界里，先看清``数事件''与``量时间''是同一件事的两面；
+\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/02]{``Poisson 过程与独立增量''}：三条假设如何锁死整个过程，以及非齐次与复合两个最常用的推广；
+\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/03]{``到达时刻、指数等待与条件均匀性''}：把无记忆性讲透——它为什么让排队模型变得可算，以及怎样发现它在你的数据上不成立；
+\item \hyperref[sec:06-Random-Processes/02-Counting-Processes/04]{``更新过程与长期更新率''}：间隔一般化之后还剩什么，以及随机时刻观察为什么会系统性地偏向长周期。
 \end{itemize}
+
+四篇按依赖排列，前两篇是主线。若你手上已经有一份到达数据、只想判断 Poisson 是否够用，可以直接跳到第三篇的危险率诊断，再按结论回补。本章的模型在\hyperref[ch:050]{``连续时间 Markov 链与排队：不仅要知道跳到哪，还要知道何时跳''}里会被当作零件反复调用，那里的状态空间之所以能压得那么小，靠的正是这里的无记忆性。

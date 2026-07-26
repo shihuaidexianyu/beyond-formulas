@@ -88,6 +88,26 @@ f(x,y)=\frac12x^2+50y^2.
 
 等高线是一组狭长椭圆，长短轴之比约为 \(10:1\)。梯度总是垂直于等高线——这意味着梯度方向近乎与长轴（\(x\) 方向）垂直。所以每一步走的方向，都不是指向远处的椭圆中心，而是近乎横跨谷地的。下一步从新位置的等高线再出发，又被推向对面谷壁。迭代轨迹在谷地两侧左右摆动，像之字形锯齿，缓慢地沿长轴朝中心蠕动。
 
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,>=stealth]
+  \draw[gray!35] (0,0) ellipse [x radius=4.2,y radius=1.35];
+  \draw[gray!45] (0,0) ellipse [x radius=3.2,y radius=1.02];
+  \draw[gray!55] (0,0) ellipse [x radius=2.2,y radius=0.70];
+  \draw[gray!65] (0,0) ellipse [x radius=1.2,y radius=0.38];
+  \fill (0,0) circle (2pt) node[below] {最小点};
+  \draw[->,blue!70!black,thick]
+    (4.0,1.05) -- (3.25,-0.88) -- (2.55,0.70) --
+    (1.90,-0.52) -- (1.30,0.36) -- (0.82,-0.23) --
+    (0.42,0.11) -- (0.08,-0.02);
+  \node[above right] at (4.0,1.05) {\(x_0\)};
+  \node[above] at (2.8,1.5) {陡峭方向来回穿越};
+  \draw[->,gray!80] (2.7,1.35) -- (2.58,0.78);
+  \node[below] at (2.7,-1.45) {平缓方向推进很慢};
+\end{tikzpicture}
+
+\emph{安全步长由最陡方向限制，于是轨迹横跨狭谷反复折返，只能缓慢地沿长轴接近中心。}
+\end{center}
+
 这就是大条件数的诅咒。对 \(m\)-强凸、\(L\)-光滑的函数，定义条件数
 
 \[

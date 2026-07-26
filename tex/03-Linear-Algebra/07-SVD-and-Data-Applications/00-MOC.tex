@@ -1,39 +1,44 @@
-特征值分解很有力量，却只在方阵上直接成立，而且只有在矩阵拥有足够多特征向量时才真正好用。现实中的数据矩阵往往是长方形的：每一行是一个样本，每一列是一项特征。即使矩阵恰好是方阵，它也未必对称、未必能被一组正交特征向量对角化。
+一张用户对电影的评分表：十万行、两万列，大半格子空着。你想知道这堆数字背后是不是只有十几条主线——偏爱科幻、偏爱文艺、只看院线大片——足以把十万个人和两万部片子同时装进一个小得多的空间。手边最像样的结构工具是特征分解，可它第一步就写不下去：\(Av=\lambda v\) 要求等号两边住在同一个空间，而这张表把两万维送进十万维。
 
-奇异值分解解决的正是这个缺口。它告诉我们，任何线性映射都可以拆成"选择正交的输入方向---分别伸缩---转到正交的输出方向"。这一个结构同时解释了伪逆、最小二乘的敏感性、低秩压缩和主成分分析。
+方阵这个前提，数据矩阵基本不满足。即便凑巧是方阵，特征分解还要求它可对角化，而且特征方向未必正交，\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/03]{``对角化失败与 Jordan 形：独立特征方向不够时怎么办''}里的例子说明这并非罕见情形。
 
-\subsection{先看一个例子}
+奇异值分解把这些门槛全部拿掉。它对任何矩阵成立，不问方不方、满不满秩、对不对称，交出的结构永远是同一句话：先把输入换到一组正交坐标，沿各坐标独立伸缩，再把结果摆进输出空间的另一组正交坐标。两侧的正交变换不改变长度，矩阵所有的放大、压缩与信息丢失，全部落在中间那串伸缩因子上——它们叫奇异值，并且从大到小排好了队。
 
-取 \(A=\begin{bmatrix}3&0\\4&5\end{bmatrix}\)。试一下 \(A^{\trans}A=\begin{bmatrix}25&20\\20&25\end{bmatrix}\)，特征值 \(45\) 和 \(5\)，所以奇异值 \(\sigma_1=\sqrt{45}=3\sqrt5\approx6.708\)，\(\sigma_2=\sqrt5\approx2.236\)。对应右奇异向量 \(v_1=(1,1)^{\trans}/\sqrt2\)，\(v_2=(1,-1)^{\trans}/\sqrt2\)，左奇异向量 \(u_1=Av_1/\sigma_1\)，\(u_2=Av_2/\sigma_2\)。单位圆在 \(A\) 作用后变成一个椭圆，长半轴长度 \(\sigma_1\) 沿 \(u_1\) 方向，短半轴长度 \(\sigma_2\) 沿 \(u_2\) 方向。两个奇异值都不为零，所以 \(A\) 可逆；若有一个零奇异值，就说明存在某些输入方向被完全压成零，矩阵非满秩。
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[black!55,fill=blue!10] (-2.1,-0.6) rectangle (2.1,0.6);
+  \node at (0,0) {\(A=U\Sigma V^{\trans}\)};
+  \draw[black!40,fill=black!3] (-6.7,1.3) rectangle (-2.9,2.7);
+  \node[align=center] at (-4.8,2.0) {最小二乘与伪逆\\只反解能反解的方向};
+  \draw[black!40,fill=black!3] (2.9,1.3) rectangle (6.7,2.7);
+  \node[align=center] at (4.8,2.0) {条件数与正则化\\小奇异值是病态的来源};
+  \draw[black!40,fill=black!3] (-6.7,-2.7) rectangle (-2.9,-1.3);
+  \node[align=center] at (-4.8,-2.0) {最佳低秩近似\\截断前 \(k\) 个方向};
+  \draw[black!40,fill=black!3] (2.9,-2.7) rectangle (6.7,-1.3);
+  \node[align=center] at (4.8,-2.0) {主成分分析\\中心化数据的主方向};
+  \draw[->,thick,black!65] (-2.2,0.42) -- (-3.5,1.3);
+  \draw[->,thick,black!65] (2.2,0.42) -- (3.5,1.3);
+  \draw[->,thick,black!65] (-2.2,-0.42) -- (-3.5,-1.3);
+  \draw[->,thick,black!65] (2.2,-0.42) -- (3.5,-1.3);
+\end{tikzpicture}
 
-建议按下面的顺序连续阅读：
+\emph{本章的四条支线共用一个分解。区别只在于你盯着 \(\Sigma\) 的哪一端：盯着大奇异值得到压缩与降维，盯着小奇异值得到病态与正则化。}
+\end{center}
 
-\begin{enumerate}
-\tightlist
-\item
-  任意矩阵的奇异值分解：从单位球的像出发，推导 \(A=U\Sigma V^{\trans}\)。
-\item
-  伪逆与病态问题：哪些信息可以反解，哪些微小误差会被放大。
-\item
-  低秩近似：为什么截断 SVD 是最好的秩约束近似。
-\item
-  从数据矩阵到 PCA：把前面的结构翻译成降维与数据解释。
-\end{enumerate}
+排好队这件事比看上去要紧。奇异值一旦有序，``只保留前 \(k\) 个''就变成一个带最优性保证的动作：Eckart--Young 定理说，在所有秩不超过 \(k\) 的矩阵里，找不到比这个截断更接近原矩阵的。图像压缩、信号去噪、降维可视化、推荐系统里的矩阵补全、大模型微调时的低秩适配，共用的都是这一条定理。
 
-前置内容是对称矩阵的谱定理和最小二乘。读完本单元后，Fourier 分析会显得很自然：它也是寻找一组能把结构化线性变换变简单的正交坐标。
+队尾那些接近零的奇异值则从另一头制造麻烦。反解时要除以它们，于是数据里千分之一的噪声能把回归系数推出几十倍。伪逆、截断与岭回归处理的是同一件事：不去除以那些几乎为零的数。
 
-\subsection{怎么读这一章}
-
-先把 SVD 看成"旋转---按正交方向缩放---再旋转"，随后处理不可逆或病态系统的伪逆，再用截断奇异值获得最佳低秩近似，最后把中心化数据矩阵的 SVD 与 PCA 连接起来。
-
-\subsection{本章篇目}
-
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+\subsection{四篇的分工}
 
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/01]{``任意矩阵的奇异值分解''}；
-\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/02]{``伪逆与病态问题''}；
-\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/03]{``低秩近似：用少数方向保留主要结构''}；
-\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/04]{``从数据矩阵到 PCA''}。
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/01]{``任意矩阵的奇异值分解''}：把``旋转—伸缩—旋转''这句几何观察坐实成矩阵等式，并读出一个映射保留了哪些方向、消灭了哪些方向。
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/02]{``伪逆与病态问题''}：无解时取最小二乘、多解时取最小范数，两种情形被同一个公式统一；小奇异值则决定了这个解值不值得信。
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/03]{``低秩近似：用少数方向保留主要结构''}：截断为什么最优，以及最优的前提有多窄。
+\item \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/04]{``从数据矩阵到 PCA''}：同一个分解换成样本的语言，以及中心化这一步为什么不能省。
 \end{itemize}
+
+前置只有两处：对称矩阵的谱定理（\hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/01]{``对称矩阵与谱定理：什么时候特征方向一定正交''}）给出推导的全部弹药，而\hyperref[sec:03-Linear-Algebra/03-Orthogonality/03]{``最小二乘：为无解方程寻找最佳近似''}提供第二篇要接手的问题。若你是带着一个具体困惑进来的，直接翻到最接近的一篇，再沿链接回补也行。
+
+读完之后，下一章的 Fourier 基会显得顺理成章：那同样是在找一组能把某类线性变换化简成对角形的正交坐标，只不过换成了复数域，而且基是事先给定的、不用从数据里学。

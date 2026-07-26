@@ -1,0 +1,58 @@
+\documentclass[UTF8,openany]{ctexbook}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{amsthm}
+\usepackage{booktabs,longtable,array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tocloft}
+\usepackage{hyperref}
+\input{tex/macros.tex}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=black,
+  urlcolor=blue,
+  citecolor=blue,
+  bookmarksdepth=1,
+  psdextra=true,
+  pdftitle={Beyond Formulas},
+  pdfsubject={从公式到结构、判断与可信计算}
+}
+\AtBeginDocument{%
+\renewcommand{\cftchapdotsep}{1}%
+\renewcommand{\cftchapleader}{\cftdotfill{\cftchapdotsep}}%
+\renewcommand{\cftchapafterpnum}{\cftparfillskip}%
+}
+\pdfstringdefDisableCommands{%
+  \let\, \space
+  \let\quad \space
+  \let\qquad \space
+}
+\setlist{nosep}
+\setlength{\emergencystretch}{3em}
+\raggedbottom
+\setcounter{secnumdepth}{0}
+\setcounter{tocdepth}{0}
+% 无编号定理类环境（与全书无编号风格一致；用法见 STYLE_GUIDE.md 第 4 节）
+\theoremstyle{definition}
+\newtheorem*{definition}{定义}
+\newtheorem*{example}{例}
+\newtheorem*{remark}{注记}
+\theoremstyle{plain}
+\newtheorem*{theorem}{定理}
+\newtheorem*{proposition}{命题}
+\newtheorem*{lemma}{引理}
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\newcounter{none}
+\title{Beyond Formulas\\[0.8em]\large 从公式到结构、判断与可信计算}
+\author{}
+\date{}
+\begin{document}
+\chapter*{数值微分与积分：同一份采样，为何难度相反}
+\phantomsection\label{ch:064}
+\input{tex/08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/00-MOC.tex}
+\input{tex/08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/01-数值微分为何不能无限缩小步长.tex}
+\input{tex/08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/02-从插值多项式到梯形与Simpson求积.tex}
+\input{tex/08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/03-Gaussian与自适应求积.tex}
+\end{document}

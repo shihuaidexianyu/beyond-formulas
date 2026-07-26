@@ -1,30 +1,55 @@
-导数观察局部变化，会把高频噪声和舍入误差放大；积分汇总区间贡献，能平均局部扰动。两类方法都可从"用低次多项式替代函数"推导，但误差传播完全不同。
+同一份采样数据摆在你面前：几十个 \((x_i,f(x_i))\)，间距 \(h\)。有人问你曲线在某点的斜率，也有人问你曲线下的面积。两个问题看上去对称——都只用加减乘除、都只碰这些点、都随 \(h\) 变小而``应该更准''。做下去才发现它们的难度差得很远。
 
-以中心差商近似 \(f'(x)\) 为例。取 \(f(x)=\sin x\)，\(x=\pi/4\)，真值为 \(\cos(\pi/4)\approx 0.70710678\)。用步长 \(h=10^{-3}\)，差分得 \(0.70710666\)，约 8 位正确。把 \(h\) 缩小到 \(10^{-8}\)，截断误差可降至 \(10^{-16}\) 量级——但浮点舍入把 \((f(x+h)-f(x-h))/(2h)\) 的分子推向了消去区，有效数字反而只剩约 8 位。步长不是越细越好。
+求导要把两个相近的函数值相减，再除以一个小数。求积要把函数值乘上一个小数，再累加。同一个 \(h\)，一个在分母，一个在分子。误差传播的方向也就此分道扬镳。
 
-本单元从步长的 U 形误差开始，再把梯形、Simpson、Gaussian 与自适应求积连成一条选择路径。
+\begin{center}
+\begin{tikzpicture}[x=1.05cm,y=1.05cm,font=\small,>=stealth]
+  \draw[black!30] (-0.1,0) -- (3.15,0);
+  \draw[black!85,thick] plot[domain=0:3,samples=241]
+    (\x,{1.05+0.45*sin(70*\x)+0.055*sin(900*\x)});
+  \node[font=\footnotesize,black!75] at (1.5,-0.42) {采样：信号 \(+\) 一点高频抖动};
+  \draw[->,black!55] (3.25,1.25) -- (4.05,2.45);
+  \node[font=\footnotesize,black!70] at (3.35,2.15) {求导};
+  \draw[->,black!55] (3.25,0.45) -- (4.05,-1.25);
+  \node[font=\footnotesize,black!70] at (3.35,-0.95) {求积};
+  \begin{scope}[shift={(4.2,1.7)}]
+    \draw[black!30] (-0.1,0) -- (3.15,0);
+    \draw[blue!45,dashed,thick] plot[domain=0:3,samples=121]
+      (\x,{0.9+0.5*0.55*cos(70*\x)});
+    \draw[black!85,thick] plot[domain=0:3,samples=241]
+      (\x,{0.9+0.5*(0.55*cos(70*\x)+0.864*cos(900*\x))});
+    \node[font=\footnotesize,black!75] at (1.5,-0.42) {抖动主宰了输出};
+    \node[right,font=\footnotesize,blue!60] at (3.15,0.9) {真实导数};
+  \end{scope}
+  \begin{scope}[shift={(4.2,-2.0)}]
+    \draw[black!30] (-0.1,0) -- (3.15,0);
+    \draw[black!85,thick] plot[domain=0:3,samples=241]
+      (\x,{0.45*(1.05*\x-0.368*cos(70*\x)+0.368)});
+    \node[font=\footnotesize,black!75] at (1.5,-0.42) {抖动看不出来};
+    \node[right,font=\footnotesize,black!55] at (3.15,1.3) {与无噪声结果重合};
+  \end{scope}
+\end{tikzpicture}
 
-\begin{enumerate}
-\tightlist
-\item
-  数值微分为何不能无限缩小步长
-\item
-  从插值多项式到梯形与 Simpson 求积
-\item
-  Gaussian 与自适应求积
-\end{enumerate}
+\emph{左边那条曲线上叠了一点幅度 \(0.055\) 的高频抖动，肉眼几乎看不出。求导之后它的幅度被乘以频率，涨到 \(0.86\)，把幅度 \(0.55\) 的真实导数（虚线）压了下去。求积之后它的幅度被除以频率，降到 \(0.004\)，画出来与无噪声的结果分辨不开。}
+\end{center}
 
-同一个 \(h\) 扮演两种角色：变小降低截断误差，却也可能放大舍入、噪声和采样盲区。公式的阶数只描述进入渐近区后的理想行为；实际选择还要看函数是否光滑、能否自由取样，以及粗细两套节点是否可能同时漏掉结构。
+这张图是本章的组织线索。微分是放大器，积分是平均器；同一份采样、同一个 \(h\)，一边把局部扰动乘以频率，一边把它除以频率。
 
-前一单元：\hyperref[ch:063]{``插值与逼近：通过数据点，不等于理解点之间''}。
+由此引出的第一条判断是：\textbf{数值微分有一个最优步长，而且它离零很远}。截断误差随 \(h\) 变小而下降，舍入误差随 \(h\) 变小而上升，总误差在双对数纸上是一条 U 形曲线。中心差商的谷底落在 \(h\sim u^{1/3}\)，双精度下约 \(10^{-5}\)，能拿到的精度约 \(10^{-11}\)——离机器精度还差五个数量级。把 \(h\) 设成 \(10^{-12}\) 求``更准的导数''，是这条曲线上最常见的一次误判。
+
+第二条判断关于求积公式的来历：\textbf{那些系数表全部来自``先插值、再精确积掉插值多项式''}。梯形法用两个端点的弦，Simpson 法用三个点的抛物线，误差阶数由插值次数定。Simpson 还额外多赚一阶——三个节点对称摆放，误差展开中的奇次项成对消失，于是二次插值的公式对三次多项式也精确。同一个对称性红利，在中心差商比前向差商多一阶那里已经出现过一次。
+
+第三条判断关于预算的花法：\textbf{节点位置本身就是可调的变量}。Gauss 求积放开节点位置，\(n\) 个点最高能对 \(2n-1\) 次多项式精确，代价是节点不再等距、加密时旧值不能复用。自适应求积换一个方向，用局部误差估计驱动细分，把求值预算搬到被积函数难缠的那一段。固定网格与按需分配，是同一笔预算的两种花法。
+
+最后一条是收束：\textbf{阶数只在渐近区内说话}。所有 \(O(h^2)\)、\(O(h^4)\)、\(2n-1\) 次精确的承诺，都建立在被积函数有足够多阶连续导数、并且网格已经细到能分辨它全部结构之上。函数带尖点、跳跃或端点奇性时，高阶方法失去优势，降阶加密反而更稳；宽度小于网格间距的窄峰会整个漏在节点之间，粗细两套网格同时错过它，误差估计还会一致地报告``已收敛''。数值方法看不见从未被采样过的东西。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/01]{``数值微分为何不能无限缩小步长''}；
-\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/02]{``从插值多项式到梯形与 Simpson 求积''}；
-\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/03]{``Gaussian 与自适应求积''}。
+\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/01]{``数值微分为何不能无限缩小步长''}：U 形误差曲线，最优步长的两个指数，以及绕开这条曲线的两条路；
+\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/02]{``从插值多项式到梯形与 Simpson 求积''}：求积公式的统一来历，对称性白送的那一阶，以及 Richardson 外推；
+\item \hyperref[sec:08-Numerical-Analysis/04-Numerical-Differentiation-and-Integration/03]{``Gaussian 与自适应求积''}：把节点位置和节点密度都交出去，各自能换回什么、要付什么。
 \end{itemize}
+
+三篇按依赖排列。若你是带着一个具体故障来的——梯度检查通不过、积分结果随容差抖动、加密网格后答案纹丝不动却与解析解对不上——可以直接打开最像的那一篇。进入本章前最好已经熟悉相近数相减的后果，见\hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/02]{``误差如何产生与放大''}；插值多项式的构造与节点选择在上一章，见\hyperref[ch:063]{``插值与逼近：通过数据点，不等于理解点之间''}。

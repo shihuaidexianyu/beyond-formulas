@@ -1,41 +1,62 @@
-压缩并不是简单地``给高概率符号短一些的字符串''。短码之间会争夺同一棵码树，编码必须能够被唯一拆开；逐符号编码还受整数码长限制，即使知道真实概率也可能离熵很远。只有把可译码性、构造方法与长序列的统计结构放在一起，才会看见熵为何成为压缩率的边界。
+一个日志目录被 gzip 压到原来的十分之一；一个语言模型的评测报告里写着``每字节 \(0.87\) 比特''。这两个数字来自完全不同的工作流，可它们量的是同一件事，而且受同一条下界约束。本章要把这条线索拉直。
 
-一个最简数字感应矛盾：Bernoulli$(0.99)$ 信源的单符号熵只有 $h_2(0.99)\approx0.081$ bit。任何二元单符号前缀码都至少需要 1 bit/symbol——因为只有两个码字可选，最短的那一个也得占 1 bit。差距接近一个数量级。若把 100 个符号打成一包编码，整包的熵约为 $100\times0.081=8.1$ bit，而 100 个符号的典型序列数约为 $2^{8.1}\approx 274$ 种，用 9 bit 的索引就能区分它们。每符号开销降到约 $0.09$ bit，余数浪费被长块摊薄。
+出发点是一句在上一章末尾已经露头的话：编码长度和概率是同一件事的两种写法。给一个符号分配 \(\ell\) 比特的码字，等于宣称它的概率大约是 \(2^{-\ell}\)；反过来，任何一个概率模型都自动指定了一套码长。这条对应一旦立住，压缩的全部问题就变成了概率建模的问题——而熵，成为账本上不可逾越的那条底线。
 
-本单元依次解决六个问题：
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[rounded corners,black!45,fill=blue!5] (0,1.0) rectangle (3.1,2.3);
+  \draw[rounded corners,black!45,fill=blue!5] (3.6,1.0) rectangle (6.7,2.3);
+  \draw[rounded corners,black!45,fill=blue!5] (7.2,1.0) rectangle (10.3,2.3);
+  \draw[rounded corners,black!45,fill=blue!5] (10.8,1.0) rectangle (13.9,2.3);
+  \draw[->,black!60] (3.12,1.65) -- (3.58,1.65);
+  \draw[->,black!60] (6.72,1.65) -- (7.18,1.65);
+  \draw[->,black!60] (10.32,1.65) -- (10.78,1.65);
+  \node[align=center,font=\footnotesize] at (1.55,1.65) {码长能不能实现\\\(\sum_i 2^{-\ell_i}\le1\)};
+  \node[align=center,font=\footnotesize] at (5.15,1.65) {逐符号最短\\整数取整的零头};
+  \node[align=center,font=\footnotesize] at (8.75,1.65) {整段发一个区间\\零头摊到全序列};
+  \node[align=center,font=\footnotesize] at (12.35,1.65) {底线从哪来\\典型序列只有 \(2^{nH}\) 条};
+  \node[font=\footnotesize,black!65] at (1.55,0.62) {Kraft 不等式};
+  \node[font=\footnotesize,black!65] at (5.15,0.62) {Huffman};
+  \node[font=\footnotesize,black!65] at (8.75,0.62) {算术编码};
+  \node[font=\footnotesize,black!65] at (12.35,0.62) {AEP 与编码定理};
+  \draw[black!30] (1.55,0.3) -- (12.35,0.3);
+  \draw[->,black!50] (3.95,0.3) -- (3.95,-0.28);
+  \draw[->,black!50] (9.95,0.3) -- (9.95,-0.28);
+  \draw[rounded corners,black!45,fill=red!5] (2.0,-1.6) rectangle (5.9,-0.3);
+  \draw[rounded corners,black!45,fill=red!5] (8.0,-1.6) rectangle (11.9,-0.3);
+  \node[align=center,font=\footnotesize] at (3.95,-0.95) {松开``必须无损''\\底线降到 \(R(D)\)};
+  \node[align=center,font=\footnotesize] at (9.95,-0.95) {松开``分布已知''\\边编码边学重复};
+  \node[font=\footnotesize,black!65] at (3.95,-1.98) {率失真};
+  \node[font=\footnotesize,black!65] at (9.95,-1.98) {LZ 通用压缩};
+\end{tikzpicture}
 
-\begin{enumerate}
-\tightlist
-\item
-  什么样的变长码能够即时、唯一地译码？
-\item
-  在逐符号前缀码中，怎样把平均长度做到最小？
-\item
-  怎样摆脱``每个符号必须占整数 bit''的浪费？
-\item
-  为什么长序列最终只需要约 $nH(X)$ bit？
-\item
-  允许失真时，压缩极限变成什么？
-\item
-  分布未知时，怎样边编码边学习重复模式？
-\end{enumerate}
+\emph{上排是无损压缩的主线：先问码长是否可行，再问怎样最短，再问怎样甩掉取整损失，最后问底线为什么在那里。下排是两次松绑，各拿掉主线的一个前提。}
+\end{center}
 
-\subsection{怎么读这一章}
+\subsection{本章想让你改掉的几个判断}
 
-第一次读，可以先抓住一条主线：短码是一种有限资源，Kraft 不等式管资源够不够，Huffman 决定怎样分配，算术编码与长块编码则把逐符号的整数浪费摊薄。如果更关心实际压缩，可先读算术编码和 LZ；如果想知道``理论上还能压多短''，再读 AEP 与率失真。
+第一，设计一套码就是分配一份概率预算。Kraft 不等式说码长可行当且仅当 \(\sum_i 2^{-\ell_i}\le1\)，而深度 \(\ell\) 的码字在码树上占的份额恰是 \(2^{-\ell}\)。于是``挑码字''这个组合问题被翻译成``摊一个分布''，最优码长就是自信息 \(-\log_2 p_i\)。深度学习里 logits 到 softmax 到交叉熵那条链，走的是同一条对应关系的另一半。
 
-前一单元：\hyperref[ch:056]{``分布之间的差异：从错误编码到散度''}。
+第二，熵是下界，而且这个下界够得着。前一句大家都会说，后一句才是定理的价值所在：Huffman 做到熵加不到一比特，算术编码做到整段消息加两个比特。有了这两头，``这份数据还能不能再压''从一个只能试的问题变成了有确定答案的问题。
+
+第三，压缩率就是模型质量。用模型 \(Q\) 去编码真实分布为 \(P\) 的数据，多花的比特恰好是 \(\KL(P\|Q)\)，一点不多一点不少。所以文件压得小说明模型猜得准，语言模型的困惑度与每字符比特数是同一个量的两种刻度。这也划出了这类评测的边界：它测分布拟合，不测别的。
+
+第四，允许失真之后底线整体下移到 \(R(D)\)，而 \(R(D)\) 是一条单调下降的凸曲线。这解释了有损压缩为什么能比无损省一个数量级——省下的比特大多花在了没人要看的噪声上——也说明表示学习里``该保留多少信息''不是纯靠调参的旋钮，它背后有一条可计算的权衡曲线。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+六篇按依赖顺序排列。若从具体困惑进入，也可以直接翻到最近的一篇，再沿篇内链接回补。前四篇是主线，后两篇各松开一个前提。
 
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:07-Information-Theory/04-Source-Coding/01]{``前缀码与 Kraft 不等式''}；
-\item \hyperref[sec:07-Information-Theory/04-Source-Coding/02]{``Huffman 编码与贪心最优性''}；
-\item \hyperref[sec:07-Information-Theory/04-Source-Coding/03]{``算术编码：从符号码到序列区间''}；
-\item \hyperref[sec:07-Information-Theory/04-Source-Coding/04]{``AEP、典型集与信源编码定理''}；
-\item \hyperref[sec:07-Information-Theory/04-Source-Coding/05]{``率失真：允许失真时的压缩极限''}；
-\item \hyperref[sec:07-Information-Theory/04-Source-Coding/06]{``LZ 编码：不假设分布的通用压缩''}。
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/01]{``前缀码与 Kraft 不等式''}：码字为什么占一整棵子树，码长与概率的换算，以及熵下界的来源；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/02]{``Huffman 编码与贪心最优性''}：为什么只看最小的两个概率就够，以及最优码也可能浪费十倍；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/03]{``算术编码：从符号码到序列区间''}：整数比特这堵墙怎么拆，压缩率与交叉熵的兑换；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/04]{``AEP、典型集与信源编码定理''}：为什么低于熵的码率装不下典型世界；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/05]{``率失真：允许失真时的压缩极限''}：曲线的形状、两个端点，以及与信息瓶颈的异同；
+\item \hyperref[sec:07-Information-Theory/04-Source-Coding/06]{``LZ 编码：不假设分布的通用压缩''}：字典作为隐式模型，以及用压缩率评测模型的限度。
 \end{itemize}
+
+前一章\hyperref[ch:056]{``分布之间的差异：从错误编码到散度''}是本章的直接前置：那里定义的 KL 散度，在这里会以``多花的比特数''的身份反复出现。
+
+最后留一条贯穿全章的提醒。所有这些下界都是相对于某个明确的信源模型说的：换一个模型，底线就换一个位置。因此``这份数据不可压缩''从来不是数据的属性，它只是说当前这个模型看不出其中的结构。一段伪随机序列在 gzip 眼里是纯噪声，在知道种子的人眼里只有几十个字节。

@@ -5,6 +5,22 @@
 
 这似乎是一个普遍规律：对于 \(x^2\) 的图像，任取两点连成的弦，总是落在函数图像的上方。换个函数试试。
 
+\begin{center}
+\begin{tikzpicture}[x=1.35cm,y=0.52cm,>=stealth]
+  \draw[->] (-0.25,0) -- (3.65,0) node[right] {\(x\)};
+  \draw[->] (0,-0.4) -- (0,10.4) node[above] {\(f(x)\)};
+  \draw[blue!70!black,thick] plot[domain=0:3.25,samples=60] (\x,{\x*\x});
+  \draw[black,thick] (1,1) -- (3,9);
+  \fill (1,1) circle (2.2pt);
+  \fill (3,9) circle (2.2pt);
+  \fill[blue!70!black] (2,4) circle (2.2pt) node[below right] {\(f(2)=4\)};
+  \fill (2,5) circle (2.2pt) node[above left] {弦高 \(=5\)};
+  \draw[<->,gray!80] (2.12,4) -- (2.12,5);
+\end{tikzpicture}
+
+\emph{凸性比较的是两种顺序：先混合输入再计算函数，落在曲线上；先计算端点再混合函数值，落在弦上。}
+\end{center}
+
 取 \(f(x)=\sin x\)，在 \([0,2\pi]\) 上取 \((0,0)\) 和 \((2\pi,0)\)。弦就是 \(x\) 轴本身（高度始终为零）。但在 \(x=\pi\) 处，\(\sin\pi=0\)，弦高也是零——看起来还好。换两个点：\((\pi/2,1)\) 和 \((3\pi/2,-1)\)。在 \(x=\pi\) 处，弦高 \(0.5\cdot1+0.5\cdot(-1)=0\)，而 \(\sin\pi=0\)——又是平手。再试试 \((\pi/4,\sqrt2/2)\) 和 \((3\pi/4,\sqrt2/2)\)：中点 \(x=\pi/2\) 处，弦高 \(0.5\cdot\sqrt2/2+0.5\cdot\sqrt2/2\approx0.707\)，函数值 \(\sin(\pi/2)=1\)。这次弦在函数值\textbf{下方}——\(0.707<1\)。
 
 同一个 \(\sin x\)，有的弦在上，有的弦在下。它不是凸函数。

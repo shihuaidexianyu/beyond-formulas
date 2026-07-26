@@ -1,182 +1,173 @@
 \section{对称矩阵与谱定理：什么时候特征方向一定正交}
 \label{sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/01}
 
-上一节我们学会了把矩阵写成 \(A=S\Lambda S^{-1}\)，条件是能找到足够多的特征向量填满 \(S\)。这个分解很强大，但它有两个让人不安的地方。
+手边有两个 \(1000\times1000\) 的矩阵要做特征分解。一个是随手填的随机数，另一个是某批数据算出来的样本协方差。前者返回的多半是一堆复数，特征向量之间的夹角古怪，拼成的换基矩阵接近奇异；后者稳稳给出 1000 个实数，外加一组两两垂直的方向。两个矩阵同样大、同样稠密，差别只有一句 \(\Sigma_{ij}=\Sigma_{ji}\)。
 
-第一个：\(S\) 的列是特征向量，但它们之间未必正交。两个特征方向可能几乎平行，\(S\) 接近奇异。坐标变换 \(x=Sy\) 会把一个方向上的微小舍入误差放大成另一个方向上的巨大偏差。第二个：实矩阵也可能只有复特征值。旋转矩阵
+\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/02]{``对角化与动力系统：把耦合演化变成独立缩放''}把矩阵写成 \(A=S\Lambda S^{-1}\)，前提是凑得齐 \(n\) 个线性无关的特征向量去填满 \(S\)。这个分解有两处让人不放心。第一处是 \(S\) 的列未必正交，两个特征方向可以几乎平行，此时 \(S^{-1}\) 的元素极大，坐标变换 \(x=Sy\) 会把输入端的一点舍入误差放大成输出端的大偏差。第二处是实矩阵未必有实特征值，旋转矩阵
 
 \[
 R=\begin{pmatrix}0&-1\\1&0\end{pmatrix}
 \]
 
-的特征值是 \(\pm i\)。你在 \(\R^2\) 里找不到任何一个向量，被 \(R\) 作用后还落在自己张成的直线上。
+的特征值是 \(\pm i\)，在 \(\R^2\) 里根本找不到一条被 \(R\) 保持的直线。
 
-现在加上一个条件：\(A^{\trans}=A\)。这个条件看起来只是把矩阵沿对角线翻折了一下，没什么戏剧性。但你会发现，它同时解决了上面的两个问题——所有特征值自动变成实数，不同特征值的特征向量自动正交，对角化变成了
+现在加一条 \(A^{\trans}=A\)。这个条件读起来只是``沿对角线翻折后不变''，几何上看不出什么分量。可它把上面两处毛病同时抹掉：特征值全部落回实轴，属于不同特征值的特征向量自动垂直，对角化升级成
 
 \[
 A=Q\Lambda Q^{\trans},
 \]
 
-\(Q\) 的列是正交归一向量，逆矩阵就是转置。一个不起眼的对称条件，为什么会触发这么强的连锁反应？
+其中 \(Q\) 的列正交归一，求逆就是转置。一条对称条件换来这么多，值得先弄清正交这件事到底贵在哪里。
 
-\subsection{一条等式锁住了所有方向}
+\subsection{正交的基和近乎平行的基，代价差多少}
 
-实对称矩阵满足
+把一个向量在一组基下写成坐标，是所有换基分解的第一步。基正交时这件事几乎没有代价：坐标就是投影，\(y_i=q_i^{\trans}x\)，而且 \(\norm{y}=\norm{x}\)，长度一分不多一分不少。基一旦倾斜，坐标就开始失真。
 
-\[
-A^{\trans}=A.
-\]
+\begin{center}
+\begin{tikzpicture}[x=0.7cm,y=0.7cm,font=\small,>=stealth]
+  \draw[black!30] (-2.0,0) -- (2.4,0);
+  \draw[black!30] (0,-0.4) -- (0,2.6);
+  \draw[->,blue!65!black,thick] (0,0) -- (1.414,1.414) node[right] {\(q_1\)};
+  \draw[->,blue!65!black,thick] (0,0) -- (-1.414,1.414) node[left] {\(q_2\)};
+  \draw[->,very thick] (0,0) -- (0,2.0);
+  \node[left] at (-0.08,1.7) {\(x\)};
+  \draw[dashed,black!60] (0,0) -- (1.0,1.0) -- (0,2.0);
+  \node[below right,black!70,font=\footnotesize] at (0.9,1.0) {\(0.71\)};
+  \node[below,font=\footnotesize] at (0.2,-0.6) {正交基};
+  \begin{scope}[shift={(9,0)}]
+    \draw[black!30] (-6.0,0) -- (2.6,0);
+    \draw[black!30] (0,-0.4) -- (0,2.6);
+    \draw[->,red!65!black,thick] (0,0) -- (2.0,0) node[right] {\(v_1\)};
+    \draw[->,red!65!black,thick] (0,0) -- (1.879,0.684) node[right] {\(v_2\)};
+    \draw[->,very thick] (0,0) -- (0,2.0);
+    \node[right] at (0.08,1.6) {\(x\)};
+    \draw[dashed,black!60] (0,0) -- (-5.50,0) -- (0,2.0);
+    \node[below,black!70,font=\footnotesize] at (-2.75,-0.05) {\(-2.75\)};
+    \node[above left,black!70,font=\footnotesize] at (-2.6,1.1) {\(2.92\)};
+    \node[below,font=\footnotesize] at (-1.6,-0.6) {夹角 \(20^{\circ}\) 的基};
+  \end{scope}
+\end{tikzpicture}
 
-把它塞进一个二次型，立刻得到一个对称关系：
+\emph{同一个长度为 1 的向量 \(x\) 在两组基下的坐标。左边两条基互相垂直，坐标就是投影，两个系数都不到 1；右边两条基只差 \(20^{\circ}\)，为了拼出这个短向量，两个系数得先放大到将近 3 再互相抵消。抵消得越狠，输入的扰动在坐标上放大得越厉害。谱定理保证对称矩阵总落在左边这一侧。}
+\end{center}
+
+所以``特征方向正交''不是审美偏好。它决定了换到特征坐标去做的一切计算——解方程、算矩阵函数、做主成分投影——会不会在有限精度下失真。
+
+\subsection{对称性只提供一条等式，但那条等式够用}
+
+\(A^{\trans}=A\) 在推导里以这个形式出场：对任意 \(x,y\)，
 
 \[
 x^{\trans}Ay=(Ax)^{\trans}y.
 \]
 
-左边是把 \(y\) 送进 \(A\)、再跟 \(x\) 做内积；右边是把 \(x\) 送进 \(A\)、再跟 \(y\) 做内积。对称性意味着输入与输出的角色可以互换。
+左边先把 \(y\) 送进 \(A\) 再与 \(x\) 做内积，右边先把 \(x\) 送进 \(A\) 再与 \(y\) 做内积。矩阵可以从内积的一侧挪到另一侧而不留痕迹，这是对称性的全部内容，谱定理的每一步都只是在用它。
 
-这个等式是整个谱定理的支点。下面两个小节分别用它证明"不同特征方向正交"和"特征值不会跑到复平面"。
-
-\subsection{不同特征方向为什么正交}
-
-设 \(Av_i=\lambda_i v_i\)，\(Av_j=\lambda_j v_j\)，并且 \(\lambda_i\ne\lambda_j\)。利用上面的对称关系，把 \(v_i\) 和 \(v_j\) 分别塞进 \(x\) 和 \(y\)：
+先看正交性。设 \(Av_i=\lambda_iv_i\)，\(Av_j=\lambda_jv_j\)，两个特征值不等。把 \(v_i,v_j\) 代进上式，左边化出 \(\lambda_jv_i^{\trans}v_j\)，右边化出 \(\lambda_iv_i^{\trans}v_j\)，于是
 
 \[
-v_i^{\trans}Av_j=(Av_i)^{\trans}v_j.
+(\lambda_i-\lambda_j)\,v_i^{\trans}v_j=0 .
 \]
 
-左边：\(Av_j=\lambda_j v_j\)，所以是 \(\lambda_j v_i^{\trans}v_j\)。右边：\(Av_i=\lambda_i v_i\)，转置后是 \(\lambda_i v_i^{\trans}v_j\)。两者必须相等：
+括号非零，只能是 \(v_i^{\trans}v_j=0\)。没有 Gram--Schmidt，没有人为挑选，正交性是特征值不同这件事白送的——而``把 \(A\) 从内积右侧挪到左侧''那一步，正是对称性唯一被消耗的地方。
+
+再看实数性。暂时允许复特征向量 \(v\ne0\) 与复特征值 \(\lambda\)，用共轭转置 \(v^*\) 左乘 \(Av=\lambda v\) 得 \(\lambda=v^*Av/(v^*v)\)。分母 \(\sum_i\abs{v_i}^2\) 是正实数。分子是个标量，而
 
 \[
-\lambda_j v_i^{\trans}v_j = \lambda_i v_i^{\trans}v_j.
+(v^*Av)^*=v^*A^*v=v^*Av,
 \]
 
-移项：
+中间一步用的是 \(A\) 实且对称，因此 \(A^*=A^{\trans}=A\)。一个等于自身共轭的数是实数，于是 \(\lambda\) 实。这一条同样只花掉对称性一次。
+
+剩下的是记账：特征值重复时怎么办，以及会不会像一般矩阵那样凑不齐特征向量。两件事一起解决的办法是对维数归纳。取任一实特征向量 \(v\)（特征多项式在 \(\C\) 上有根，而刚才已证根是实的，对应的实特征向量存在）。若 \(x\perp v\)，则
 
 \[
-(\lambda_j-\lambda_i)v_i^{\trans}v_j=0.
+v^{\trans}(Ax)=(Av)^{\trans}x=\lambda\,v^{\trans}x=0,
 \]
 
-\(\lambda_i\ne\lambda_j\)，所以括号内非零。为此等式成立，只能
+说明 \(Ax\) 仍然垂直于 \(v\)。\(v\) 的正交补是 \(A\) 的不变子空间，在其上重复同样的操作，维数每次降一。走完 \(n\) 步就得到一组完整的正交归一特征基，中途不需要假设特征值互不相同，也没有留下``半截''特征方向的余地。这条链的每一环都只用了那一条挪动等式。
+
+\begin{theorem}[实对称矩阵的谱定理]
+设 \(A\in\R^{n\times n}\) 且 \(A^{\trans}=A\)。则存在正交矩阵 \(Q\)（\(Q^{\trans}Q=QQ^{\trans}=I\)）与实对角矩阵 \(\Lambda=\diag(\lambda_1,\ldots,\lambda_n)\)，使得 \(A=Q\Lambda Q^{\trans}\)。
+\end{theorem}
+
+\subsection{把假设一条条拿掉}
+
+定理只有两个假设：实、对称。各自防住一种失效，去掉哪一个都能造出反例。
+
+去掉对称性但保留实数，先失去的可能是实特征值：开头那个旋转矩阵 \(R\) 满足 \(R^{\trans}=-R\)，特征值 \(\pm i\)。也可能特征值明明是实的，正交性却没了：
 
 \[
-v_i^{\trans}v_j=0.
+B=\begin{pmatrix}2&1\\0&3\end{pmatrix}
 \]
 
-两个属于不同特征值的特征向量，自动正交。没有任何 Gram--Schmidt，没有任何刻意选择——对称性替你做好了这一切。
-
-如果某个特征值重复，对应特征空间可能有多个维度。此时不同特征值的特征向量已经和这个子空间正交，但子空间内部的基还可以任意选取。在这个子空间内部做 Gram--Schmidt，选出一组正交归一基。Gram--Schmidt 的每一步只是已有向量的线性组合，而同一特征值的特征向量的任意线性组合仍是该特征值的特征向量（因为 \(A(\alpha u+\beta v)=\lambda(\alpha u+\beta v)\)），所以正交化不会离开特征空间。最终，整个 \(\R^n\) 可以选出一组完整的正交归一特征基。
-
-\subsection{为什么特征值不会跑到复平面}
-
-即使暂时允许复特征向量，实对称矩阵也会把特征值拉回实数。设 \(Av=\lambda v\)，其中 \(v\) 可能是复向量（\(v\ne 0\)）。用 \(v\) 的共轭转置 \(v^*\) 左乘：
+的特征值是 2 和 3，特征向量取 \((1,0)^{\trans}\) 与 \((1,1)^{\trans}\)，夹角 \(45^{\circ}\)。所以``实特征值''和``正交特征向量''是两笔账，对称性一次买下两条。再狠一点，
 
 \[
-v^*Av = \lambda v^*v.
+N=\begin{pmatrix}1&1\\0&1\end{pmatrix}
 \]
 
-注意 \(v^*v=\sum|v_i|^2>0\)，所以
+连完整特征基都没有，只有一维特征空间，落在 \hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/03]{``对角化失败与 Jordan 形：独立特征方向不够时怎么办''}讨论的情形里。上面那条归纳链恰好排除了这种可能。
+
+去掉实数性、只保留 \(A^{\trans}=A\)，结论同样塌掉。复矩阵
 
 \[
-\lambda = \frac{v^*Av}{v^*v}.
+A=\begin{pmatrix}1&i\\i&-1\end{pmatrix}
 \]
 
-关键在分子：\(v^*Av\) 是一个标量。它的共轭转置就是它自己——因为 \(A\) 是实对称矩阵，\(A^*=A^{\trans}=A\)，所以
+是对称的，但 \(A^2=0\) 而 \(A\ne0\)，它不可对角化。原因在于实数性用在了``\((v^*Av)^*=v^*A^*v\)''那一步：复情形下起作用的不是转置而是共轭转置，正确的推广条件是 \(A^*=A\)，即 Hermitian，见 \hyperref[sec:03-Linear-Algebra/08-Complex-Matrices-and-Fourier-Structure/02]{``Hermitian 矩阵与复谱定理''}。
+
+\subsection{对称矩阵就是沿一组正交轴各自伸缩}
+
+有了 \(A=Q\Lambda Q^{\trans}\)，矩阵作用可以整句读出来：先用 \(Q^{\trans}\) 把 \(x\) 的坐标换到特征轴上，沿第 \(i\) 条轴乘 \(\lambda_i\)，再用 \(Q\) 转回去。没有剪切，没有把一个方向的分量掺进另一个方向。
+
+\begin{center}
+\begin{tikzpicture}[x=0.8cm,y=0.8cm,font=\small,>=stealth]
+  \draw[black!25] (-1.6,0) -- (1.6,0);
+  \draw[black!25] (0,-1.6) -- (0,1.6);
+  \draw[blue!60!black,thick] (0,0) circle (1.2);
+  \draw[->,thick] (0,0) -- (0.849,0.849) node[above right,font=\footnotesize] {\(q_1\)};
+  \draw[->,thick] (0,0) -- (-0.849,0.849) node[above left,font=\footnotesize] {\(q_2\)};
+  \node[below,font=\footnotesize] at (0,-2.0) {单位圆};
+  \draw[->,thick,black!60] (2.2,0) -- (3.6,0);
+  \node[above,black!70,font=\footnotesize] at (2.9,0.1) {\(A\)};
+  \begin{scope}[shift={(7.0,0)}]
+    \draw[black!25] (-3.0,0) -- (3.0,0);
+    \draw[black!25] (0,-2.2) -- (0,2.2);
+    \begin{scope}[rotate=45]
+      \draw[blue!60!black,thick] (0,0) ellipse (3.6 and 1.2);
+    \end{scope}
+    \draw[->,thick] (0,0) -- (2.546,2.546) node[above right,font=\footnotesize] {\(3q_1\)};
+    \draw[->,thick] (0,0) -- (-0.849,0.849) node[above left,font=\footnotesize] {\(q_2\)};
+    \node[below,font=\footnotesize] at (0,-2.6) {像椭圆};
+  \end{scope}
+\end{tikzpicture}
+
+\emph{\(A=\bigl(\begin{smallmatrix}2&1\\1&2\end{smallmatrix}\bigr)\) 把单位圆压成椭圆。特征值 3 和 1 就是两条半轴长，特征方向 \(q_1\propto(1,1)^{\trans}\) 与 \(q_2\propto(1,-1)^{\trans}\) 就是两条主轴。圆上其他方向被转动了，这两条没有。}
+\end{center}
+
+按列展开同一个分解，得到另一种读法：
 
 \[
-(v^*Av)^* = v^*A^*v = v^*Av.
+A=Q\Lambda Q^{\trans}=\sum_{i=1}^{n}\lambda_i\,q_iq_i^{\trans}.
 \]
 
-一个标量等于自己的共轭，它必须是实数。分子是实数，分母是正实数，因此 \(\lambda\) 是实数。不管你怎么尝试塞进复向量，对称矩阵都会把特征值拉回实轴。
-
-\subsection{谱定理}
-
-把上面两条拼在一起，就得到实对称矩阵的谱定理：
+每个 \(q_iq_i^{\trans}\) 是投影到第 \(i\) 条特征轴的秩一矩阵，\(A\) 是这些投影按特征值加权的叠加。这个写法立刻给出矩阵函数：
 
 \[
-A = Q\Lambda Q^{\trans},
+f(A)=Q\,f(\Lambda)\,Q^{\trans}=\sum_{i=1}^{n}f(\lambda_i)\,q_iq_i^{\trans},
 \]
 
-其中 \(Q\) 的列是一组正交归一特征向量（\(Q^{\trans}Q=QQ^{\trans}=I\)），\(\Lambda=\diag(\lambda_1,\ldots,\lambda_n)\) 是实对角矩阵。
+只要 \(f\) 在每个 \(\lambda_i\) 处有定义就行。取 \(f(t)=1/t\) 得逆，取 \(f(t)=\sqrt t\) 得对称平方根（需要特征值非负，这是下一节的事），把接近零的 \(\lambda_i\) 直接扔掉就得到伪逆的谱版本，参见 \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/02]{``伪逆与病态问题''}。
 
-对比一般对角化 \(A=S\Lambda S^{-1}\)，这里多了三项更强的保证：
+上图还留了一个方向问题，下一节会用到：像椭圆沿 \(q_1\) 最长，因为那个方向被拉了 3 倍；而等高线 \(x^{\trans}Ax=c\) 沿 \(q_1\) 反而最短，因为同样的位移在那个方向上换来更多的``能量''。同一组轴，两种相反的读法，混起来极易出错。
 
-\begin{itemize}
-\tightlist
-\item
-  一定存在完整的特征基——对称矩阵永远不会出现 Jordan 块；
-\item
-  特征基可以选为正交归一的——\(Q^{-1}=Q^{\trans}\)，求逆零成本；
-\item
-  坐标变换 \(x\mapsto Q^{\trans}x\) 保持长度和夹角——数值上远比 \(S^{-1}\) 稳定。
-\end{itemize}
+\subsection{为什么数据里全是对称矩阵}
 
-第一条特别值得展开。为什么对称矩阵不会出现 Jordan 块？假设某个特征值 \(\lambda\) 对应了一个大小至少为 2 的 Jordan 块，就存在向量 \(w\) 满足 \((A-\lambda I)w=v\)，其中 \(v\) 是真正的特征向量。但对称性会强制 \(v\) 与 \(w\) 的一个特定组合正交——这跟 Jordan 链的长度假设冲突。详细论证需要用到对称矩阵的 Schur 分解或极小多项式无重复根的性质，但直觉已经清楚：对称性是一个极紧的约束，它不给"半截子"特征方向留生存空间。
+样本协方差 \(\frac1nX^{\trans}X\)（列已中心化）对称，它的特征向量给出数据变化互不相关的方向，特征值给出各方向上的方差。按特征值从大到小排，取前几条轴，就是 PCA，\hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/04]{``从数据矩阵到 PCA''}把这条线走完。谱定理在这里承担的正是``主轴一定存在且一定互相垂直''这句保证——没有它，``第二主成分''这个说法都定义不清楚。
 
-\subsection{一个熟悉矩阵的谱分解}
+核方法里的核矩阵 \(K_{ij}=k(x_i,x_j)\) 对称，因为核函数对两个参数对称；它的谱分解给出特征映射的正交坐标。图的 Laplacian 对称，特征向量是图上信号的低频与高频模式，谱聚类用的就是最低的几条。二阶可微函数的 Hessian 在混合偏导连续时对称，其特征值符号决定驻点是极小、极大还是鞍点。
 
-取
+这些矩阵之所以都对称，是因为它们记录的都是``配对关系''：\(i\) 与 \(j\) 之间的协方差、相似度、连边、交叉曲率，本来就不分先后。谱定理把这种成对的对称性翻译成一组互不干扰的方向，而对称性在实践中出现得如此频繁，几乎可以说线性代数里真正常用的那部分工具，是围绕对称矩阵建起来的。
 
-\[
-A=\begin{pmatrix}2&1\\1&2\end{pmatrix}.
-\]
-
-解特征方程：\(\det(A-\lambda I)=(2-\lambda)^2-1=\lambda^2-4\lambda+3=0\)，特征值 \(\lambda_1=3\)，\(\lambda_2=1\)。对应特征向量（未归一）：
-
-\[
-\tilde v_1=\begin{pmatrix}1\\1\end{pmatrix},\qquad
-\tilde v_2=\begin{pmatrix}1\\-1\end{pmatrix}.
-\]
-
-归一化后：
-
-\[
-q_1=\frac1{\sqrt2}\begin{pmatrix}1\\1\end{pmatrix},\qquad
-q_2=\frac1{\sqrt2}\begin{pmatrix}1\\-1\end{pmatrix}.
-\]
-
-于是
-
-\[
-Q=\frac1{\sqrt2}
-\begin{pmatrix}1&1\\1&-1\end{pmatrix},
-\qquad
-\Lambda=\begin{pmatrix}3&0\\0&1\end{pmatrix},
-\]
-
-验证：\(Q^{\trans}Q=I\)，并且 \(A=Q\Lambda Q^{\trans}\)。
-
-从几何上看这个分解。任意输入向量 \(x\)，先被 \(Q^{\trans}\) 旋转到两条特征轴上——第一条轴沿 \((1,1)\) 方向，第二条轴沿 \((1,-1)\) 方向。沿第一轴拉伸 3 倍，沿第二轴保持不变。最后 \(Q\) 旋转回原坐标。整个过程没有剪切，没有旋转以外的方向混合，只有沿两个正交轴的独立缩放。
-
-\subsection{按方向拆成秩一作用}
-
-把矩阵乘法按列展开：
-
-\[
-A = Q\Lambda Q^{\trans}
-= \begin{pmatrix}q_1&\cdots&q_n\end{pmatrix}
-\begin{pmatrix}\lambda_1&&\\&\ddots&\\&&\lambda_n\end{pmatrix}
-\begin{pmatrix}q_1^{\trans}\\\vdots\\q_n^{\trans}\end{pmatrix}
-= \sum_{i=1}^{n}\lambda_i\, q_i q_i^{\trans}.
-\]
-
-矩阵 \(q_i q_i^{\trans}\) 是投影到第 \(i\) 个特征方向的秩一矩阵。\(A\) 的工作方式可以逐方向阅读：取出 \(x\) 在 \(q_i\) 上的坐标（\(q_i^{\trans}x\)），乘上缩放因子 \(\lambda_i\)，再沿 \(q_i\) 方向输出（乘 \(q_i\)）。然后把所有方向的输出加起来。
-
-这个形式让矩阵函数也一目了然：
-
-\[
-f(A)=Q\,f(\Lambda)\,Q^{\trans}
-= \sum_{i=1}^{n} f(\lambda_i)\, q_i q_i^{\trans}.
-\]
-
-\(f(\Lambda)\) 就是对每个对角元单独作用 \(f\)。平方根、指数、对数、逆——只要 \(f\) 在每个 \(\lambda_i\) 处有定义，就可以直接照搬。\(A^{-1}=Q\Lambda^{-1}Q^{\trans}\)，其中 \(\Lambda^{-1}\) 就是把每个非零特征值取倒数，零特征值对应的维度被丢弃（这就是伪逆的谱版本）。
-
-\subsection{谱定理在数据中的含义}
-
-协方差矩阵 \(\frac1{n}X^{\trans}X\) 是对称半正定矩阵（半正定性在下一节证明）。它的特征向量给出数据变化互不相关的方向——第一个特征向量是方差最大的方向，第二个是在与第一个正交的约束下方差最大的方向，依此类推。特征值给出对应方向上的方差大小。PCA 就是把这些方向按特征值从大到小排列，保留前几个主方向。
-
-同样的结构反复出现。图的 Laplacian 矩阵是对称的，其特征向量给出图上信号的低频与高频模式。核矩阵是对称的，其谱分解给出特征映射的正交坐标。Hessian 矩阵在足够光滑时对称，其正负特征值的个数决定临界点是极小、极大还是鞍点。
-
-对称矩阵出现如此频繁，正是因为自然界中大量"配对关系"天然满足交换对称性：\(x\) 对 \(y\) 的影响方式，与 \(y\) 对 \(x\) 的影响方式，由同一个矩阵刻画。谱定理把这种对偶性翻译成正交方向上的独立缩放。
-
-下一节将沿着谱分解进入一个新的问题：不只看矩阵本身，而是看它产生的标量函数 \(x^{\trans}Ax\)——在什么条件下，这个函数在所有非零方向上恒为正？
+到这里我们只谈了矩阵怎么作用在向量上。可上面反复出现的``方差''``曲率''``能量''都不是向量，而是一个数。它们共用同一个表达式 \(x^{\trans}Ax\)：给定方向，返回一个标量。下一节转过去看这个标量函数，问的问题也随之变了——不再是特征方向朝哪儿，而是这个数在所有非零方向上是否恒为正。

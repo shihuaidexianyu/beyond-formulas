@@ -1,72 +1,48 @@
-信息一旦离开发送者，就可能被噪声改变、被网络丢弃，或者只剩下若干不完整的片段。最直接的办法是重复发送，但``多抄几遍''只制造了冗余，并没有解释冗余应当怎样组织，也没有告诉接收者哪一份可信。
+一块盘坏了。在存着几 PB 数据的集群里，这算不上事故，只是日常——磁盘、整机乃至整个机架都会以可预测的频率退出服务。早年的对策很直接：每份数据存三副本，坏掉一份就从另外两份拷回来，代价是存储成本乘以三。
 
-例如一个温和的擦除场景：通过 UDP 发送 100 个数据包，其中 3 个可能被路由丢弃，但丢包探测会告诉我们哪 3 个包没了。若在每个数据包末尾附加一个校验和，它只能报错；若用 Reed--Solomon 码把 100 个消息包变成 103 个编码包，接收者拿到任意 100 个不同编码包就能通过多项式插值无损恢复全部原始数据。冗余不是无差别复制，而是让任意足够大的子集都携带完整信息。
+现在 HDFS 与 Ceph 的纠删码配置换了一套算法。把一份数据切成 6 块，再算出 3 块校验块，9 块分散到 9 台机器上。任意 3 台同时失效，剩下的 6 块仍能把原数据完整还原。存储开销从 \(200\%\) 降到 \(50\%\)，容错能力反而提高了。多出来的 3 块不是任何一块原始数据的复制品，它们与那 6 块被同一个代数关系绑在一起，这个关系就是 Reed--Solomon 码。
 
-编码理论研究的是一个更精确的问题：
+所以真正的问题不是``要不要冗余''，而是冗余该怎么组织。多抄几遍只制造了副本，既没有说明副本之间应当满足什么，也没有告诉接收者版本冲突时该信谁。
 
-\begin{quote}
-怎样以尽可能少的额外符号，使接收者能够发现错误、定位错误，甚至恢复原始信息？
-\end{quote}
+本章的统一答案是几何的。把 \(k\) 个符号的消息映射成 \(n\) 个符号的码字，等于把 \(q^k\) 个消息稀疏地撒进一个有 \(q^n\) 个点的空间。消息原本挨得很紧，编码之后被人为拉开；噪声会把发出去的码字推离原位，只要推得不够远，接收者仍能看出它原本坐在哪里。
 
-这条问题线索会把离散数学中的几个看似分散的主题连接起来。有限域提供可逆的离散算术；多项式插值把少量信息扩展成许多彼此制约的取值；Hamming 距离把``能纠正多少错误''变成几何问题；稀疏图则允许接收者在巨大码字空间中进行局部、迭代的推断。
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[black!45,fill=blue!8] (0,0) rectangle (2.4,2.4);
+  \foreach \i in {0,1,2,3,4,5}{
+    \foreach \j in {0,1,2,3,4,5}{
+      \fill[blue!70] (0.2+0.4*\i,0.2+0.4*\j) circle (1.3pt);
+    }
+  }
+  \node[below,font=\footnotesize] at (1.2,-0.25) {\(q^{k}\) 个消息};
+  \draw[->,thick] (2.9,1.2) -- (4.1,1.2);
+  \node[above,font=\footnotesize] at (3.5,1.28) {编码};
+  \draw[black!45,fill=blue!4] (4.6,-0.7) rectangle (10.8,3.1);
+  \foreach \p/\q in {5.5/0.1, 7.1/1.7, 8.7/0.2, 9.9/2.1, 6.4/2.4, 9.5/0.7}{
+    \draw[black!35,dashed] (\p,\q) circle (0.66);
+    \fill[blue!70] (\p,\q) circle (1.9pt);
+  }
+  \draw[<->,black!70] (5.5,0.1) -- (7.1,1.7);
+  \node[black!70,font=\footnotesize] at (6.65,0.62) {\(d\)};
+  \node[below,font=\footnotesize] at (7.7,-0.95) {\(q^{n}\) 个串，其中只有 \(q^{k}\) 个是码字};
+\end{tikzpicture}
 
-建议按下面的顺序阅读：
+\emph{编码不增加信息，只重新安排位置：同样多的消息被搬进一个大得多的空间，彼此之间空出了距离 \(d\)。虚线圈是每个码字的势力范围，噪声只要没把接收串推出圈外，归属就没有歧义。整章的判断几乎都能从这幅图里读出来。}
+\end{center}
 
-\begin{enumerate}
-\tightlist
-\item
-  有限域与多项式插值：先建立后续编码真正依赖的代数工具。
-\item
-  码距决定检测与纠错能力：理解所有纠错码共同的几何原理。
-\item
-  Reed--Solomon 编码：看多项式怎样把这个原理变成可计算的方案。
-\item
-  稀疏图码与消息传递：当最优解码太昂贵时，怎样利用局部结构逼近它。
-\item
-  Fountain 码与无速率传输：当主要困难从``符号被改坏''变成``数据包不知丢了哪些''时，编码思路怎样改变。
-\end{enumerate}
+接下来几节各自补上这幅图的一块。有限域提供一个能做除法的离散数系；没有它，``解一个方程''这句话都站不住。多项式给出把距离拉开的最省办法：\(k\) 个点唯一确定一个 \(k-1\) 次多项式，多发几个点就自带冗余，而任意 \(k\) 个点都足以还原——Reed--Solomon 码与 Shamir 秘密共享共用的正是这一条。Hamming 距离把``能纠几个错''翻译成``那些圈会不会相交''。稀疏图码换了一种代价结构：用大量局部约束替换一个全局约束，让出一点可解码性，换回可以承受的计算量。
 
-这几节并不试图覆盖全部现代编码理论。主线是让读者形成三个可以迁移的判断：
-
-\begin{itemize}
-\tightlist
-\item
-  冗余的价值不在数量，而在不同符号之间形成了什么约束；
-\item
-  能否纠错首先由码字之间的最小距离决定，解码算法只是实现这种能力的方式；
-\item
-  不同信道需要不同结构：错误、擦除和软噪声不能被当成同一种问题。
-\end{itemize}
-
-学完后，可以继续阅读信息论部分的\hyperref[ch:058]{``有噪信道编码：噪声中为什么仍能可靠通信''}，在那里我们会问另一个层次的问题：可靠传输的极限究竟在哪里，而不只是某个具体码怎样工作。
-
-\subsection{怎么读这一章}
-
-不必每次都从有限域顺读到 Fountain 码。可以先按眼前的问题选择入口：
+按依赖顺序排列，本章五篇分别是：
 
 \begin{itemize}
 \tightlist
-\item
-  若想知道``冗余为什么真的能够纠错''，读\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/02]{``码距决定检测与纠错能力''}；先抓住 Hamming 球互不相交这幅图景，再决定是否回补线性码公式。
-\item
-  若想看一个确定、可手算的代数方案，依次读\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/01]{``有限域与多项式插值''}与\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/03]{``Reed--Solomon 编码''}；主线只是``低次多项式不能拥有太多根''。
-\item
-  若关心现代长码怎样在现实成本下解码，直接读\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/04]{``稀疏图码与消息传递''}；其中的 Tanner 图建立在\hyperref[ch:029]{``图论：局部邻接怎样形成全局网络''}的二分图语言上。
-\item
-  若问题是丢包率未知、广播反馈昂贵，读\hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/05]{``Fountain 码与无速率传输''}；这里处理的是已知丢失位置的擦除，而不是未被发现的篡改。
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/01]{``有限域与多项式插值''}：为什么编码必须住在域上，以及低次多项式的刚性从何而来；
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/02]{``码距决定检测与纠错能力''}：把检错、纠错、纠擦除三种能力统一读成球是否相交；
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/03]{``Reed--Solomon 编码''}：多项式怎样把上一条几何判断变成可部署的方案；
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/04]{``稀疏图码与消息传递''}：全局约束换成局部约束之后，解码变成图上的迭代推断；
+\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/05]{``Fountain 码与无速率传输''}：当困难从``符号被改坏''变成``不知道丢了哪些包''时，编码思路怎样跟着变。
 \end{itemize}
 
-第一次阅读可以在能回答下面的问题时停下：信道究竟造成错误、擦除还是软噪声？当前结论描述的是存在性边界、确定性保证还是高概率表现？把这两件事说清，比记住具体码名更重要。
+若只想解决眼前的一个问题，也不必顺读。想弄清冗余为什么真能纠错，第二篇够了；想要一个确定的、可以手工验证的方案，读第一、三篇；关心长码在现实成本下怎样解码，直接进第四篇，它用到的 Tanner 图建立在\hyperref[ch:029]{``图论：局部邻接怎样形成全局网络''}的二分图语言上。
 
-\subsection{本章篇目}
-
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
-\begin{itemize}
-\tightlist
-\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/01]{``有限域与多项式插值''}；
-\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/02]{``码距决定检测与纠错能力''}；
-\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/03]{``Reed--Solomon 编码''}；
-\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/04]{``稀疏图码与消息传递''}；
-\item \hyperref[sec:04-Discrete-Mathematics/05-Coding-and-Polynomial-Methods/05]{``Fountain 码与无速率传输''}。
-\end{itemize}
+读的时候始终盯住两个区分：信道造成的是错误、擦除还是软噪声？手上这条结论是存在性边界、确定性保证，还是高概率表现？把这两件事说清楚，比记住码名有用得多。至于可靠传输的极限究竟在哪里——不是某个具体的码能做到什么，而是任何码都越不过什么——那是信息论部分\hyperref[ch:058]{``有噪信道编码：噪声中为什么仍能可靠通信''}要回答的问题。

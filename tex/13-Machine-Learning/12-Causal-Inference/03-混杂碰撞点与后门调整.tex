@@ -78,6 +78,41 @@ X\longrightarrow Y,
 
 因此，``先把所有与 \(Y\) 相关的变量放进模型''不是稳健策略。变量选择应先依据时间顺序、机制知识和目标效应，再考虑统计效率。正则化能够在候选变量中压缩系数，却不会自动识别共同原因、碰撞点和中介。
 
+\begin{center}
+\begin{tikzpicture}[>=stealth,
+  var/.style={draw,circle,minimum size=0.75cm,fill=blue!6},
+  every node/.style={font=\small}]
+  \begin{scope}[xshift=-4cm]
+    \node[var] (c) at (0,1.35) {\(C\)};
+    \node[var] (x) at (-1,0) {\(X\)};
+    \node[var] (y) at (1,0) {\(Y\)};
+    \draw[->] (c) -- (x);
+    \draw[->] (c) -- (y);
+    \draw[->,thick] (x) -- (y);
+    \node at (0,-0.85) {混杂：通常应控制 \(C\)};
+  \end{scope}
+  \begin{scope}
+    \node[var] (x2) at (-1,1.35) {\(X\)};
+    \node[var] (y2) at (1,1.35) {\(Y\)};
+    \node[var] (s) at (0,0) {\(S\)};
+    \draw[->] (x2) -- (s);
+    \draw[->] (y2) -- (s);
+    \node at (0,-0.85) {碰撞点：控制 \(S\) 会开路};
+  \end{scope}
+  \begin{scope}[xshift=4cm]
+    \node[var] (x3) at (-1.2,0.65) {\(X\)};
+    \node[var] (m) at (0,0.65) {\(M\)};
+    \node[var] (y3) at (1.2,0.65) {\(Y\)};
+    \draw[->] (x3) -- (m);
+    \draw[->] (m) -- (y3);
+    \draw[->,thick] (x3) to[bend left=35] (y3);
+    \node at (0,-0.85) {中介：控制 \(M\) 会删掉路径};
+  \end{scope}
+\end{tikzpicture}
+
+\emph{三个图中变量都可能与结果相关，但调整含义相反；该不该控制取决于箭头角色，而不是相关系数大小。}
+\end{center}
+
 \subsection{调整集合必须在看结果之前解释}
 
 可靠报告应说明每个关键变量为何是处理前变量，它阻断哪条路径，是否可能受处理影响，以及样本选择是否依赖处理和结果。若多个合理 DAG 导出不同调整集，应分别计算或做敏感性分析，而不是把图画成唯一事实。

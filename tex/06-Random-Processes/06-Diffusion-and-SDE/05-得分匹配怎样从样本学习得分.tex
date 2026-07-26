@@ -1,89 +1,163 @@
 \section{得分匹配：怎样从样本学习得分}
 \label{sec:06-Random-Processes/06-Diffusion-and-SDE/05}
 
-上一节的时间反演把生成归结为估计得分场 $\nabla_x\log p_t(x)$。但这里有一个看似致命的障碍：我们连密度 $p_t$ 都没有——有的话就不必做生成了——只有来自它的样本。怎样在不知道密度的情况下学习密度的对数梯度？得分匹配给出的答案出人意料：有一个目标函数只依赖样本，却等价于回归真实得分。
-
-\subsection{先感受困难：密度未知，梯度从何谈起}
-
-最直接的想法是先估计密度（核密度估计、直方图），再取对数求梯度。但核密度估计在高维失效：带宽小了过拟合、带宽大了抹平结构，维度诅咒让它在高维数据上不可信（Part 13 的流形假设单元已经遇到这个问题）。
-
-更根本的问题是：我们其实不需要密度本身。反向 SDE 只用得分 $\nabla\log p_t$，而得分是密度的对数梯度——对数把归一化常数变成可加常数，梯度又把它消掉。这提示可以绕过密度，直接对得分建目标。
-
-\subsection{Fisher 散度：直接比较得分场}
-
-设模型得分场为 $s_\theta(x)$（一个神经网络），真实得分为 $\nabla\log p(x)$。最自然的度量是 Fisher 散度
+你想用一个神经网络给图片打分：网络输出能量 \(E_\theta(x)\)，模型密度是 \(p_\theta(x)=e^{-E_\theta(x)}/Z_\theta\)，其中 \(Z_\theta=\int e^{-E_\theta(x)}\,dx\) 是所有可能图片上的积分。最大似然的梯度算出来是
 
 \[
-J(\theta)=\frac12\E_{p}\bigl[\norm{s_\theta(x)-\nabla\log p(x)}^2\bigr].
+\nabla_\theta\log p_\theta(x)=-\nabla_\theta E_\theta(x)+\E_{p_\theta}\big[\nabla_\theta E_\theta(X)\big].
 \]
 
-这个目标无法直接计算——里面有未知的 $\nabla\log p$。但 Hyvärinen 的得分匹配定理说：在温和正则条件下，
+第一项好办，第二项要从模型分布里采样。可模型还没训好，采样得到的是垃圾；要采得像样，模型得先训好。绕成了一个圈。这个圈就是配分函数 \(Z_\theta\) 设下的关卡，能量模型多年被卡在这里（见\hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/06]{``配分函数把能量变成全局概率''}）。
+
+上一节的反向 SDE 却提出了一个更省的要求：它不要密度，只要密度的对数梯度。而
 
 \[
-J(\theta)=\E_{p}\Bigl[\frac12\norm{s_\theta(x)}^2+\trace\bigl(\nabla_x s_\theta(x)\bigr)\Bigr]+\text{常数},
+\nabla_x\log p_\theta(x)=-\nabla_x E_\theta(x),
 \]
 
-其中 $\nabla_x s_\theta$ 是 $s_\theta$ 的 Jacobian，$\trace$ 是散度。关键在于：右边只含模型量和对 $p$ 的期望，期望可以用样本平均替代。证明只需对交叉项 $\E_p[s_\theta\cdot\nabla\log p]$ 做分部积分，把对 $p$ 的导数搬到 $s_\theta$ 上——这与 Stein 方法和 Cramér--Rao 下界中``对数密度的期望积分为零''是同一技巧。
+对 \(x\) 求导，\(\log Z_\theta\) 是常数，直接蒸发。关卡在这个方向上不存在。
 
-以 $p=\mathcal N(0,1)$ 完整验证一次。此时 $\nabla\log p(x)=-x$。取 $s_\theta(x)=ax$（$a$ 为参数），Hyvärinen 目标的样本部分是
+问题于是变成：真实密度 \(p\) 我们并不知道，手上只有它的样本，怎么学它的对数梯度？听起来仍然像循环论证——要学一个关于 \(p\) 的量，却不许知道 \(p\)。得分匹配的答案有点出人意料：存在一个只依赖样本的目标函数，最小化它等价于回归真实得分。
+
+\subsection{直接比较两个向量场}
+
+设网络输出的得分场是 \(s_\theta(x)\)，真实得分是 \(\nabla\log p(x)\)。最自然的度量是两者的平方距离在 \(p\) 下取平均，叫 Fisher 散度：
 
 \[
-\frac12\norm{s_\theta}^2+\trace(\nabla s_\theta)
-=\frac12 a^2x^2+a.
+J(\theta)=\frac12\,\E_{p}\big[\norm{s_\theta(x)-\nabla\log p(x)}^2\big].
 \]
 
-对 $x\sim p$ 取期望：$\frac12a^2\E[x^2]+a=\frac12a^2+a$。而 Fisher 散度是
+它当然算不了，里面明摆着有未知的 \(\nabla\log p\)。Hyvärinen 的结果是：在温和的正则条件下，
 
 \[
-\frac12\E[(ax-(-x))^2]=\frac12(a+1)^2\E[x^2]=\frac12(a+1)^2.
+J(\theta)=\E_{p}\Big[\frac12\norm{s_\theta(x)}^2+\trace\big(\nabla_x s_\theta(x)\big)\Big]+C,
 \]
 
-两者相差 $\frac12(a^2+2a+1)-\frac12a^2-a=\frac12$，与 $\theta$ 无关——正是那个``常数''。最小化任一个都给出 $a=-1$，即 $s_\theta(x)=-x=\nabla\log p(x)$。常数不依赖参数，所以对优化无影响；等价的含义是``只差一个与 $\theta$ 无关的常数''。
+其中 \(\nabla_xs_\theta\) 是 \(s_\theta\) 的 Jacobian，迹就是散度，\(C\) 与 \(\theta\) 无关。右边彻底干净了：只有模型自身的量，加上一个对 \(p\) 的期望——而期望可以用样本平均顶替。
 
-于是学习得分变成标准的回归问题：最小化样本上的 $\frac12\norm{s_\theta}^2+\trace(\nabla s_\theta)$，可用自动微分与随机梯度下降完成。
+推导的骨架只有一步。把平方展开，三项里 \(\norm{s_\theta}^2\) 已经合规，\(\norm{\nabla\log p}^2\) 与 \(\theta\) 无关归入 \(C\)，麻烦的是交叉项 \(\E_p[s_\theta\cdot\nabla\log p]\)。注意 \(p\,\nabla\log p=\nabla p\)，于是这一项是 \(\int s_\theta\cdot\nabla p\)，分部积分把导数从 \(p\) 搬到 \(s_\theta\) 上，边界项在密度衰减足够快时消失，剩下 \(-\int(\nabla\cdot s_\theta)\,p\)，正是那个迹。这与 Stein 方法、与 Cramér--Rao 下界里``对数密度的梯度在自身分布下期望为零''用的是同一个手法：把未知密度的导数换成它的对数导数，再借分部积分甩掉。
 
-\subsection{代价与折中：散度项的计算}
+\begin{example}
+取 \(p=\mathcal N(0,1)\)，此时 \(\nabla\log p(x)=-x\)。设模型 \(s_\theta(x)=ax\)。Hyvärinen 目标的被积部分是 \(\tfrac12a^2x^2+a\)，对 \(x\sim p\) 取期望得 \(\tfrac12a^2+a\)。而 Fisher 散度是 \(\tfrac12\E[(ax+x)^2]=\tfrac12(a+1)^2\)。两者相差 \(\tfrac12\)，与 \(a\) 无关；各自求导都给出 \(a=-1\)，也就是 \(s_\theta(x)=-x\)，恰是真实得分。这个例子里那个常数是什么、为什么不影响优化，看得一清二楚。
+\end{example}
 
-迹项 $\trace(\nabla s_\theta)$ 是 $d\times d$ Jacobian 的对角和。高维数据（$d$ 为像素数）时直接计算需要 $d$ 次反向传播，代价过高。两条出路：
+于是学得分变成了标准回归：最小化样本上的 \(\tfrac12\norm{s_\theta}^2+\trace(\nabla s_\theta)\)，自动微分加随机梯度下降即可。
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{切片得分匹配}：把散度换成随机方向投影 $\E_v[v^\trans\nabla s_\theta\,v]$，$v$ 取 Rademacher 随机向量，无偏且只需一次反向传播；
-\item
-  \textbf{去噪得分匹配}：不在原分布上而在加噪条件分布上匹配。若 $q(\tilde x|x)$ 是已知的加噪核（如 $\mathcal N(x,\sigma^2)$），则回归目标退化为
+\subsection{迹项太贵，两条绕法}
+
+代价藏在 \(\trace(\nabla s_\theta)\) 里。它是 \(d\times d\) Jacobian 的对角和，\(d\) 是数据维度；对图片来说 \(d\) 是像素数，逐个求对角元需要 \(d\) 次反向传播。这在高维直接不可行。
+
+一条绕法是把散度换成随机方向上的投影，用 \(\E_v[v^{\trans}\nabla s_\theta\,v]\) 作无偏替代，\(v\) 取 Rademacher 或标准正态随机向量，一次向量--Jacobian 乘积就能算出来，代价与维度无关。这叫切片得分匹配，用方差换掉了计算量。
+
+另一条绕法更彻底，也更重要：不在原分布上匹配得分，改在加噪之后的条件分布上匹配。
+
+\subsection{去噪得分匹配：标签是自己造的}
+
+设 \(q(\tilde x\given x)\) 是一个已知的加噪核，取最常用的 \(\mathcal N(x,\sigma^2I)\)。目标改写成
+
 \[
-\E_{p(x)q(\tilde x|x)}\bigl[\norm{s_\theta(\tilde x)-\nabla_{\tilde x}\log q(\tilde x|x)}^2\bigr],
+\E_{p(x)\,q(\tilde x\given x)}\Big[\big\lVert s_\theta(\tilde x)-\nabla_{\tilde x}\log q(\tilde x\given x)\big\rVert^2\Big].
 \]
-条件得分 $\nabla_{\tilde x}\log q(\tilde x|x)=-( \tilde x-x)/\sigma^2$ 有闭式。Gaussian 加噪下，这等价于训练网络从 $\tilde x$ 预测噪声——正是扩散模型实际使用的训练目标。
-\end{itemize}
 
-这里训练标签是条件得分，而反向 SDE 需要加噪边缘分布 $p_\sigma(\tilde x)=\int p(x)q(\tilde x\mid x)\,dx$ 的得分。二者之所以接得上，是因为平方损失的总体最优预测满足
+关键在于条件得分是闭式的：\(\nabla_{\tilde x}\log q(\tilde x\given x)=-(\tilde x-x)/\sigma^2\)。而 \(\tilde x=x+\sigma\epsilon\)，\(\epsilon\sim\mathcal N(0,I)\)，所以这个目标就是 \(-\epsilon/\sigma\)。换个参数化，令网络直接输出 \(\epsilon_\theta(\tilde x,\sigma)=-\sigma\,s_\theta(\tilde x)\)，损失变成
 
 \[
-s^*(\tilde x)
-=\E\!\left[\nabla_{\tilde x}\log q(\tilde x\mid X)\mid \tilde X=\tilde x\right]
+\E\big[\norm{\epsilon_\theta(\tilde x,\sigma)-\epsilon}^2\big].
+\]
+
+网络要做的事只剩一句话：看着一张加过噪的图，说出加进去的噪声是什么。这就是扩散模型实际训练时用的目标，一行代码。
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[black!30,dashed] (1.5,0.9) circle (0.85);
+  \fill[black!85] (1.5,0.9) circle (2.2pt);
+  \node[below,font=\footnotesize] at (1.5,0.72) {\(x\)};
+  \fill[blue!75] (2.28,1.22) circle (2pt);
+  \fill[blue!75] (0.85,0.42) circle (2pt);
+  \fill[blue!75] (1.72,0.12) circle (2pt);
+  \draw[->,red!75] (2.24,1.19) -- (1.62,0.95);
+  \draw[->,red!75] (0.91,0.47) -- (1.40,0.83);
+  \draw[->,red!75] (1.70,0.20) -- (1.52,0.78);
+  \node[right,font=\footnotesize,blue!75] at (2.36,1.26) {\(\tilde x=x+\sigma\epsilon\)};
+  \draw[black!25] (4.3,-0.5) -- (4.3,2.3);
+  \begin{scope}[shift={(5.4,0)}]
+    \draw[black!30,dashed] (1.2,0.75) circle (0.85);
+    \draw[black!30,dashed] (3.1,1.25) circle (0.85);
+    \fill[black!85] (1.2,0.75) circle (2.2pt);
+    \fill[black!85] (3.1,1.25) circle (2.2pt);
+    \fill[blue!75] (1.95,1.05) circle (2pt);
+    \fill[blue!75] (2.42,1.02) circle (2pt);
+    \draw[->,red!75] (1.90,1.02) -- (1.32,0.81);
+    \draw[->,red!75] (2.48,1.05) -- (2.99,1.20);
+    \node[font=\footnotesize,black!70,align=center] at (2.2,-0.35) {噪声云重叠处，\\两个方向被平均};
+  \end{scope}
+  \node[font=\footnotesize,black!70,align=center] at (1.5,-0.35) {每个加噪样本\\自带回家的方向};
+\end{tikzpicture}
+
+\emph{左：一个数据点 \(x\) 随机撒出几个加噪样本 \(\tilde x\)，红箭头是网络在 \(\tilde x\) 处要输出的目标，正比于指回 \(x\) 的方向。标签由加噪过程自己生成，全程不需要任何关于 \(p_0\) 的知识。右：当两个数据点的噪声云重叠时，落在重叠区的 \(\tilde x\) 会在不同轮次里被要求指向不同的原点；平方损失下网络学到的是这些方向的条件平均，而那个平均恰好等于加噪边缘分布的得分。}
+\end{center}
+
+右边这件事需要说清楚，否则容易误以为去噪得分匹配把条件得分当成了边缘得分。反向 SDE 要的是加噪边缘分布 \(p_\sigma(\tilde x)=\int p(x)\,q(\tilde x\given x)\,dx\) 的得分，训练标签却是条件得分。两者接得上，靠的是平方损失的一条基本性质：它的总体最优预测是条件期望。于是
+
+\[
+s^{*}(\tilde x)=\E\big[\nabla_{\tilde x}\log q(\tilde x\given X)\given\tilde X=\tilde x\big]
 =\nabla_{\tilde x}\log p_\sigma(\tilde x),
 \]
 
-其中第二个等号需要在积分与求导可交换等正则条件下成立。这一步说明去噪得分匹配不是把条件得分误当成边缘得分，而是利用条件期望把前者平均成后者。
+第二个等号在积分与求导可交换等正则条件下成立。所以网络并没有被教错，它被教的是一堆噪声方向，而最优解自动是这些方向的平均——正是我们要的那个边缘得分。
 
-去噪得分匹配把``不可能的任务''（回归未知密度的得分）变成带已知监督信号的回归（预测加入的噪声）。概念上每个噪声水平 $\sigma$ 对应一个得分场；实际通常用同一个以时间或噪声水平为条件的网络联合表示它们。上一节的反向 SDE 沿噪声从大到小依次调用这些得分——先粗轮廓、后补细节，与时间反演中得分随时间变化的角色完全对应。
+\subsection{噪声水平不是一个数，是一条日程}
 
-\subsection{边界清单}
+概念上每个 \(\sigma\) 对应一个得分场；实现上通常用同一个网络，把噪声水平（或时间）作为额外输入，一次性表示整条日程。上一节的反向 SDE 沿噪声从大到小依次调用它们。
 
-\begin{itemize}
-\tightlist
-\item
-  得分匹配定理要求密度在边界处衰减足够快（分部积分无边界项）；有界支持的分布（像素值截断在 $[0,1]$）要小心。
-\item
-  Fisher 散度对低密度区域不敏感（期望在 $p$ 下取，样本稀少处权重小）——生成模型在分布尾部质量差，根源之一在这里。
-\item
-  得分场必须是梯度场才与某个密度相容；一般向量场最小化 Fisher 散度后未必可积。实际中神经网络不强制可积，误差由反向采样的鲁棒性部分吸收。
-\item
-  去噪得分匹配估计的是加噪分布 $p_t$ 的得分，不是原分布的得分；$\sigma\to0$ 时目标方差爆炸，$\sigma$ 太大时得分过于平滑——噪声调度（上一节的时间网格）因此是模型设计的一部分。
-\end{itemize}
+为什么必须从大到小，下面这张图给出理由。
 
-\subsection{落点}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \begin{scope}
+    \draw[black!45] (0,0) -- (4.4,0);
+    \draw[blue!70,thick] plot[domain=0.05:4.35,samples=80]
+      (\x,{1.15*exp(-(\x-2.2)*(\x-2.2)/1.5)});
+    \draw[black!45] (0,-1.15) -- (4.4,-1.15);
+    \foreach \x/\d in {0.35/0.42,0.95/0.36,1.55/0.26,2.85/-0.26,3.45/-0.36,4.05/-0.42}
+      \draw[->,red!75] (\x,-1.15) -- ({\x+\d},-1.15);
+    \foreach \x in {2.0,2.4} \fill[red!75] (\x,-1.15) circle (1.2pt);
+    \node[below,font=\footnotesize,align=center] at (2.2,-1.45) {大噪声：\\处处有信号，只指大方向};
+  \end{scope}
+  \draw[black!25] (5.1,-1.9) -- (5.1,1.6);
+  \begin{scope}[shift={(5.8,0)}]
+    \draw[black!45] (0,0) -- (4.4,0);
+    \draw[blue!70,thick] plot[domain=0.05:4.35,samples=90]
+      (\x,{1.15*exp(-(\x-1.3)*(\x-1.3)/0.09)+0.95*exp(-(\x-3.2)*(\x-3.2)/0.11)});
+    \draw[black!45] (0,-1.15) -- (4.4,-1.15);
+    \foreach \x/\d in {0.75/0.34,1.05/0.16,1.55/-0.16,1.85/-0.34,2.75/0.30,3.05/0.12,
+                       3.45/-0.14,3.75/-0.32}
+      \draw[->,red!75] (\x,-1.15) -- ({\x+\d},-1.15);
+    \draw[black!35,dashed] (2.15,-1.15) -- (2.55,-1.15);
+    \node[above,font=\footnotesize,black!50] at (2.35,-1.12) {?};
+    \node[below,font=\footnotesize,align=center] at (2.2,-1.45) {小噪声：\\细节精确，谷底无从判断};
+  \end{scope}
+\end{tikzpicture}
 
-得分匹配补上了扩散生成的最后一块数学拼图：时间反演说明``倒着跑需要得分''，得分匹配说明``得分可以从样本学到''，Euler--Maruyama 说明``学到之后怎样走''。三步合起来，生成模型从``拟合密度''的困难问题，变成``回归向量场再沿它走路''的可执行流程。这条链与变分推断（Part 13）共享同一个主题：把不可计算的推断对象，换成可优化的回归目标。
+\emph{同一个双峰数据分布，加噪重与加噪轻两种情形。上排是密度，下排是对应的得分场。大噪声把两个峰糊成一个宽包，得分虽然粗糙，却在整条轴上都有定义，能把远方的粒子拉进来。小噪声保住了两个峰的位置和形状，可谷底那段几乎没有样本落进去，网络在那里学到的东西不可信。采样必须从左走到右：先靠大噪声的得分决定去哪个峰，再换小噪声的得分把细节补上。}
+\end{center}
+
+这与上一单元退火采样那张双阱图是同一个道理的两种说法。那里调的是温度，这里调的是噪声水平；那里的困难是低温下粒子翻不过势垒，这里的困难是低噪声下低密度区没有可靠的得分估计。解法也一样：从平滑的版本起步，逐步收紧。
+
+\subsection{它在什么地方会失灵}
+
+分部积分那一步要求边界项消失，也就是密度在边界处衰减足够快。像素值截断在 \([0,1]\) 这种有界支撑的分布并不自动满足，实践中的解决办法通常是先做一次连续化变换，而不是假装条件成立。
+
+Fisher 散度的期望是在 \(p\) 下取的，低密度区域权重极小，估计误差在那里几乎不受惩罚。生成模型在分布尾部表现差、偶尔吐出结构崩坏的样本，根源之一就在这个加权方式。上面那张图的右半边讲的正是这件事。
+
+还有一个容易忽略的结构性问题：真正的得分必然是某个标量函数的梯度，也就是无旋向量场。神经网络输出的一般向量场没有这个约束，最小化 Fisher 散度之后未必可积，也就未必对应任何密度。实践中这个偏差被反向采样过程的鲁棒性吸收了不少，但它确实存在，把网络显式参数化成某个能量的梯度是一种代价更高的补救。
+
+最后，去噪得分匹配估的是加噪分布 \(p_\sigma\) 的得分，不是原数据分布的。\(\sigma\to0\) 时标签 \(-\epsilon/\sigma\) 的方差发散，训练信号被噪声淹没；\(\sigma\) 太大时得分被抹得过平，携带的信息接近于零。中间那段才可用，所以噪声调度不是超参数表里可以随手填的一行，它是模型设计的一部分。
+
+\subsection{这条链的落点}
+
+三块拼图到此合拢：时间反演说明倒着跑需要得分，得分匹配说明得分可以从样本学到，Euler--Maruyama 说明学到之后怎样走完这条路。生成于是从``拟合一个高维密度''这个基本无解的问题，变成了``回归一个向量场，再沿着它走''这个可执行的流程。
+
+值得和\hyperref[sec:14-Deep-Learning/06-Variational-Autoencoders/01]{``VAE 把不可积后验变成可训练下界''}并排看一眼。两者面对的困难同源——真正想要的那个量含着算不出的积分——绕法却分了岔：变分方法退而求其次去优化一个下界，扩散方法干脆换掉优化对象，只学梯度场，把不可算的常数从一开始就排除在外。哪条路更好没有普适答案，但它们共享一个可迁移的判断：当一个量因为归一化而不可及时，先看看你真正需要的是不是它本身。
+
+随机过程这一章到此转向另一类问题。前面的模型都从局部机制出发向前推演，而\hyperref[ch:052]{``ARMA 与 ARIMA：时间序列的经典模型族''}反过来，从一条已经观测到的序列出发，问怎样用有限的参数把它的依赖结构拟合出来。

@@ -1,47 +1,19 @@
-概率并不是一成不变的属性。它总是相对于当前信息而言：一张未知扑克牌是 A 的概率为 \(4/52\)，得知它是黑桃后变成 \(1/13\)，看到牌面后则变成 \(0\) 或 \(1\)。
+一张扣着的扑克牌是 A 的概率是 \(1/13\)。有人瞄了一眼告诉你``它是黑桃''，这个数仍然是 \(1/13\)；如果那句话换成``它是红色的''，这个数就变成了 \(0\)。同一张牌，两句话，两个答案，没有哪一个更正确——它们回答的是不同信息状态下的不同问题。
 
-这一单元围绕``观察到 \(B\) 以后，怎样重新评价 \(A\)''展开：
+概率不是贴在事物身上的标签，而是相对于某个信息状态的一笔账。这一章要处理的共同困难只有一句：新信息到手之后，原来那笔账该怎么改。
 
-\begin{enumerate}
-\tightlist
-\item
-  条件概率与乘法法则：把样本空间限制到已知事件，并把顺序实验拆成条件概率的乘积。
-\item
-  全概率公式与 Bayes 更新：沿原因到结果计算，再由结果反推原因。
-\item
-  独立性：从两事件到多个事件：准确区分独立、互斥、两两独立与相互独立。
-\item
-  条件独立与信息结构：理解加入条件后，依赖关系为什么既可能消失，也可能被制造出来。
-\end{enumerate}
-
-这里最重要的习惯是：每当概率改变，都明确说出``相对于什么信息''。
-
-\subsection{怎么读这一章}
-
-可以按当前困惑选择入口：
-
-\begin{itemize}
-\tightlist
-\item
-  若不知道条件化究竟改变了什么，读\hyperref[sec:05-Probability/02-Conditional-Probability/01]{``条件概率与乘法法则''}；把它理解为限制到已知事件后重新规范化，链式法则本身不要求独立。
-\item
-  若已知``原因怎样产生结果''却想反推原因，读\hyperref[sec:05-Probability/02-Conditional-Probability/02]{``全概率公式与 Bayes 更新''}；全概率公式计算证据的所有来路，Bayes 再按先验与似然重新分配权重。
-\item
-  若准备把联合概率写成乘积，先读\hyperref[sec:05-Probability/02-Conditional-Probability/03]{``独立性：从两事件到多个事件''}；区分互斥、两两独立、相互独立与不相关。
-\item
-  若加入第三个变量后依赖关系改变，读\hyperref[sec:05-Probability/02-Conditional-Probability/04]{``条件独立与信息结构''}；共同原因被给定时可能阻断依赖，共同结果被给定时则可能制造依赖。
-\end{itemize}
-
-第一次阅读可以在每次写出乘积时都能说明其来源后停下：这是条件概率定义的链式分解，还是模型额外假定的独立性？Bayes 更新改变的是信息状态，不会仅凭公式把统计关系变成因果关系。
+四篇共用同一个动作，截断再归一——把样本空间缩到已知信息之内，再把剩下的部分整体放大，使它自己的总概率回到 \(1\)。这个动作立刻带出一条警告：\(P(A\given B)\) 与 \(P(B\given A)\) 截出的是两个不同的世界，数值上一般毫不相干。检测的技术指标属于前者，你拿到报告后真正想知道的属于后者。把两者对调，在法庭上叫检察官谬误，在监控台前则表现为对告警的系统性误读。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:05-Probability/02-Conditional-Probability/01]{``条件概率与乘法法则''}；
-\item \hyperref[sec:05-Probability/02-Conditional-Probability/02]{``全概率公式与 Bayes 更新''}；
-\item \hyperref[sec:05-Probability/02-Conditional-Probability/03]{``独立性：从两事件到多个事件''}；
-\item \hyperref[sec:05-Probability/02-Conditional-Probability/04]{``条件独立与信息结构''}。
+\item \hyperref[sec:05-Probability/02-Conditional-Probability/01]{``条件概率与乘法法则''}：条件化换掉的不是公式而是全集；链式法则能把任意长的过程拆成逐步更新，并且不依赖任何独立性假设。
+\item \hyperref[sec:05-Probability/02-Conditional-Probability/02]{``全概率公式与 Bayes 更新''}：后验赔率等于先验赔率乘以似然比。基础率极低时，即使检测很准，阳性结果也大概率是假阳性。
+\item \hyperref[sec:05-Probability/02-Conditional-Probability/03]{``独立性：从两事件到多个事件''}：独立是概率分配的性质，不是集合几何的性质；多个事件的独立要求所有子集都按乘积分解，两两验过并不算数。
+\item \hyperref[sec:05-Probability/02-Conditional-Probability/04]{``条件独立与信息结构''}：独立与条件独立互不蕴含。给定共同原因会让相关性消失，给定共同结果会让相关性凭空出现。
 \end{itemize}
+
+读完全章只需要\hyperref[sec:05-Probability/01-Probability-Spaces/02]{``概率公理与概率空间''}里的归一化与可加性两条。第四篇是概率图模型与因果推断的入口，值得比其余三篇多花些时间。
+
+给自己留一个习惯：每当一个概率数字发生变化，先说清它是相对于什么信息而言的。这个习惯比本章任何一条公式都耐用。

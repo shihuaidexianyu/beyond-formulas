@@ -1,43 +1,33 @@
-一般矩阵可能没有完整特征基，特征向量也可能彼此几乎平行。实对称矩阵却拥有一套格外整齐的几何：全部特征值为实数，不同特征方向彼此正交，并且总能在正交基下对角化。二次型 \(x^{\trans}Ax\) 把这些特征值解释为各方向上的曲率或能量；正定性则保证所有非零方向都具有正能量和严格曲率。
+前面几个单元处理的是一般矩阵，得到的结论也就一般：特征值可能是复数，特征向量可能几乎平行，换基矩阵可能接近奇异，甚至凑不齐一组特征基。可你在数据工作里遇到的矩阵大多不是一般矩阵。协方差、Gram 矩阵、核矩阵、图的 Laplacian、Hessian，它们全都满足同一条 \(A^{\trans}=A\)——因为它们记录的是成对关系，而``\(i\) 对 \(j\)''与``\(j\) 对 \(i\)''本来就不分先后。
 
-\subsection{先看一个例子}
+这一条看似轻描淡写的假设，换来的东西多得不成比例。本单元要讲清楚它换来了什么，以及这些好处怎样一路传到 PCA、优化收敛速度和高斯采样上去。
 
-取
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,>=stealth]
+  \draw[black!45,fill=blue!6] (0,0) rectangle (3.3,1.4);
+  \node[align=center] at (1.65,0.7) {\(A^{\trans}=A\)\\[2pt] 一条对称假设};
+  \draw[->,thick,black!60] (3.4,0.7) -- (3.85,0.7);
+  \draw[black!45,fill=blue!6] (3.95,0) rectangle (7.25,1.4);
+  \node[align=center] at (5.6,0.7) {\(A=Q\Lambda Q^{\trans}\)\\[2pt] 实特征值、正交主轴};
+  \draw[->,thick,black!60] (7.35,0.7) -- (7.8,0.7);
+  \draw[black!45,fill=blue!6] (7.9,0) rectangle (11.2,1.4);
+  \node[align=center] at (9.55,0.7) {\(x^{\trans}Ax=\sum_i\lambda_iy_i^2\)\\[2pt] 碗、鞍或槽};
+  \draw[->,thick,black!60] (11.3,0.7) -- (11.75,0.7);
+  \draw[black!45,fill=blue!6] (11.85,0) rectangle (15.15,1.4);
+  \node[align=center] at (13.5,0.7) {\(A=LL^{\trans}\)\\[2pt] 可判定、可解、可采样};
+\end{tikzpicture}
 
-\[
-A=\begin{pmatrix}2&-1\\-1&2\end{pmatrix}.
-\]
+\emph{本单元的主线只有一条链，三个箭头分别是谱定理、换到特征坐标、要求全部特征值为正。每一步都是等价改写而不是新增假设：对称性买来正交特征基，正交特征基把二次型化成一组独立的平方项，全部系数为正就是正定，而正定又允许把这组平方项用一次消元直接写出来。}
+\end{center}
 
-特征值 \(3\) 和 \(1\)，特征方向分别为 \((1,-1)^{\trans}\) 和 \((1,1)^{\trans}\)——互相垂直。二次型 \(q(x)=x^{\trans}Ax=2x_1^2-2x_1x_2+2x_2^2\) 在特征坐标 \(y=Q^{\trans}x\) 下化简为 \(3y_1^2+y_2^2\)，各项系数就是特征值。若 \(x\ne0\)，\(q(x)>0\)，所以 \(A\) 正定。Cholesky 分解 \(A=LL^{\trans}\) 给出 \(L=\begin{pmatrix}\sqrt2&0\\-1/\sqrt2&\sqrt{3/2}\end{pmatrix}\)，代入 \(q(x)=\|L^{\trans}x\|^2\) 又把正定性写成一组平方和。等高线 \(q(x)=c\) 是一族主轴方向分别沿 \((1,-1)^{\trans}\) 和 \((1,1)^{\trans}\) 的椭圆——谱定理选定了方向，特征值决定了半轴长度。
-
-\subsection{阅读顺序}
-
-\begin{enumerate}
-\tightlist
-\item
-  对称矩阵与谱定理
-\item
-  二次型与正定性
-\item
-  Cholesky 分解
-\item
-  二次曲面用谱分解显露几何形状
-\end{enumerate}
-
-前三节建立谱、正定性与分解，最后一节把它们重新放回可见的几何：旋转消掉交叉项，平移找到中心，特征值的符号分类椭球、双曲与退化情形。主要参考 MIT 18.06 关于 symmetric matrices、positive definiteness、minima 与 Cholesky 的讲授。
-
-\subsection{怎么读这一章}
-
-按"谱---能量---分解---几何"阅读。对称矩阵拥有正交特征方向，二次型把特征值变成各方向的曲率，正定性允许 Cholesky 分解，最后再用谱坐标看清椭球面的主轴。
-
-\subsection{本章篇目}
-
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+链条上的四个环节各对应一节。第一节证明谱定理并交代对称性用在了哪一步、拿掉它会怎样。第二节转到标量函数 \(x^{\trans}Ax\)，用特征值的符号给几何分类，并说明正定的几条判据为什么是同一句话；条件数在这里第一次露面，它把线性代数和优化的收敛速度接在一起。第三节的 Cholesky 分解既是正定性的构造性证明，也是从模型协方差生成相关高斯样本、计算 \(\log\det\) 与解正规方程的实用工具，顺带解释``矩阵不正定''这条报错在实践中意味着什么。第四节把前三节放回可见的几何：旋转拿走交叉项，平移找到中心，剩下的分类只看特征值符号。
 
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/01]{``对称矩阵与谱定理：什么时候特征方向一定正交''}；
-\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/02]{``二次型与正定性：每个方向上的能量是否为正''}；
-\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/03]{``Cholesky 分解：把正能量写成平方和''}；
-\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/04]{``二次曲面用谱分解显露几何形状''}。
+\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/01]{``对称矩阵与谱定理：什么时候特征方向一定正交''}：把``特征方向正交''从运气变成保证，并说清这条保证的代价是什么；
+\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/02]{``二次型与正定性：每个方向上的能量是否为正''}：学会只看特征值符号就判断驻点身份、目标函数是否严格凸、参数是否唯一；
+\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/03]{``Cholesky 分解：把正能量写成平方和''}：把正定性变成一次可执行的计算，并把分解失败读成一条诊断；
+\item \hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/04]{``二次曲面用谱分解显露几何形状''}：把误差椭圆、置信区域和优化等高线认成同一族曲面。
 \end{itemize}
+
+四节按依赖顺序排列，连着读最省力。若你是带着一个具体问题进来的——训练卡住了、协方差矩阵报错了、置信区域该怎么画——也可以直接打开最接近的那一节，再沿篇内链接回补前面的结论。需要的前置只有特征值与对角化，见 \hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/02]{``对角化与动力系统：把耦合演化变成独立缩放''}。

@@ -1,47 +1,43 @@
-一个分布对应某种重复出现的随机机制，公式名称只是标记。固定次数的独立成败试验产生 Binomial；等待第几次成功产生 Geometric 或 Negative Binomial；稀有事件在固定时间窗内的计数产生 Poisson；Poisson 到达之间的等待时间则产生 Exponential。而当极端值拒绝被平均稀释时，问题要倒过来问：矩是否存在，以及最坏的一次有多坏。
+每小时的请求数、每笔订单的金额、每次接口调用的延迟——三列数摆在面前，要各挑一个分布。翻开手册，二十几个名字排成一张表，每行是密度、期望、方差、矩母函数。表看完了，问题还在原地：这三列数分别该用哪一行？
 
-因此选择分布时，先问``数据是怎样产生的''，再看参数和公式：
+按公式挑是挑不出来的。密度长什么样是结果，不是理由。把一个分布定下来的是数据被生成的方式：请求由大量互不相干的客户端各自发出，于是计数落进 Poisson；订单金额被少数大客户主导，于是尾巴按幂律拖出去；延迟是排队、重试和超时叠加的产物，既不对称也不轻尾。机制说清楚之后，密度是被推出来的，不必被记住。
 
-\begin{enumerate}
-\tightlist
-\item
-  成败试验中的 Bernoulli、二项与等待分布：固定试验次数与固定成功次数是两种不同停止规则。
-\item
-  不放回抽样与 Hypergeometric 分布：有限总体抽样为何产生依赖，以及何时可用 Binomial 近似。
-\item
-  Poisson 计数、Exponential 等待与 Gamma 时间：把事件数和等待时间看成同一到达过程的两面。
-\item
-  Uniform、Beta 与 Dirichlet 分布：区间或概率单纯形上的分布怎样表达相对于指定坐标与基准测度的均匀性，以及不同形状的先验。
-\item
-  Gaussian 与多元 Gaussian：为什么许多小扰动的和会形成钟形，以及协方差怎样决定椭圆几何。
-\item
-  从 Gaussian 到卡方与 Student \(t\)：估计均值与方差时为什么自然出现新的分布。
-\item
-  重尾分布：Cauchy 的样本均值为何永不收敛，尾指数怎样决定哪些矩存在。
-\item
-  极值分布与尾部风险：块最大值与超阈值超出量服从什么极限规律，``百年一遇''如何解读又何时失效。
-\end{enumerate}
+所以本章不按字母序列举分布，而按机制分组。同一个机制换一个提问方向就会长出一个新名字：固定试验次数问成功数，得到 Binomial；固定成功数问试验次数，得到 Negative Binomial——两个公式，一套试验。同一个到达过程，数窗口内的事件个数是 Poisson，量一次等待是 Exponential，量第 \(k\) 次等待是 Gamma——三个名字，一件事的三个投影。看清这层结构，要记的东西会少掉一大半。
 
-学习每个分布时至少保留五件事：随机机制、支撑集、参数含义、均值与方差（先确认它们存在）、失效边界。只记密度公式，往往最先忘掉的恰好是决定能否使用它的条件。
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,>=stealth]
+  \foreach \y/\m/\d in {%
+    0/{独立重复的成败}/{Bernoulli、Binomial、Geometric、Negative Binomial},
+    -1.15/{有限总体、不放回}/{Hypergeometric},
+    -2.30/{随机时刻的到达流}/{Poisson、Exponential、Gamma},
+    -3.45/{有界比例与概率向量}/{Uniform、Beta、Dirichlet},
+    -4.60/{大量微小扰动的叠加}/{Gaussian、\(\chi^2\)、Student \(t\)},
+    -5.75/{少数极端观测主导}/{Pareto、Cauchy、Gumbel、Weibull}}{
+    \draw[black!45,fill=blue!8] (0,\y-0.4) rectangle (4.3,\y+0.4);
+    \node at (2.15,\y) {\m};
+    \draw[->,black!55] (4.45,\y) -- (5.15,\y);
+    \node[right] at (5.25,\y) {\d};}
+\end{tikzpicture}
 
-一个具体例子：某客服中心每分钟来电数 \(X\sim\mathrm{Poisson}(3)\)，则两分钟内来电总数 \(Y\sim\mathrm{Poisson}(6)\)。已知第一分钟来了 2 通电话，第二分钟来电分布仍是 \(\mathrm{Poisson}(3)\)——Poisson 过程的独立增量性质。若来电高峰时段速率升至每分钟 10 通，继续用 3 作为参数就会低估等待时长和排队人数。
+\emph{左列是机制，右列是它长出来的名字。选分布的动作发生在左列；右列只是记账。同一行里的几个名字往往只差一个提问方向。}
+\end{center}
 
-\subsection{怎么读这一章}
+\hyperref[sec:05-Probability/06-Common-Distributions/01]{``成败试验中的 Bernoulli、二项与等待分布''}把一条 0--1 序列摆出来，然后指出四个分布读的是同一条序列。区别全在停止规则：谁是你定死的，谁是随机的。这一节顺带说明为什么在 A/B 测试里``看到显著就停''会让结论失效——停止规则是模型的一部分，改了它，分布就换了。
 
-首次阅读以机制配对为主：固定次数与等待次数、不放回与独立重复、计数与等待时间、单变量 Gaussian 与协方差几何。第二遍再进入 Beta--Dirichlet 共轭、卡方与 Student \(t\) 的构造。重尾与极值两篇不是附录：当风险由少数极端观测主导时，应优先阅读它们，并在计算均值、方差或重现水平前先检查矩存在性、平稳性与独立性。
+\hyperref[sec:05-Probability/06-Common-Distributions/02]{``不放回抽样与 Hypergeometric 分布''}拿走独立性。从一个已经标注完的数据集里抽样复核，每抽走一条，剩下的组成就变了。期望不受影响，方差被压缩，压缩的幅度由抽样比例决定。样本相对总体很小时两者几乎重合，这也解释了为什么大多数场合可以放心用二项。
 
-\subsection{本章篇目}
+\hyperref[sec:05-Probability/06-Common-Distributions/03]{``Poisson 计数、Exponential 等待与 Gamma 时间''}是本章的主干。一条时间轴上的事件点，数个数、量一次间隔、量到第 \(k\) 个点的总时长，得到三个分布。无记忆性在这里被摆到明面上：它是一个非常强的假设，强到几乎没有真实系统满足。
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+\hyperref[sec:05-Probability/06-Common-Distributions/04]{``Uniform、Beta 与 Dirichlet 分布''}换一个层次——被建模的对象不再是观测，而是参数本身。Beta 是比例的分布，观测到成功和失败之后它仍然是 Beta，只是参数加了两个计数。这种``更新后不出族''的性质叫共轭，它买来了闭式更新，代价是形状被锁在一个不宽的家族里。Dirichlet 把同一套逻辑搬到多类别，是主题模型和平滑估计的默认先验。
 
-\begin{itemize}
-\tightlist
-\item \hyperref[sec:05-Probability/06-Common-Distributions/01]{``成败试验中的 Bernoulli、二项与等待分布''}；
-\item \hyperref[sec:05-Probability/06-Common-Distributions/02]{``不放回抽样与 Hypergeometric 分布''}；
-\item \hyperref[sec:05-Probability/06-Common-Distributions/03]{``Poisson 计数、Exponential 等待与 Gamma 时间''}；
-\item \hyperref[sec:05-Probability/06-Common-Distributions/04]{``Uniform、Beta 与 Dirichlet 分布''}；
-\item \hyperref[sec:05-Probability/06-Common-Distributions/05]{``Gaussian 与多元 Gaussian''}；
-\item \hyperref[sec:05-Probability/06-Common-Distributions/06]{``从 Gaussian 到卡方与 Student \(t\)''}；
-\item \hyperref[sec:05-Probability/06-Common-Distributions/07]{``重尾分布：当均值与方差失效时''}；
-\item \hyperref[sec:05-Probability/06-Common-Distributions/08]{``极值分布与尾部风险''}。
-\end{itemize}
+\hyperref[sec:05-Probability/06-Common-Distributions/05]{``Gaussian 与多元 Gaussian''}回答一个很多人跳过的问题：为什么它是默认？两个彼此独立的理由——大量微小扰动的和会趋向它，以及在只知道均值和方差的前提下它是最不承诺的那个分布。多元情形里协方差矩阵完全决定了等高线椭球的朝向和粗细，这一步直接接上谱定理。
+
+\hyperref[sec:05-Probability/06-Common-Distributions/06]{``从 Gaussian 到卡方与 Student \(t\)''}讲的是构造出来的分布。卡方是标准正态的平方和，\(t\) 是正态除以一个独立的卡方尺度。它们之所以在统计推断里到处出现，是因为你用同一批数据同时估计了均值和方差——分母也在抖，尾巴因此比正态厚。
+
+\hyperref[sec:05-Probability/06-Common-Distributions/07]{``重尾分布：当均值与方差失效时''}是本章判断价值最高的一篇。均值和方差是积分，积分可以发散：Cauchy 的均值不存在，Pareto 的哪些矩存在取决于尾指数。这不是数学奇观——大数定律和中心极限定理的前提在这里塌掉，样本均值不收敛，基于它的置信区间失去意义。收入、文件大小、词频、请求延迟都活在这一档里，这也是``平均延迟''作为指标为什么长期误导人。
+
+\hyperref[sec:05-Probability/06-Common-Distributions/08]{``极值分布与尾部风险''}把问题从``平均而言''换成``最坏的一次''。块最大值经过规范化之后只有三种可能的极限分布，具体落进哪一种由母体的尾部性状决定，建模者说了不算。关心峰值时用正态近似会系统性地低估风险，这一节给出替代路线和它的失效边界。
+
+首次通读建议按顺序走前六篇，重点放在机制配对上：固定次数与固定成功数、放回与不放回、计数与等待、观测与参数、单变量与协方差几何。最后两篇不是附录。只要你的风险由少数极端观测决定——容量规划、成本控制、SLA 承诺、金融敞口——就应该优先读它们，并且在计算任何均值或方差之前先确认这两个量存在。
+
+读完之后可检验的变化，是拿到一列数时的第一反应从``用哪个公式''变成三个问题：这些数是怎么产生的？我固定了什么、什么在随机波动？极端值出现的频率高到会让平均失效吗？答不上来的时候，公式记得再熟也没有落脚点。

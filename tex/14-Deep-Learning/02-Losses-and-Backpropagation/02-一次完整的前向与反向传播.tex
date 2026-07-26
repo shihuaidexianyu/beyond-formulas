@@ -33,6 +33,32 @@ L=\frac12(-1-1)^2=2.
 
 前向途中，每算出一个中间值就把它存下来：\(z\), \(h\), \(o\)。反向传播要用到它们。
 
+\begin{center}
+\begin{tikzpicture}[>=stealth,
+  unit/.style={draw,rounded corners=2pt,minimum width=1.25cm,minimum height=0.7cm,fill=blue!6},
+  every node/.style={font=\small}]
+  \node[unit] (x) at (-4,0) {\(x\)};
+  \node[unit] (z) at (-2,0) {\(z=w_1x+b_1\)};
+  \node[unit] (h) at (0,0) {\(h=\relu(z)\)};
+  \node[unit] (o) at (2,0) {\(o=w_2h+b_2\)};
+  \node[unit] (l) at (4,0) {\(L\)};
+  \draw[->,blue!70!black,thick] (x) -- (z);
+  \draw[->,blue!70!black,thick] (z) -- (h);
+  \draw[->,blue!70!black,thick] (h) -- (o);
+  \draw[->,blue!70!black,thick] (o) -- (l);
+  \draw[<-,black,thick] (x.south) -- ++(0,-0.8);
+  \draw[->,black,thick] (l.south) -- ++(0,-0.8);
+  \draw[<-,black,thick] (z.south) -- ++(0,-0.8);
+  \draw[<-,black,thick] (h.south) -- ++(0,-0.8);
+  \draw[<-,black,thick] (o.south) -- ++(0,-0.8);
+  \draw[->,black,thick] (3.8,-1.0) -- (-3.8,-1.0);
+  \node[above] at (0,0.55) {前向：计算并保存中间值};
+  \node[below] at (0,-1.0) {反向：上游梯度 \(\times\) 局部导数};
+\end{tikzpicture}
+
+\emph{前向箭头携带数值，反向箭头携带敏感度；每经过一个节点，就把上游敏感度乘以该节点的局部导数。}
+\end{center}
+
 现在从损失回头。\(L=\frac12(o-y)^2\) 对 \(o\) 的导数是直接的：
 \[
 \frac{\partial L}{\partial o}=o-y=-1-1=-2.

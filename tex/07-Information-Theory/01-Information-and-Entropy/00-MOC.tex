@@ -1,35 +1,51 @@
-一条必然发生的消息几乎不带新信息，极少发生的消息一旦出现却很惊讶。信息论从这个直觉出发，把单个结果的惊讶度定义为对数概率，再对结果取平均得到熵。
+同事发来一份数据集说明：某列标签有 \(99\%\) 是``正常''；另一列是连续的响应延迟；还有一列缺了大半，需要补一个分布进去。三件事看起来毫无关系，可它们背后是同一个问题——``不确定''这个词能不能变成一个可以加减、可以比较、可以当预算来花的数。
 
-考虑一个三面骰子，面为 $a,b,c$，概率分别为 $1/2,1/4,1/4$。直观上，$a$ 没什么可惊讶的，$b$ 和 $c$ 的出现更难猜。自信息给它们的赋值是 $-\log_2(1/2)=1$ bit 和 $-\log_2(1/4)=2$ bit，恰好分别需要一个和两个 yes-no 问题来定位。平均下来，熵为 $H=1.5$ bit——不是说每次投掷恰好消耗 1.5 bit，而是长期编码时每个结果平均需要 1.5 bit。
+本章给出的答案只有一句话：把一个结果的代价定义成 \(-\log P\)，再取平均。这句话很短，落地时却有四个台阶，而中间那一级最容易踩空。
 
-\begin{enumerate}
-\tightlist
-\item
-  从惊讶到 Bit 与自信息：为什么信息量必须是概率的负对数，以及底数怎样决定单位。
-\item
-  Shannon 熵与二元熵：平均自信息怎样衡量离散随机变量的不确定性。
-\item
-  微分熵为何不是离散熵的直接复制：连续密度下熵可为负、会随坐标缩放改变，哪些性质仍然可靠。
-\item
-  最大熵原理：从约束到分布：只保留已知约束时，怎样选择最少附加结构的分布。
-\end{enumerate}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[rounded corners,black!45,fill=blue!5] (0,0) rectangle (3.3,1.4);
+  \draw[rounded corners,black!45,fill=blue!5] (3.8,0) rectangle (7.1,1.4);
+  \draw[rounded corners,black!45,fill=blue!5] (7.6,0) rectangle (10.9,1.4);
+  \draw[rounded corners,black!45,fill=blue!5] (11.4,0) rectangle (14.7,1.4);
+  \draw[->,black!60] (3.32,0.7) -- (3.78,0.7);
+  \draw[->,black!60] (7.12,0.7) -- (7.58,0.7);
+  \draw[->,black!60] (10.92,0.7) -- (11.38,0.7);
+  \node[align=center,font=\footnotesize] at (1.65,0.7) {一个结果的代价\\\(-\log P\)};
+  \node[align=center,font=\footnotesize] at (5.45,0.7) {取平均得熵\\平均问几个是非题};
+  \node[align=center,font=\footnotesize] at (9.25,0.7) {换成连续变量\\换个单位数就变};
+  \node[align=center,font=\footnotesize] at (13.05,0.7) {反着用\\由约束定出分布};
+  \node[align=center,font=\footnotesize,black!65] at (1.65,-0.55) {自信息};
+  \node[align=center,font=\footnotesize,black!65] at (5.45,-0.55) {Shannon 熵};
+  \node[align=center,font=\footnotesize,black!65] at (9.25,-0.55) {微分熵};
+  \node[align=center,font=\footnotesize,black!65] at (13.05,-0.55) {最大熵原理};
+\end{tikzpicture}
 
-熵不是``知识''\,``语义价值''或``数据质量''的通用分数。它精确衡量给定概率模型下结果编码所需的平均信息量。
+\emph{四篇的走向。前两步把不确定性变成数，第三步说明这个数换到连续情形会失去绝对意义，第四步把箭头掉转过来：已知若干约束，反推最不多话的那个分布。}
+\end{center}
 
-\subsection{怎么读这一章}
+\subsection{本章想让你改掉的几个判断}
 
-若只想获得随手可用的直觉，先读四篇开头的``核心洞见''，再记住三句话：自信息衡量一次结果有多意外，熵是这种意外的模型内平均，最大熵是在明确约束与参考测度下不擅自补充额外结构。微分熵不能脱离坐标和单位单独解释。
+第一，熵不是抽象的``混乱度''，它有一个可以数的读法：\emph{平均需要问多少个是非题，才能把结果定位下来}。这个读法让 \(\log_2\) 和 bit 有了实义，也直接解释了熵为什么就是压缩的下界——一串是非题的答案就是一串比特。语言模型报的困惑度是熵的指数，读作``平均在多少个等可能候选之间犹豫''。
 
-若要继续学习编码、互信息与 KL，再细读长块编码解释、量化极限和最大熵的约束推导。证明可以按需回看，但每次使用一个信息量时，都应先说明随机变量、概率分布、对数底和连续情形的参考测度。
+第二，熵只看概率，不看取值。把标签重命名、把数值统统放大一千倍，熵一动不动。所以它适合度量``有多难猜''，不适合度量``有多大''——后者是方差的活。
+
+第三，也是最容易被跳过的一条：微分熵不是离散熵的推广。它可以为负，会随坐标尺度改变，把长度单位从米换成毫米，数字就跳了 \(\log_2 1000\)。因此单个连续变量的``信息量''没有绝对意义，两列连续特征的微分熵不能直接比大小。有意义的是差——互信息与 KL 散度在坐标变换下不变，特征筛选该用它们。
+
+第四，最大熵是一条建模纪律：在给定约束下选最不承诺的分布。给定支撑得到均匀分布，加上均值得到指数分布，再加上方差得到 Gaussian。这解释了这些分布为何总在``默认''位置出现，也划出了默认失效的场合——重尾数据上，二阶矩约束可能既估不准也不存在。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
+四篇按依赖顺序排列，从具体困惑进入也可以直接翻到最近的一篇，再沿篇内链接回补。
 
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/01]{``从惊讶到 Bit 与自信息''}；
-\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/02]{``Shannon 熵与二元熵''}；
-\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/03]{``微分熵为何不是离散熵的直接复制''}；
-\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/04]{``最大熵原理：从约束到分布''}。
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/01]{``从惊讶到 Bit 与自信息''}：为什么信息量必须是概率的负对数，底数怎样决定单位，以及提问树上那棵图；
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/02]{``Shannon 熵与二元熵''}：平均自信息、二元熵曲线、困惑度换算与压缩下界；
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/03]{``微分熵为何不是离散熵的直接复制''}：负值、尺度依赖、量化桥，以及哪些量仍然可信；
+\item \hyperref[sec:07-Information-Theory/01-Information-and-Entropy/04]{``最大熵原理：从约束到分布''}：从约束反推分布，指数族与 softmax，以及重尾场合的失效。
 \end{itemize}
+
+只想拿走随手可用的直觉的话，记住三句就够：自信息衡量一次结果有多意外，熵是这种意外在模型下的平均，最大熵是在明确约束下不擅自补充结构。若要继续读编码、互信息与 KL，第三篇的坐标依赖值得多花点时间——后面所有连续情形的信息量，都建立在``只有差有意义''这一条上。
+
+最后提醒一件事，它会在整章反复被违反：熵、微分熵、最大熵解，全都是相对于某个明确的概率模型而言的。变量是谁、分布由谁给出、对数取什么底、连续情形的参考测度是什么——这四项交代不清，算出来的数就没有完整含义。

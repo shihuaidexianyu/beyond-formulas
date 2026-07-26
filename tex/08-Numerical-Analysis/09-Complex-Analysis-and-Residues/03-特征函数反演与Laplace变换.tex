@@ -1,85 +1,123 @@
 \section{特征函数反演与 Laplace 变换}
 \label{sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/03}
 
-Part 05 的特征函数 \(\varphi_X(t)=\E[e^{itX}]\) 唯一确定分布，但"确定"不等于"能算出来"。反演公式把特征函数变回密度，而它的严格推导与计算都依赖复平面上的围道方法。
-
-\subsection{反演公式的两种形式}
-
-若 \(X\) 有密度 \(f\) 且 \(\varphi\) 可积，则
+一台设备做完辨识，拿到传递函数
 
 \[
-f(x)=\frac1{2\pi}\int_{-\infty}^{\infty}e^{-itx}\varphi(t)\,dt.
+\hat h(s)=\frac{1}{(s+1)(s^2+0.2s+25)} .
 \]
 
-这是 Fourier 反演的直接应用：\(\varphi\) 是 \(f\) 的 Fourier 变换（差一个常数），反变换恢复 \(f\)。若 \(X\) 有离散分布，反演公式给出概率质量函数
+要回答的问题很实际：敲它一下，十秒后还剩多少抖动？
+
+标准答案是把 \(\hat h\) 反演回时域求 \(h(t)\)。真去做的人不多。工程上直接读极点：\(s=-1\) 对应 \(e^{-t}\)，\(s=-0.1\pm 5i\) 对应 \(e^{-0.1t}\cos(5t+\phi)\)。十秒之后，前一项衰到 \(4.5\times10^{-5}\)，后一项还有 \(0.37\)——抖动全归那对复极点，那个实极点早就不见了。谁衰得慢，看谁的实部更靠右；抖多快，看谁的虚部更大。
+
+这个读数不是经验法则，它是围道积分的直接推论。而同一句话在概率论里叫特征函数反演，在常微分方程里叫特征根，在控制里叫稳定性判据。本节把这几件事按到同一个平面上。
+
+\subsection{反演公式是一条积分路径}
+
+概率论里的特征函数 \(\varphi_X(t)=\E[e^{itX}]\) 就是密度的 Fourier 变换。若 \(X\) 有密度 \(f\) 且 \(\varphi\) 可积，反演公式给出
 
 \[
-p_k=\frac1{2\pi}\int_{-\pi}^{\pi}e^{-itk}\varphi(t)\,dt,
-\qquad k\in\Z,
+f(x)=\frac1{2\pi}\int_{-\infty}^{\infty}e^{-itx}\varphi(t)\,dt .
 \]
 
-即 Fourier 级数的系数公式。
+离散情形换成 Fourier 级数的系数公式，\(p_k=\frac1{2\pi}\int_{-\pi}^{\pi}e^{-itk}\varphi(t)\,dt\)。\(\varphi\) 可积这个前提对应 \(f\) 有一定光滑性；\(\varphi\) 不可积时密度未必存在（离散分布、奇异分布都是例子），得改用 Lévy 反演定理，先算分布函数在两点之差，再取截断极限。
 
-连续情形的反演要求 \(\varphi\) 可积（\(\int|\varphi|<\infty\)），这对应 \(f\) 有一定光滑性。若 \(\varphi\) 不可积，密度可能不存在（如离散或奇异分布），需要更一般的反演公式（Lévy 反演定理，用截断逼近）。
+矩母函数 \(M_X(s)=\E[e^{sX}]\) 与特征函数是同一个变换在复平面上不同直线的取值：\(\varphi\) 取虚轴，\(M\) 取实轴。虚轴上 \(\abs{e^{itX}}=1\)，积分总收敛，所以特征函数对任何分布都存在；实轴上 \(e^{sX}\) 可能爆掉，于是 \(M\) 只在一条竖直带 \(s_-<\operatorname{Re}s<s_+\) 内有定义，带宽由分布尾部的轻重决定。\hyperref[sec:05-Probability/07-Transforms-and-Bounds/01]{``生成函数、矩母函数与特征函数''}把这两个变换并排讲过；从复平面上看，它们是一张图上的两条线，而尾部越重，收敛带越窄，最近的奇点离虚轴越近。
 
-\subsection{先判断被积函数能否进入复平面}
+\subsection{看到反演积分，先检查解析性}
 
-有些反演积分可以通过留数定理计算，但前提是被积函数能解析延拓到所选围道内。以 Cauchy 分布为例，其特征函数是 \(\varphi(t)=e^{-|t|}\)，反演公式给出
+Cauchy 分布是个好教训。它的特征函数是 \(\varphi(t)=e^{-\abs t}\)，反演公式给出
 
 \[
-f(x)=\frac1{2\pi}\int_{-\infty}^{\infty}e^{-itx}e^{-|t|}\,dt.
+f(x)=\frac1{2\pi}\int_{-\infty}^{\infty}e^{-itx}e^{-\abs t}\,dt .
 \]
 
-这里不能直接把 \(e^{-|t|}\) 放进复围道，因为绝对值没有所需的解析延拓。正确做法是先在 \(t=0\) 处分开正负半轴：
+看到 Fourier 积分就想封围道，这里会当场翻车：\(e^{-\abs t}\) 在 \(t=0\) 有折角，没有跨越原点的解析延拓，任何绕过原点的围道都无从谈起。正确做法是在 \(t=0\) 处把正负半轴分开，各自是一个能收敛的初等积分：
 
 \[
-\int_{-\infty}^{\infty}e^{-itx}e^{-|t|}\,dt
-=\int_0^\infty e^{-(1+ix)t}\,dt
-+\int_0^\infty e^{-(1-ix)t}\,dt
-=\frac{2}{1+x^2}.
+\int_{-\infty}^{\infty}e^{-itx}e^{-\abs t}\,dt
+=\int_0^\infty e^{-(1+ix)t}\,dt+\int_0^\infty e^{-(1-ix)t}\,dt
+=\frac{2}{1+x^2},
 \]
 
-因此
+于是 \(f(x)=1/(\pi(1+x^2))\)，Cauchy 密度。
+
+这个结果与上一节严丝合缝。\hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/02]{``留数定理计算实积分''}算过 \(\int\cos(ax)/(1+x^2)\,dx=\pi e^{-\abs a}\)，那正是同一对 Fourier 关系的另一个方向；那里的绝对值来自``往哪半平面封''的二选一，这里的折角来自同一件事——\(\pm i\) 那对极点分居实轴两侧，谁被圈进去取决于指数因子往哪衰减。折角与半平面切换是同一个现象在两端的读数。
+
+Gaussian 则相反地省事：\(\varphi(t)=e^{-t^2/2}\) 是整函数，全平面无奇点，反演积分配方即可，用不上留数。它的特征函数与密度落在同一个函数族里，这一条在很多推导里被默默用掉。
+
+所以拿到一个反演积分，第一步不是选围道，是问被积函数能不能延拓到你想画的那条路径周围。
+
+\subsection{最右边的奇点写着长期行为}
+
+Laplace 变换 \(\hat f(s)=\int_0^\infty e^{-sx}f(x)\,dx\) 在 \(\operatorname{Re}s>\sigma_0\) 内收敛，\(\sigma_0\) 称为收敛横坐标，由 \(f\) 的增长速度决定。反演是 Bromwich 积分
 
 \[
-f(x)=\frac1{\pi(1+x^2)}.
+f(x)=\frac1{2\pi i}\int_{c-i\infty}^{c+i\infty}e^{sx}\hat f(s)\,ds,\qquad c>\sigma_0,
 \]
 
-这正是 Cauchy 密度。这个例子提醒我们：看到 Fourier 反演并不意味着必须使用留数。先检查解析性，再决定用围道、初等积分还是其他方法。
+沿一条竖直线积。这条线必须站在所有奇点的右边，否则积分不收敛。
 
-Gaussian 的特征函数反演更简单：\(\varphi(t)=e^{-t^2/2}\) 是整函数，反演积分可以直接配方，不需要留数定理。这也是 Gaussian 特殊的原因之一——它的特征函数和密度在同一函数族中。
-
-\subsection{Laplace 变换与生成函数的奇点}
-
-Laplace 变换 \(\hat f(s)=\int_0^\infty e^{-sx}f(x)\,dx\) 在 \(\operatorname{Re}s>a\) 时收敛，\(a\) 由 \(f\) 的增长决定。反演 Bromwich 积分
+把这条线往左推，就是上一节的封闭围道换了个方向：用一段左半平面的大圆弧把竖直线接成闭合回路，若弧上贡献趋于零，留数定理给出
 
 \[
-f(x)=\frac1{2\pi i}\int_{c-i\infty}^{c+i\infty}e^{sx}\hat f(s)\,ds,
-\qquad c>a,
+f(x)=\sum_j\operatorname{Res}\bigl(e^{sx}\hat f(s),\,s_j\bigr),
 \]
 
-沿垂直线 \(\operatorname{Re}s=c\) 积分。留数定理允许把围道向左移动，经过 \(\hat f\) 的奇点，奇点留数给出 \(f\) 的渐近项。
+求和跑遍被扫过的奇点。一阶极点 \(s_j\) 贡献 \(c_j e^{s_j x}\)，\(m\) 阶极点贡献 \(x^{m-1}e^{s_j x}\) 量级的项。有理传递函数做部分分式分解再逐项查表，做的就是这件事，只是没把留数的名字叫出来。
 
-生成函数 \(G(z)=\sum_k p_kz^k\) 在 \(|z|<R\) 内解析，\(R\) 是最近奇点的距离。奇点的位置和类型决定系数 \(p_k\) 的渐近行为：
+\begin{center}
+\begin{tikzpicture}[scale=0.9,font=\small,>=stealth]
+  \begin{scope}
+    \draw[black!30,dashed] (0,-2.2) -- (0,2.2);
+    \draw[->,black!55] (-3.7,0) -- (1.9,0) node[right,font=\footnotesize] {\(\operatorname{Re}s\)};
+    \draw[->,black!55] (0,-2.4) -- (0,2.6) node[above,font=\footnotesize] {\(\operatorname{Im}s\)};
+    \draw[red!60!black,thick] (1.25,-2.3) -- (1.25,2.3);
+    \node[font=\footnotesize,red!55!black] at (1.25,2.72) {\(\operatorname{Re}s=c\)};
+    \foreach \px/\py/\col in {-2.4/0/{blue!65!black},-0.7/1.35/{orange!80!black},-0.7/-1.35/{orange!80!black},0.5/0/{red!70!black}}{
+      \draw[\col,thick] (\px-0.13,\py-0.13) -- (\px+0.13,\py+0.13);
+      \draw[\col,thick] (\px-0.13,\py+0.13) -- (\px+0.13,\py-0.13);
+    }
+    \draw[->,black!60] (1.0,-1.95) -- (-0.6,-1.95);
+    \node[below,font=\footnotesize,black!70] at (0.2,-2.0) {围道左移，扫过奇点};
+  \end{scope}
+  \begin{scope}[shift={(6.9,1.75)}]
+    \draw[black!35] (0,0) -- (3.3,0);
+    \draw[blue!65!black,thick] plot[domain=0:3.3,samples=60] (\x,{0.6*exp(-2.2*\x)});
+    \node[right,font=\footnotesize,blue!55!black] at (3.45,0.1) {\(e^{-2.2x}\)：迅速消失};
+  \end{scope}
+  \begin{scope}[shift={(6.9,0)}]
+    \draw[black!35] (0,0) -- (3.3,0);
+    \draw[orange!80!black,thick] plot[domain=0:3.3,samples=120] (\x,{0.6*exp(-0.7*\x)*cos(4.2*\x r)});
+    \node[right,font=\footnotesize,orange!70!black] at (3.45,0.1) {\(e^{-0.7x}\cos(4.2x)\)：慢衰减的振荡};
+  \end{scope}
+  \begin{scope}[shift={(6.9,-1.75)}]
+    \draw[black!35] (0,0) -- (3.3,0);
+    \draw[red!70!black,thick] plot[domain=0:3.3,samples=60] (\x,{0.16*exp(0.55*\x)});
+    \node[right,font=\footnotesize,red!60!black] at (3.45,0.35) {\(e^{0.55x}\)：发散};
+  \end{scope}
+\end{tikzpicture}
 
-\begin{itemize}
-\tightlist
-\item
-  极点 \(z=R\) 给出指数增长 \(p_k\sim CR^{-k}\)；
-\item
-  代数奇点 \((R-z)^{-\alpha}\) 给出 \(p_k\sim Ck^{\alpha-1}R^{-k}\)；
-\item
-  对数奇点给出对数修正。
-\end{itemize}
+\emph{每个极点在时域里换来一项 \(e^{s_jx}\)：实部定衰减率，虚部定振荡频率。竖直虚线是生死线，最右那个极点站在它哪一侧，决定整个解的命运。}
+\end{center}
 
-这是分析组合学（analytic combinatorics）的核心：生成函数的奇点结构决定计数序列的渐近形状。分枝过程、随机树、组合结构的渐近计数，都依赖这种奇点分析。
+图里的规律可以一句话说完：奇点的实部给衰减率，虚部给振荡频率，而所有项当中衰得最慢的那一项——也就是实部最大、位置最靠右的那个奇点——统治了长期行为。开头那台设备的读数，就是这张图的一次具体填空。
 
-\subsection{与本书已有内容的连接}
+这个判据在别处已经出现过好几次，只是名字不同。\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/02]{``线性系统与矩阵指数''}里，\(\dot y=Ay\) 的解由 \(e^{At}\) 给出，长期行为看 \(A\) 的谱横坐标（特征值实部的最大值）；\hyperref[sec:08-Numerical-Analysis/06-ODE/03]{``稳定区域与刚性方程''}里，数值格式稳定与否看 \(\lambda h\) 落在稳定区域的哪一侧，而 \(\lambda\) 正是那些特征值。三者说的是同一件事：对常系数线性方程做 Laplace 变换，微分变成乘 \(s\)，方程变成代数式，分母恰好是特征多项式，于是 \(\hat f\) 的极点就是特征根。特征根、矩阵特征值、传递函数极点——三个词，一处位置。
 
-"特征函数"中 \(\varphi_Z(t)=e^{-t^2/2}\) 的计算用围道移动；"生成函数矩母函数与特征函数"中 MGF 的存在性对应 Laplace 变换的收敛域；\hyperref[sec:05-Probability/08-Limit-Theorems/02]{``大数定律与长期平均''}中弱收敛的 Lévy 连续性定理，其证明也用 Fourier 方法。
+沿这条线还能读出刚性的来源。刚性方程的特征值实部相差几个数量级，翻译成极点，就是有的极点远在左边（对应飞快衰掉的分量），有的贴着虚轴（对应慢慢演化的分量）。显式格式的步长被最左边那个极点卡住，而人们真正关心的是最右边那个。刻度差得越远，格式越难做。
 
-留数定理和围道移动是这些结果的共同技术基础。它们不是概率论的装饰，而是把"变换--计算--反演"闭环变成可执行操作的工具。
+\subsection{生成函数的奇点决定计数序列的形状}
 
-\subsection{落点}
+同一条原理在离散侧也成立。生成函数 \(G(z)=\sum_k p_kz^k\) 在 \(\abs z<R\) 内解析，\(R\) 是最近奇点到原点的距离，于是 \(p_k\) 的指数增长率立刻是 \(R^{-k}\)——这只是幂级数收敛半径的另一种说法。更细的形状由奇点的类型决定：一阶极点给出干净的 \(p_k\sim CR^{-k}\)；代数奇点 \((1-z/R)^{-\alpha}\) 在指数因子上乘一个多项式修正 \(k^{\alpha-1}\)；对数奇点带来 \(1/\log k\) 一类的慢因子。取出这些修正的标准手法是把求和圈用 Hankel 型围道贴着奇点绕过去，那是留数定理在一类退化情形下的推广。
 
-特征函数反演和 Laplace 变换把复分析从"积分技巧"变成概率论的计算工具。反演公式的合法性、奇点决定渐近、以及围道移动的技术，共同支撑了变换方法在概率论中的有效性。至此，Part 08 的 Fourier 与谱方法有了复分析的完整地基：实轴上的计算只是投影，复平面上的结构才是核心。
+分析组合学整门学科就架在这上面：分枝过程的灭绝概率、随机树的高度分布、组合结构的渐近计数，都先找生成函数的主奇点，再读它的类型。与 Laplace 那一侧的区别只是坐标——那边看``最右''，这边看``最近''，做的是同一个动作。
+
+\subsection{知道位置，不等于算得出数值}
+
+奇点分析给的是渐近形状，不是任意精度的数值。Bromwich 积分在数值上出了名地难：被积函数含 \(e^{sx}\)，沿竖直线积分时振荡剧烈，直接上求积公式会被抵消吃掉有效位——那正是\hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/02]{``误差如何产生与放大''}里的老问题。可用的数值反演方法（Talbot 围道、Weeks 展开、Euler 加速）几乎都在做同一件事：把积分路径变形成一条能让 \(e^{sx}\) 衰减的曲线，让被积函数在路径上迅速趋零，从而少取几个点就够。路径变形之所以合法，仍然是 Cauchy 定理。
+
+概率论那一侧的限度是另一种。特征函数唯一确定分布，Lévy 连续性定理还保证特征函数逐点收敛蕴含分布弱收敛——\hyperref[sec:05-Probability/08-Limit-Theorems/04]{``特征函数怎样证明中心极限定理''}整篇建立在这上面。但从 \(\varphi\) 逼近到密度逼近的这一步会掉精度：\(\varphi\) 上的小扰动可以让反演出的密度面目全非，因为反演是一次除法式的放大。可用的是分布层面的结论，不可用的是逐点密度的数值。
+
+整个单元只用了一个动作：把积分路径在复平面上挪动。挪而不碰奇点，得到系数的指数衰减；挪到把奇点圈住，得到实积分的闭式；挪到扫过奇点，得到解的渐近展开。实轴上看到的衰减速度、振荡频率、稳定与否，都是同一批奇点在不同投影下的影子。往下的路分两条：\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/04]{``谱方法：用光滑性换高精度''}是把这套判断用在数值格式的选型上，而 Part 15 的动力系统会把``最右奇点''换成非线性场景下的不变流形与 Lyapunov 指数——那时线性叠加不再成立，位置也不再由几个孤立的点写完。

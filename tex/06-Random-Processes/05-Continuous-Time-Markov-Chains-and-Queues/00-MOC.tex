@@ -1,45 +1,63 @@
-离散时间 Markov 链每一步都在统一时钟上更新。连续时间系统则在随机时刻跳变：设备随时可能故障或修复，顾客随时到达或离开。
+离散时间 Markov 链把时间切成整齐的格子：第 1 步、第 2 步、第 3 步，每格更新一次。现实里的事件不按格子来。请求在任意一个毫秒到达，磁盘在任意一个瞬间坏掉，用户在任意一个时刻关掉页面。
 
-连续时间 Markov 链（CTMC）把两类随机性结合：
+硬把这类系统塞进离散时钟，你得先挑一个步长，而两头都不好挑。步长大了，同一格里发生两件事会被记成一件；步长小了，绝大多数格子什么都没发生，算力全耗在空转上。更麻烦的是最后那个数字会随步长漂移——本该由系统决定的量，变成了由建模习惯决定的量。
 
-\begin{itemize}
-\tightlist
-\item
-  当前状态会停留多久；
-\item
-  离开后跳到哪个状态。
-\end{itemize}
+这一章换掉时钟。状态仍然离散（正常与故障，队列里 0 个人、1 个人、2 个人），时间放开成连续的实轴。模型于是要回答两件事而不是一件：跳到哪，以及什么时候跳。
 
-\begin{enumerate}
-\tightlist
-\item
-  连续时间 Markov 链与生成矩阵：从 Exponential 驻留时间和跳链构造过程。
-\item
-  Kolmogorov 方程与矩阵指数：局部速率怎样生成有限时间转移概率。
-\item
-  连续时间平稳分布与流量平衡：用 $\pi Q=0$ 和局部流量理解长期占比。
-\item
-  排队系统与 M/M/1 模型：把 Poisson 到达和 Exponential 服务组合成生灭链，并解释负载接近一时延为何爆炸。
-\end{enumerate}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
+  \draw[->,black!55] (-0.2,0) -- (5.3,0) node[right,font=\footnotesize] {\(n\)};
+  \draw[->,black!55] (-0.2,0) -- (-0.2,2.7) node[above,font=\footnotesize] {状态};
+  \foreach \x in {0,0.7,1.4,2.1,2.8,3.5,4.2,4.9}
+    \draw[black!18] (\x,0) -- (\x,2.5);
+  \draw[blue!70,thick] (0,0.6) -- (0.7,0.6) -- (0.7,1.5) -- (1.4,1.5) -- (1.4,1.5)
+    -- (2.1,1.5) -- (2.1,0.6) -- (2.8,0.6) -- (2.8,2.3) -- (3.5,2.3) -- (3.5,1.5)
+    -- (4.2,1.5) -- (4.2,1.5) -- (4.9,1.5);
+  \foreach \p in {(0,0.6),(0.7,1.5),(1.4,1.5),(2.1,0.6),(2.8,2.3),(3.5,1.5),(4.2,1.5),(4.9,1.5)}
+    \fill[blue!80] \p circle (1.8pt);
+  \node[font=\footnotesize,align=center,black!75] at (2.4,-0.75) {离散时间：\\只在整点更新，节拍由你规定};
+  \draw[black!25] (5.9,-1.2) -- (5.9,2.9);
+  \begin{scope}[shift={(6.6,0)}]
+    \draw[->,black!55] (-0.2,0) -- (5.3,0) node[right,font=\footnotesize] {\(t\)};
+    \draw[->,black!55] (-0.2,0) -- (-0.2,2.7) node[above,font=\footnotesize] {状态};
+    \draw[blue!70,thick] (0,0.6) -- (0.95,0.6);
+    \draw[blue!70,thick,dashed] (0.95,0.6) -- (0.95,1.5);
+    \draw[blue!70,thick] (0.95,1.5) -- (1.55,1.5);
+    \draw[blue!70,thick,dashed] (1.55,1.5) -- (1.55,0.6);
+    \draw[blue!70,thick] (1.55,0.6) -- (3.05,0.6);
+    \draw[blue!70,thick,dashed] (3.05,0.6) -- (3.05,2.3);
+    \draw[blue!70,thick] (3.05,2.3) -- (3.65,2.3);
+    \draw[blue!70,thick,dashed] (3.65,2.3) -- (3.65,1.5);
+    \draw[blue!70,thick] (3.65,1.5) -- (4.9,1.5);
+    \foreach \p in {(0.95,0.6),(1.55,1.5),(3.05,0.6),(3.65,2.3)}
+      \fill[blue!80] \p circle (1.8pt);
+    \draw[<->,black!65] (1.6,0.32) -- (3.0,0.32);
+    \node[font=\footnotesize,black!75] at (2.3,0.05) {\(\Exp(q_i)\)};
+    \node[font=\footnotesize,align=center,black!75] at (2.4,-0.75) {连续时间：\\跳变时刻本身是随机变量};
+  \end{scope}
+\end{tikzpicture}
 
-连续时间不再有离散链那种纯粹的周期振荡问题，因为随机 Exponential 驻留打散了统一节拍；但稳定性、正常返和非爆炸性仍必须检查。
+\emph{同一段历史的两种记法。左图每格必须表态，哪怕什么也没发生；右图只在真正发生跳变时记一笔，代价是要为``停留多久''单独建模，而这段停留时间只能是指数分布。}
+\end{center}
 
-例如，一个两状态故障---修复模型：正常状态平均持续 $1/\lambda$ 小时，故障状态平均持续 $1/\mu$ 小时。若 $\lambda=1$、$\mu=4$，则每次故障平均持续 15 分钟。跳链每次必在两状态间交替，跳链平稳分布是 $(1/2,1/2)$。但 CTMC 的时间平稳分布是 $(\mu/(\lambda+\mu),\;\lambda/(\lambda+\mu))=(0.8,\;0.2)$——系统 80\% 的时间正常，因为正常状态的驻留远超故障状态。忽略驻留时间差异，只用跳链统计量，会严重高估故障占比。
+第一件要立住的事是记账工具的替换。离散链走 \(n\) 步靠矩阵幂 \(P^{n}\)；连续时间里没有``一步''可走，接手的是生成矩阵 \(Q\)——它记录的是速率而非概率，量纲为每单位时间，每行之和为零。从 \(Q\) 走到任意有限时间的转移矩阵，中间那一步由矩阵指数完成，\(P(t)=e^{tQ}\)。这和线性系统 \(x'=Ax\) 的解 \(e^{tA}x_0\) 是同一套数学，只是被演化的对象换成了概率行向量。
 
-\subsection{怎么读这一章}
+第二件事在上图右侧已经埋好：连续时间里要求 Markov 性，停留时间就只能服从指数分布。Markov 性说未来与``已经待了多久''无关，这句话正是无记忆性的定义，而连续分布里只有指数族满足它。这既是模型的便利，也是它最容易失真的地方——会老化的设备不满足这一条。
 
-先记住一条主线：生成矩阵 $Q$ 描述瞬时速率，矩阵指数 $e^{tQ}$ 描述有限时间转移，$\pi Q=0$ 描述平稳流量，而能否把形式解规范化决定无限状态系统是否稳定。
+第三件事是长期行为。平稳分布由 \(\pi Q=0\) 决定，但更好用的读法是一句白话：每个状态的流入速率等于流出速率。写成流量平衡之后，生灭过程的平稳分布几乎是顺手推出来的，无需真的解线性方程组。
 
-若要实际计算，再读前向方程、uniformization、生灭递推与 Little 定律；若要分析真实服务系统，则还必须检查非爆炸性、到达与服务假设、系统边界和尾延迟。矩阵指数推导可以在需要瞬态概率时细读，不能只关心长期均值时也可先略过。
+第四件事把前三件用到排队上。Little 定律 \(L=\lambda W\) 用平均并发反推平均延迟，它几乎不依赖任何分布假设，只要系统稳定就成立——这是它在实践中好用的原因。而 M/M/1 给出的判断更尖锐：平均队长 \(L=\rho/(1-\rho)\) 在利用率 \(\rho\to 1\) 时竖直爆炸。容量规划因此不能按平均负载来做，把利用率从 \(80\%\) 提到 \(90\%\) 换来的不是一成的代价。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/01]{``连续时间 Markov 链与生成矩阵''}；
-\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/02]{``Kolmogorov 方程与矩阵指数''}；
-\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/03]{``连续时间平稳分布与流量平衡''}；
-\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/04]{``排队系统与 M/M/1 模型''}。
+\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/01]{``连续时间 Markov 链与生成矩阵''} 用速率替换一步概率，并说明停留时间为什么绕不开指数分布；
+\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/02]{``Kolmogorov 方程与矩阵指数''} 把瞬时速率累积成有限时间的转移矩阵，前进与后退方程是同一件事的两个读法；
+\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/03]{``连续时间平稳分布与流量平衡''} 把 \(\pi Q=0\) 翻译成流入等于流出，并交出生灭过程的递推；
+\item \hyperref[sec:06-Random-Processes/05-Continuous-Time-Markov-Chains-and-Queues/04]{``排队系统与 M/M/1 模型''} 给出 Little 定律与利用率爆炸曲线，这是本章对工程判断影响最直接的一篇。
 \end{itemize}
+
+四篇都是主线。如果你是带着一个具体的容量问题进来的，直接从最后一篇读起也可以，需要生灭过程的递推时再回到第三篇。
+
+读完本章，状态仍然是可数的，跳变仍然是离散的事件。接下来的\hyperref[ch:051]{``扩散与随机微分方程：路径不可微时怎样写微分方程''}拿掉最后这条限制：状态本身连续变化，轨道处处不可微，微分方程要重新定义。

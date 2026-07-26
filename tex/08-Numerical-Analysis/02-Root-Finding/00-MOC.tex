@@ -1,28 +1,44 @@
-求 \(f(x)=0\) 时，我们只能查询函数值，有时还能得到导数。取 \(f(x)=x^3-2x-5\)，它的唯一实根在 2 和 3 之间。二分法每次折半区间，约 10 步多 3 位十进制精度，不问 \(f\) 长什么样。Newton 法从 \(x_0=2\) 出发，第一步就到 \(x_1\approx2.1\)，第二步 \(x_2\approx2.0946\)，两步就拿到二分法需要 15 步的精度——前提是初值足够近。
+方程 \(f(x)=0\) 一旦超出二次三次的范围，通常就没有求根公式可用。剩下的办法只有一条：反复查询函数，一步步把根围住。本章的共同困难是，你手里的``查询''能力各不相同——有时只能拿到函数值的正负号，有时能拿到函数值本身，有时连导数也能算出来。信息的多少决定了能买到多快的收敛，也决定了失手时会摔多重。
 
-二分法用一个含根区间担保收敛；Newton 法用局部导数换取二次速度；割线法则用历史函数值近似导数。每种方法维护不同的证据，进入快收敛区的条件不同，停止条件能证明的事也不同。
+拿 \(f(x)=x^3-2x-5\) 做尺子。它的唯一实根在 \(2\) 与 \(3\) 之间。二分法每步把区间对折，约十步换三位十进制精度，全程不问 \(f\) 长什么样。Newton 法从 \(x_0=2\) 出发，一步到 \(2.1\)，两步到 \(2.0946\)，二分法要跑十五步的精度它两步就拿到——前提是初值已经足够近。
 
-\begin{enumerate}
-\tightlist
-\item
-  括区与二分法
-\item
-  不动点与 Newton 法
-\item
-  割线法、收敛阶与混合策略
-\end{enumerate}
+\begin{center}
+\begin{tikzpicture}[x=3.0cm,y=2.2cm,font=\small,>=stealth]
+  \draw[->,black!55] (0.5,0.85) -- (3.55,0.85) node[right,font=\footnotesize] {每步索取的信息};
+  \draw[->,black!55] (0.5,0.85) -- (0.5,2.35) node[above,font=\footnotesize] {收敛阶};
+  \draw[black!18,dashed] (0.5,1) -- (3.35,1);
+  \draw[black!18,dashed] (0.5,1.618) -- (3.35,1.618);
+  \draw[black!18,dashed] (0.5,2) -- (3.35,2);
+  \node[left,font=\footnotesize] at (0.47,1) {\(1\)};
+  \node[left,font=\footnotesize] at (0.47,1.618) {\(1.618\)};
+  \node[left,font=\footnotesize] at (0.47,2) {\(2\)};
+  \fill[blue!70] (1,1) circle (1.7pt);
+  \fill[black!70] (2,1.618) circle (1.7pt);
+  \fill[red!70] (3,2) circle (1.7pt);
+  \node[above,font=\footnotesize,blue!70] at (1,1.04) {二分法};
+  \node[above,font=\footnotesize,black!70] at (2,1.658) {割线法};
+  \node[above,font=\footnotesize,red!70] at (3,2.04) {Newton 法};
+  \node[below,font=\footnotesize,align=center] at (1,0.8) {只用\\符号};
+  \node[below,font=\footnotesize,align=center] at (2,0.8) {两个\\函数值};
+  \node[below,font=\footnotesize,align=center] at (3,0.8) {函数值\\与导数};
+  \node[right,font=\footnotesize,black!55,align=left] at (1.12,1.22) {自带含根区间：\\最坏情况可控};
+  \node[left,font=\footnotesize,black!55,align=right] at (3.28,1.42) {不维护任何不变量：\\可能发散};
+\end{tikzpicture}
 
-三种方法可以看成三种姿态。二分法始终保存"根还在这个区间里"这一事实；Newton 法相信当前切线在附近足够像原函数；割线法用两个旧函数值猜斜率。方法快不快，要连它放弃了什么安全网一起看。
+\emph{纵轴越高越快，横轴越靠右要求越多。三种方法沿一条向上的对角线排开，看起来是花钱买速度；但图上还有第二个维度没画出来——失手的代价。左端那一点带着一张含根证书，右端那一点什么也不带。}
+\end{center}
 
-前一单元：\hyperref[ch:061]{``浮点数与误差：计算机为什么不等于实数系统''}。
+所以三种方法真正的分野不在速度表上，而在各自维护的证据里。二分法始终保存``根仍在这个区间内''这一事实，代价是每步只用符号；Newton 法相信当前切线在附近足够像原函数，一旦这个信任错付就没有兜底；割线法用两个旧函数值猜斜率，成本最低，安全性和 Newton 法一样脆。方法快不快，要连它放弃了什么安全网一起看。
+
+前一单元讲清了误差从哪里来：\hyperref[ch:061]{``浮点数与误差：计算机为什么不等于实数系统''}。本章默认你已经熟悉相消与条件数这两件事。
 
 \subsection{本章篇目}
 
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
 \begin{itemize}
 \tightlist
-\item \hyperref[sec:08-Numerical-Analysis/02-Root-Finding/01]{``括区与二分法''}；
-\item \hyperref[sec:08-Numerical-Analysis/02-Root-Finding/02]{``不动点与 Newton 法''}；
-\item \hyperref[sec:08-Numerical-Analysis/02-Root-Finding/03]{``割线法、收敛阶与混合策略''}。
+\item \hyperref[sec:08-Numerical-Analysis/02-Root-Finding/01]{``括区与二分法''}——一次变号就是一张含根证书，误差界在第一次调用之前就能算出；
+\item \hyperref[sec:08-Numerical-Analysis/02-Root-Finding/02]{``不动点与 Newton 法''}——所有迭代算法的收敛都由同一个判据 \(\abs{g'}<1\) 管辖，Newton 法把它压到零，换来二次收敛与随之而来的脆弱；
+\item \hyperref[sec:08-Numerical-Analysis/02-Root-Finding/03]{``割线法、收敛阶与混合策略''}——不用导数也能超线性，以及收敛阶这把尺子量不到的地方。
 \end{itemize}
+
+三篇按依赖顺序排列，但若你此刻正被一个具体的求根故障困住，可以直接从症状最像的那篇进入，再沿篇内链接回补。

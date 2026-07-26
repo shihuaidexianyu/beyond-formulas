@@ -1,78 +1,146 @@
 \section{留数定理计算实积分}
 \label{sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/02}
 
-许多实积分没有初等原函数，或原函数极其复杂。留数定理提供了一条绕过原函数的路径：把实积分变成复平面上的围道积分，答案由围道内奇点的留数决定。
-
-\subsection{奇点与留数}
-
-解析函数 \(f\) 在孤立奇点 \(z_0\) 附近的 Laurent 展开为
+拟合一条 Lorentzian 谱线，或者算 Cauchy 分布的特征函数，都会撞上同一个积分：
 
 \[
-f(z)=\sum_{n=-\infty}^{\infty}a_n(z-z_0)^n,
+I(a)=\int_{-\infty}^{\infty}\frac{\cos(ax)}{1+x^2}\,dx,\qquad a>0 .
 \]
 
-其中 \(a_{-1}\) 称为 \(f\) 在 \(z_0\) 的留数，记为 \(\operatorname{Res}(f,z_0)\)。
+被积函数干净得不能再干净——分母是二次多项式，分子是余弦，处处光滑，衰减得也够快。可它没有初等原函数。分部积分把 \(\cos\) 和 \(\sin\) 换来换去绕回原地；把 \(1/(1+x^2)\) 展成级数，收敛半径只有 \(1\)，管不了整条实轴。查表能查到答案是 \(\pi e^{-a}\)，可表是谁算出来的？
 
-奇点分三类：
+答案是：没有人在实轴上算出它。上一节把积分路径从实轴挪开，条带里没有奇点，挪动不花钱。这一节把路径挪得更远——远到它绕住了奇点。绕住之后要付的钱，正好等于我们想要的那个积分。
 
-\begin{itemize}
-\tightlist
-\item
-  \textbf{可去奇点}：\(a_{-1}=0\)，极限存在（如 \(\sin z/z\) 在 \(z=0\)）；
-\item
-  \textbf{极点}：有限个负幂项（如 \(1/(z-z_0)^m\)），留数由 Laurent 系数或极限公式给出；
-\item
-  \textbf{本性奇点}：无穷多负幂项，行为任意（Picard 定理）。
-\end{itemize}
+\subsection{留数是绕一圈之后唯一活下来的系数}
 
-一阶极点 \(z_0\) 的留数有快捷公式：若 \(f(z)=g(z)/(z-z_0)\) 且 \(g\) 解析，则 \(\operatorname{Res}(f,z_0)=g(z_0)\)；若 \(f=g/h\) 且 \(h\) 在 \(z_0\) 有一阶零点，则 \(\operatorname{Res}(f,z_0)=g(z_0)/h'(z_0)\)。
-
-\subsection{留数定理}
-
-设 \(\gamma\) 是正向（逆时针）简单闭曲线，\(f\) 在 \(\gamma\) 内除有限个奇点 \(z_1,\ldots,z_k\) 外解析，在 \(\gamma\) 上连续。则
+解析函数 \(f\) 在孤立奇点 \(z_0\) 的去心邻域内有 Laurent 展开
 
 \[
-\oint_\gamma f(z)\,dz=2\pi i\sum_{j=1}^k\operatorname{Res}(f,z_j).
+f(z)=\sum_{n=-\infty}^{\infty}a_n(z-z_0)^n .
 \]
 
-这是 Cauchy 积分定理的推广：无奇点时积分为零，有奇点时每个奇点贡献 \(2\pi i\) 乘留数。证明思路是把每个奇点用小圆挖掉，多连通区域上应用 Cauchy 定理，小圆上的积分在半径趋于零时给出留数。
+沿一个绕 \(z_0\) 一圈的小圆逐项积分，会发现一件事：所有的 \(n\ne -1\) 项积分都是零，因为 \((z-z_0)^n\) 在 \(n\ne-1\) 时有单值原函数 \((z-z_0)^{n+1}/(n+1)\)，绕闭路一圈回到起点，原函数取值不变。只有 \(n=-1\) 例外——\(1/(z-z_0)\) 的原函数是对数，绕一圈后辐角增加 \(2\pi\)，留下 \(2\pi i\)。
 
-留数定理把"计算积分"变成"找奇点、算留数"——后者比求原函数简单得多。
+于是整条 Laurent 级数被压成一个数：\(a_{-1}\)，称为 \(f\) 在 \(z_0\) 的留数，记 \(\operatorname{Res}(f,z_0)\)。奇点是可去的（无负幂项）、极点（有限个负幂项）还是本性的（无穷多负幂项），影响的是这个系数好不好算，不影响它是不是唯一活下来的那个。
 
-\subsection{实积分的围道方法}
-
-计算 \(\int_{-\infty}^{\infty}f(x)\,dx\) 的标准策略是：取上半平面的大半圆围道（实轴上从 \(-R\) 到 \(R\)，再沿半圆 \(|z|=R\) 回到 \(-R\)），令 \(R\to\infty\)。若 \(f\) 在上半平面的极点有限，且大半圆弧上的积分趋于零，则实积分等于 \(2\pi i\) 乘上半平面极点留数之和。
-
-例子：计算
+一阶极点的算法最省事。若 \(f=g/h\)，\(g\) 与 \(h\) 都在 \(z_0\) 解析，\(g(z_0)\ne0\) 而 \(h\) 在 \(z_0\) 有一阶零点，则
 
 \[
-I=\int_{-\infty}^{\infty}\frac{dx}{1+x^2}.
+\operatorname{Res}(f,z_0)=\frac{g(z_0)}{h'(z_0)} .
 \]
 
-\(f(z)=1/(1+z^2)\) 在 \(z=i\) 有一阶极点（上半平面），留数为
+\(m\) 阶极点要先乘上 \((z-z_0)^m\) 再求 \(m-1\) 阶导数，算起来烦，但仍然是有限步的代数。
+
+\begin{theorem}
+设 \(\gamma\) 是正向简单闭曲线，\(f\) 在 \(\gamma\) 及其内部除有限个孤立奇点 \(z_1,\dots,z_k\) 外解析。则
+\[
+\oint_\gamma f(z)\,dz=2\pi i\sum_{j=1}^{k}\operatorname{Res}(f,z_j).
+\]
+\end{theorem}
+
+证明骨架：把每个奇点用一个小圆挖掉，剩下的多连通区域内 \(f\) 处处解析，Cauchy 定理给出外围道积分等于各小圆积分之和；每个小圆上代入 Laurent 展开，按上面那段逐项积分，得到 \(2\pi i\,a_{-1}\)。条件对账：奇点必须孤立且个数有限（否则挖不完），\(f\) 在 \(\gamma\) 上要连续，\(\gamma\) 内部要单连通（否则``内部''无定义）。
+
+这条定理把``求原函数''换成了``找奇点、算留数''。后者是代数，前者是运气。
+
+\subsection{把 \(\cos\) 换成 \(e^{iaz}\)，然后往上半平面走}
+
+回到 \(I(a)\)。考虑 \(f(z)=\dfrac{1}{1+z^2}\)，它在 \(z=\pm i\) 有一阶极点。
+
+第一个决定：不要把 \(\cos(az)\) 直接搬进复平面。\(\cos\) 在实轴上有界，离开实轴却指数爆炸——\(\abs{\cos(iy)}=\cosh y\to\infty\)，无论往上走还是往下走。带着它去封闭围道，大圆弧上的贡献不会消失。改用
 
 \[
-\operatorname{Res}(f,i)=\frac{1}{2i}.
+\int_{-\infty}^{\infty}\frac{e^{iax}}{1+x^2}\,dx ,
 \]
 
-大半圆弧上的积分按 \(O(1/R^2)\cdot\pi R=O(1/R)\) 趋于零。因此
+最后取实部。这不是记号游戏：\(\abs{e^{iaz}}=e^{-a\operatorname{Im}z}\)，它在上半平面衰减、在下半平面增长，是一个有方向的因子，而 \(\cos\) 把两个方向搅在了一起。
+
+第二个决定：既然 \(a>0\) 时 \(e^{iaz}\) 在上半平面衰减，围道就往上半平面封。取实轴上从 \(-R\) 到 \(R\) 的线段，接上半径 \(R\) 的上半圆弧回到 \(-R\)。
+
+\begin{center}
+\begin{tikzpicture}[scale=0.95,font=\small,>=stealth]
+  \fill[blue!8] (-2.6,0) -- (2.6,0) arc (0:180:2.6) -- cycle;
+  \draw[->,black!55] (-3.3,0) -- (3.5,0) node[right,font=\footnotesize] {\(\operatorname{Re}z\)};
+  \draw[->,black!55] (0,-1.45) -- (0,3.15) node[above,font=\footnotesize] {\(\operatorname{Im}z\)};
+  \draw[very thick,red!65!black] (-2.6,0) -- (2.6,0);
+  \draw[very thick,red!65!black] (2.6,0) arc (0:180:2.6);
+  \draw[->,very thick,red!65!black] (-0.35,0) -- (0.35,0);
+  \draw[->,very thick,red!65!black] (0.35,2.6) -- (-0.35,2.6);
+  \draw[black!70,thick] (-0.13,0.87) -- (0.13,1.13);
+  \draw[black!70,thick] (-0.13,1.13) -- (0.13,0.87);
+  \draw[black!70,thick] (-0.13,-1.13) -- (0.13,-0.87);
+  \draw[black!70,thick] (-0.13,-0.87) -- (0.13,-1.13);
+  \node[right,font=\footnotesize] at (0.22,1.0) {\(z=i\)（围道内）};
+  \node[right,font=\footnotesize] at (0.22,-1.0) {\(z=-i\)（围道外）};
+  \node[font=\footnotesize,black!70] at (-1.75,2.05) {\(\abs{e^{iaz}}=e^{-a\operatorname{Im}z}\)};
+  \node[font=\footnotesize,black!70] at (-1.75,1.62) {在这里往上指数变小};
+  \node[right,font=\footnotesize,red!55!black] at (2.05,2.05) {\(\gamma_R\)};
+  \draw[black!45] (2.6,0.08) -- (2.6,-0.28);
+  \node[below,font=\footnotesize,black!70] at (2.6,-0.26) {\(R\)};
+  \node[font=\footnotesize,black!70] at (0,-1.85) {下半平面 \(e^{iaz}\) 指数增长，不能往这边封};
+\end{tikzpicture}
+
+\emph{围道不是随便画的：\(e^{iaz}\) 在哪半平面衰减，围道就往哪半平面封。上半平面里只圈住了 \(z=i\) 这一个极点，整个积分就退化成它一个留数。}
+\end{center}
+
+第三个决定是把大圆弧上的贡献扔掉，这一步需要 Jordan 引理。
+
+\begin{lemma}
+设 \(f\) 在上半平面 \(\abs{z}\ge R_0\) 处解析，且 \(M_R=\max_{0\le\theta\le\pi}\abs{f(Re^{i\theta})}\to0\)。则对任意 \(a>0\)，
+\[
+\int_{\gamma_R}f(z)e^{iaz}\,dz\longrightarrow 0\quad(R\to\infty),
+\]
+其中 \(\gamma_R\) 是上半圆弧。
+\end{lemma}
+
+证明骨架：在弧上 \(z=Re^{i\theta}\)，\(\abs{e^{iaz}}=e^{-aR\sin\theta}\)，弧长元 \(\abs{dz}=R\,d\theta\)，于是
 
 \[
-I=2\pi i\cdot\frac{1}{2i}=\pi,
+\begin{aligned}
+\left|\int_{\gamma_R}f e^{iaz}\,dz\right|
+&\le M_R\,R\int_0^{\pi}e^{-aR\sin\theta}\,d\theta
+=2M_R\,R\int_0^{\pi/2}e^{-aR\sin\theta}\,d\theta\\
+&\le 2M_R\,R\int_0^{\pi/2}e^{-2aR\theta/\pi}\,d\theta
+\le \frac{\pi M_R}{a},
+\end{aligned}
 \]
 
-与初等结果一致。这个方法的价值在于它不需要知道 \(\arctan\) 是原函数，也不限于有理函数。
+其中用了 \(\sin\theta\ge 2\theta/\pi\)（\(0\le\theta\le\pi/2\)）。
 
-更复杂的例子：\(\int_{-\infty}^{\infty}e^{-x^2}\cos(bx)\,dx\) 可以通过把 \(e^{-z^2}\) 的围道移动为平行于实轴的矩形，利用 \(e^{-z^2}\) 在条带内的衰减，得到 \(\sqrt\pi e^{-b^2/4}\)。这是 Gaussian 的 Fourier 变换仍是 Gaussian 的严格证明，也是"特征函数"中 \(\varphi_Z(t)=e^{-t^2/2}\) 的来源。
+这个界值得看一眼：右端没有 \(R\)。若不带 \(e^{iaz}\)，只能用长度乘上界的粗估 \(\pi R\,M_R\)，要它趋零就得 \(M_R=o(1/R)\)——\(1/(1+z^2)\) 满足，但 \(1/(1+z)\) 就不满足了。指数因子把长度因子 \(\pi R\) 整个吃掉，代价是要求 \(a>0\) 且必须封在上半平面。这就是 Jordan 引理的全部内容：它不是一个技术性补丁，它是``为什么可以只数几个留数''的理由。
 
-Jordan 引理处理含 \(e^{iaz}\) 的积分：若 \(f(z)\to0\) 在上半平面一致（当 \(|z|\to\infty\)），则 \(\int_{\gamma_R}f(z)e^{iaz}\,dz\to0\) 对 \(a>0\) 成立，其中 \(\gamma_R\) 是上半圆。这允许计算 \(\int_{-\infty}^{\infty}f(x)e^{iax}\,dx\)，是 Fourier 变换计算的主力工具。
+三个决定齐了，剩下的是算术。围道内只有 \(z=i\)，
 
-\subsection{留数定理的边界}
+\[
+\operatorname{Res}\!\left(\frac{e^{iaz}}{1+z^2},\,i\right)=\left.\frac{e^{iaz}}{2z}\right|_{z=i}=\frac{e^{-a}}{2i},
+\]
 
-留数定理要求围道内的奇点是孤立的。支割（如 \(\sqrt z\)、\(\log z\) 的多值性）需要修改围道，沿支割两侧绕行。本性奇点虽然 Laurent 展开含有无穷多个负幂项，仍然有 \((z-z_0)^{-1}\) 项的系数。因此只要它是孤立奇点，照样可以用留数定理；困难在于留数未必容易算。
+于是
 
-围道方法也不总是最快：有些实积分用参数微分（Feynman 技巧）、级数展开或特殊函数更快。留数定理的优势在于通用性——它把一大类积分统一为代数计算，而不需要为每个积分发明新技巧。
+\[
+\int_{-\infty}^{\infty}\frac{e^{iax}}{1+x^2}\,dx=2\pi i\cdot\frac{e^{-a}}{2i}=\pi e^{-a},
+\qquad I(a)=\pi e^{-a}.
+\]
 
-\subsection{与本书已有内容的连接}
+结果对 \(a<0\) 要往下半平面封（那时 \(e^{iaz}\) 在下面衰减），围道取负向，圈住 \(-i\)，得到 \(\pi e^{a}\)。合起来 \(I(a)=\pi e^{-\abs{a}}\)。那个绝对值不是凑出来的，它记录的是``往哪半平面封''这个二选一。
 
-\hyperref[sec:08-Numerical-Analysis/08-Fourier-and-Spectral-Methods/01]{``从 Fourier 级数到连续变换''}中 Gaussian 的 Fourier 变换仍是 Gaussian，可以用围道移动证明；\hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/01]{``解析延拓与 Fourier 衰减''}中把积分路径移入条带，合法性由 Cauchy 定理和 Jordan 引理保证；"特征函数"中 \(\varphi_Z(t)=e^{-t^2/2}\) 的计算，是留数定理在概率论中的直接应用。
+把等式两边除以 \(\pi\)，左边是 Cauchy 密度 \(1/(\pi(1+x^2))\) 的 Fourier 积分，右边是 \(e^{-\abs a}\)。Cauchy 分布特征函数在原点的那个尖角，来源就是刚才那次半平面的切换。下一节还会遇到它。
+
+\subsection{围道是设计出来的}
+
+半圆不是唯一的形状。要什么形状，由被积函数在哪里衰减、奇点在哪里排列共同决定。
+
+Gaussian 用矩形。算 \(\int_{-\infty}^{\infty}e^{-x^2}e^{ibx}\,dx\) 时先配方，\(e^{-x^2+ibx}=e^{-b^2/4}e^{-(x-ib/2)^2}\)，剩下的积分是把 \(e^{-z^2}\) 沿水平线 \(\operatorname{Im}z=b/2\) 积。取以实轴和这条线为上下边的长矩形：\(e^{-z^2}\) 是整函数，矩形内无奇点，环路积分为零；两条竖直边上 \(\abs{e^{-z^2}}\sim e^{-R^2}\) 迅速消失。于是水平线上的积分等于实轴上的，答案 \(\sqrt\pi\,e^{-b^2/4}\)。Gaussian 的 Fourier 变换仍是 Gaussian，证明就是这么一次路径平移，与上一节移动 Fourier 系数积分路径是同一个动作。
+
+极点正好落在实轴上时，围道要绕。\(\int_0^\infty \sin x/x\,dx\) 是标准例子：用 \(e^{iz}/z\)，原点处的极点用一个半径 \(\varepsilon\) 的小半圆绕开，小半圆贡献 \(-i\pi\operatorname{Res}\)——绕半圈拿半个留数，符号由绕行方向定。这类算法给出的是主值积分，不是通常意义的收敛积分，用之前要确认问题本身接受主值解释。
+
+多值函数要沿支割走。\(\sqrt z\)、\(\log z\)、\(z^{\alpha}\) 在绕原点一圈后取值改变，围道必须避开支割线，通常沿割线两侧一来一回，两侧的值差正好制造出想要的因子。锁孔围道就是这么来的。
+
+\subsection{留数不是万能钥匙}
+
+有几类情形要提前认出来。
+
+被积函数在无穷远处衰减不够快时，任何围道封闭都会失败——比如 \(\int_{-\infty}^{\infty}\frac{x}{1+x^2}dx\) 本身就不收敛（只有主值），围道方法只能给主值。本性奇点处留数依然存在（Laurent 展开照样有 \(a_{-1}\)），定理照样成立，麻烦在于那个系数常常只能靠展开硬算。奇点无穷多且有聚点时，``挖掉每个奇点''这一步做不下去，定理直接失效。
+
+还有一类是能用但不划算。参数微分（Feynman 技巧）、级数交换求和、对称性配对，在很多具体积分上比设计围道快得多。留数方法的价值不在每道题上最快，而在于它把一大类积分统一成了同一套操作：找奇点、判半平面、验衰减、算留数。不需要为每个积分发明新技巧，这件事在自动化和符号计算里的分量比在手算里更重。
+
+\hyperref[sec:08-Numerical-Analysis/09-Complex-Analysis-and-Residues/01]{``解析延拓与 Fourier 衰减''}挪动路径是为了估计，本节封闭路径是为了求值，两者用的是同一条 Cauchy 定理，区别只在于路径有没有把奇点圈进去。下一节把这套操作交给概率论：那里的积分叫反演公式，那里的奇点位置直接写着随机过程和线性系统的长期命运。
