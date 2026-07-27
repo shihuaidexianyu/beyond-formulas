@@ -5,7 +5,7 @@
 
 排序变了，说明这个判据在你的数据量下还没有稳定下来。要不要信它，得先弄清楚它为什么不稳。
 
-\subsection{互信息看得见相关系数看不见的依赖，代价是它难估}
+\subsection{互信息看得见相关系数看不见的依赖，麻烦是它难估}
 
 互信息 \(I(X_j;Y)=H(Y)-H(Y\given X_j)\) 度量的是知道 \(X_j\) 之后标签不确定性减少了多少，它对单调变换不变，也不预设任何函数形式，定义与基本性质见 \hyperref[sec:07-Information-Theory/02-Joint-Information/02]{``互信息是依赖，也是对不确定性的减少''}。这些优点都是真的。麻烦出在从有限样本估计它。
 
@@ -27,7 +27,7 @@
 
 并要求 \(Z-X-Y\) 构成 Markov 链——表示只能从输入生成，给定输入之后不许再去偷看标签。\(\beta\) 是那个旋钮：它大，模型偏预测，愿意让 \(Z\) 多记；它小，模型偏压缩，宁可损失一点精度换紧凑。
 
-两个极端先看清楚。\(\beta\to 0\) 时最优解是常数表示，\(I(X;Z)=0\) 而 \(I(Z;Y)=0\)，压缩到底也预测不了任何东西。\(\beta\to\infty\) 时最优解保留关于 \(Y\) 的全部信息，代价是 \(I(X;Z)\) 可能带进一堆与 \(Y\) 无关的输入细节。有意思的是中间那一段。
+两个极端先看清楚。\(\beta\to 0\) 时最优解是常数表示，\(I(X;Z)=0\) 而 \(I(Z;Y)=0\)，压缩到底也预测不了任何东西。\(\beta\to\infty\) 时最优解保留关于 \(Y\) 的全部信息，\(I(X;Z)\) 于是可能带进一堆与 \(Y\) 无关的输入细节。有意思的是中间那一段。
 
 \begin{center}
 \begin{tikzpicture}[>=stealth]
@@ -38,7 +38,7 @@
   \draw[dashed] (0,2.4) -- (6.2,2.4);
   \node[anchor=east] at (-0.08,2.4) {\footnotesize \(I(X;Y)\)};
   \draw[dashed] (0,0) -- (2.9,2.9);
-  \node[anchor=south east,rotate=45] at (2.55,2.55) {\footnotesize \(I(Z;Y)\le I(X;Z)\)};
+  \node[anchor=south east,rotate=45] at (1.95,2.20) {\footnotesize \(I(Z;Y)\le I(X;Z)\)};
   \draw[very thick] plot[domain=0:6,samples=90] (\x,{2.4*(1-exp(-0.40*\x))});
   \draw[thick] (1.0,0.892) -- (3.4,1.927);
   \fill (2,1.322) circle (0.055);
@@ -89,7 +89,7 @@ I(Z;Y)=I(X;Y)-I(X;Y\given Z)\le I(X;Y).
 I(X;Z)=\E_x\KL(q_\phi(z\given x)\|q_\phi(z)).
 \]
 
-\(q_\phi(z)\) 本身算不出来，于是用先验顶替，代价是多出一项非负的差：
+\(q_\phi(z)\) 本身算不出来，于是用先验顶替，因此多出一项非负的差：
 
 \[
 \E_x\KL(q_\phi(z\given x)\|r(z))=I(X;Z)+\KL(q_\phi(z)\|r(z))\ge I(X;Z).

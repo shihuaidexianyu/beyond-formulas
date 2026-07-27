@@ -38,8 +38,8 @@
 \node[above,font=\scriptsize,align=center] at (1,3.05) {真实谱\\全部质量在 \(\lambda=1\)};
 \draw[->] (0.85,0.55) -- (0.18,0.55);
 \draw[->] (1.15,0.55) -- (3.85,0.55);
-\node[font=\scriptsize,anchor=east] at (0.82,0.85) {压向 0};
-\node[font=\scriptsize,anchor=west] at (1.2,0.85) {推向 4};
+\node[font=\scriptsize,anchor=east] at (0.75,0.25) {压向 0};
+\node[font=\scriptsize,anchor=west] at (1.30,0.25) {推向 4};
 \node[font=\scriptsize,anchor=west] at (2.5,2.2) {样本谱（\(p=n\)）};
 \end{tikzpicture}
 \end{center}
@@ -76,6 +76,6 @@
 
 把这个偏差换算成日常汇报的语言更刺眼。\(n=p=500\) 的纯噪声数据里，最大的十个样本特征值大多在 3 以上，加起来超过总迹 500 的 \(6\%\)；而真实的``前十个方向解释的方差比''恰好是 \(10/500=2\%\)。也就是说，一份完全没有主成分可言的数据，会报出三倍于真值的解释方差比。真有信号时这个高估同样存在，只是被信号掩盖，不容易察觉。\hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/04]{``从数据矩阵到 PCA''}把 PCA 的几何讲清楚了，那套几何在 \(c\approx0\) 时可靠；\(c\) 抬起来之后，几何还在，读数不再是原来的意思。
 
-失真会沿着流水线往下渗。马氏距离和判别分析要用 \(\widehat\Sigma^{-1}\)，被压到零附近的最小特征值一取倒数就变成巨大权重，平平无奇的点会被判成极端离群，这是 \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/02]{``LDA 与收缩：判别方向的几何与高维失效''} 反复碰到的麻烦。Markowitz 组合的最优权重同样含 \(\widehat\Sigma^{-1}\)，谱失真让权重对输入极度敏感，昨天和今天的协方差估计差一点点，最优组合就能从全仓一只切到全仓另一只，\hyperref[sec:09-Convex-Optimization/07-Applications/04]{``风险、收益与投资组合''}把这笔账算过一遍。而 Ledoit--Wolf 收缩、阈值化、因子模型这些正则化手段之所以有效，前提正是承认样本谱不可信、需要向某个结构目标拉回去——它们修的就是本节这张图里灰色区域相对竖线的外扩。
+失真会沿着流水线往下渗。马氏距离和判别分析要用 \(\widehat\Sigma^{-1}\)，被压到零附近的最小特征值一取倒数就变成巨大权重，平平无奇的点会被判成极端离群，这是 \hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/02]{``LDA 与收缩：判别方向的几何与高维失效''} 反复碰到的麻烦。Markowitz 组合的最优权重同样含 \(\widehat\Sigma^{-1}\)，谱失真让权重对输入极度敏感，昨天和今天的协方差估计差一点点，最优组合就能从全仓一只切到全仓另一只，\hyperref[sec:09-Convex-Optimization/07-Applications/04]{``风险、收益与投资组合''}把这个连锁反应算过一遍。而 Ledoit--Wolf 收缩、阈值化、因子模型这些正则化手段之所以有效，前提正是承认样本谱不可信、需要向某个结构目标拉回去——它们修的就是本节这张图里灰色区域相对竖线的外扩。
 
 只是要修得有据可依，就得先知道那片灰色的确切形状。它不是一团模糊的``高维不可信''，而是一条有闭式表达的密度曲线，只依赖 \(c\) 一个参数。下一节把这条曲线写出来。

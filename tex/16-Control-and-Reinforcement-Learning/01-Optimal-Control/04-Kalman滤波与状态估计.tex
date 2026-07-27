@@ -299,7 +299,7 @@ P_t = (I - K_t C) P_t^- (I - K_t C)^{\trans} + K_t R K_t^{\trans},
 
 Kalman filter 的优雅来自一个很窄的前提：线性变换把 Gaussian 映成 Gaussian，联合 Gaussian 的条件分布仍是 Gaussian。这两个性质缺一个，闭式递推就会断裂。
 
-如果动力学或观测是非线性的，Gaussian 经过非线性变换后通常不再是 Gaussian。Extended Kalman filter 的做法是在当前均值处取一阶 Taylor 展开——用局部的线性 \(A_t = \partial f / \partial x\) 和 \(C_t = \partial h / \partial x\) 替代固定的 \(A\) 和 \(C\)。近似的质量取决于：在当前不确定性椭球范围内，真正的非线性函数偏离其线性近似有多远。不确定性很大时，一阶近似可能完全不可靠。一个经典的 EKF 翻车场景是：机器人初始位姿不确定性很大，而观测模型（比如距离和方位的极坐标转换）在远离线性化点处高度非线性——此时 EKF 的线性化可能指向完全错误的更新方向。
+如果动力学或观测是非线性的，Gaussian 经过非线性变换后通常不再是 Gaussian。Extended Kalman filter 的做法是在当前均值处取一阶 Taylor 展开——用局部的线性 \(A_t = \partial f / \partial x\) 和 \(C_t = \partial h / \partial x\) 替代固定的 \(A\) 和 \(C\)。近似的质量取决于：在当前不确定性椭球范围内，真正的非线性函数偏离其线性近似有多远。不确定性很大时，一阶近似可能完全不可靠。一个经典的 EKF 失效场景是：机器人初始位姿不确定性很大，而观测模型（比如距离和方位的极坐标转换）在远离线性化点处高度非线性——此时 EKF 的线性化可能指向完全错误的更新方向。
 
 Unscented Kalman filter 不取导数，而是用一组确定性选择的 sigma points 穿过非线性函数，再用变换后的样本点重建均值和协方差——它相当于在矩的层面做了至少二阶精度的近似。Particle filter 则完全放弃 Gaussian 假设，用带权的离散粒子表示任意形状的后验分布。
 

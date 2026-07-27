@@ -74,13 +74,13 @@ f(x+h)=f(x)+2\bigl(A^{\trans}(Ax-b)\bigr)^{\trans}h+\norm{Ah}_2^2 ,
     \draw[black!45,fill=blue!8] (3.1,0.2) -- (0.9,-1.04) -- (-3.1,-0.2) -- (-0.9,1.04) -- cycle;
     \node[black!70,font=\footnotesize] at (-2.05,-0.12) {\(\operatorname{Col}(A)\)};
     \draw[->,gray!70] (0,0) -- (1.7,-0.357);
-    \node[gray!70,font=\footnotesize] at (1.95,-0.42) {\(a_1\)};
+    \node[gray!70,font=\footnotesize] at (1.95,-0.13) {\(a_1\)};
     \draw[->,gray!70] (0,0) -- (1.32,0.744);
     \node[gray!70,font=\footnotesize] at (1.5,0.86) {\(a_2\)};
     \draw[->,thick] (0,0) -- (1.195,0.132);
     \node[below] at (0.78,0.02) {\(\hat b\)};
     \draw[->,thick,red!70!black] (1.195,0.132) -- (1.195,1.832);
-    \node[right,red!70!black] at (1.26,0.95) {\(\hat r\)};
+    \node[right,red!70!black] at (1.26,1.42) {\(\hat r\)};
     \draw[->,very thick,blue!60!black] (0,0) -- (1.195,1.832);
     \node[above left] at (1.06,1.66) {\(b\)};
     \draw (1.371,0.095) -- (1.371,0.275) -- (1.195,0.312);
@@ -118,7 +118,7 @@ f(x+h)=f(x)+2\bigl(A^{\trans}(Ax-b)\bigr)^{\trans}h+\norm{Ah}_2^2 ,
 
 平方损失对大残差的惩罚增长很快：残差为 \(2\) 的观测贡献是残差为 \(1\) 的四倍。误差大致对称、没有离谱值时，这个特性很合适。在线性 Gaussian 噪声模型下，最小二乘还恰好等于最大似然估计。
 
-代价是一个离群点就能把整条线拽走。把第三个点从 \((3,2)\) 改成 \((3,10)\)，正规方程变成 \(3\hat C+6\hat D=13,\;6\hat C+14\hat D=32\)，解得 \(\hat D=3,\;\hat C=5/3\)。
+麻烦也在这里：一个离群点就能把整条线拽走。把第三个点从 \((3,2)\) 改成 \((3,10)\)，正规方程变成 \(3\hat C+6\hat D=13,\;6\hat C+14\hat D=32\)，解得 \(\hat D=3,\;\hat C=5/3\)。
 
 \begin{center}
 \begin{tikzpicture}[x=1.05cm,y=0.26cm,font=\small,>=stealth]

@@ -105,7 +105,7 @@ Label smoothing 把 one-hot 换成 \((1-\alpha)\) 倍的 one-hot 加上 \(\alpha
 
 \subsection{log-sum-exp 保住目标，裁剪偷偷改目标}
 
-softmax 从 logits \(z\) 出发给出 \(q_k=e^{z_k}/\sum_j e^{z_j}\)。先算 softmax 再取对数，在极端 logits 上会翻车：某个 \(z_k\) 很大时 \(e^{z_k}\) 溢出，很小时下溢成零，再取对数就是 \(-\infty\) 或 NaN。正确的写法把两步合并：
+softmax 从 logits \(z\) 出发给出 \(q_k=e^{z_k}/\sum_j e^{z_j}\)。先算 softmax 再取对数，在极端 logits 上会栽跟头：某个 \(z_k\) 很大时 \(e^{z_k}\) 溢出，很小时下溢成零，再取对数就是 \(-\infty\) 或 NaN。正确的写法把两步合并：
 
 \[
 \log q_\theta(y=k\given x)=z_k-\logsumexp(z),

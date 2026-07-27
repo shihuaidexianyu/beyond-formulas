@@ -47,11 +47,11 @@ P(H_0\given\text{数据})=\frac{P(\text{数据}\given H_0)\,P(H_0)}{P(\text{数�
   \draw[->,black!65] (f) -- (fs);
   \draw[->,black!65] (f) -- (fn);
   \node[black!60,anchor=east] at (-4.1,1.15) {功效 \(0.5\)};
-  \node[black!60,anchor=west] at (2.3,1.15) {\(\alpha=0.05\)};
+  \node[black!60,anchor=east] at (2.30,1.15) {\(\alpha=0.05\)};
   \node[draw,black!80,rounded corners=2pt,inner sep=4pt] (sum) at (-1.7,-1.4)
     {报出显著的共 \(95\) 个，其中 \(45\) 个是假阳性，占 \(47\%\)};
-  \draw[->,black!70] (ts) -- (-4.6,-1.4) -- (sum);
-  \draw[->,black!70] (fs) -- (1.2,-1.4) -- (sum);
+  \draw[->,black!70] (ts) -- (sum);
+  \draw[->,black!70] (fs) -- (sum);
 \end{tikzpicture}
 
 \emph{同样是 \(p<0.05\)，一年里报出的显著结果中有近一半来自压根没有效应的改动——基准率与功效决定了这个比例，\(p\) 值本身不含这个信息。}

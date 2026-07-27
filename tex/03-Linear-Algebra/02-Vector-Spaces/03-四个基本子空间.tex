@@ -95,14 +95,14 @@ Ax=Ax_{\mathrm{row}}+Ax_{\mathrm{null}}=Ax_{\mathrm{row}}.
   \draw[black!35,->] (-0.8,0) -- (3.8,0);
   \draw[black!35,->] (0,-2.0) -- (0,3.5);
   \draw[blue!65!black,thick] (-0.3,-0.3) -- (3.1,3.1);
-  \node[font=\footnotesize,blue!55!black] at (2.75,2.55) {行空间};
+  \node[font=\footnotesize,blue!55!black] at (3.4,2.45) {行空间};
   \draw[black!55,dashed] (0,0) -- (1.7,-1.7);
-  \node[font=\footnotesize,black!65] at (1.95,-1.55) {零空间};
+  \node[font=\footnotesize,black!65,below right] at (1.78,-1.78) {零空间};
   \draw[black!75,thick] (0.1,2.9) -- (3.3,-0.3);
-  \node[font=\footnotesize] at (0.55,3.05) {解集 \(x_p+\mathcal N(A)\)};
+  \node[font=\footnotesize,anchor=south west] at (0.12,3.05) {解集 \(x_p+\mathcal N(A)\)};
   \draw[->,very thick,blue!65!black] (0,0) -- (1.5,1.5);
   \fill (1.5,1.5) circle (1.6pt);
-  \node[font=\footnotesize,above left] at (1.5,1.5) {\(x_+\)};
+  \node[font=\footnotesize] at (0.75,1.5) {\(x_+\)};
   \draw[->,black!70] (0,0) -- (2.7,0.3);
   \fill (2.7,0.3) circle (1.6pt);
   \node[font=\footnotesize,below] at (2.75,0.25) {\(x_1\)};
@@ -111,7 +111,7 @@ Ax=Ax_{\mathrm{row}}+Ax_{\mathrm{null}}=Ax_{\mathrm{row}}.
 \emph{相容方程的解集是一条平行于零空间的直线，线上每个点给出同一个 \(Ax\)。它与行空间恰好交于一点 \(x_+\)，那是全体解中最短的一个；任何别的解 \(x_1\) 都在 \(x_+\) 上叠了一段零空间位移，只增长度、不改输出。}
 \end{center}
 
-这就是伪逆给出的那个解，也是``最小范数解''这一说法的几何来源。欠定问题里之所以默认取它，并不是因为它更接近真值，而是因为需要一个不依赖随机初值的确定挑法。挑法的代价与替代方案（例如改用正则化把偏好写进目标函数）在 \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/02]{``伪逆与病态问题''}里详细算账。
+这就是伪逆给出的那个解，也是``最小范数解''这一说法的几何来源。欠定问题里之所以默认取它，并不是因为它更接近真值，而是因为需要一个不依赖随机初值的确定挑法。这个挑法让出了什么、替代方案（例如改用正则化把偏好写进目标函数）又换回什么，在 \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/02]{``伪逆与病态问题''}里详细算账。
 
 \subsection{一个矩阵的完整账目}
 
@@ -133,4 +133,4 @@ A=\begin{pmatrix}1&2&3\\2&4&6\end{pmatrix}
 
 同一张图会在后面反复出现，只是名字换掉。测量里它是可分辨性与一致性检验；模型辨识里它是参数能不能从数据中恢复；到了 \hyperref[sec:03-Linear-Algebra/07-SVD-and-Data-Applications/01]{``任意矩阵的奇异值分解''}，它会被加工到极精确的形态：在两端各选一组正交基之后，\(A\) 的动作简化为 \(r\) 条独立的缩放通道，缩放倍数为零的方向就是这里的盲区。
 
-图里还留了一个没说破的地方。行空间到列空间的那条``一一对应''，是矩阵 \(A\) 在标准基下的行为；换一组基去看同一个变换，矩阵里的数字会全部改写，可这四个子空间的维数一个都不会动。下一节就把变换与它的矩阵分开，看清哪些东西属于操作本身，哪些只是记账方式。
+图里还留了一个没说破的地方。行空间到列空间的那条``一一对应''，是矩阵 \(A\) 在标准基下的行为；换一组基去看同一个变换，矩阵里的数字会全部改写，可这四个子空间的维数一个都不会动。下一节就把变换与它的矩阵分开，看清哪些东西属于操作本身，哪些只是坐标的产物。

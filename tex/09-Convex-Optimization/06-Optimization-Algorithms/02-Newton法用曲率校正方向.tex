@@ -40,18 +40,18 @@ f(x)=\frac{1}{2}x^{\trans}Qx+b^{\trans}x+c,\qquad Q\succ0 .
   \draw[gray!50] (0,0) ellipse [x radius=2.2,y radius=0.70];
   \draw[gray!60] (0,0) ellipse [x radius=1.2,y radius=0.38];
   \draw[->,gray!70,thick]
-    (4.0,1.05) -- (3.25,-0.88) -- (2.55,0.70) --
-    (1.90,-0.52) -- (1.30,0.36) -- (0.82,-0.23) --
-    (0.42,0.11) -- (0.08,-0.02);
-  \draw[->,black,very thick] (4.0,1.05) -- (0.07,0.02);
-  \fill (4.0,1.05) circle (2pt);
+    (4.00,0.62) -- (3.58,-0.50) -- (3.21,0.40) -- (2.88,-0.32) --
+    (2.58,0.25) -- (2.32,-0.20) -- (2.08,0.16) -- (1.87,-0.13) --
+    (1.68,0.10);
+  \draw[->,black,very thick] (4.00,0.62) -- (0.07,0.02);
+  \fill (4.00,0.62) circle (2pt);
   \fill (0,0) circle (2pt);
-  \node[above right,font=\footnotesize] at (4.0,1.05) {\(x_0\)};
+  \node[above right,font=\footnotesize] at (4.00,0.62) {\(x_0\)};
   \node[below right,font=\footnotesize] at (0.05,-0.06) {\(x^\star\)};
   \node[font=\footnotesize] at (3.05,1.62) {Newton：一步};
-  \draw[->,black!70] (3.05,1.48) -- (3.38,0.88);
+  \draw[->,black!70] (3.05,1.48) -- (3.30,0.65);
   \node[font=\footnotesize,gray!45!black] at (1.55,-1.62) {梯度下降：八步还在半路};
-  \draw[->,gray!70] (1.55,-1.48) -- (1.82,-0.58);
+  \draw[->,gray!70] (1.55,-1.48) -- (1.84,-0.30);
 \end{tikzpicture}
 
 \emph{同一个病态二次型上的两条路径：负梯度被等高线的形状带偏，反复横穿峡谷；Newton 方向把椭圆的扁平度除掉，直接连向中心。}
@@ -84,7 +84,7 @@ f(x)=\frac{1}{2}x^{\trans}Qx+b^{\trans}x+c,\qquad Q\succ0 .
 
 由此看清了病态的归属。条件数刻画的不是问题，而是问题与你所用坐标系的关系；同一个最优化问题，换一套单位就能把 \(\kappa\) 从 \(10^8\) 变到 \(1\)。梯度下降对这层关系敏感，所以它的步长必须随单位重调；Newton 法把 \(H^{-1}\) 挡在中间，坐标系的影响被约掉了，步长这个旋钮也就没有存在的必要。
 
-深度学习里的自适应方法在模仿的正是这件事。Adam 用梯度平方的滑动平均构造一个对角矩阵，再拿它去除梯度，相当于用一个对角的 \(P\) 做预条件——只在坐标轴方向上做缩放，抹掉各参数量纲和梯度尺度的差异，对旋转则无能为力。这是二阶信息的一个廉价投影：它换来了对逐层梯度尺度差异的免疫，代价是放弃了 Hessian 的非对角部分，也就放弃了参数之间的耦合。这条线索的展开见\hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/02]{``动量与 Adam 在平均什么''}与\hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/05]{``动量与自适应缩放改变的是动力学''}。
+深度学习里的自适应方法在模仿的正是这件事。Adam 用梯度平方的滑动平均构造一个对角矩阵，再拿它去除梯度，相当于用一个对角的 \(P\) 做预条件——只在坐标轴方向上做缩放，抹掉各参数量纲和梯度尺度的差异，对旋转则无能为力。这是二阶信息的一个廉价投影：它换来了对逐层梯度尺度差异的免疫，放弃的是 Hessian 的非对角部分，也就放弃了参数之间的耦合。这条线索的展开见\hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/02]{``动量与 Adam 在平均什么''}与\hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/05]{``动量与自适应缩放改变的是动力学''}。
 
 尺度不变性还有一个副产品：Newton 法的收敛分析里不出现 \(\kappa\)。靠近最优点、Hessian 正定且在邻域内 Lipschitz 连续时，取 \(\alpha=1\) 的误差满足
 

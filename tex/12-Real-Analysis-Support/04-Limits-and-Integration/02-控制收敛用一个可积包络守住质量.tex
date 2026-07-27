@@ -14,7 +14,7 @@
 \draw[dashed,domain=0:5,samples=120] plot ({\x},{2.4*exp(-0.8*\x)});
 \draw[dotted,domain=0:5,samples=120] plot ({\x},{0.9*exp(-0.3*\x)});
 \node[right] at (2.3,1.15) {\footnotesize \(g\)};
-\node[right] at (3.3,0.32) {\footnotesize \(f_n\)};
+\node[right] at (1.15,0.20) {\footnotesize \(f_n\)};
 \node at (2.6,-0.9) {\footnotesize 有可积包络：面积无处可逃};
 \begin{scope}[shift={(8.4,0)}]
 \draw[->] (0,0) -- (5.9,0) node[right] {\footnotesize \(x\)};
@@ -26,7 +26,7 @@
 \clip (0,0) rectangle (5.9,3.4);
 \draw[very thick,domain=0.29:5,samples=140] plot ({\x},{1.0/\x});
 \end{scope}
-\node[right] at (2.0,0.72) {\footnotesize \(\sup_n f_n\sim 1/x\)};
+\node[right] at (2.7,1.05) {\footnotesize \(\sup_n f_n\sim 1/x\)};
 \node at (2.6,-0.9) {\footnotesize 包络本身不可积：拦不住};
 \end{scope}
 \end{tikzpicture}

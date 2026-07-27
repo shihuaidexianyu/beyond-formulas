@@ -16,7 +16,7 @@ v_{n+1}=\begin{pmatrix}a_{n+1}+a_n\\ a_{n+1}\end{pmatrix}
 =\begin{pmatrix}1&1\\ 1&0\end{pmatrix}v_n.
 \]
 
-第二行只是把 \(a_{n+1}\) 原样搬下来，起记账的作用。这么一改写，递推变成 \(v_{n+1}=Av_n\)，于是 \(v_n=A^{n}v_0\)——问题从``迭代 \(n\) 次''变成了``求矩阵的 \(n\) 次幂''。而矩阵幂由什么决定，线性代数已经回答过：\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/02]{``对角化与动力系统：把耦合演化变成独立缩放''}里，\(A\) 在特征向量方向上只是一个数乘，\(A^{n}\) 在那个方向上就是 \(\lambda^{n}\)。
+第二行只是把 \(a_{n+1}\) 原样搬下来，起占位的作用。这么一改写，递推变成 \(v_{n+1}=Av_n\)，于是 \(v_n=A^{n}v_0\)——问题从``迭代 \(n\) 次''变成了``求矩阵的 \(n\) 次幂''。而矩阵幂由什么决定，线性代数已经回答过：\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/02]{``对角化与动力系统：把耦合演化变成独立缩放''}里，\(A\) 在特征向量方向上只是一个数乘，\(A^{n}\) 在那个方向上就是 \(\lambda^{n}\)。
 
 算一下 \(A\) 的特征多项式：\(\det(\lambda I-A)=\lambda^{2}-\lambda-1\)。
 
@@ -109,7 +109,7 @@ L[\lambda^{\bullet}]_n=\lambda^{\,n-2}\chi(\lambda),\qquad \chi(\lambda)=\lambda
 \emph{取 \(\lambda=0.75\)。第二支解不是另一条指数曲线，而是同一条指数被乘上一个多项式因子：先涨后落，最终仍被 \(\lambda\) 的模长押回零。它与 \(\lambda^{n}\) 线性无关，正好补齐解空间缺掉的那一维。}
 \end{center}
 
-回到矩阵的说法，重根意味着 \(A\) 的特征值重复而独立特征向量不够，无法对角化。\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/03]{``对角化失败与 Jordan 形：独立特征方向不够时怎么办''}里，Jordan 块的 \(n\) 次幂在副对角线上会冒出 \(n\lambda^{\,n-1}\)。递推里的多项式因子和那里的副对角项是同一个现象换了套记号，两边都在说：特征方向不够时，得用广义特征向量补位，代价就是解里多出多项式。
+回到矩阵的说法，重根意味着 \(A\) 的特征值重复而独立特征向量不够，无法对角化。\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/03]{``对角化失败与 Jordan 形：独立特征方向不够时怎么办''}里，Jordan 块的 \(n\) 次幂在副对角线上会冒出 \(n\lambda^{\,n-1}\)。递推里的多项式因子和那里的副对角项是同一个现象换了套记号，两边都在说：特征方向不够时，得用广义特征向量补位，解里于是多出多项式。
 
 复根的处理顺带说一句。共轭复根写成 \(\rho e^{\pm i\theta}\) 时，实数解可以整理成 \(\rho^{n}(A\cos n\theta+B\sin n\theta)\)：模长管增长或衰减，辐角管振荡快慢。不必在复数里绕，写成三角函数就回到实数世界了。
 

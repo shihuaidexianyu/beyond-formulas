@@ -20,13 +20,13 @@ Ridge 在最小二乘目标上加一项系数平方和的惩罚：
 
 先看数值这笔账。\(\lambda>0\) 时 \(X^{\trans}X+\lambda I\) 一定可逆，即便 \(X\) 不满列秩；它的特征值从 \(\sigma_j^2\) 变成 \(\sigma_j^2+\lambda\)，条件数从 \(\sigma_1^2/\sigma_p^2\) 降到 \((\sigma_1^2+\lambda)/(\sigma_p^2+\lambda)\)。原本 \(\sigma_p\to 0\) 时条件数发散，加了 \(\lambda\) 之后它被 \((\sigma_1^2+\lambda)/\lambda\) 封住。目标函数在每个方向上都变成强凸的，解唯一，迭代算法的收敛速率也跟着改善——强凸模数从 0 提到 \(\lambda\)，梯度下降的线性收敛率由 \(\lambda/(\sigma_1^2+\lambda)\) 控制（见\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/01]{``梯度下降真正难在步长''}）。条件数为什么是问题固有的敏感度而非算法的毛病，见\hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/03]{``条件数衡量问题本身的敏感性''}。
 
-再看统计这笔账，SVD 把它摊开得最清楚。令 \(X=U\Sigma V^{\trans}\)，奇异值 \(\sigma_1\ge\cdots\ge\sigma_p\ge 0\)。最小二乘在 \(V\) 的坐标系里第 \(j\) 个分量是 \(u_j^{\trans}y/\sigma_j\)，Ridge 则是
+再看统计这笔账，SVD 把它显示得最清楚。令 \(X=U\Sigma V^{\trans}\)，奇异值 \(\sigma_1\ge\cdots\ge\sigma_p\ge 0\)。最小二乘在 \(V\) 的坐标系里第 \(j\) 个分量是 \(u_j^{\trans}y/\sigma_j\)，Ridge 则是
 \[
 \widehat\beta_\lambda=V\diag\!\left(\frac{\sigma_j}{\sigma_j^2+\lambda}\right)U^{\trans}y .
 \]
 两个缩放因子的差别集中在小奇异值上：\(\sigma_j\) 大时 \(\sigma_j/(\sigma_j^2+\lambda)\approx 1/\sigma_j\)，强方向几乎原样保留；\(\sigma_j\to 0\) 时因子约为 \(\sigma_j/\lambda\to 0\)，弱方向被压下去。最小二乘用 \(1/\sigma_j\) 把 \(u_j^{\trans}y\) 里那点微弱投影放大成一个大系数，而那点投影里噪声的占比最高。
 
-代价是偏差。\(\E(\widehat\beta_\lambda\given X)=(X^{\trans}X+\lambda I)^{-1}X^{\trans}X\beta\ne\beta\)，每个系数都被缩向零。回报是方差：\(\Var(\widehat\beta_\lambda\given X)=\sigma^2(X^{\trans}X+\lambda I)^{-1}X^{\trans}X(X^{\trans}X+\lambda I)^{-1}\)，沿弱方向被压掉的正是最小二乘那里被放大的部分。存在一个正的 \(\lambda\) 使总均方误差严格低于最小二乘，这一点在任何设计矩阵下都成立，只是那个 \(\lambda\) 依赖未知的 \(\beta\) 和 \(\sigma^2\)，得靠交叉验证去找。上一节说 Gauss--Markov 的最优性被``线性''与``无偏''两个词框住，Ridge 就是走出这个框之后拿到的好处。
+付出的是偏差。\(\E(\widehat\beta_\lambda\given X)=(X^{\trans}X+\lambda I)^{-1}X^{\trans}X\beta\ne\beta\)，每个系数都被缩向零。换回的是方差：\(\Var(\widehat\beta_\lambda\given X)=\sigma^2(X^{\trans}X+\lambda I)^{-1}X^{\trans}X(X^{\trans}X+\lambda I)^{-1}\)，沿弱方向被压掉的正是最小二乘那里被放大的部分。存在一个正的 \(\lambda\) 使总均方误差严格低于最小二乘，这一点在任何设计矩阵下都成立，只是那个 \(\lambda\) 依赖未知的 \(\beta\) 和 \(\sigma^2\)，得靠交叉验证去找。上一节说 Gauss--Markov 的最优性被``线性''与``无偏''两个词框住，Ridge 就是走出这个框之后拿到的好处。
 
 回到两个温度计。公共方向（两者的平均）奇异值大，Ridge 基本不动它；差异方向（两者之差）奇异值极小，Ridge 把它压到接近零。系数于是被平摊到两个传感器上，不再互相抵消。
 
@@ -63,7 +63,7 @@ S_\lambda(z)=\sign(z)\,(\abs{z}-\lambda)_+ .
   \draw (0.8,0.09) -- (0.8,-0.09);
   \draw (-0.8,0.09) -- (-0.8,-0.09);
   \node[below] at (0.8,-0.12) {\footnotesize \(\lambda\)};
-  \node[below] at (-0.86,-0.12) {\footnotesize \(-\lambda\)};
+  \node[anchor=south east] at (-0.84,0.08) {\footnotesize \(-\lambda\)};
 \end{tikzpicture}
 \end{center}
 
@@ -87,7 +87,7 @@ S_\lambda(z)=\sign(z)\,(\abs{z}-\lambda)_+ .
 
 \(\lambda\) 靠交叉验证定，前提是所有数据驱动的预处理都留在训练折内部。常见的错法是先在全量数据上标准化、砍掉低方差特征，再切折搜 \(\lambda\)。这时标准化的均值方差与特征清单已经看过验证折的信息，选出的 \(\lambda\) 系统性偏乐观。正确的顺序是在每个训练折内部独立完成标准化、筛选与 \(\lambda\) 搜索，验证折只用来打分；若还要报告最终性能，得再套一层从未参与任何选择的外层测试集（见\hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/04]{``数据划分、泄漏与分布偏移''}）。
 
-除了验证误差的最低点，整条正则化路径值得看。验证误差随 \(\lambda\) 通常先降后升，下降段是方差收益超过偏差代价，上升段是偏差反超。Ridge 的系数应该随 \(\lambda\) 平滑收缩，某个系数忽上忽下往往指向严重的共线。Lasso 的非零集合在相邻折之间是否一致，直接对应上一小节的稳定性问题。至于按验证误差选出的 \(\lambda\) 本身，它是随机量，样本量小时离总体最优可以差得很远，所以最终模型应当用选定的 \(\lambda\) 在全部训练数据上重拟合。
+除了验证误差的最低点，整条正则化路径值得看。验证误差随 \(\lambda\) 通常先降后升，下降段是方差上的收益压过偏差上的损失，上升段是偏差反超。Ridge 的系数应该随 \(\lambda\) 平滑收缩，某个系数忽上忽下往往指向严重的共线。Lasso 的非零集合在相邻折之间是否一致，直接对应上一小节的稳定性问题。至于按验证误差选出的 \(\lambda\) 本身，它是随机量，样本量小时离总体最优可以差得很远，所以最终模型应当用选定的 \(\lambda\) 在全部训练数据上重拟合。
 
 数值上，Ridge 做一次 SVD 就能以 \(O(np^2)\) 的代价扫完所有 \(\lambda\)。Lasso 用坐标下降或近端梯度沿 \(\lambda\) 由大到小热启动，一次得到整条路径。判收敛时别只盯目标值的变化量：非光滑面上目标值可以变得很慢而解还离最优点有距离，KKT 违反量或对偶间隙才是可靠的判据。
 

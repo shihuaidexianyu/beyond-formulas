@@ -1,5 +1,5 @@
 \section{选模型族就是选一组关于世界形状的假设}
-\label{sec:17-Synthesis/01-System-Lifecycle/03}
+\label{sec:18-Synthesis/01-System-Lifecycle/03}
 
 一家连锁品牌要做门店周销量预测。手上的数据是两百家门店、十八个月，合起来三千六百行，每行四十来个特征：门店面积、周边人口、天气、促销标记、节假日、上周销量。
 
@@ -23,7 +23,7 @@
 
 概率图把假设写成``哪些依赖不存在''。\hyperref[sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/01]{``图结构把联合分布拆成局部因子''}里，缺一条边比多一条边说得更多——它断言在给定某组变量之后，另外两个变量再无关联。这类假设最省参数，也最容易被现实推翻。
 
-卷积断言平移等变与局部性：一个模式出现在图像的哪个位置不改变它的含义，而判断一个位置需要的信息集中在它附近。\hyperref[sec:14-Deep-Learning/04-Convolutional-Networks/01]{``卷积把平移结构写进线性映射''}说明这两条假设怎样把一个全连接层的参数量压到极小。注意力则几乎放弃了位置假设，允许任意两个位置直接对话，代价是它连顺序都不知道——\hyperref[sec:14-Deep-Learning/05-Attention-and-Sequence-Models/03]{``位置必须外挂，因为注意力看不见顺序''}讲的就是这笔账：把结构假设拿掉之后，得手工再加回去一部分。
+卷积断言平移等变与局部性：一个模式出现在图像的哪个位置不改变它的含义，而判断一个位置需要的信息集中在它附近。\hyperref[sec:14-Deep-Learning/04-Convolutional-Networks/01]{``卷积把平移结构写进线性映射''}说明这两条假设怎样把一个全连接层的参数量压到极小。注意力则几乎放弃了位置假设，允许任意两个位置直接对话，于是它连顺序都不知道——\hyperref[sec:14-Deep-Learning/05-Attention-and-Sequence-Models/03]{``位置必须外挂，因为注意力看不见顺序''}讲的就是这件事：把结构假设拿掉之后，得手工再加回去一部分。
 
 \subsection{偏置强度与样本量是一条权衡曲线}
 

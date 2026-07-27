@@ -37,7 +37,7 @@ while k < n:
   \node[left,align=right,black!70] at (-2.85,1.4) {保持：\\跑完一轮 \(I\) 仍成立};
   \draw[->] (t.east) -- (e.west);
   \node[above,black!70] at (2.1,2.3) {\(k=n\)};
-  \node[below,align=center,black!70] at (4.2,1.85) {终止：\\\(I\) 与 \(k=n\) 一起\\给出结论};
+  \node[below,align=left,black!70] at (4.2,1.85) {终止：\\\(I\) 与 \(k=n\) 一起\\给出结论};
 \end{tikzpicture}
 
 \emph{同一句断言要在三个位置成立：进入循环之前、每一轮结束之后、以及退出的那一刻——前两处对应基例与归纳步，第三处负责把它兑换成用户要的结论。}
@@ -102,8 +102,6 @@ while k < n:
       \fill[black!18] (\i+1,\j+1) rectangle ++(1,1);
     }
   }
-  \fill[white] (0,0) rectangle (1,1);
-  \fill[white] (7,7) rectangle (8,8);
   \foreach \i in {0,...,8}{
     \draw[black!35] (\i,0) -- (\i,8);
     \draw[black!35] (0,\i) -- (8,\i);

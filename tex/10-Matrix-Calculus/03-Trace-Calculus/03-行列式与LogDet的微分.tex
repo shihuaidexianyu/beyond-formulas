@@ -5,7 +5,7 @@
 
 原因在数量级。\(\det\Sigma\) 是 \(200\) 个特征值的乘积，特征值哪怕平均只有 \(0.1\)，乘积也是 \(10^{-200}\)，双精度浮点在 \(10^{-308}\) 附近就归零；平均值稍大于 \(1\)，乘积又会冲到上溢。这个量在纸上是一个正数，在机器里几乎必然落到表示范围之外，见\hyperref[sec:08-Numerical-Analysis/01-Floating-Point-and-Error/01]{``从实数到浮点数''}。
 
-同一项在 normalizing flow 里出现得更频繁。变量替换公式要求每一层都记账 \(\log\abs{\det J}\)（见\hyperref[sec:05-Probability/05-Joint-Distributions/05]{``多维变量变换与 Jacobian''}），几十层累加下来，训练循环的每一步都要算这个量和它的梯度。所以这一节要给两笔账：微分的账，和实现的账。两笔都不长，但混起来就会写出上面那种代码。
+同一项在 normalizing flow 里出现得更频繁。变量替换公式要求每一层都算出 \(\log\abs{\det J}\)（见\hyperref[sec:05-Probability/05-Joint-Distributions/05]{``多维变量变换与 Jacobian''}），几十层累加下来，训练循环的每一步都要算这个量和它的梯度。所以这一节要给两笔账：微分的账，和实现的账。两笔都不长，但混起来就会写出上面那种代码。
 
 \subsection{行列式的相对变化率是一个 trace}
 
@@ -48,7 +48,7 @@ d\log\det X=\trace(X^{-1}dX),
     \draw[dashed,red!65!black,thick] (0,0) -- (2.24,0.56) -- (2.94,2.30) -- (0.70,1.74) -- cycle;
     \fill[blue!12] (0,0) -- (2.05,0.51) -- (2.68,2.10) -- (0.63,1.59) -- cycle;
     \draw[blue!60!black,thick] (0,0) -- (2.05,0.51) -- (2.68,2.10) -- (0.63,1.59) -- cycle;
-    \node[font=\footnotesize,blue!60!black] at (1.30,0.95) {面积 \(=\det X\)};
+    \node[font=\footnotesize,blue!60!black,align=center] at (1.30,0.95) {面积\\\(=\det X\)};
     \node[font=\footnotesize,red!65!black,anchor=west] at (2.90,2.28) {\(X+dX\)};
     \node[font=\footnotesize,black!70,align=center] at (1.45,-0.68) {薄边面积 \(\div\) 整块面积 \(=\trace(X^{-1}dX)\)};
   \end{scope}
@@ -113,7 +113,7 @@ d\log\det X=\trace(X^{-1}dX),
 \frac{d}{d\theta}\log\det X(\theta)=\trace\Bigl(X(\theta)^{-1}\frac{dX}{d\theta}\Bigr),
 \]
 
-推导上没有新东西，实现上则要把前两节的纪律叠起来用：\(X^{-1}\) 不显式构造，\(\log\det\) 走分解的对角线，同一份分解服务前向的似然值与反向的梯度。normalizing flow 之所以偏爱三角或对角结构的 Jacobian，原因就在这里——那种结构下 \(\log\abs{\det J}\) 退化成对角元绝对值的对数之和，代价 \(O(d)\)，梯度也跟着变成逐元素运算，整个记账几乎免费。设计可逆层时对 Jacobian 结构的执着，追到底是在为这一项的成本做选择。
+推导上没有新东西，实现上则要把前两节的纪律叠起来用：\(X^{-1}\) 不显式构造，\(\log\det\) 走分解的对角线，同一份分解服务前向的似然值与反向的梯度。normalizing flow 之所以偏爱三角或对角结构的 Jacobian，原因就在这里——那种结构下 \(\log\abs{\det J}\) 退化成对角元绝对值的对数之和，代价 \(O(d)\)，梯度也跟着变成逐元素运算，整个流程几乎免费。设计可逆层时对 Jacobian 结构的执着，追到底是在为这一项的成本做选择。
 
 写代码前的对账很短。\(X\) 是否可逆，是否对称正定，行列式是否可能为负，用的是 \(\log\det\) 还是 \(\log\abs{\det}\)，分解是否与前向共用，梯度里的逆是否被真的构造了出来。六个问题都有明确答案，这一项就不会成为训练崩溃的源头。
 

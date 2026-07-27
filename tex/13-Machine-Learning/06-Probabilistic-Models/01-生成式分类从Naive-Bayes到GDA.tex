@@ -17,7 +17,7 @@ P(Y=k\given x)
 {\sum_j\pi_jp(x\given Y=j)}.
 \]
 
-写下联合分布之后，采样、补缺失、给不确定性都变成同一个模型上的不同查询。代价也是明确的：你必须为每一个特征维度作出分布假设，而假设越多，出错的地方越多。
+写下联合分布之后，采样、补缺失、给不确定性都变成同一个模型上的不同查询。要付出的也很明确：你必须为每一个特征维度作出分布假设，而假设越多，出错的地方越多。
 
 \subsection{联合分布买到的东西比一条边界多}
 
@@ -46,7 +46,7 @@ P(Y=k\given x)
 \draw[black,thick] (3.36,0.46) -- (1.44,3.74);
 \fill[blue!70] (1.2,1.4) circle (2.4pt);
 \fill[red!70] (3.6,2.8) circle (2.4pt);
-\node[font=\scriptsize,anchor=west] at (0.45,0.62) {\(p(x\given Y=k)\)};
+\node[font=\scriptsize,anchor=west,fill=white,inner sep=1pt] at (0.45,0.62) {\(p(x\given Y=k)\)};
 \node[font=\scriptsize] at (2.5,-0.15) {生成式：先有密度，边界是推论};
 \end{scope}
 
@@ -104,7 +104,7 @@ p(x\given Y=k)=\prod_{j=1}^dp(x_j\given Y=k).
 X\given Y=k\sim\mathcal N(\mu_k,\Sigma_k).
 \]
 
-这就是上图左侧那两团等高线。covariance 决定椭球的朝向和各方向的尺度，于是``离哪个类更近''不再由欧氏距离决定，而由 Mahalanobis 距离决定：沿方差大的方向走同样远，付出的代价更小。
+这就是上图左侧那两团等高线。covariance 决定椭球的朝向和各方向的尺度，于是``离哪个类更近''不再由欧氏距离决定，而由 Mahalanobis 距离决定：沿方差大的方向走同样远，算出来的距离更短。
 
 各类共享同一个 \(\Sigma\) 时，判别函数会塌成线性。把两类的 log density 相减，二次型 \((x-\mu_k)^{\trans}\Sigma^{-1}(x-\mu_k)\) 展开后，\(x\) 的二次项与 \(-\tfrac12\log\abs{\Sigma}\) 都与 \(k\) 无关而抵消：
 

@@ -5,7 +5,7 @@
 
 手上有 47 个干净观测，大致沿 \(y=2x+1\) 散布，噪声标准差约 0.5。最小二乘拟合给出 \(\widehat\beta_1\approx 2.03\)、\(\widehat\beta_0\approx 0.94\)，一切合理。现在往数据里塞进第 48 个点 \((x_{48},y_{48})=(100,1000)\)，同一段代码跑出来的是 \(\widehat\beta_1\approx 8.71\)、\(\widehat\beta_0\approx -12.3\)。一个点，把 47 个点提供的信号盖掉了。
 
-原因在损失的形状里。残差 900 的点贡献 \(900^2=810{,}000\)，47 个残差 0.5 的点合计约 12。优化器没有别的选择，压下那个巨型残差是唯一能显著降低总损失的动作，代价是把整条线拉过去。换成绝对损失，同样 48 个点给出 \(\widehat\beta_1\approx 2.14\)、\(\widehat\beta_0\approx 0.87\)：残差 900 只贡献 900，47 个 0.5 的残差合计 23.5，两边的话语权变得可比。
+原因在损失的形状里。残差 900 的点贡献 \(900^2=810{,}000\)，47 个残差 0.5 的点合计约 12。优化器没有别的选择，压下那个巨型残差是唯一能显著降低总损失的动作，于是整条线被拉了过去。换成绝对损失，同样 48 个点给出 \(\widehat\beta_1\approx 2.14\)、\(\widehat\beta_0\approx 0.87\)：残差 900 只贡献 900，47 个 0.5 的残差合计 23.5，两边的话语权变得可比。
 
 但别急着宣布绝对损失更好。回到只有 47 个干净点的情形重复模拟一千次，平方损失给出的 \(\widehat\beta_1\) 标准差约 0.03，绝对损失约 0.047，宽了一半还多。Gaussian 噪声下平方损失达到 Cram\'er--Rao 下界，绝对损失的渐近相对效率只有 \(2/\pi\approx 0.637\)。换句话说，用绝对损失要多花约六成的数据才能达到同样精度。没有一种损失在所有数据集上最优。选损失就是在表态：我相信数据是以什么方式生成的。
 
@@ -34,8 +34,10 @@
   \draw[->] (0,-0.15) -- (0,2.4) node[anchor=east, font=\scriptsize] {损失 \(\ell(r)\)};
   \draw[thick, domain=-2.1:2.1, samples=80] plot (\x, {0.5*\x*\x});
   \draw[thick, dashed, domain=-2.2:2.2, samples=120] plot (\x, {abs(\x)});
-  \node[font=\scriptsize, anchor=west] at (1.5,1.35) {\(r^2\)};
-  \node[font=\scriptsize, anchor=east] at (-1.45,1.85) {\(\abs{r}\)};
+  \node[font=\scriptsize, anchor=west] at (1.98,0.62) {\(r^2\)};
+  \draw[thin] (2.02,0.76) -- (1.76,1.38);
+  \node[font=\scriptsize, anchor=east] at (-0.85,1.72) {\(\abs{r}\)};
+  \draw[thin] (-0.92,1.62) -- (-1.30,1.32);
 \end{scope}
 
 \end{tikzpicture}

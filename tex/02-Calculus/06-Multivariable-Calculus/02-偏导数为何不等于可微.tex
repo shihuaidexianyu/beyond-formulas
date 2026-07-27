@@ -42,8 +42,10 @@ D_{\mathbf u}f(\mathbf 0)=a\cos\theta+b\sin\theta,
 \begin{tikzpicture}[x=2.1cm,y=2.4cm,font=\small,>=stealth]
   \draw[->,black!55] (-0.15,0) -- (4.35,0) node[right] {\(\theta\)};
   \draw[->,black!55] (0,-0.75) -- (0,0.78) node[above] {\(D_{\mathbf u}f(\mathbf 0)\)};
-  \foreach \k/\lab in {1/{\(\pi/2\)},2/{\(\pi\)},3/{\(3\pi/2\)},4/{\(2\pi\)}}
-    {\draw[black!35] (\k,-0.04) -- (\k,0.04); \node[below,black!60] at (\k,-0.06) {\lab};}
+  \foreach \k/\lab/\anc in {1/{\(\pi/2\)}/{north east},2/{\(\pi\)}/{north west},
+                            3/{\(3\pi/2\)}/{north east},4/{\(2\pi\)}/{north west}}
+    {\draw[black!35] (\k,-0.04) -- (\k,0.04);
+     \node[anchor=\anc,inner sep=2pt,black!60] at (\k,-0.06) {\lab};}
   \draw[red!70!black,thick] plot[domain=0:360,samples=140] (\x/90,{0.5*sin(2*\x)});
   \draw[blue!70!black,thick,dashed] (0,0) -- (4,0);
   \foreach \k in {0,1,2,3} {\fill[blue!70!black] (\k,0) circle (2pt);}

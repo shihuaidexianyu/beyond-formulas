@@ -1,5 +1,5 @@
 \section{评估是在为一句关于未见数据的断言背书}
-\label{sec:17-Synthesis/01-System-Lifecycle/05}
+\label{sec:18-Synthesis/01-System-Lifecycle/05}
 
 新的排序策略在离线评测上把 NDCG 提高了 \(2.1\%\)。上线做 A/B，跑满两周，\(p=0.12\)。产品经理说再跑一周看看；第三周末 \(p=0.043\)，会上决定全量。一个月后复盘，大盘指标与上线前没有可辨认的差别。
 
@@ -65,7 +65,7 @@
 
 至于那些形如``真风险不超过经验风险加上一个复杂度项''的上界，\hyperref[sec:13-Machine-Learning/10-Learning-Theory/04]{``泛化界的解释力与边界''}说得很诚实：代进真实数字后，界常常给出大于 \(1\) 的误差上限，也就是毫无内容。它们的价值不在数值，而在于指出哪些量控制泛化——样本量、假设类容量、间隔、稳定性。把界当成预测工具会失望，把它当成``该往哪个方向使劲''的指南则相当可靠。
 
-需要有限样本、可用数值的保证时，\hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/05]{``Conformal prediction 用可交换性换有限样本覆盖''}是少数几个真的能拿来用的工具：它不假设分布形式，只要求校准数据与待预测样本可交换，就给出有覆盖保证的预测集合。代价写在那个前提里——可交换性一旦被时间漂移破坏，保证同时失效，而这正是下一篇要处理的事。
+需要有限样本、可用数值的保证时，\hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/05]{``Conformal prediction 用可交换性换有限样本覆盖''}是少数几个真的能拿来用的工具：它不假设分布形式，只要求校准数据与待预测样本可交换，就给出有覆盖保证的预测集合。让步写在那个前提里——可交换性一旦被时间漂移破坏，保证同时失效，而这正是下一篇要处理的事。
 
 \subsection{这一步做错时，故障长什么样}
 

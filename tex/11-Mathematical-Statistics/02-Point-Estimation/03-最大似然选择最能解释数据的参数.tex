@@ -41,8 +41,10 @@ L(\theta;x)=p_\theta(x).
   \node[font=\footnotesize,black!55,anchor=west] at (3.30,0.72) {\(n=10\)};
   \node[font=\footnotesize,black!62,anchor=west] at (2.72,1.55) {\(n=40\)};
   \node[font=\footnotesize,black!75,anchor=west] at (2.32,2.42) {\(n=160\)};
-  \draw[<->,black!55] (1.25,0.60) -- (2.75,0.60);
-  \node[font=\footnotesize,black!55,anchor=north] at (2.00,0.55) {宽度 \(\propto 1/\sqrt{n}\)};
+  \draw[black!35] (1.25,0) -- (1.25,-0.55);
+  \draw[black!35] (2.75,0) -- (2.75,-0.55);
+  \draw[<->,black!55] (1.25,-0.55) -- (2.75,-0.55);
+  \node[font=\footnotesize,black!55,anchor=north] at (2.00,-0.62) {宽度 \(\propto 1/\sqrt{n}\)};
 \end{tikzpicture}
 
 \emph{同一个模型、样本量翻两番的三条似然曲线，都按各自的峰高归一；峰的位置回答``估计是多少''，峰的宽窄回答``这个估计有多可信''。}

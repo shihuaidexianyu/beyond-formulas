@@ -21,7 +21,7 @@ T=\bar Y_{\text{treat}}-\bar Y_{\text{ctrl}},
 p=\frac{\#\set{\pi:\abs{T^\pi}\ge\abs{T_{\mathrm{obs}}}}}{\#\set{\text{全部 }\pi}}.
 \]
 
-这个式子里没有任何分布假设，只有计数。代价是 \(\binom{1200}{600}\) 这个数大到没法枚举，于是改成随机抽 \(B\) 个排列做 Monte Carlo 近似，
+这个式子里没有任何分布假设，只有计数。难处在于 \(\binom{1200}{600}\) 这个数大到没法枚举，于是改成随机抽 \(B\) 个排列做 Monte Carlo 近似，
 
 \[
 \hat p=\frac{1+\#\set{b:\abs{T^{\pi_b}}\ge\abs{T_{\mathrm{obs}}}}}{B+1}.

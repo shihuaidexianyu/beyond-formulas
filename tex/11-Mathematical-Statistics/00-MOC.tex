@@ -10,7 +10,8 @@
 \begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
   \draw[black!45,fill=blue!9] (0,1.5) rectangle (3.4,2.9);
   \node[align=center] at (1.7,2.2) {一次\\有限样本};
-  \draw[->,black!55] (3.5,2.2) -- (4.6,2.2);
+  \draw[black!55] (3.5,2.2) -- (4.15,2.2);
+  \draw[black!55] (4.15,0.35) -- (4.15,3.8);
   \draw[black!45,fill=green!8] (4.7,3.35) rectangle (12.9,4.25);
   \node[align=left,anchor=west] at (4.9,3.8) {点估计：给出一个数（第二、三章）};
   \draw[black!45,fill=green!8] (4.7,2.2) rectangle (12.9,3.1);
@@ -19,9 +20,10 @@
   \node[align=left,anchor=west] at (4.9,1.5) {重采样：让数据自己评估整条流程（第六章）};
   \draw[black!45,fill=orange!10] (4.7,-0.1) rectangle (12.9,0.8);
   \node[align=left,anchor=west] at (4.9,0.35) {决策：把概率变成行动（第七章）};
-  \draw[->,black!55] (4.6,2.25) -- (4.65,3.8);
-  \draw[->,black!55] (4.6,2.1) -- (4.65,1.5);
-  \draw[->,black!55] (4.6,2.0) -- (4.65,0.35);
+  \draw[->,black!55] (4.15,3.8) -- (4.65,3.8);
+  \draw[->,black!55] (4.15,2.65) -- (4.65,2.65);
+  \draw[->,black!55] (4.15,1.5) -- (4.65,1.5);
+  \draw[->,black!55] (4.15,0.35) -- (4.65,0.35);
   \node[align=center,font=\footnotesize,black!65] at (1.7,0.35) {每一步都挂着\\一组假设——\\它们是结论\\有效的条件};
 \end{tikzpicture}
 

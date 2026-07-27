@@ -24,7 +24,7 @@
 
 两条路上还有一条共同的诊断线索：重要性权重的方差。提议分布的尾部比目标薄时，权重按指数发散，表面十万个样本的有效样本量可能只有十几个。它在第一节以方差缩减的形式出现，在粒子滤波里以每步权重塌缩的形式出现，在检验变分近似质量时又被反过来用作探针。
 
-六节的分工是这样的。第一节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/01]{``Monte Carlo 用随机样本逼近期望''} 建立误差的记账方式，包括重要性采样的权重诊断。第二节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/02]{``MCMC 在无法独立采样时构造平稳链''} 用细致平衡把归一化常数从接受率里约掉，并把遍历性、谱间隙、跨模态失败讲清楚。第三节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/03]{``变分推断把后验近似变成优化''} 换到另一条路，把代价定位到变分族与 KL 方向上。第四节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/04]{``Bootstrap 重建分析流程的不确定性''} 处理另一类问题：没有后验可谈，只问换一批数据整条流程会波动多少。第五节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/05]{``粒子滤波用带权样本追踪非线性状态''} 把重要性采样接进时间递推。第六节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/06]{``配分函数把能量变成全局概率''} 正面对付那个一直被约掉的常数，并说明为什么局部能量便宜而全局学习仍然依赖采样。
+六节的分工是这样的。第一节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/01]{``Monte Carlo 用随机样本逼近期望''} 建立误差的计量方式，包括重要性采样的权重诊断。第二节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/02]{``MCMC 在无法独立采样时构造平稳链''} 用细致平衡把归一化常数从接受率里约掉，并把遍历性、谱间隙、跨模态失败讲清楚。第三节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/03]{``变分推断把后验近似变成优化''} 换到另一条路，把代价定位到变分族与 KL 方向上。第四节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/04]{``Bootstrap 重建分析流程的不确定性''} 处理另一类问题：没有后验可谈，只问换一批数据整条流程会波动多少。第五节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/05]{``粒子滤波用带权样本追踪非线性状态''} 把重要性采样接进时间递推。第六节 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/06]{``配分函数把能量变成全局概率''} 正面对付那个一直被约掉的常数，并说明为什么局部能量便宜而全局学习仍然依赖采样。
 
 \subsection{读之前先把四类误差分开}
 

@@ -17,22 +17,22 @@
 \begin{tikzpicture}[>=stealth,every node/.style={font=\small}]
   \begin{scope}[xshift=-4.2cm]
     \draw[blue!70!black,thick] (0,0) circle (1);
-    \draw[->] (0,0) -- (0.75,0.65) node[above] {\(v_1\)};
-    \draw[->] (0,0) -- (-0.65,0.75) node[left] {\(v_2\)};
+    \draw[->] (0,0) -- (0.75,0.65) node[above right,inner sep=1pt] {\(v_1\)};
+    \draw[->] (0,0) -- (-0.65,0.75) node[above left,inner sep=1pt] {\(v_2\)};
     \node at (0,-1.35) {输入单位圆};
   \end{scope}
   \draw[->,thick] (-2.9,0) -- (-1.8,0) node[midway,above] {\(V^{\trans}\)};
   \begin{scope}
     \draw[blue!70!black,thick] (0,0) ellipse [x radius=1.45,y radius=0.65];
-    \draw[->] (0,0) -- (1.35,0) node[above] {\(\sigma_1\)};
-    \draw[->] (0,0) -- (0,0.58) node[right] {\(\sigma_2\)};
+    \draw[->] (0,0) -- (1.35,0) node[pos=0.62,above] {\(\sigma_1\)};
+    \draw[->] (0,0) -- (0,0.58) node[pos=0.55,right] {\(\sigma_2\)};
     \node at (0,-1.35) {独立伸缩};
   \end{scope}
   \draw[->,thick] (1.75,0) -- (2.85,0) node[midway,above] {\(U\)};
   \begin{scope}[xshift=4.2cm,rotate=28]
     \draw[blue!70!black,thick] (0,0) ellipse [x radius=1.45,y radius=0.65];
-    \draw[->] (0,0) -- (1.35,0) node[above] {\(u_1\)};
-    \draw[->] (0,0) -- (0,0.58) node[right] {\(u_2\)};
+    \draw[->] (0,0) -- (1.35,0) node[pos=0.62,above] {\(u_1\)};
+    \draw[->] (0,0) -- (0,0.58) node[pos=0.55,right] {\(u_2\)};
   \end{scope}
   \node at (4.2,-1.35) {输出椭圆};
 \end{tikzpicture}
@@ -72,7 +72,7 @@ A=\sum_{i=1}^{r}\sigma_i u_i v_i^{\trans}=U_r\Sigma_r V_r^{\trans}.
 
 回到上面那张图，现在每个符号都有了出处：\(V^{\trans}\) 把输入改写成右奇异向量下的坐标，\(\Sigma\) 逐坐标伸缩（有些坐标乘以零），\(U\) 把结果摆进输出空间。两侧的正交变换保长，矩阵全部的放大、压缩与信息丢失都被逼进 \(\Sigma\) 的对角线。
 
-特征分解要方阵、要可对角化，才能得到形式上类似的 \(A=P\Lambda P^{-1}\)；SVD 一个前提都不要。代价也说得清：左右两侧用的是两组不同的正交基，所以 SVD 不描述``迭代 \(A\) 很多次会怎样''这类需要输入输出同基的问题。选哪一个，看你问的是演化还是几何。
+特征分解要方阵、要可对角化，才能得到形式上类似的 \(A=P\Lambda P^{-1}\)；SVD 一个前提都不要。让出的东西也说得清：左右两侧用的是两组不同的正交基，所以 SVD 不描述``迭代 \(A\) 很多次会怎样''这类需要输入输出同基的问题。选哪一个，看你问的是演化还是几何。
 
 \subsection{一个映射的四块地}
 

@@ -116,14 +116,14 @@ Q=\begin{bmatrix}-\lambda&\lambda\\ \mu&-\mu\end{bmatrix}.
 
 \begin{center}
 \begin{tikzpicture}[x=1cm,y=1cm,font=\small]
-  \fill[blue!22] (0,1.5) rectangle (2.44,2.05);
-  \fill[red!55] (2.44,1.5) rectangle (2.52,2.05);
-  \fill[blue!22] (2.52,1.5) rectangle (5.14,2.05);
-  \fill[red!55] (5.14,1.5) rectangle (5.22,2.05);
-  \fill[blue!22] (5.22,1.5) rectangle (7.44,2.05);
-  \fill[red!55] (7.44,1.5) rectangle (7.52,2.05);
-  \fill[blue!22] (7.52,1.5) rectangle (9.92,2.05);
-  \fill[red!55] (9.92,1.5) rectangle (10,2.05);
+  \fill[blue!22] (0,1.5) rectangle (2.48,2.05);
+  \fill[red!55] (2.48,1.5) rectangle (2.52,2.05);
+  \fill[blue!22] (2.52,1.5) rectangle (5.18,2.05);
+  \fill[red!55] (5.18,1.5) rectangle (5.22,2.05);
+  \fill[blue!22] (5.22,1.5) rectangle (7.48,2.05);
+  \fill[red!55] (7.48,1.5) rectangle (7.52,2.05);
+  \fill[blue!22] (7.52,1.5) rectangle (9.96,2.05);
+  \fill[red!55] (9.96,1.5) rectangle (10,2.05);
   \draw[black!55] (0,1.5) rectangle (10,2.05);
   \node[left,font=\footnotesize,black!75,align=right] at (-0.15,1.78) {真实时间轴};
   \node[right,font=\footnotesize,black!75] at (10.15,1.78) {\(98.4\%\) 正常};
@@ -134,10 +134,10 @@ Q=\begin{bmatrix}-\lambda&\lambda\\ \mu&-\mu\end{bmatrix}.
   \draw[black!55] (0,0.35) rectangle (10,0.9);
   \node[left,font=\footnotesize,black!75,align=right] at (-0.15,0.63) {跳跃计数轴};
   \node[right,font=\footnotesize,black!75] at (10.15,0.63) {各 \(50\%\)};
-  \draw[black!30,dashed] (2.46,1.45) -- (1.25,0.95);
-  \draw[black!30,dashed] (5.16,1.45) -- (3.75,0.95);
-  \draw[black!30,dashed] (7.46,1.45) -- (6.25,0.95);
-  \draw[black!30,dashed] (9.94,1.45) -- (8.75,0.95);
+  \draw[black!30,dashed] (2.50,1.45) -- (1.25,0.95);
+  \draw[black!30,dashed] (5.20,1.45) -- (3.75,0.95);
+  \draw[black!30,dashed] (7.50,1.45) -- (6.25,0.95);
+  \draw[black!30,dashed] (9.98,1.45) -- (8.75,0.95);
 \end{tikzpicture}
 
 \emph{同一段历史，两种量法。上面按真实时间量，故障只是几条细缝；下面按跳跃次数量，每次访问被拉成等宽，正常与故障各占一半。虚线连着的是同一批事件。跳链把每次访问平等计数，时间占比则按停留时长加权，两者相差的正是那个权重。}

@@ -41,8 +41,9 @@ x\begin{pmatrix}1\\3\end{pmatrix}+y\begin{pmatrix}2\\-1\end{pmatrix}=\begin{pmat
     \draw[red!65!black,thick] (1.2,-0.4) -- (2.5,3.5);
     \fill (1.857,1.571) circle (1.7pt);
     \node[blue!65!black,font=\footnotesize,rotate=-19] at (0.85,2.6) {\(x+2y=5\)};
-    \node[red!65!black,font=\footnotesize] at (3.1,3.1) {\(3x-y=4\)};
-    \node[font=\footnotesize] at (2.55,1.15) {解};
+    \node[red!65!black,font=\footnotesize,anchor=south] at (2.55,3.6) {\(3x-y=4\)};
+    \node[font=\footnotesize] at (2.45,1.95) {解};
+    \draw[black!55] (2.28,1.86) -- (1.95,1.63);
   \end{scope}
   \node[font=\footnotesize] at (1.4,-0.85) {行视角：约束交在哪里};
   \begin{scope}[shift={(4.2,0.2)},x=0.5cm,y=0.5cm]
@@ -57,7 +58,7 @@ x\begin{pmatrix}1\\3\end{pmatrix}+y\begin{pmatrix}2\\-1\end{pmatrix}=\begin{pmat
     \draw[->,black,very thick] (0,0) -- (5,4);
     \node[right,font=\footnotesize] at (5.0,4.0) {\(b\)};
     \node[right,font=\footnotesize,black!65] at (4.4,0.9) {\(\tfrac{13}{7}a_1\)};
-    \node[below,font=\footnotesize,black!65] at (2.3,-1.9) {\(\tfrac{11}{7}a_2\)};
+    \node[right,font=\footnotesize,black!65] at (3.45,-1.45) {\(\tfrac{11}{7}a_2\)};
   \end{scope}
   \node[font=\footnotesize] at (5.6,-0.85) {列视角：目标能不能被拼出来};
 \end{tikzpicture}
@@ -116,7 +117,7 @@ AB=\begin{pmatrix}Ab_1&\cdots&Ab_p\end{pmatrix}.
   \draw[black!50,fill=black!4] (7.0,0) rectangle (8.5,1.0);
   \node at (7.75,0.5) {\(\R^{m}\)};
   \draw[->,thick,black!60] (0.75,-0.15) .. controls (2.2,-1.4) and (6.3,-1.4) .. (7.75,-0.15);
-  \node[font=\footnotesize,black!60] at (4.25,-1.15) {\(AB\)：一步走完同一条路的那个矩阵};
+  \node[font=\footnotesize,black!60] at (4.25,-1.55) {\(AB\)：一步走完同一条路的那个矩阵};
 \end{tikzpicture}
 
 \emph{求和指标跑遍的是中间空间 \(\R^{n}\) 的维数。尺寸必须对上，不是排版要求，而是接力接不上就没有复合可言。}

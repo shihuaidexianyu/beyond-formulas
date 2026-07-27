@@ -1,0 +1,125 @@
+\section{加多少噪声由敏感度决定}
+\label{sec:17-Constrained-Guarantees/01-Differential-Privacy/02}
+
+一个具体任务：数据库里有 \(n\) 条就诊记录，要对外发布``其中多少人被诊断为某种疾病''这一个数。上一节已经说清楚，直接发布真实计数不满足任何有意义的隐私定义——张三在与不在，答案相差 1，两个分布完全可分。所以要加噪声。
+
+问题只剩下加多少。会上出现了三种提议。一种是按数据规模来，\(n\) 越大加得越多，理由是``数据多的时候泄露的也多''。一种是按结果的量级来，答案是几万就加几百，理由是``相对误差控制在百分之一''。还有一种干脆说加到肉眼看不出规律为止。
+
+三种都不对，而且错的方式相同：它们都在盯着答案本身，而定义关心的根本不是答案有多大，是\textbf{答案对一条记录的改动有多敏感}。
+
+\subsection{敏感度：一条记录最多能把答案推多远}
+
+\begin{definition}[\(\ell_1\) 敏感度]
+设查询 \(f\) 把数据集映到 \(\R^k\)。它的 \(\ell_1\) 敏感度为
+\[
+\Delta_1 f\;=\;\max_{D\sim D'}\;\norm{f(D)-f(D')}_1 ,
+\]
+最大值取遍所有相邻数据集对。
+\end{definition}
+
+这个量与手上这份数据无关，它是对\textbf{所有可能的数据集}取的最大值。计数查询的 \(\Delta_1 f=1\)：改动一条记录，计数至多变化 1，无论数据集里有一百人还是一千万人。直方图查询也是 1（替换型相邻下是 2）：一条记录只落在一个桶里，它的进出只影响那一个桶的高度。
+
+有了这个量，噪声的规模就定下来了。
+
+\begin{theorem}[Laplace 机制]
+设 \(b=\Delta_1 f/\varepsilon\)，机制
+\[
+\mathcal M(D)=f(D)+(Z_1,\dots,Z_k),\qquad Z_i\stackrel{\iid}{\sim}\mathrm{Lap}(0,b)
+\]
+满足 \(\varepsilon\)-差分隐私，其中 \(\mathrm{Lap}(0,b)\) 的密度为 \(\frac{1}{2b}e^{-\abs{z}/b}\)。
+\end{theorem}
+
+证明骨架只有三步。记 \(p_D\) 为 \(\mathcal M(D)\) 的密度。对任意输出点 \(t\in\R^k\)，
+\[
+\begin{aligned}
+\frac{p_D(t)}{p_{D'}(t)}
+&=\prod_{i=1}^{k}\exp\!\Big(\frac{\abs{t_i-f_i(D')}-\abs{t_i-f_i(D)}}{b}\Big)\\
+&\le\prod_{i=1}^{k}\exp\!\Big(\frac{\abs{f_i(D)-f_i(D')}}{b}\Big)
+=\exp\!\Big(\frac{\norm{f(D)-f(D')}_1}{b}\Big)
+\;\le\;\exp\!\Big(\frac{\Delta_1 f}{b}\Big)=e^{\varepsilon}.
+\end{aligned}
+\]
+第一步是把 Laplace 密度代进去，指数上的常数 \(1/(2b)\) 约掉；第二步用三角不等式 \(\abs{u}-\abs{v}\le\abs{u-v}\)；第三步用敏感度的定义。逐点的密度比受控之后，对任意可测集 \(S\) 积分即得 \(P(\mathcal M(D)\in S)\le e^{\varepsilon}P(\mathcal M(D')\in S)\)。
+
+条件对账：第二步要求 Laplace 密度的指数里是绝对值，换成 Gaussian 的平方就失效——那一步会留下一个随 \(t\) 增长的余项，这是后面 Gaussian 机制必须配 \(\delta\) 的根源。第三步要求 \(\Delta_1 f\) 是对所有相邻对取的最大值；如果只在手上这份数据的邻域里估了一个``经验敏感度''，最大值的上界就不成立，定理的结论随之作废。各分量噪声独立这一条也不能省：相关的噪声会让乘积那一步拆不开。最后，\(\Delta_1 f\) 必须有限——没有这个前提，\(b\) 无从取值。
+
+\subsection{同样的噪声，在一百万人身上是尘埃，在一百人身上是灾难}
+
+\(\Delta_1 f=1\) 与 \(n\) 无关，这句话是整节的支点。取 \(\varepsilon=0.1\)，Laplace 噪声的标准差是 \(\sqrt2\,\Delta_1 f/\varepsilon\approx 14.1\)。这个 \(14.1\) 是一个绝对数字，它不随数据集变大而变大，也不随数据集变小而变小。
+
+在一百万条记录上，真实计数可能是五万，加减十几毫无影响。在一百条记录上，真实计数可能是七，加减十几之后连正负号都保不住——发布出去的数字可以是 \(-6\)，也可以是 \(21\)。同一个 \(\varepsilon\)，同一个机制，在两种规模上的可用性天差地别。
+
+把这件事画出来更清楚。计数本身的抽样波动按 \(\sqrt{n}\) 增长（见\hyperref[sec:11-Mathematical-Statistics/01-Statistical-Models/03]{``抽样分布连接数据与推断''}），而隐私噪声是一条水平线。
+
+\begin{center}
+\begin{tikzpicture}[x=1.6cm,y=1.1cm,>=stealth,font=\small]
+  \fill[orange!13] (1,0) rectangle (2.9,3.0);
+  \draw[->,black!60] (0.85,0) -- (6.5,0) node[right,font=\footnotesize] {\(n\)};
+  \draw[->,black!60] (1,-0.1) -- (1,3.15);
+  \foreach \t/\lab in {2/{\(10^2\)},3/{\(10^3\)},4/{\(10^4\)},5/{\(10^5\)},6/{\(10^6\)}} {
+    \draw[black!60] (\t,0) -- (\t,-0.1);
+    \node[below,font=\footnotesize] at (\t,-0.12) {\lab};
+  }
+  \draw[very thick,blue!65] (1,1.15) -- (6.2,1.15);
+  \draw[very thick,orange!85!black] (1,0.2) -- (6.2,2.7);
+  \fill[black] (2.9,1.15) circle (2pt);
+  \draw[black!55,dashed] (2.9,0) -- (2.9,1.15);
+  \node[below,font=\footnotesize,black!70] at (2.9,-0.42) {\(n\approx 800\)};
+  \node[blue!65,anchor=west,font=\footnotesize] at (4.15,0.85)
+    {隐私噪声 \(\sqrt2\,\Delta_1 f/\varepsilon\)};
+  \node[orange!85!black,anchor=east,font=\footnotesize] at (5.15,2.55)
+    {抽样波动 \(\propto\sqrt n\)};
+  \node[align=center,font=\footnotesize,black!70] at (1.95,2.6)
+    {隐私噪声\\压过信号};
+  \node[rotate=90,anchor=south,font=\footnotesize,black!70] at (0.72,1.5)
+    {标准差（对数刻度）};
+\end{tikzpicture}
+\end{center}
+
+\emph{要记住的是这两条线的斜率不同：抽样波动随数据增长，隐私噪声不随数据增长。于是隐私对小样本格外昂贵，而在大样本上几乎是免费的——这条判断决定了差分隐私能不能用在你的场景里，比调 \(\varepsilon\) 重要得多。}
+
+图里左边那块阴影区域是实践中最容易出事的地方。分组统计尤其危险：整体样本有几十万，看上去在图的右侧，可一旦按地区、年龄段、诊断类别做交叉分组，每个格子里只剩几十个人，每个格子都退回到左侧。真实系统里的隐私事故很少发生在总体查询上，多半发生在切片查询上，原因就在这张图。
+
+\subsection{均值查询的敏感度是无穷大}
+
+计数查询的敏感度好算，是因为每条记录对答案的贡献天然有界。均值查询没有这个便利。
+
+设 \(f(D)=\frac1n\sum_i x_i\)，把一条记录从 \(x\) 换成 \(x'\)，答案变化 \(\abs{x-x'}/n\)。如果 \(x\) 的取值范围没有限制，这个量可以任意大：一条把收入填成 \(10^{12}\) 的记录，能把平均收入推到任何地方。于是 \(\Delta_1 f=\infty\)，Laplace 机制的 \(b\) 无法取值，定理直接不适用。
+
+标准做法是先裁剪：固定一个区间 \([a,c]\)，把每个 \(x_i\) 截断到区间内，再求均值。裁剪之后 \(\Delta_1 f=(c-a)/n\)，噪声标准差是 \(\sqrt2 (c-a)/(n\varepsilon)\)，随 \(n\) 下降。
+
+这里有一处必须说清楚的取舍。裁剪边界 \(c\) 取小了，真实值超出边界的记录被压回边界，均值被系统性低估，这是一个偏差；取大了，敏感度随之变大，噪声方差跟着变大。总误差是偏差平方加方差，形状与\hyperref[sec:11-Mathematical-Statistics/02-Point-Estimation/01]{``偏差、方差与均方误差''}里那条曲线完全一样，只是这里的方差来自人为注入的噪声而不是抽样。
+
+更麻烦的是，\(c\) 该取多少本身依赖数据的分布——而看一眼数据再定 \(c\)，这一眼就已经泄露了信息，它必须被算进预算里。实践中要么用公开的先验知识定边界（收入不超过某个已知上限），要么先花一小份 \(\varepsilon\) 用隐私的方式估一个分位数再定边界。前者不花预算但可能定得离谱，后者定得准但先扣掉一部分预算。重尾数据上这个选择格外难办，因为分位数与最大值可以差好几个数量级（见\hyperref[sec:05-Probability/06-Common-Distributions/07]{``重尾分布：当均值与方差失效时''}）。
+
+\subsection{Gaussian 机制换一种范数，也换一种保证}
+
+Laplace 机制配 \(\ell_1\) 敏感度，是因为多维 Laplace 噪声的对数密度里出现的正是 \(\ell_1\) 范数。若把噪声换成各向同性的 Gaussian，对数密度里出现的就是 \(\ell_2\) 范数，相应地要用
+
+\[
+\Delta_2 f=\max_{D\sim D'}\norm{f(D)-f(D')}_2 .
+\]
+
+对 \(k\) 维查询，两个敏感度满足 \(\Delta_2 f\le\Delta_1 f\le\sqrt k\,\Delta_2 f\)。当一条记录同时影响很多个分量时（比如一个 \(k\) 维梯度向量），\(\Delta_1\) 可以比 \(\Delta_2\) 大 \(\sqrt k\) 倍，此时 Gaussian 机制加的噪声总量小得多。高维场景几乎都用它，理由就在这个因子上。
+
+为此让出的是保证的形式。前面证明 Laplace 机制时，关键一步是 \(\abs{t-f(D')}-\abs{t-f(D)}\le\Delta_1 f\)，左边与 \(t\) 无关地被控住了。Gaussian 密度的指数是平方，同样的差写出来是
+\[
+\frac{\norm{t-f(D')}_2^2-\norm{t-f(D)}_2^2}{2\sigma^2},
+\]
+展开后含有一项与 \(t\) 线性相关的内积，它随 \(t\) 走向尾部而无界增长——正是上一节那张图里跑出带子的那条直线。所以 Gaussian 机制不可能满足纯 \(\varepsilon\)-差分隐私。补救办法是把尾部那一小块概率交给 \(\delta\)：对 \(\varepsilon\in(0,1)\)，取
+\[
+\sigma\;\ge\;\frac{\Delta_2 f}{\varepsilon}\sqrt{2\ln(1.25/\delta)}
+\]
+即得 \((\varepsilon,\delta)\)-差分隐私。证明思路是把输出空间切成两块：内积项受控的那一块用 Gaussian 尾部估计（见\hyperref[sec:05-Probability/06-Common-Distributions/05]{``Gaussian 与多元 Gaussian''}）说明比值不超过 \(e^\varepsilon\)，剩下那一块的概率由 \(\delta\) 兜住，用的是标准的 Union Bound 手法（见\hyperref[sec:05-Probability/07-Transforms-and-Bounds/02]{``从 Union Bound 到 Markov 与 Chebyshev''}）。
+
+条件对账里有一条容易被忽略：\(\sqrt{2\ln(1.25/\delta)}\) 这个式子只在 \(\varepsilon<1\) 时有效，很多实现里 \(\varepsilon\) 被调到 3 或 5 却仍套用这个公式，得到的 \(\sigma\) 偏小，实际保证达不到声称的水平。这类错误不会在运行时报错，只会让参数表上的数字失去含义。
+
+\subsection{噪声的形状也在传递信息}
+
+还有一件事值得单独说：加噪之后的输出未必落在原本合法的取值范围内。计数加了 Laplace 噪声可能变成负数或小数，比例可能超过 1，直方图的各桶之和可能不等于总数。
+
+把结果强行截断到合法范围——负数改成 0——是可以的，因为这属于后处理（下一节会证明后处理不削弱保证）。但如果调整方式依赖真实数据，比如``把各桶按真实总数重新归一''，那就不是后处理，而是一次新的、未经计算的数据访问，保证随之失效。
+
+同样的道理适用于报告方式。发布``真实答案约为 5000，误差在正负 30 以内''这样一句话，如果那个误差范围是根据真实答案算的，它本身就泄露了信息。合规的做法是发布加噪结果和\textbf{事先固定}的噪声参数，让使用者自己算区间——噪声参数与数据无关，公开它不花预算。
+
+到这里，单次发布的账已经算清：敏感度决定噪声规模，噪声规模决定可用性，数据规模决定这个噪声是尘埃还是灾难。但真实系统从来不只发布一次。同一份数据上跑第二个查询、第三个查询时，前面的保证还剩多少？这是下一节的问题，答案比多数人预期的要严峻。

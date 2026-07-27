@@ -55,7 +55,7 @@ I=\int_0^1 g(x)\cdot1\,dx=\E[g(X)],\qquad X\sim\Uniform(0,1).
     \draw[very thick,blue!55!black] (2,-1) -- (8,-4);
   \end{scope}
   \node[left,black!70] at (3.15,-3.25) {\(d=1\)};
-  \node[left,black!70] at (4.35,-3.15) {\(d=2\)};
+  \node[left,black!70] at (4.5,-3.9) {\(d=2\)};
   \node[right,black!70] at (8.05,-2.2) {网格法 \(d=10\)};
   \node[right,black!70] at (8.05,-1.6) {网格法 \(d=20\)};
   \node[right,black!70] at (8.05,-4.0) {Monte Carlo，任意 \(d\)};
@@ -122,7 +122,7 @@ n_{\mathrm{eff}}\approx\frac{n}{1+2\sum_{k\ge1}\rho_k},
 
 \subsection{收敛得很稳，也可能稳在错误答案上}
 
-最后一条边界，也是最容易在工程里付出代价的一条：不要把``误差''和``Monte Carlo 误差''划等号。标准误只度量随机波动那一部分，而它旁边至少还站着三种误差。
+最后一条边界，也是最容易在工程里吃亏的一条：不要把``误差''和``Monte Carlo 误差''划等号。标准误只度量随机波动那一部分，而它旁边至少还站着三种误差。
 
 离散化偏差来自你解的其实是近似模型，比如用 Euler--Maruyama 格式模拟随机微分方程；它不随样本量减小，只随步长减小。模型偏差来自目标分布本身不代表现实，积分算得再准也只是模型内部的量。初始偏差来自 MCMC 尚未进入平稳状态，前若干个样本携带的是初始点的信息而不是目标分布的信息。
 

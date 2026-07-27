@@ -61,7 +61,7 @@ D_{\mathbf u}f(\mathbf a)=\nabla f(\mathbf a)^{\trans}\mathbf u
   \node[right,blue!70!black] at (1.66,1.55) {东北：\(4.24\)};
   \node[right,black!70] at (1.92,0.98) {正 \(x\)：\(2\)};
   \node[right,black!60] at (1.70,0.50) {切向：\(0\)};
-  \node[black!45] at (-1.35,1.30) {\(f=5\)};
+  \node[black!45,fill=white,inner sep=1pt] at (-1.35,1.30) {\(f=5\)};
 \end{tikzpicture}
 
 \emph{三条等高线来自 \(f=x^2+2y^2\)。梯度垂直穿过 \((1,1)\) 处的等高线，其余方向的变化率按与它的夹角余弦打折；沿等高线切向恰好折到零。等高线越挤，\(\norm{\nabla f}\) 越大。}
@@ -92,8 +92,8 @@ D_{\mathbf u}f(\mathbf a)=\nabla f(\mathbf a)^{\trans}\mathbf u
   \draw[->,red!70!black,very thick] (0,0) -- (0.5,0.866);
   \draw[->,blue!70!black,very thick] (0,0) -- (1.483,0.269);
   \fill (0,0) circle (1.6pt);
-  \node[left,red!70!black] at (0.42,0.95) {\(\nabla f\)};
-  \node[below,blue!70!black] at (1.30,0.18) {\(M^{-1}\nabla f\)};
+  \node[red!70!black] at (0.30,1.20) {\(\nabla f\)};
+  \node[below,blue!70!black,fill=white,inner sep=1pt] at (1.30,0.13) {\(M^{-1}\nabla f\)};
   \node[black!55] at (-0.78,-0.72) {欧氏单位球};
   \node[black!55] at (1.75,-0.72) {\(M\) 单位球};
 \end{tikzpicture}

@@ -34,12 +34,12 @@
   \fill[blue!70!black] (0.25,0.88) circle (2.3pt);
   \fill[blue!70!black] (0.62,0.63) circle (2.3pt);
   \fill[blue!70!black] (0.83,0.25) circle (2.3pt);
-  \node[font=\small,left] at (0.235,0.90) {低温};
-  \node[font=\small,above right] at (0.625,0.635) {默认};
-  \node[font=\small,right] at (0.845,0.25) {高温};
-  \node[blue!70!black,font=\small] at (0.30,0.52) {同一组权重};
+  \node[font=\small,anchor=north east] at (0.235,0.855) {低温};
+  \node[font=\small,above right] at (0.645,0.645) {默认};
+  \node[font=\small,anchor=north east] at (0.815,0.215) {高温};
+  \node[blue!70!black,font=\small] at (0.26,0.52) {同一组权重};
   \node[green!35!black,font=\small] at (0.72,0.99) {换一个更强的模型};
-  \draw[->,gray!75] (0.66,0.70) -- (0.74,0.82);
+  \draw[->,gray!75] (0.50,0.745) -- (0.62,0.865);
 \end{tikzpicture}
 
 \emph{调温度是在同一条曲线上滑动，模型变强是整条曲线往外挪。单个 FID 数值分不清这两件事，而它们对应完全不同的行动。}
@@ -99,7 +99,7 @@ p_\theta=0.99\,q+0.01\,p_{\text{data}}.
 
 \subsection{回到那个共同的困难}
 
-四条路线现在都放回了同一个框架：都在让 \(p_\theta\) 靠近 \(p_{\text{data}}\)，区别只在用哪个散度量差距、以及怎样绕开算不出来的那一项。VAE 用下界绕开边缘似然，流用可逆性让归一化常数恒为一，GAN 干脆不写密度、把散度的估计外包给一个网络，代价分别是模糊、架构受限、以及理论保证的缺失。
+四条路线现在都放回了同一个框架：都在让 \(p_\theta\) 靠近 \(p_{\text{data}}\)，区别只在用哪个散度量差距、以及怎样绕开算不出来的那一项。VAE 用下界绕开边缘似然，流用可逆性让归一化常数恒为一，GAN 干脆不写密度、把散度的估计外包给一个网络，三者各自赔进去的是模糊、架构受限、以及理论保证的缺失。
 
 放到一起看，剩下的困难其实是同一个：训练开始时 \(p_\theta\) 和 \(p_{\text{data}}\) 离得很远，而所有散度在``离得远''的时候都不好用——JS 直接饱和成常数，两个 KL 方向则被迫在覆盖与贴合之间做极端取舍，于是有了模糊和模式坍缩。换一个更聪明的散度只能缓解，改不掉这个结构。
 

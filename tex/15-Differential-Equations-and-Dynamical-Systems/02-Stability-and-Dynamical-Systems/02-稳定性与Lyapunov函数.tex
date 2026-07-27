@@ -41,13 +41,13 @@
   \draw[gray] (0,0) ellipse (0.8 and 0.57);
   \draw[gray] (0,0) ellipse (0.35 and 0.25);
   \node[gray] at (2.35,1.25) {\small \(V=c_1\)};
-  \node[gray] at (1.75,-1.15) {\small \(V=c_2<c_1\)};
+  \node[gray] at (2.55,-1.05) {\small \(V=c_2<c_1\)};
   \draw[very thick] plot[domain=0:14,samples=90,variable=\t]
     ({1.85*exp(-0.115*\t)*cos(\t r)},{1.31*exp(-0.115*\t)*sin(\t r)});
   \fill (0,0) circle (1.8pt);
-  \node[below right] at (0.03,-0.05) {\small \(u^\ast\)};
-  \draw[->] (1.85,0.05) -- (1.5,0.6);
-  \node[right] at (1.9,0.45) {\small 起点};
+  \node[below right,fill=white,inner sep=1pt] at (0.03,-0.05) {\small \(u^\ast\)};
+  \draw[->] (2.35,0.55) -- (1.92,0.08);
+  \node[right] at (2.3,0.68) {\small 起点};
   \node at (0,-2.0) {\small \(\dot V\le0\)：轨迹只能穿向内层，永不外出};
 \end{tikzpicture}
 \end{center}

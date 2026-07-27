@@ -78,19 +78,19 @@ F_X(x)=P(X\le x).
 \begin{tikzpicture}[x=2.8cm,y=2cm,>=stealth,every node/.style={font=\small}]
   \begin{scope}[xshift=-2.2cm]
     \draw[->] (-0.08,0) -- (1.15,0) node[right] {\(x\)};
-    \draw[->] (0,-0.05) -- (0,2.2) node[above] {\(f_X(x)\)};
+    \draw[->] (0,-0.05) -- (0,2.2) node[above left] {\(f_X(x)\)};
     \draw[blue!70!black,thick] (0,0) -- (1,2);
     \fill[blue!20] (0.5,0) -- (0.5,1) -- (0.75,1.5) -- (0.75,0) -- cycle;
     \draw[dashed] (0.5,0) -- (0.5,1);
     \draw[dashed] (0.75,0) -- (0.75,1.5);
-    \node at (0.63,0.35) {面积};
+    \node[font=\footnotesize] at (0.63,0.35) {面积};
     \node at (0.5,-0.25) {\(a\)};
     \node at (0.75,-0.25) {\(b\)};
     \node at (0.5,2.35) {PDF：局部浓度};
   \end{scope}
-  \begin{scope}[xshift=1.4cm]
+  \begin{scope}[xshift=2.0cm]
     \draw[->] (-0.08,0) -- (1.15,0) node[right] {\(x\)};
-    \draw[->] (0,-0.05) -- (0,1.2) node[above] {\(F_X(x)\)};
+    \draw[->] (0,-0.05) -- (0,1.2) node[above left] {\(F_X(x)\)};
     \draw[blue!70!black,thick] plot[domain=0:1,samples=50] (\x,{\x*\x});
     \draw[dashed] (0.5,0) -- (0.5,0.25) -- (0,0.25);
     \draw[dashed] (0.75,0) -- (0.75,0.5625) -- (0,0.5625);
@@ -179,4 +179,4 @@ Q(p)=\inf\set{x\in\R\given F_X(x)\ge p},\qquad 0<p<1.
 
 支撑集是另一处容易含糊的地方。它指的是那些``任意小的邻域都有正概率''的点构成的闭集，判断依据是邻域而不是该点的密度值。\(f_X(x)=2x\) 在 \(x=0\) 处密度为零，可 \(P(0\le X<\varepsilon)=\varepsilon^2>0\) 对每个 \(\varepsilon>0\) 都成立，所以 0 照样在支撑集里。
 
-分位数函数已经把``给概率求位置''这条路打通了。下一节反着用它：喂一个均匀随机数进去，出来的是服从目标分布的样本。这不是一个孤立的技巧——它是随机变量变换的一个特例，而变换公式里那个导数因子，正是密度在拉伸和压缩下的记账方式。
+分位数函数已经把``给概率求位置''这条路打通了。下一节反着用它：喂一个均匀随机数进去，出来的是服从目标分布的样本。这不是一个孤立的技巧——它是随机变量变换的一个特例，而变换公式里那个导数因子，正是密度在拉伸和压缩下的换算方式。

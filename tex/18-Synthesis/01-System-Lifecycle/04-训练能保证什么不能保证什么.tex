@@ -1,5 +1,5 @@
 \section{训练能保证什么不能保证什么}
-\label{sec:17-Synthesis/01-System-Lifecycle/04}
+\label{sec:18-Synthesis/01-System-Lifecycle/04}
 
 梯度检查通过了，损失还是不降。
 
@@ -40,7 +40,7 @@
 
 \subsection{凸与非凸之间隔着一条真实的分界}
 
-\hyperref[sec:09-Convex-Optimization/01-Optimization-Foundations/02]{``局部更好为何还不够''}提出的是整个优化理论的出发问题：算法只能看见当前点附近，凭什么它找到的局部最好就是全局最好。凸性给出的回答干脆——\hyperref[sec:09-Convex-Optimization/03-Convex-Functions/02]{``切平面为何是全局下界''}说明凸函数在任意一点的切平面都落在函数图像下方，于是梯度为零这个纯局部的条件，直接推出该点在整个定义域上最小。这是一条定理，不是经验规律，它的代价是要求函数确实凸。
+\hyperref[sec:09-Convex-Optimization/01-Optimization-Foundations/02]{``局部更好为何还不够''}提出的是整个优化理论的出发问题：算法只能看见当前点附近，凭什么它找到的局部最好就是全局最好。凸性给出的回答干脆——\hyperref[sec:09-Convex-Optimization/03-Convex-Functions/02]{``切平面为何是全局下界''}说明凸函数在任意一点的切平面都落在函数图像下方，于是梯度为零这个纯局部的条件，直接推出该点在整个定义域上最小。这是一条定理，不是经验规律，换来它的条件是函数确实凸。
 
 非凸问题里这条推理链断在第一环。梯度为零只说明到了驻点，而驻点可以是局部极小、局部极大或鞍点。\hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/02]{``二阶结构区分局部极小与鞍点''}指出在高维空间里鞍点比局部极小常见得多——一个驻点要成为局部极小，需要 Hessian 的所有特征值同号，而维数越高这件事越难同时发生。训练平台期很多时候不是陷进了局部极小，是在一片近乎平坦的区域里方向不明。
 

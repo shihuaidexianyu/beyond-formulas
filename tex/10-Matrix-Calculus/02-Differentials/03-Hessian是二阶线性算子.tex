@@ -90,7 +90,7 @@ f(x+h)=f(x)+\nabla f(x)^{\trans}h+\tfrac12h^{\trans}\nabla^2f(x)h+o(\norm{h}^2)
 \ip{H}{\mathcal H_X[H]}_F=\trace\bigl(H^{\trans}A^{\trans}AH\bigr)=\norm{AH}_F^2\ge0,
 \]
 
-对所有 \(H\) 成立，所以这个目标是凸的。全程没有出现四阶数组，也没有出现一个下标。注意 \(\mathcal H_X[H]=A^{\trans}AH\) 这个式子本身就是可以直接编码的：给一个 \(H\)，做两次矩阵乘法即得，代价与一次前向相当。
+对所有 \(H\) 成立，所以这个目标是凸的。全程没有出现四阶数组，也没有出现一个下标。注意 \(\mathcal H_X[H]=A^{\trans}AH\) 这个式子本身就是可以直接编码的：给一个 \(H\)，做两次矩阵乘法即得，和一次前向差不多贵。
 
 \subsection{Hessian-向量积不需要那个矩阵}
 
@@ -100,7 +100,7 @@ f(x+h)=f(x)+\nabla f(x)^{\trans}h+\tfrac12h^{\trans}\nabla^2f(x)h+o(\norm{h}^2)
 \nabla^2f(x)\,v=D(\nabla f)(x)[v],
 \]
 
-也就是梯度这个向量值函数沿 \(v\) 的方向导数。有两条现成的算法。一条是对梯度做一次前向模式微分，即在反向传播之上再套一层 JVP，业内叫 forward-over-reverse。另一条是先算标量 \(g(x)=\nabla f(x)^{\trans}v\)（把 \(v\) 当常量），再对它做一次普通的反向传播，因为 \(\nabla g=\nabla^2f\,v\)。两条路都只需要常数倍于一次梯度计算的代价，占用的内存也是 \(O(n)\) 而不是 \(O(n^2)\)。
+也就是梯度这个向量值函数沿 \(v\) 的方向导数。有两条现成的算法。一条是对梯度做一次前向模式微分，即在反向传播之上再套一层 JVP，业内叫 forward-over-reverse。另一条是先算标量 \(g(x)=\nabla f(x)^{\trans}v\)（把 \(v\) 当常量），再对它做一次普通的反向传播，因为 \(\nabla g=\nabla^2f\,v\)。两条路都只需要常数倍于一次梯度计算的开销，占用的内存也是 \(O(n)\) 而不是 \(O(n^2)\)。
 
 有了这个原语，一批二阶方法在高维下就活了过来。Newton-CG 用共轭梯度求解 \(\nabla^2f(x)p=-\nabla f(x)\)，每一轮只要一次 HVP，从不组装矩阵；这类``只需要矩阵作用而不需要矩阵''的迭代法是\hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/04]{``大型稀疏系统与 Krylov 迭代''}的主题，那里讲清楚了为什么几十轮就能给出够用的解。Lanczos 用同样的原语估计谱的两端，可以回答``当前这一点附近有多少负曲率''，这正是\hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/02]{``二阶结构区分局部极小与鞍点''}里要判断的事。影响函数、曲率诊断、二阶信赖域方法，用的都是这一个接口。至于 Newton 方向本身为什么值得费这个劲，见\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/02]{``Newton 法用曲率校正方向''}。
 
@@ -116,6 +116,6 @@ f(x+h)=f(x)+\nabla f(x)^{\trans}h+\tfrac12h^{\trans}\nabla^2f(x)h+o(\norm{h}^2)
 
 Gauss--Newton 直接扔掉第二项，只用 \(J_r^{\trans}J_r\)。理由有两层：它天然半正定，因为 \(h^{\trans}J_r^{\trans}J_rh=\norm{J_rh}_2^2\ge0\)，于是解出的方向一定是下降方向；而且它只需要一阶导数信息，代价低得多。什么时候可信也说得清楚——第二项带着残差 \(r_i\) 作系数，残差小或模型接近线性时它就小。远离解、残差很大时，被丢掉的可能恰是关键曲率，Levenberg--Marquardt 再加一项阻尼把稳定性找补回来。
 
-这个例子给出的判断值得单独记下：二阶近似并非越完整越好。一个结构化的近似可以换来正定性、更低的成本和更稳的方向，代价是它只在某个区域内可信，而那个区域必须说清楚。深度学习里流行的 K-FAC、各种对角或 Kronecker 近似，走的都是同一条路子。
+这个例子给出的判断值得单独记下：二阶近似并非越完整越好。一个结构化的近似可以换来正定性、更低的成本和更稳的方向，让出的是普遍性——它只在某个区域内可信，而那个区域必须说清楚。深度学习里流行的 K-FAC、各种对角或 Kronecker 近似，走的都是同一条路子。
 
 矩阵微积分到这里已经备齐了一阶与二阶的工具。剩下的是把它用熟：迹、逆、行列式这些反复出现的结构各有一套整理套路，下一单元把它们逐个拆开。

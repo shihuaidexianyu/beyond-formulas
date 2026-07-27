@@ -38,11 +38,11 @@
 % 摊平后的瓣（必留缝隙）
 \foreach \k in {0,1,2,3} {
   \draw[blue!70!black] plot[domain=0:1,samples=30]
-    ({11.5+0.78*\k+0.30*sin(180*\x)},{0.28+2.22*\x});
+    ({11.95+0.78*\k+0.30*sin(180*\x)},{0.28+2.22*\x});
   \draw[blue!70!black] plot[domain=0:1,samples=30]
-    ({11.5+0.78*\k-0.30*sin(180*\x)},{0.28+2.22*\x});
+    ({11.95+0.78*\k-0.30*sin(180*\x)},{0.28+2.22*\x});
 }
-\node[font=\small] at (12.7,-0.55) {缝隙合不拢};
+\node[font=\small] at (13.15,-0.55) {缝隙合不拢};
 \end{tikzpicture}
 \end{center}
 

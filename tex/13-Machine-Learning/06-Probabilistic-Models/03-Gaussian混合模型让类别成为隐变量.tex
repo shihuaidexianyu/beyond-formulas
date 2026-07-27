@@ -73,7 +73,7 @@ p(x_i)=\sum_{k=1}^K\pi_k\,\mathcal N(x_i\given\mu_k,\Sigma_k).
 {\sum_j\pi_j\,\mathcal N(x_i\given\mu_j,\Sigma_j)}.
 \]
 
-\(\gamma_{ik}\) 通常叫 responsibility，读作成分 \(k\) 对这个样本负多少责任。它和 K-means 的硬指派形成对照：落在两峰之间那些通话时长为四分钟的电话，会得到 \(0.5\) 上下的责任值，模型如实承认自己分不清。K-means 必须把它交给某一个簇，代价是丢掉这份不确定性，细节见\hyperref[sec:13-Machine-Learning/05-Clustering-and-Data-Geometry/01]{``K-means 在交替下降中制造簇''}。
+\(\gamma_{ik}\) 通常叫 responsibility，读作成分 \(k\) 对这个样本负多少责任。它和 K-means 的硬指派形成对照：落在两峰之间那些通话时长为四分钟的电话，会得到 \(0.5\) 上下的责任值，模型如实承认自己分不清。K-means 必须把它交给某一个簇，这份不确定性就此丢掉，细节见\hyperref[sec:13-Machine-Learning/05-Clustering-and-Data-Geometry/01]{``K-means 在交替下降中制造簇''}。
 
 麻烦在于这个公式要求参数已知。反过来，若每个 \(Z_i\) 已知，参数也很好办：按成分分组，各自算加权均值和加权协方差，与有标签的 GDA 完全一样。两个方向各自简单，可现在两端都空着。直接写出观测的 log-likelihood
 

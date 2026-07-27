@@ -49,7 +49,7 @@ g'(\theta)&=\frac{\partial}{\partial\theta}\int T(x)\,p_\theta(x)\,dx
   \draw[black!60,domain=1.15:9.4,samples=61,smooth] plot (\x,{4.6/\x});
   \foreach \nx in {1.5,2.5,4,6,8.5}
     \fill[blue!55!black] (\nx,{2.4/\nx+0.11}) circle (2.4pt);
-  \node[font=\footnotesize,anchor=west] at (9.5,0.255) {\(1/I_n(\theta)\)};
+  \node[font=\footnotesize,anchor=west] at (9.55,0.62) {\(1/I_n(\theta)\)};
   \draw[black!45] (3.2,1.44) -- (4.9,1.95);
   \node[font=\footnotesize,anchor=west,black!65] at (4.95,1.95) {某个次优的无偏估计量};
   \draw[black!45] (4,0.71) -- (4.9,1.15);
@@ -69,7 +69,7 @@ g'(\theta)&=\frac{\partial}{\partial\theta}\int T(x)\,p_\theta(x)\,dx
 
 同类的判断在别处出现过。\hyperref[sec:07-Information-Theory/06-Information-and-Learning/04]{``分类、神经网络与信息论边界''}里的 Fano 不等式说，特征没覆盖住的那部分标签不确定性会转化成错误率的地板，任何算法都够不着地板以下。两条结论的形式完全一致：先量出信息，再把信息翻译成某个性能指标的极限，从而把``模型还不够好''与``信息本来就不够''分开。区别只在量的是什么——Fisher 信息量的是似然曲面在真值附近的曲率，条件熵量的是标签里没被特征解释掉的部分。
 
-还有一个共同点值得记住：两条界都依赖你写下的那个模型。换一个模型，\(I_n(\theta)\) 变了，下界跟着变。所以``这份数据问不出更多''的准确说法是``在当前模型设定下问不出更多''，引入更强的结构假设、更好的特征或更精细的似然，确实可能让下界下移。代价是这些假设写错了，估计得再有效也指向别处。
+还有一个共同点值得记住：两条界都依赖你写下的那个模型。换一个模型，\(I_n(\theta)\) 变了，下界跟着变。所以``这份数据问不出更多''的准确说法是``在当前模型设定下问不出更多''，引入更强的结构假设、更好的特征或更精细的似然，确实可能让下界下移。风险是这些假设一旦写错，估计得再有效也指向别处。
 
 \subsection{有偏估计可以走到灰区里去}
 
@@ -81,9 +81,9 @@ g'(\theta)&=\frac{\partial}{\partial\theta}\int T(x)\,p_\theta(x)\,dx
 \Var_\theta(T)\ \ge\ \frac{[g'(\theta)+b'(\theta)]^2}{I_n(\theta)},
 \]
 
-分子里多出来的 \(b'(\theta)\) 就是那点余地：偏差随 \(\theta\) 变化得越快，方差被允许的下限越低。评价这类估计量应当直接比 \(\MSE_\theta(T)=\Var_\theta(T)+b(\theta)^2\)，只盯方差会把代价那一半藏起来。正则化强度怎么选、用什么标准选，见\hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/04]{``偏差---方差、正则化与模型选择''}。
+分子里多出来的 \(b'(\theta)\) 就是那点余地：偏差随 \(\theta\) 变化得越快，方差被允许的下限越低。评价这类估计量应当直接比 \(\MSE_\theta(T)=\Var_\theta(T)+b(\theta)^2\)，只盯方差会把偏差那一半藏起来。正则化强度怎么选、用什么标准选，见\hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/04]{``偏差---方差、正则化与模型选择''}。
 
-顺带说清一件容易误传的事：有偏估计能压低方差，不意味着可以无限压低 MSE。在正则模型里，能对某些参数点做得特别好的估计量，通常要在别的参数点付出代价，这种取舍在\hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/03]{``Minimax 与可容许性比较整条风险曲线''}里以风险曲线的形式出现。
+顺带说清一件容易误传的事：有偏估计能压低方差，不意味着可以无限压低 MSE。在正则模型里，能对某些参数点做得特别好的估计量，通常要在别的参数点上变差，这种取舍在\hyperref[sec:11-Mathematical-Statistics/07-Statistical-Decision-and-Reliable-Prediction/03]{``Minimax 与可容许性比较整条风险曲线''}里以风险曲线的形式出现。
 
 \subsection{正则条件一失效，界就不适用}
 

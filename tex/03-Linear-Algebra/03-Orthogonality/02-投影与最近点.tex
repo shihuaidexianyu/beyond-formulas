@@ -30,7 +30,9 @@ p=a\,\frac{a^{\trans}b}{a^{\trans}a} .
   \draw[blue!70!black,thick] (-0.35,-0.35) -- (2.55,2.55)
     node[above right] {\(S=\operatorname{span}\{a\}\)};
   \fill (2,0) circle (2.2pt) node[below right] {\(b=(2,0)^{\trans}\)};
-  \fill (1,1) circle (2.2pt) node[above left] {\(p=(1,1)^{\trans}\)};
+  \fill (1,1) circle (2.2pt);
+  \node[font=\footnotesize] at (0.88,1.98) {\(p=(1,1)^{\trans}\)};
+  \draw[black!55] (0.95,1.82) -- (1.04,1.16);
   \draw[->,thick] (1,1) -- (2,0) node[midway,above right] {\(e=b-p\)};
   \draw (1.08,0.92) -- (1.16,1) -- (1.08,1.08);
   \draw[->,gray!80] (0,0) -- (0.72,0.72) node[midway,above left] {\(a\)};

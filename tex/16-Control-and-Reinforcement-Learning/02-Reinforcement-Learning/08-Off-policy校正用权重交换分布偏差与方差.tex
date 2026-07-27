@@ -27,7 +27,7 @@ W_{t:T-1}=\frac{p_\pi(\tau)}{p_\mu(\tau)}=\prod_{k=t}^{T-1}\rho_k,
 V^\pi(s)=\E_\mu\big[W_{t:T-1}G_t\given S_t=s\big].
 \]
 
-这是 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/01]{``Monte Carlo 用随机样本逼近期望''} 里那套重要性采样，换了一身衣服：提议分布是行为策略诱导的轨迹分布，目标分布是目标策略诱导的。好消息是转移概率不必知道；代价是必须知道当时那个动作被选中的概率。日志只记了动作没记 propensity，事后拿一个模型去反推 \(\mu(a\given s)\)，模型误差会原封不动进入权重。
+这是 \hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/01]{``Monte Carlo 用随机样本逼近期望''} 里那套重要性采样，换了一身衣服：提议分布是行为策略诱导的轨迹分布，目标分布是目标策略诱导的。好消息是转移概率不必知道；坏消息是必须知道当时那个动作被选中的概率。日志只记了动作没记 propensity，事后拿一个模型去反推 \(\mu(a\given s)\)，模型误差会原封不动进入权重。
 
 支持条件也照搬过来：凡是 \(\pi(a\given s)>0\) 的地方都要有 \(\mu(a\given s)>0\)。行为策略从没执行过的动作没有反事实结果，任何权重都变不出零样本里的信息。
 
@@ -49,7 +49,7 @@ V^\pi(s)=\E_\mu\big[W_{t:T-1}G_t\given S_t=s\big].
 
 在支持条件与矩条件下无偏，可无偏说的是无限次重复的平均。上面那个例子里，要让有效样本量达到十几，需要几十万条轨迹；你手上那一批数据里，绝大多数轨迹的权重接近零，估计的命运握在两三条轨迹手里。
 
-\subsection{自归一化换来稳定，代价是有限样本偏差}
+\subsection{自归一化换来稳定，欠下的是有限样本偏差}
 
 一个便宜的改进是把权重归一化：
 
@@ -112,7 +112,7 @@ w_{t+1}=w_t+\alpha_t\,\rho_t\,\delta_t\,\nabla_w\widehat V(S_t;w_t).
   2.4/0.07,2.75/0.03,3.1/1.10,3.45/0.04,3.8/0.06,4.15/0.02,4.5/0.05}
   \draw[very thick] (\x,0) -- (\x,\h);
 \draw[dashed] (0,0.9) -- (4.8,0.9) node[right,font=\small] {\(c\)};
-\node[right,font=\small,align=left] at (0.2,2.4) {\(N_{\mathrm{eff}}\approx2\)};
+\node[right,font=\small,align=left] at (2.15,2.6) {\(N_{\mathrm{eff}}\approx2\)};
 \end{scope}
 \end{tikzpicture}
 \end{center}

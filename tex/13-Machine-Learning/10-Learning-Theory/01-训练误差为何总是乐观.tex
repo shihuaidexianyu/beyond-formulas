@@ -89,7 +89,7 @@ P\bigl(\abs{\widehat R(h) - R(h)} \ge \varepsilon\bigr)
 \draw[->] (0,0) -- (0,5.4) node[above left] {\footnotesize 真风险 \(R(h)\)};
 % diagonal
 \draw[dashed,gray] (0,0) -- (5.2,5.2);
-\node[gray,rotate=45,anchor=south] at (4.3,4.3) {\footnotesize \(R=\widehat R\)};
+\node[gray,rotate=45,anchor=north] at (4.75,4.75) {\footnotesize \(R=\widehat R\)};
 % band
 \draw[gray!45] (0,0.9) -- (4.4,5.3);
 \draw[gray!45] (0.9,0) -- (5.3,4.4);
@@ -102,8 +102,8 @@ P\bigl(\abs{\widehat R(h) - R(h)} \ge \varepsilon\bigr)
 \fill[black] (0.55,1.5) circle (0.09);
 \node[anchor=west] at (0.7,1.7) {\footnotesize \(\widehat h\)};
 % gap arrows
-\draw[<->] (0.35,0.55) -- (0.35,1.42);
-\node[anchor=east] at (0.33,1.0) {\footnotesize 落差};
+\draw[<->] (0.25,0.55) -- (0.25,1.42);
+\node[anchor=west] at (0.33,1.20) {\footnotesize 落差};
 \draw[dotted] (0,1.5) -- (0.55,1.5);
 \draw[dotted] (0.55,0) -- (0.55,0.55);
 \end{tikzpicture}
@@ -117,7 +117,7 @@ P\bigl(\abs{\widehat R(h) - R(h)} \ge \varepsilon\bigr)
 
 把机器学习的术语全部剥掉，这个效应可以用硬币重现。准备 \(m\) 枚均匀硬币，每枚代表一个候选假设；每枚抛 \(n\) 次，正面比例作为它的``训练表现''；从 \(m\) 枚中选出正面比例最低的那一枚，报告它的比例。单枚硬币的比例以半径 \(\sqrt{\log(2/\delta)/(2n)}\) 集中在 \(1/2\) 附近，这是 Hoeffding 对固定硬币的承诺。可是 \(m\) 枚里最极端的那一枚，其偏离量的量级是 \(\sqrt{\log m/(2n)}\)——被惩罚的对象从 \(\log(1/\delta)\) 换成了 \(\log m\)。代入 \(m = 10^6\)、\(n = 100\)，被选中的硬币正面比例大约 \(0.5 - 0.26 \approx 0.24\)。一枚完全均匀的硬币，仅仅因为是从一百万个候选里挑出来的最优者，就长出了偏币的外观。
 
-硬币没有毛病，制造偏差的是候选数量。同一笔账在统计推断里早有精确写法：\hyperref[sec:11-Mathematical-Statistics/05-Hypothesis-Testing/04]{``多重比较改变错误的计量单位''}说明做一百次独立显著性检验几乎必然撞出假阳性，与从一百万个候选模型里几乎必然撞出虚高的训练表现是同一个机制。每多一次``看过数据再做决定''，随机性的同一份预算就被多花掉一次。
+硬币没有毛病，制造偏差的是候选数量。同一个道理在统计推断里早有精确写法：\hyperref[sec:11-Mathematical-Statistics/05-Hypothesis-Testing/04]{``多重比较改变错误的计量单位''}说明做一百次独立显著性检验几乎必然撞出假阳性，与从一百万个候选模型里几乎必然撞出虚高的训练表现是同一个机制。每多一次``看过数据再做决定''，随机性的同一份预算就被多花掉一次。
 
 工程纪律把这条账翻译成一句话：测试集只能用一次。调超参数、筛特征、比较结构，凡是``看过数据再决定''的操作都要走验证集或重抽样（\hyperref[sec:11-Mathematical-Statistics/06-Resampling-and-Model-Selection/03]{``交叉验证评估的是完整训练流程''}）。评估数据每参与一次决定，就有一部分变成了训练数据，它对模型的打分随之带上前面那张图里的落差。
 
@@ -125,7 +125,7 @@ P\bigl(\abs{\widehat R(h) - R(h)} \ge \varepsilon\bigr)
 
 回看 Hoeffding 不等式的证明，第一步写的是``\(\ell(h(X_i), Y_i)\) 独立同分布、均值为 \(R(h)\)''。当 \(h = \widehat h\) 由样本决定时，第 \(i\) 项同时出现在``选出 \(\widehat h\)''与``评估 \(\widehat h\)''两个角色里，各项不再独立于 \(\widehat h\)，条件均值也不再等于 \(R(\widehat h)\)。后续的 Markov 步、Chernoff 步、指数衰减全部架在这一环上，第一环断了，整条链就失效。
 
-第一种修复是把选择与评估在物理上分开：数据切成两份，一份专管挑假设，一份专管给挑出来的假设打分。评估时那个假设相对测试集是固定的，Hoeffding 的前提恢复。留出法和交叉验证走的都是这条路，代价是挑选阶段可用的样本变少。
+第一种修复是把选择与评估在物理上分开：数据切成两份，一份专管挑假设，一份专管给挑出来的假设打分。评估时那个假设相对测试集是固定的，Hoeffding 的前提恢复。留出法和交叉验证走的都是这条路，牺牲掉的是挑选阶段可用的样本量。
 
 第二种修复是把界加强到整个假设类上。仍然用同一批数据做选择，但要求
 

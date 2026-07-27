@@ -68,14 +68,15 @@ R_\theta=\begin{bmatrix}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{bmatri
   }
   \node at (0,-2.5) {\(r=0.86<1\)：旋进原点};
   \begin{scope}[shift={(6.0,0)}]
-    \draw[black!20] (0,0) circle (0.75);
+    \draw[black!20] (0,0) circle (0.50);
     \draw[black!35] (-1.95,0) -- (2.05,0);
     \draw[black!35] (0,-1.95) -- (0,2.05);
     \foreach \k in {0,...,11} {
-      \draw[red!60!black,thick] ({0.75*pow(1.12,\k)*cos(38*\k)},{0.75*pow(1.12,\k)*sin(38*\k)})
-        -- ({0.75*pow(1.12,\k+1)*cos(38*(\k+1))},{0.75*pow(1.12,\k+1)*sin(38*(\k+1))});
-      \fill[red!60!black] ({0.75*pow(1.12,\k)*cos(38*\k)},{0.75*pow(1.12,\k)*sin(38*\k)}) circle (1.1pt);
+      \draw[red!60!black,thick] ({0.50*pow(1.12,\k)*cos(38*\k)},{0.50*pow(1.12,\k)*sin(38*\k)})
+        -- ({0.50*pow(1.12,\k+1)*cos(38*(\k+1))},{0.50*pow(1.12,\k+1)*sin(38*(\k+1))});
+      \fill[red!60!black] ({0.50*pow(1.12,\k)*cos(38*\k)},{0.50*pow(1.12,\k)*sin(38*\k)}) circle (1.1pt);
     }
+    \fill[red!60!black] ({0.50*pow(1.12,12)*cos(38*12)},{0.50*pow(1.12,12)*sin(38*12)}) circle (1.1pt);
     \node at (0,-2.5) {\(r=1.12>1\)：旋出去};
   \end{scope}
 \end{tikzpicture}
@@ -101,7 +102,7 @@ x^{\trans}x=1^2+i^2=0.
 x^{\conj}=\overline{x}^{\,\trans}.
 \]
 
-于是 \(\norm{x}^2=x^{\conj}x=\sum_j\abs{x_j}^2\)，非负，且只在 \(x=0\) 时取零。代价是内积不再对称，而是共轭对称：\(\ip{y}{x}=\overline{\ip{x}{y}}\)，并且它对第一个变量共轭线性、对第二个变量线性。有的教材把共轭放在第二个变量上，结论等价，但同一份推导里不能中途换边。
+于是 \(\norm{x}^2=x^{\conj}x=\sum_j\abs{x_j}^2\)，非负，且只在 \(x=0\) 时取零。相应地，内积不再对称，而是共轭对称：\(\ip{y}{x}=\overline{\ip{x}{y}}\)，并且它对第一个变量共轭线性、对第二个变量线性。有的教材把共轭放在第二个变量上，结论等价，但同一份推导里不能中途换边。
 
 共轭转置 \(A^{\conj}\) 的作用可以脱离坐标来说。它是 \(A\) 关于这个内积的伴随：
 
