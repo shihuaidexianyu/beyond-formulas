@@ -125,10 +125,10 @@ P_t = P_t^- - K_t C P_t^-.
     -- (3,-1.019) -- (3,-0.714) -- (4,-1.005) -- (4,-0.709) -- (5,-1.001)
     -- (5,-0.707) -- (6,-1.000) -- (6,-0.707);
 
-  % 估计本身作为基准线
+  % 在估计误差坐标中，以零为基准线
   \draw[dashed,black!55] (-0.1,0) -- (6.3,0);
-  \node[anchor=west,font=\footnotesize] at (6.35,0.85) {\(m_t\pm\sqrt{P_t}\)};
-  \node[anchor=west,font=\footnotesize] at (6.35,0) {估计 \(m_t\)};
+  \node[anchor=west,font=\footnotesize] at (6.35,0.85) {\(\pm\sqrt{P_t}\)};
+  \node[anchor=west,font=\footnotesize] at (6.35,0) {误差中心 \(0\)};
 
   % 真实状态与估计之差
   \draw[line width=1pt] plot[smooth] coordinates
@@ -151,7 +151,7 @@ P_t = P_t^- - K_t C P_t^-.
   }
 \end{tikzpicture}
 
-\emph{一胀一缩：每一步预测都把不确定区间撑开一点，每一次观测又把它拉回来一截，锯齿最终稳定在一个固定的循环上。真实状态与估计之差落在区间里，是这条带宽有意义的标志。}
+\emph{纵轴采用估计误差坐标：中心是 \(0\)，带宽是 \(\pm\sqrt{P_t}\)。每一步预测把区间撑开，每次观测又把它拉回；真实误差 \(x_t-m_t\) 是否与这条带宽相称，是协方差校准是否可信的标志。}
 \end{center}
 
 锯齿的两条边由两组不同的量控制。上升那一段只与 \(Q\) 有关，是动力学未建模部分持续注入的不确定性；下降那一段的深浅由观测决定，而决定深浅的正是 \(K_t\)。
@@ -193,8 +193,10 @@ P_t = P_t^- - K_t C P_t^-.
   % 两段份额
   \draw[<->,black!65] (1.5,0.0) -- (4.7,0.0);
   \draw[<->,black!65] (4.7,0.0) -- (5.5,0.0);
-  \node[anchor=south,font=\footnotesize] at (3.1,0.04) {\(K_t\)};
-  \node[anchor=west,font=\footnotesize] at (5.65,0.0) {\(1-K_t\)};
+  \node[anchor=south,font=\footnotesize] at (3.1,0.04)
+    {\(K_t(y_t-m_t^-)\)};
+  \node[anchor=west,font=\footnotesize] at (5.65,0.0)
+    {\((1-K_t)(y_t-m_t^-)\)};
 
   % 数轴
   \draw[->] (-0.3,-0.5) -- (7.6,-0.5);
@@ -205,7 +207,7 @@ P_t = P_t^- - K_t C P_t^-.
   \node[anchor=north,font=\footnotesize] at (5.62,-0.9) {\(y_t\)};
 \end{tikzpicture}
 
-\emph{每条区间的半宽就是它自己的不确定性。融合后的估计落在预测与观测之间、偏向窄的那一侧，而且比两者都窄。它落在什么位置由 \(K_t\) 决定，\(K_t\) 又只是两个宽度的比——增益不是调出来的参数，是被 \(P_t^-\) 与 \(R\) 算出来的。}
+\emph{每条区间的半宽是相应标准差。融合后的估计落在预测与观测之间、偏向窄的那一侧，而且比两者都窄；图下两段距离分别是 \(K_t\) 与 \(1-K_t\) 乘上新息。增益取决于两个方差在新息总方差中的占比，不是手调参数。}
 \end{center}
 
 Kalman gain 不是在两个固定权重之间做选择——它会随每一步的 \(P_t^-\) 动态变化。filter 刚启动时，初始协方差很大，gain 很大，快速吸收早期数据；稳定运行后，\(P_t\) 收敛到稳态值，gain 也趋于常数，锯齿图上表现为最右边那几个周期高度不再变化。

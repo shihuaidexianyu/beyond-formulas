@@ -73,29 +73,28 @@ V(D^\ast,\theta)
 \begin{tikzpicture}[>=stealth]
 \begin{scope}[x=1.02cm,y=1.05cm]
   \draw[->] (-0.15,0) -- (3.35,0) node[right] {\(x\)};
-  \draw[blue!70!black,thick] plot[domain=0.25:1.75,samples=90]
-    (\x,{1.1*exp(max(-(\x-1)*(\x-1)/0.051,-9))});
-  \draw[red!75!black,thick] plot[domain=1.25:2.75,samples=90]
-    (\x,{1.1*exp(max(-(\x-2)*(\x-2)/0.051,-9))});
-  \node[blue!70!black,font=\small] at (0.62,1.22) {\(p_{\text{data}}\)};
-  \node[red!75!black,font=\small] at (2.42,1.22) {\(p_\theta\)};
+  \draw[blue!70!black,very thick,->] (1,0) -- (1,1.15);
+  \draw[red!75!black,very thick,->] (2,0) -- (2,1.15);
+  \node[blue!70!black,font=\small] at (0.62,1.22) {\(p_{\text{data}}=\delta_1\)};
+  \node[red!75!black,font=\small] at (2.42,1.22) {\(p_\theta=\delta_2\)};
   \draw[<->,gray!85] (1,-0.22) -- (2,-0.22);
-  \node[gray!60!black,font=\small] at (1.5,-0.5) {间距 \(d\)，两个支撑几乎不交};
+  \node[gray!60!black,font=\small] at (1.5,-0.5) {间距 \(d>0\)，两个支撑不交};
 \end{scope}
 \begin{scope}[shift={(4.7,0)},x=1.55cm,y=1.5cm]
   \draw[->] (-0.08,0) -- (1.72,0) node[right] {\(d\)};
   \draw[->] (0,-0.08) -- (0,1.45);
   \draw[gray!55,dashed] (0,0.693) -- (1.62,0.693);
   \node[gray!55!black,font=\small,left] at (0,0.693) {\(\log 2\)};
-  \draw[blue!70!black,thick] plot[smooth] coordinates
-    {(0,0) (0.15,0.25) (0.30,0.50) (0.45,0.645) (0.60,0.686)} -- (1.55,0.6931);
+  \fill[blue!70!black] (0,0) circle (1.7pt);
+  \draw[blue!70!black,thick] (0.055,0.6931) -- (1.55,0.6931);
+  \draw[blue!70!black,fill=white,thick] (0,0.6931) circle (1.7pt);
   \draw[red!75!black,thick] (0,0) -- (1.2,1.2);
   \node[blue!70!black,font=\small,below] at (1.15,0.66) {JS};
   \node[red!75!black,font=\small,above left] at (1.22,1.20) {Wasserstein};
 \end{scope}
 \end{tikzpicture}
 
-\emph{两个分布刚一分开，JS 就平成常数，斜率归零；搬运质量的代价却继续线性增长。梯度有没有，看的是曲线平不平，不是散度大不大。}
+\emph{对图中的两个点质量，\(d=0\) 时 JS 为 \(0\)，任意 \(d>0\) 时支撑不交，JS 立刻跳到常数 \(\log2\)；搬运质量的代价却继续按 \(d\) 线性增长。梯度有没有，看的是曲线平不平，不是散度大不大。}
 \end{center}
 
 图上那条平线解释了为什么``把判别器调弱''会有效：容量不足或加了噪声的判别器估不出那个尖锐的 \(D^\ast\)，实际给出的是一个被抹平的版本，对应的散度估计因此还留着一点斜率。这是在用估计误差换梯度信号，不是在改进目标。

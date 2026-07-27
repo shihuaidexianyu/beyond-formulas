@@ -68,7 +68,7 @@ Z_\theta=\int \tilde p_\theta(x)\,dx.
     (\x,{exp(max(-(\x+1.5)*(\x+1.5)/0.605,-9))+exp(max(-(\x-1.5)*(\x-1.5)/0.605,-9))});
   % 前向 KL：摊平覆盖
   \draw[blue!70!black,thick,dashed] plot[domain=-3.3:3.3,samples=140]
-    (\x,{0.78*exp(max(-\x*\x/3.645,-9))});
+    (\x,{0.688*exp(max(-\x*\x/5.105,-9))});
   % 反向 KL：贴住一峰
   \draw[red!75!black,thick,dash dot] plot[domain=-3.3:3.3,samples=140]
     (\x,{2.0*exp(max(-(\x-1.5)*(\x-1.5)/0.605,-9))});

@@ -67,7 +67,7 @@ k_j = \E_{p(x)}\Big[\KL\big(q_\phi(z_j\given x)\,\Vert\, p(z_j)\big)\Big],
     \foreach \yv in {1,2,3,4,5}{\draw (0,\yv) -- (-0.12,\yv) node[left,font=\scriptsize] {\(\yv\)};}
     \foreach \i/\v in {1/1.35,2/1.25,3/1.15,4/1.05,5/0.92,6/0.80,7/0.68,8/0.56,9/0.44,10/0.32}
       \fill[blue!55!black,fill opacity=0.8] ({0.20+0.44*(\i-1)},0) rectangle ({0.20+0.44*(\i-1)+0.32},\v);
-    \draw[dashed,black!50] (0,0.15) -- (4.7,0.15);
+    \draw[dashed,black!50] (0,0.10) -- (4.7,0.10);
     \node[font=\small] at (2.35,-1.2) {健康模型};
   \end{scope}
   \begin{scope}[shift={(6.3,0)}]
@@ -76,8 +76,8 @@ k_j = \E_{p(x)}\Big[\KL\big(q_\phi(z_j\given x)\,\Vert\, p(z_j)\big)\Big],
     \foreach \yv in {1,2,3,4,5}{\draw (0,\yv) -- (-0.12,\yv);}
     \foreach \i/\v in {1/5.30,2/2.95,3/0.05,4/0.04,5/0.03,6/0.03,7/0.02,8/0.02,9/0.02,10/0.02}
       \fill[red!60!black,fill opacity=0.8] ({0.20+0.44*(\i-1)},0) rectangle ({0.20+0.44*(\i-1)+0.32},\v);
-    \draw[dashed,black!50] (0,0.15) -- (4.7,0.15);
-    \node[font=\scriptsize,black!60,above] at (3.3,0.25) {活跃阈值};
+    \draw[dashed,black!50] (0,0.10) -- (4.7,0.10);
+    \node[font=\scriptsize,black!60,above] at (3.3,0.20) {活跃阈值 \(0.1\)};
     \node[font=\small] at (2.35,-1.2) {坍缩模型};
   \end{scope}
 \end{tikzpicture}
