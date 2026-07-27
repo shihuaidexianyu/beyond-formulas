@@ -1,202 +1,143 @@
 \section{从最小二乘到 logistic 回归梯度}
 \label{sec:10-Matrix-Calculus/04-Applications/01}
 
-设有 \(n\) 个样本、\(d\) 个特征：
+翻开任何一份从零实现的机器学习代码，两个模型的梯度会挨着出现：
 
 \[
-X\in\R^{n\times d},
+\nabla_wL=\frac1nX^{\trans}(Xw-y),
 \qquad
-w\in\R^d.
+\nabla_wL=\frac1nX^{\trans}(p-y).
 \]
 
-线性预测是
+上面是最小二乘，下面是 logistic 回归。两个损失函数长得毫无相似之处——一个是平方和，一个是对数似然；一个有闭式解，一个只能迭代。可梯度的形状一模一样，都是 \(X^{\trans}\) 乘一个``预测减标签''的向量，连那个 \(1/n\) 都在同一个位置。
+
+把这当成巧合背下来，每换一个损失就得重新查一次表。用微分法推一遍，会看到这不是两个结果，是同一个结果的两次出现。
+
+\subsection{线性层的反向永远是乘 \texorpdfstring{\(X^{\trans}\)}{X 转置}}
+
+先固定记号。\(n\) 个样本、\(d\) 个特征，\(X\in\R^{n\times d}\)，\(w\in\R^d\)，线性预测 \(z=Xw\in\R^n\)。两个模型共享这一步，分歧发生在如何拿 \(z\) 与标签比较。
+
+对连续标签 \(y\in\R^n\)，取
 
 \[
-z=Xw\in\R^n.
+L(w)=\frac1{2n}\norm{Xw-y}_2^2.
 \]
 
-最小二乘与 logistic 回归共享这一步，区别在于怎样把预测 \(z_i\) 与标签比较。损失函数一变，反向传播到 \(z\) 的"残差信号"就会改变；线性层的伴随始终是乘以 \(X^{\trans}\)。
-
-\subsection{最小二乘：误差本身就是输出梯度}
-
-对连续标签 \(y\in\R^n\)，令
+记残差 \(r=Xw-y\)。微分分两层走：外层是范数，\(dL=\frac1nr^{\trans}dr\)；内层是线性映射，\(dr=X\,dw\)。合起来
 
 \[
-L(w)=\frac{1}{2n}\norm{ Xw-y}_2^2.
+dL=\frac1nr^{\trans}X\,dw=\Bigl(\frac1nX^{\trans}r\Bigr)^{\trans}dw,
 \]
 
-记残差
+读出 \(\nabla_wL=\frac1nX^{\trans}(Xw-y)\)。
+
+这个推导有两个可以分开命名的部分。损失对预测 \(z\) 的梯度是 \(\delta=\frac1nr\)，这一段只跟损失函数有关；把 \(\delta\) 换算成对 \(w\) 的梯度，用的是线性映射 \(z=Xw\) 的伴随，也就是左乘 \(X^{\trans}\)，这一段只跟模型的这一层有关（见\hyperref[sec:10-Matrix-Calculus/02-Differentials/02]{``链式法则就是线性映射复合''}）。换损失只动前一段，换层只动后一段。
+
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \node[font=\footnotesize] at (-0.1,0.8) {\(w\)};
+  \node[draw,black!55,rounded corners,inner sep=5pt] (F) at (1.8,0.8) {\(z=Xw\)};
+  \node[font=\footnotesize] at (3.5,0.8) {\(z\)};
+  \node[draw,black!55,rounded corners,inner sep=5pt] (Lo) at (5.5,0.8) {损失};
+  \draw[->,black!60] (0.15,0.8) -- (F);
+  \draw[->,black!60] (F) -- (3.3,0.8);
+  \draw[->,black!60] (3.7,0.8) -- (Lo);
+
+  \node[font=\footnotesize,red!60!black] at (-0.35,-0.8) {\(\nabla_wL\)};
+  \node[draw,red!60!black,rounded corners,fill=red!4,inner sep=5pt] (Bk) at (1.8,-0.8) {乘 \(X^{\trans}\)};
+  \node[font=\footnotesize,red!60!black] (D) at (3.5,-0.8) {\(\delta\)};
+  \draw[<-,red!60!black] (0.2,-0.8) -- (Bk);
+  \draw[<-,red!60!black] (Bk) -- (3.3,-0.8);
+  \draw[<-,red!60!black] (3.7,-0.8) -- (5.2,-0.8);
+  \draw[red!60!black] (5.5,0.35) -- (5.5,-0.8);
+
+  \draw[dashed,black!45] (3.5,-1.1) -- (3.5,-1.6);
+  \node[font=\footnotesize,align=center,black!75] at (3.0,-1.95)
+    {平方损失 \(\delta=\tfrac1n(z-y)\)\qquad logistic \(\delta=\tfrac1n(p-y)\)};
+\end{tikzpicture}
+
+\emph{换损失只换 \(\delta\) 这一格，\(X^{\trans}\) 那一格原样不动。}
+\end{center}
+
+图里 \(\delta\) 那一格是唯一随损失变化的地方。下面把 logistic 回归推一遍，验证这个分工。
+
+顺带记下二阶信息：\(\nabla_w^2L=\frac1nX^{\trans}X\succeq0\)，它不含 \(w\)，因为目标本来就是二次的。加上 Ridge 项 \(\frac{\lambda}2\norm{w}^2\)，梯度多一个 \(\lambda w\)，Hessian 多一个 \(\lambda I\)，后者把可能奇异的 \(X^{\trans}X\) 顶成正定，这也是 Ridge 在数值上的作用（模型层面的讨论见\hyperref[sec:13-Machine-Learning/02-Linear-Models/02]{``正则化从 Ridge 到 Lasso''}）。
+
+常数因子在这里是个反复出问题的地方。目标取样本和还是样本平均、带不带那个 \(\frac12\)，都会改变梯度前面的系数。不同资料的公式不能直接对照，必须先把目标定义写出来。
+
+\subsection{换成 logistic，改的只有残差信号}
+
+二分类标签 \(y_i\in\set{0,1}\)，加一个截距 \(b\)，logit 为 \(z=Xw+b\mathbf1\)，概率为 \(p=\sigma(z)\)，其中 \(\sigma(t)=1/(1+e^{-t})\)。平均负对数似然
 
 \[
-r=Xw-y.
+L=-\frac1n\sum_{i=1}^n\bigl[y_i\log p_i+(1-y_i)\log(1-p_i)\bigr].
 \]
 
-微分为
-
-\[
-dL = \frac1n r^{\trans}dr
-=\frac1n r^{\trans}X\,dw.
-\]
-因此
-
-\[
-\nabla_wL = \frac1nX^{\trans}(Xw-y).
-\]
-这条公式可以按两层理解：
-
-\begin{enumerate}
-\tightlist
-\item
-  平方损失对预测 \(z\) 的梯度是平均残差 \(r/n\)；
-\item
-  线性映射 \(z=Xw\) 的反向伴随把它乘以 \(X^{\trans}\)。
-\end{enumerate}
-
-Hessian 为
-
-\[
-\nabla_w^2L = \frac1nX^{\trans}X\succeq0.
-\]
-它不依赖 \(w\)，因为目标本来就是二次函数。若加入 Ridge 项 \(\lambda\norm{ w}^2/2\)，
-
-\[
-\nabla_wL = \frac1nX^{\trans}r+\lambda w,
-\]
-\[
-\nabla_w^2L = \frac1nX^{\trans}X+\lambda I.
-\]
-样本和、样本平均以及是否含 \(\frac12\) 都会改变常数因子。推导前必须先写清目标定义，不能把不同资料的梯度直接比较。
-
-\subsection{多输出最小二乘保持同一结构}
-
-若
-
-\[
-W\in\R^{d\times k},
-\qquad
-Y\in\R^{n\times k},
-\]
-
-预测为 \(XW\)，目标
-
-\[
-L(W)=\frac{1}{2n}\norm{ XW-Y}_F^2.
-\]
-
-沿用矩阵残差 \(R=XW-Y\)，微分为
-
-\[
-dL=\frac1n\trace(R^{\trans}dR)
-=\frac1n\trace\bigl((X^{\trans}R)^{\trans}dW\bigr),
-\]
-
-读出
-
-\[
-\nabla_WL=\frac1nX^{\trans}R.
-\]
-
-形状为 \(d\times k\)，与 \(W\) 相同。向量公式就是矩阵公式在 \(k=1\) 时的特例，无须再当成独立结论记忆。
-
-\subsection{Logistic 回归：残差信号变成概率减标签}
-
-令二分类标签 \(y_i\in\{0,1\}\)，并加入标量截距 \(b\)（\(\mathbf1\) 为全一向量），logit
-
-\[
-z=Xw+b\mathbf1,
-\]
-
-概率
-
-\[
-p=\sigma(z),
-\qquad
-\sigma(z_i)=\frac1{1+e^{-z_i}}.
-\]
-
-平均负对数似然为
-
-\[
-L = -\frac1n\sum_{i=1}^n
-\bigl[
-y_i\log p_i+(1-y_i)\log(1-p_i)
-\bigr].
-\]
-对单个样本，先对 \(p\) 求导：
-
-\[
-\frac{\partial\ell}{\partial p} = -\frac yp+\frac{1-y}{1-p}.
-\]
-而 sigmoid 的导数可直接算出：
-
-\[
-\frac{dp}{dz}=\frac{e^{-z}}{(1+e^{-z})^2}=p(1-p).
-\]
-
-相乘并化简：
+只需算单个样本的 \(\partial\ell/\partial z\)。对 \(p\) 求导得 \(-\frac yp+\frac{1-y}{1-p}\)，sigmoid 的导数是 \(\frac{dp}{dz}=p(1-p)\)，两者相乘：
 
 \[
 \frac{\partial\ell}{\partial z}
-=\left(-\frac yp+\frac{1-y}{1-p}\right)p(1-p)
+=\Bigl(-\frac yp+\frac{1-y}{1-p}\Bigr)p(1-p)
 =-y(1-p)+(1-y)p
 =p-y.
 \]
-于是批量梯度为
+
+分母上的 \(p\) 和 \(1-p\) 被 sigmoid 导数里的 \(p(1-p)\) 整除掉了，剩下一个不带任何非线性的差。于是 \(\delta=\frac1n(p-y)\)，套进图里那条共用的通道：
 
 \[
-\nabla_wL = \frac1nX^{\trans}(p-y),
+\nabla_wL=\frac1nX^{\trans}(p-y),
+\qquad
+\frac{\partial L}{\partial b}=\frac1n\mathbf1^{\trans}(p-y).
 \]
-\[
-\frac{\partial L}{\partial b} = \frac1n\mathbf1^{\trans}(p-y).
-\]
-与最小二乘相比，线性层的反向形式完全相同，只有预测空间中的残差从 \(z-y\) 变成 \(p-y\)。
 
-\subsection{直接从稳定 logits 损失推导}
+截距的梯度是 \(\delta\) 沿 batch 轴求和，因为 \(b\) 通过全一向量参与，它的伴随就是 \(\mathbf1^{\trans}\)。
 
-数值实现不应先算概率再取两个对数。代入 \(\log p=z-\log(1+e^z)\) 与 \(\log(1-p)=-\log(1+e^z)\)，单样本损失化简为
+开头那个观察至此有了解释：两个梯度公式共用的 \(X^{\trans}\) 来自共用的线性层，不同的括号内容来自不同的损失。而括号里都写成``预测减标签''，则是又一件事——它对 logistic 成立并非偶然，下一节处理。
 
-\[
-\ell(z,y) = \log(1+e^z)-yz.
-\]
-用稳定 softplus 计算后，导数直接是
+\subsection{多输出情形不需要新公式}
+
+把 \(w\) 换成矩阵 \(W\in\R^{d\times k}\)、标签换成 \(Y\in\R^{n\times k}\)，预测为 \(XW\)，目标
 
 \[
-\sigma(z)-y.
+L(W)=\frac1{2n}\norm{XW-Y}_F^2.
 \]
 
-这个表示避免 \(p\) 下溢为零后出现 \(\log0\)，也使凸性清楚：softplus 凸，减去线性项仍凸。
-
-Hessian 为
+记 \(R=XW-Y\)。Frobenius 范数的微分写成 trace，\(dL=\frac1n\trace(R^{\trans}dR)\)，代入 \(dR=X\,dW\) 并循环移位：
 
 \[
-\nabla_w^2L = \frac1nX^{\trans}DX,
+dL=\frac1n\trace(R^{\trans}X\,dW)=\frac1n\trace\bigl((X^{\trans}R)^{\trans}dW\bigr),
 \]
-其中
+
+读出 \(\nabla_WL=\frac1nX^{\trans}R\)，形状 \(d\times k\)，与 \(W\) 一致。向量版本是 \(k=1\) 的特例，不必当成独立结论。这一步用的正是上一单元的 trace 整理，把它放在这里是想说明：单输出到多输出，推导流程一个字都不用改。
+
+\subsection{实现从 logits 直接走，不经过概率}
+
+推导用的形式和实现用的形式可以不同，logistic 损失是个典型。按定义先算 \(p=\sigma(z)\) 再取 \(\log p\)，当 \(z\) 很负时 \(p\) 下溢成零，\(\log 0\) 给出 \(-\infty\)，整个 batch 的损失变成 \texttt{nan}。而把 \(\log p=z-\log(1+e^z)\) 与 \(\log(1-p)=-\log(1+e^z)\) 代回去，单样本损失化简成
 
 \[
-D=\diag(p_i(1-p_i))\succeq0.
+\ell(z,y)=\log(1+e^z)-yz.
 \]
 
-所以 logistic 目标凸。若加入 \(L_2\) 正则，Hessian 再加 \(\lambda I\)。
+右边只出现一次 \(\log(1+e^z)\)，即 softplus，数值库对它有稳定实现（\(z\) 很大时改用 \(z+\log(1+e^{-z})\)，见\hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/01]{``在对数域中稳定计算概率''}）。这个写法还让凸性一眼可见：softplus 是凸函数，减去线性项仍然凸。求导也直接，\(\frac{d\ell}{dz}=\sigma(z)-y\)，与上面推的一致。
 
-\subsection{形状与缩放的实际检查}
+框架里那个把 logits 和标签一起吃进去的损失函数，做的就是这件事。传概率进去的接口不是不能用，只是把稳定化的责任推给了调用方。
 
-实现批量梯度时，至少检查：
+二阶信息同样是现成的。对 \(z\) 求二阶导得 \(p(1-p)\)，于是
 
-\begin{itemize}
-\tightlist
-\item
-  \(X^{\trans}(p-y)\) 的形状是否与 \(w\) 一致；
-\item
-  对 bias 是否沿 batch 轴求和，而不是保留样本维；
-\item
-  目标若取平均，所有数据项梯度是否也除以 \(n\)；
-\item
-  正则项是否应惩罚 bias；
-\item
-  样本权重与类别权重是否同时进入损失和梯度；
-\item
-  极端 logits 是否通过 stable softplus 仍返回有限损失。
-\end{itemize}
+\[
+\nabla_w^2L=\frac1nX^{\trans}DX,
+\qquad
+D=\diag\bigl(p_i(1-p_i)\bigr)\succeq0,
+\]
 
-有限差分或自动微分可以检查实现，但不能替代目标定义。若代码求的是样本和，而手推公式求的是样本平均，两者会稳定地相差 \(n\)，这不是浮点误差。
+logistic 目标因此是凸的，加 \(L_2\) 正则后 Hessian 再加 \(\lambda I\)。注意 \(D\) 依赖 \(w\)，这是它与最小二乘的实质差别：Hessian 随迭代点变化，没有一步到位的正规方程，只能迭代（Newton 法在这里就是迭代重加权最小二乘）。样本被分得很开时 \(p_i\) 逼近 \(0\) 或 \(1\)，\(D\) 的对角元趋于零，Hessian 接近奇异，参数可以无限增大而损失几乎不降——这就是完全可分数据上 logistic 回归不收敛的机制，模型层面的讨论见\hyperref[sec:13-Machine-Learning/02-Linear-Models/03]{``从二分类到 Softmax 分类''}。
+
+\subsection{下笔实现前的四项对账}
+
+推导正确不等于实现正确，中间还隔着几件容易错的事。
+
+先对形状。\(X^{\trans}(p-y)\) 应当与 \(w\) 同形，若不同，多半是把 \(X\) 摆成了 \(d\times n\)；bias 的梯度要沿 batch 轴求和成标量，而不是留着样本维度广播出去。再对缩放。目标若取平均，数据项梯度也要除以 \(n\)；代码求和而手推公式求平均，两者会稳定相差 \(n\) 倍，这不是浮点误差，梯度检查会给出一个干净的整数比。然后对权重。样本权重和类别权重若进入了损失，就必须同步进入 \(\delta\)，只改一处会得到与目标不匹配的梯度。最后对正则。\(L_2\) 项通常不惩罚 bias，也不该被 \(n\) 除——它是目标的一部分，不是数据项。
+
+梯度检查能验证实现与目标一致，验证不了目标本身是不是你想要的那个。定义写在纸上，检查才有参照。
+
+到这里，\(p-y\) 在二分类里已经出现了两次，一次来自平方损失的 \(z-y\)，一次来自 logistic。多分类的 softmax 加交叉熵会给出第三次，形式完全相同。三次撞在同一个式子上，就不该继续当成运气。下一节把这个化简的来源找出来。

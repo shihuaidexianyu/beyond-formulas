@@ -1,104 +1,116 @@
 \section{GLM 用链接函数连接均值与线性预测子}
 \label{sec:13-Machine-Learning/02-Linear-Models/05}
 
-\subsection{线性不必意味着直接预测响应值}
+\subsection{预测出负的包裹数，截零并不能收场}
 
-预测家庭每月用电量时，Gaussian 线性回归可能合适；预测一天收到多少个包裹时，输出必须是非负整数；预测是否迟到时，输出是 \(0/1\)。若仍令 \(x^\trans\beta\) 直接等于这些响应，可能得到负计数或超出 \([0,1]\) 的概率。
+一个区域仓要预测每个网点次日的到件量。手边有网点面积、历史均值、是否周末几列特征，线性回归拟合完，冷门网点的预测出现了 \(-3.4\) 件。把负数截成零，报表能交，读数却已经变形：模型说周末每个网点少 3.2 件，业务方的经验是周末少三成——大网点少十几件，小网点少一两件。一个加法效应和一个乘法效应，被同一个系数含混地代表着。
 
-广义线性模型保留特征的线性组合
+再往下看残差图，大网点的残差散得远比小网点开。计数数据的波动本来就随水平走，而平方损失背后的同方差假设要求它不随水平走。问题出在两处：均值被允许取到不该取的值，波动被假定成不该有的形状。
 
+广义线性模型把这两处分开处理，各给一个可以单独指定的部件。
+
+\subsection{线性结构留着，尺度换掉}
+
+GLM 由三件事定义：响应的条件分布、连接函数、线性预测子。线性预测子仍然是
 \[
-\eta=x^\trans\beta,
+\eta=x^{\trans}\beta,
 \]
-
-但让它通过链接函数连接条件均值
-
+但它不再直接等于响应，而是通过连接函数与条件均值挂钩：
 \[
-g(\mu)=\eta,
-\qquad
-\mu=\E[Y\mid X=x].
+g(\mu)=\eta,\qquad \mu=\E(Y\given X=x).
 \]
+连接函数把 \(\mu\) 的取值范围搬到整条实轴上——概率被 logit 搬过去，正的计数被对数搬过去，与上一节把线性结构安在对数几率上是同一个动作。广义的是响应分布和均值所在的尺度，被广义化的不是 \(x^{\trans}\beta\) 本身，它照旧是线性的，前几节关于共线、可识别性与系数解释的结论一条都没作废。
 
-``广义''改变的是响应分布与均值尺度，不是把 \(x^\trans\beta\) 换成任意非线性黑箱。
+\subsection{指数族给出统一的似然骨架}
 
-\subsection{指数族提供统一的似然骨架}
-
-一参数指数族可写为
-
+把响应分布限制在一参数指数族里，
 \[
-p(y\mid\theta,\phi)
-=\exp\left\{
-\frac{y\theta-b(\theta)}{a(\phi)}+c(y,\phi)
-\right\}.
+p(y\given\theta,\phi)=\exp\set{\frac{y\theta-b(\theta)}{a(\phi)}+c(y,\phi)},
 \]
+一切都由 log-partition 函数 \(b\) 决定：\(\E(Y\given x)=b'(\theta)\)，\(\Var(Y\given x)=a(\phi)b''(\theta)\)。均值和方差出自同一个函数的一阶与二阶导，这就是为什么在 GLM 里指定了分布就等于指定了均值—方差关系，没有第二次选择的机会（这条对应的完整说明见\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/06]{``指数族把归一化、矩与似然连接起来''}）。
 
-由 log-partition 的导数，
-
+取 canonical link，也就是让 \(\theta=x^{\trans}\beta\)，对数似然的梯度收成一个形状：
 \[
-\E[Y\mid x]=b'(\theta),
-\qquad
-\Var(Y\mid x)=a(\phi)b''(\theta).
+\nabla_\beta\ell(\beta)=\frac{1}{a(\phi)}X^{\trans}(y-\mu).
 \]
-
-若选择 canonical link，使 \(\theta=x^\trans\beta\)，log-likelihood 对 \(\beta\) 的梯度统一为
-
-\[
-\nabla_\beta\ell(\beta)
-=\frac{1}{a(\phi)}X^\trans(y-\mu),
-\]
-
-其中 \(a(\phi)\) 是指数族的离散尺度；若不采用 canonical link，还会出现由均值方差关系和链接函数导数组成的权重。常见对应关系是：
+线性回归的 \(X^{\trans}(y-X\beta)\) 和 logistic 回归的 \(X^{\trans}(p-y)\) 都是它的特例，差别只在 \(\mu\) 怎么由 \(\eta\) 算出来。换成非 canonical link，梯度里会多出由 \(g'\) 和方差函数拼成的权重，形状不再这么干净，但结构照旧。
 
 \begin{center}
-\begin{tabular}{lll}
+\begin{tabular}{llll}
 \toprule
-响应机制 & 条件均值 & 常用链接 \\
+响应机制 & 均值范围 & canonical link & 方差函数 \\
 \midrule
-Gaussian & \(\mu\in\R\) & \(g(\mu)=\mu\) \\
-Bernoulli & \(0<\mu<1\) & \(g(\mu)=\log\frac{\mu}{1-\mu}\) \\
-Poisson & \(\mu>0\) & \(g(\mu)=\log\mu\) \\
+Gaussian & \(\mu\in\R\) & \(g(\mu)=\mu\) & \(V(\mu)=1\) \\
+Bernoulli & \(0<\mu<1\) & \(g(\mu)=\log\dfrac{\mu}{1-\mu}\) & \(V(\mu)=\mu(1-\mu)\) \\
+Poisson & \(\mu>0\) & \(g(\mu)=\log\mu\) & \(V(\mu)=\mu\) \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-因此普通线性回归、logistic 回归和 Poisson 回归都是同一建模接口的实例。
+\emph{同一套接口的三行实例：换的是响应支持集与方差函数，不换线性预测子。}
 
-\subsection{Poisson 回归把相对变化写成加法}
+\subsection{对数链接把比例写成加法}
 
-设 \(Y\) 是一天收到的订单数，\(x_1\) 表示是否周末。采用 log link 时
-
+回到到件量。设 \(Y_i\) 是网点当日到件数，\(x_1\) 标记是否周末，取 log link：
 \[
-\log\E[Y\mid x]=\beta_0+\beta_1x_1,
+\log\E(Y\given x)=\beta_0+\beta_1x_1
+\quad\Longrightarrow\quad
+\frac{\E(Y\given x_1=1)}{\E(Y\given x_1=0)}=e^{\beta_1}.
 \]
+线性预测子上的加法，落到均值尺度上变成乘法。\(\beta_1=-0.36\) 读作周末的到件量是工作日的 \(e^{-0.36}\approx 0.70\) 倍，与网点大小无关——业务方那句``少三成''终于有了对应的参数。
 
-所以
+观察窗口不等长时要用 offset：若第 \(i\) 个网点被观测了 \(t_i\) 小时，写成 \(\log\mu_i=\log t_i+x_i^{\trans}\beta\)，\(\log t_i\) 的系数固定为 1 而不参与估计。这样模型比较的是单位时间的发生率，不会把``看得久''误当成一项特征效应。
 
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+  \fill[black!10] (2.67,0) -- (3.2,0) -- (3.2,-0.36) -- cycle;
+  \draw[->,black!60] (-0.35,0) -- (3.9,0) node[below] {\footnotesize 网点规模};
+  \draw[->,black!60] (0,-0.7) -- (0,2.4) node[left] {\footnotesize \(\mu\)};
+  \fill (0.16,1.71) circle (1.5pt);
+  \fill (0.64,1.35) circle (1.5pt);
+  \fill (1.12,1.08) circle (1.5pt);
+  \fill (1.60,0.63) circle (1.5pt);
+  \fill (2.08,0.54) circle (1.5pt);
+  \fill (2.56,0.27) circle (1.5pt);
+  \fill (3.04,0.36) circle (1.5pt);
+  \draw[very thick,smooth,samples=50,domain=0:4] plot ({\x*0.8},{0.9*exp(0.7-0.5*\x)});
+  \draw[dashed,thick] (0,1.8) -- (2.67,0);
+  \draw[dashed,thick,black!45] (2.67,0) -- (3.2,-0.36);
+  \fill[black!45] (2.67,0) circle (1.3pt);
+  \node[right] at (1.12,1.66) {\footnotesize identity link};
+  \draw[black!45] (1.10,1.58) -- (0.90,1.19);
+  \node[right] at (2.28,0.94) {\footnotesize log link};
+  \draw[black!45] (2.34,0.86) -- (2.32,0.52);
+  \node[black!55,below] at (2.95,-0.30) {\footnotesize \(\mu<0\)};
+\end{tikzpicture}
+\end{center}
+
+\emph{同一批计数，链接函数不同，模型对均值能取哪些值的承诺就不同。}
+
+图里虚线是 identity link 的拟合，它在冷门网点那一侧穿过横轴，落进 Poisson 分布根本无法容纳的区域；实线是 log link，恒为正且随规模成比例衰减。截零是在事后掩盖这条穿越，改链接函数是在事前不让它发生。
+
+\subsection{链接函数是建模决定，不是默认设置}
+
+canonical link 让梯度好看、让 \(X^{\trans}y\) 成为充分统计量，这些是数学上的便利，不是选它的充分理由。判据应当来自三处：均值的取值范围必须被守住；要报告的效应尺度必须与业务问句一致；机制上加法还是乘法更可信。
+
+二值响应就有一排候选。logit 给出常数的几率比，probit 对应一个潜在的 Gaussian 阈值机制，complementary log-log 在``至少发生一次''这类首次到达机制下更自然，三者在中段的拟合几乎分不出高下，在尾部差别明显。计数响应同样如此：想报告``周末少三成''就用 log link，想报告``每增加一个货架多收 4 件''而且均值离零足够远，identity link 配 Poisson 方差反而是更诚实的选择。
+
+这个决定会连带改变系数的含义、外推的形状和不确定性的走向，事后再换等于换了模型。它属于建模阶段要写进文档的判断，与损失函数、评价指标一样，应当能追溯到某个具体的业务问句上（对照\hyperref[sec:13-Machine-Learning/01-Learning-Problems-and-Evaluation/02]{``损失、风险、目标与指标不是同一个量''}）。
+
+\subsection{IRLS 是 Newton 法穿上均值—方差的外衣}
+
+除 Gaussian 加 identity link 之外，score 方程一般没有闭式解。Newton 法把对数似然在当前点作二阶展开，整理之后每一步都是一个加权最小二乘：
 \[
-\frac{\E[Y\mid x_1=1]}{\E[Y\mid x_1=0]}
-=e^{\beta_1}.
+\beta^{\text{new}}=(X^{\trans}WX)^{-1}X^{\trans}Wz,
 \]
+其中权重 \(W\) 由方差函数与 \(g'\) 决定，工作响应 \(z=\eta+(y-\mu)g'(\mu)\) 是响应在当前线性预测子尺度上的一阶近似。二者随迭代更新，构成似然的局部二次模型，不是对原数据的改写（背景见\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/02]{``Newton 法用曲率校正方向''}）。
 
-线性预测子里的加法，在原始均值尺度上变成乘法比例。若每个观察窗口暴露时间 \(t_i\) 不同，应使用 offset：
+实现上仍旧解加权最小二乘而不显式求逆，走 QR 或 Cholesky。上一小节写的 \((X^{\trans}WX)^{-1}\) 与前几节写的 \((X^{\trans}X)^{-1}\) 一样，是给人读的记号。收敛判据也要连着参数尺度一起看：logistic 那边的完全分离会让 \(\norm{\beta}\) 一路发散，Poisson 这边少数极端计数会形成高杠杆点，两种情形下目标值的变化量都可能已经很小而参数还在跑。
 
-\[
-\log\mu_i=\log t_i+x_i^\trans\beta.
-\]
+\subsection{均值—方差关系是可以被数据反驳的}
 
-这里 \(\log t_i\) 的系数固定为 \(1\)，因为模型比较的是单位时间发生率，而不是把观察更久误当成特征效应。
+Poisson 把 \(\Var=\mu\) 写死了。真实计数里几乎总有未建模的异质性——不同网点的基础活跃度不同、同一网点不同日期的条件不同——于是实际方差大过均值，标准误被系统性低估，本来不显著的系数看起来显著。诊断很直接：算 Pearson 残差平方和除以残差自由度，明显大于 1 就是 overdispersion 的信号。处理办法是改用 quasi-Poisson 把离散参数放开，或换成负二项分布让方差写成 \(\mu+\mu^2/k\)。结构性零特别多时（很多网点当天根本不营业），则要用 hurdle 或零膨胀模型把``零''拆成两种来源。
 
-\subsection{IRLS 是 Newton 法在均值方差结构下的样子}
+链接函数保证了输出落在合法范围内，它保证不了别的。概率输出未必校准，得单独查；系数在观测数据下仍然不是因果效应，前面几节列过的混杂、选择性与碰撞点在 GLM 里一条不少（见\hyperref[sec:13-Machine-Learning/12-Causal-Inference/03]{``混杂、碰撞点与后门调整''}）。
 
-GLM 的 score 方程通常没有闭式解。Newton 法把当前 log-likelihood 作二阶近似，可整理为迭代重加权最小二乘：
-
-\[
-\beta^{\text{new}}
-=(X^\trans W X)^{-1}X^\trans Wz.
-\]
-
-工作响应 \(z\) 与权重 \(W\) 随当前均值改变。它们构成 likelihood 在当前点的局部二次模型，并非对原数据的随意改写。完全分离的 logistic 数据会让有限 MLE 不存在；Poisson 中极端计数也可能产生高杠杆。收敛报告必须连同梯度、步长和参数尺度一起看。
-
-\subsection{分布选择必须接受数据反驳}
-
-Poisson 假设条件方差等于条件均值，现实计数常因未建模异质性出现 overdispersion；大量结构性零值又可能需要 hurdle 或 zero-inflated 模型。Bernoulli likelihood 只规定给定特征后的二元随机性，不保证概率已经校准，更不保证特征与结果的关系是因果的。
-
-GLM 的价值是把响应支持集、均值、方差和线性预测子写进一套可检查模型。若残差、离散程度或部署分布否定这些假设，应改变模型或不确定性估计，而不是因为链接函数保证了输出范围就宣布问题已经解决。
+整个单元讲的是同一件事的五个侧面。最小二乘是投影，正则化在数据沉默的方向上补一条偏好，logistic 把线性结构挪到对数几率上，Bayesian 把系数的不确定一路传到预测，GLM 则把响应分布、均值尺度与线性预测子拆成三个可以分别指定的部件。它们的表达力都不高，能留在生产系统里是因为每一处假设都写在明面上，也都能被数据反驳。往后的树模型、核方法与神经网络会把表达力推上去，同时把这份可对账性一点点交出去——决定该换的时候，先想清楚交出去的是哪一部分。

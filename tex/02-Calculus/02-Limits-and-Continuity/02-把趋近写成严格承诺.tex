@@ -40,8 +40,8 @@
   \node[below] at (2,-0.12) {\(a\)};
   \node[below,blue!55!black,font=\footnotesize] at (1.55,-0.5) {\(a-\delta\)};
   \node[below,blue!55!black,font=\footnotesize] at (2.45,-0.5) {\(a+\delta\)};
-  \node[right,red!60!black,font=\footnotesize] at (3.55,2.0) {① 对手划横带};
-  \node[right,blue!55!black,font=\footnotesize] at (2.5,3.15) {② 你划竖带};
+  \node[right,red!60!black,font=\footnotesize] at (3.55,2.0) {对手先划横带};
+  \node[above,blue!55!black,font=\footnotesize] at (2.0,3.35) {你再划竖带};
 \end{tikzpicture}
 
 \emph{横带的高度由对手指定，竖带的宽度由你回应。验收标准只有一条：曲线落在竖带里的那一段，必须整个待在横带内。横带压得越扁，竖带一般就得收得越窄。}
@@ -90,7 +90,7 @@
 
 它可以依赖 \(\varepsilon\)，这是应答结构的核心。它也可以依赖函数 \(f\) 和目标点 \(a\)——同一个函数在不同的点上，同样的精度要求可能需要宽窄悬殊的窗口。它唯独不能依赖 \(x\)，因为 \(\delta\) 必须在 \(x\) 进场之前就交出去。
 
-第二条依赖看起来无害，代价却不小。看 \(f(x)=1/x\) 在 \((0,1)\) 上：固定 \(\varepsilon=0.5\)，在 \(a=0.6\) 附近函数比较平缓，一个不算窄的窗口就够；挪到 \(a=0.2\)，曲线陡得多，窗口必须收紧一大截；再挪到 \(a=0.02\)，窗口还得再窄两个数量级。
+第二条依赖看起来无害，麻烦却不小。看 \(f(x)=1/x\) 在 \((0,1)\) 上：固定 \(\varepsilon=0.5\)，在 \(a=0.6\) 附近函数比较平缓，一个不算窄的窗口就够；挪到 \(a=0.2\)，曲线陡得多，窗口必须收紧一大截；再挪到 \(a=0.02\)，窗口还得再窄两个数量级。
 
 \begin{center}
 \begin{tikzpicture}[x=4.4cm,y=0.42cm,font=\small,>=stealth]
@@ -105,15 +105,17 @@
   \draw[red!65!black,dashed] (0,2.167) -- (1.12,2.167);
   \fill[black] (0.2,5) circle (1.6pt);
   \fill[black] (0.6,1.667) circle (1.6pt);
-  \draw[<->,blue!55!black,thick] (0.182,-0.75) -- (0.222,-0.75);
-  \draw[<->,blue!55!black,thick] (0.4615,-0.75) -- (0.857,-0.75);
+  \draw[blue!55!black,thick] (0.182,-0.75) -- (0.222,-0.75)
+    (0.182,-0.45) -- (0.182,-1.05) (0.222,-0.45) -- (0.222,-1.05);
+  \draw[blue!55!black,thick] (0.4615,-0.75) -- (0.857,-0.75)
+    (0.4615,-0.45) -- (0.4615,-1.05) (0.857,-0.45) -- (0.857,-1.05);
   \node[below,font=\footnotesize] at (0.202,-1.25) {\(a=0.2\)};
   \node[below,font=\footnotesize] at (0.66,-1.25) {\(a=0.6\)};
   \node[right,red!65!black,font=\footnotesize] at (1.13,5.0) {\(f(a)\pm\varepsilon\)};
   \node[right,red!65!black,font=\footnotesize] at (1.13,1.667) {\(f(a)\pm\varepsilon\)};
 \end{tikzpicture}
 
-\emph{两对虚线之间的高度相同，对应同一个 \(\varepsilon\)。可要把曲线压进这个高度里，靠近原点那一处的竖窗口必须窄得多。逐点的极限允许每个点配一套自己的 \(\delta\)，代价是这些 \(\delta\) 可以一路缩到零。}
+\emph{两对虚线之间的高度相同，对应同一个 \(\varepsilon\)。可要把曲线压进这个高度里，靠近原点那一处的竖窗口必须窄得多。逐点的极限允许每个点配一套自己的 \(\delta\)，这些 \(\delta\) 于是可以一路缩到零。}
 \end{center}
 
 于是有了一个自然的追问：能不能要求一个 \(\delta\) 对整条定义域上的所有点同时管用？能，那就是一致连续，写法是把 \(\forall a\) 挪到 \(\exists\delta\) 后面。\(1/x\) 在 \((0,1)\) 上做不到，因为那些逐点的 \(\delta\) 的下确界是零；换到 \([0.1,1]\) 上就做得到。这个量词的搬家会在下一节末尾和 \hyperref[sec:12-Real-Analysis-Support/03-Topology-Basics/02]{``紧致性把无限局部信息压成有限控制''} 里反复出现，函数列的逐点收敛与一致收敛也是同一个动作的另一次上演。

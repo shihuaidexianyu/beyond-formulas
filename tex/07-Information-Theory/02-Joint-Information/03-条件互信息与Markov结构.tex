@@ -91,7 +91,7 @@ I(X;Y)-I(X;Y\given Z),
   \node[font=\footnotesize,black!70] at (0,3.0) {\(H(X)\)};
   \node[font=\footnotesize,black!70] at (-2.75,-2.15) {\(H(Y)\)};
   \node[font=\footnotesize,black!70] at (2.75,-2.15) {\(H(Z)\)};
-  \draw[black!45] (0,-0.45) -- (0,-2.55);
+  \draw[black!45,dashed] (0,-0.45) -- (0,-2.55);
   \node[font=\footnotesize,black!75] at (0,-2.95) {这一块可以是负的};
 \end{tikzpicture}
 
@@ -104,7 +104,7 @@ I(X;Y)-I(X;Y\given Z),
 
 \subsection{互信息的链式法则与 Markov 结构}
 
-信息量本身也能分步记账。把 \((Y,Z)\) 联合起来关于 \(X\) 的信息拆成两段：
+信息量本身也能一段一段地拆。把 \((Y,Z)\) 联合起来关于 \(X\) 的信息拆成两段：
 
 \[
 I(X;Y,Z)=I(X;Z)+I(X;Y\given Z),

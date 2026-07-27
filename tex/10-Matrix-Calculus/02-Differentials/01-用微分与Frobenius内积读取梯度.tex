@@ -1,171 +1,167 @@
 \section{用微分与 Frobenius 内积读取梯度}
 \label{sec:10-Matrix-Calculus/02-Differentials/01}
 
-设你需要最小化
+手头的任务是最小化
 
 \[
 f(X)=\frac12\norm{AX-B}_F^2,
+\qquad
+A\in\R^{100\times 50},\quad X\in\R^{50\times 30},\quad B\in\R^{100\times 30}.
 \]
 
-其中 \(A\in\R^{100\times 50}\)，\(X\in\R^{50\times 30}\)，\(B\in\R^{100\times 30}\)。梯度下降需要 \(\nabla_X f\)——一个 \(50\times 30\) 的矩阵，包含 1500 个偏导数。
+梯度下降要的是 \(\nabla_X f\)，一个 \(50\times 30\) 的矩阵，里面有 \(1500\) 个偏导数。没有人会一个个去求它们再拼回形状。
 
-你不会想一个个求偏导再拼回矩阵形状。你可以把 \(X\) 拉成向量 \(\operatorname{vec}(X)\in\R^{1500}\)，用 Kronecker 积写出 \(\nabla_{\operatorname{vec}(X)}f = (I_{30}\otimes A^{\trans}A)\operatorname{vec}(X)-(I\otimes A^{\trans})\operatorname{vec}(B)\)。这个式子是对的——但 \(1500\times 1500\) 的 Kronecker 积不告诉你任何关于 \(A\)、\(X\)、\(B\) 原来形状的信息。你失去了从结果一眼认出 \(A^{\trans}(AX-B)\) 的能力。
+一条看起来正规的出路是把矩阵拉平。令 \(x=\operatorname{vec}(X)\in\R^{1500}\)，用 Kronecker 积把问题写成普通的向量最小二乘，梯度是 \((I_{30}\otimes A^{\trans}A)x-(I_{30}\otimes A^{\trans})\operatorname{vec}(B)\)。这个式子没错，可它把一个 \(1500\times 1500\) 的对象摆在了你面前，而 \(A\)、\(X\)、\(B\) 各自的形状全被拉平抹掉了。你再也没法从结果里一眼认出 \(A^{\trans}(AX-B)\)，也没法判断某一项该不该转置。真正在代码里要写的那一行，反而看不出来了。
 
-需要一个既尊重矩阵形状又能系统推演的记法。微分 \(df\) 加 Frobenius 内积就是为这个目的服务的。
+需要的是一套既保住矩阵形状、又能机械推演的记法。微分符号 \(\mathrm dX\) 加上 Frobenius 内积就是干这个的。它把``求梯度''换成一件纯代数的活：把 \(\mathrm df\) 整理成 \(\ip{G}{\mathrm dX}_F\) 的样子，括号里的 \(G\) 就是梯度。
 
-\subsection{微分是线性化，不是``无穷小量''}
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,>=stealth,
+    box/.style={draw=black!55,rounded corners=2pt,inner sep=4pt,align=center}]
+  \node[box,fill=blue!6] (f)  at (0.9,1.35) {\(f(X)\)};
+  \node[box,fill=blue!6] (t1) at (3.7,2.70) {写出微分\\\(\mathrm df\) 对 \(\mathrm dX\) 线性};
+  \node[box,fill=blue!6] (t2) at (7.2,2.70) {整理成内积\\\(\mathrm df=\ip{G}{\mathrm dX}_F\)};
+  \node[box,fill=blue!6] (t3) at (10.2,2.70) {读出\\\(\nabla_X f=G\)};
+  \node[box,fill=black!4] (b1) at (3.7,0.00) {逐元素求\\\(\partial f/\partial X_{ij}\)};
+  \node[box,fill=black!4] (b2) at (7.2,0.00) {\(1500\) 个标量\\与一堆求和指标};
+  \node[box,fill=black!4] (b3) at (10.2,0.00) {按 \((i,j)\) 拼回形状};
+  \draw[->,blue!55!black,thick] (f) -- (t1);
+  \draw[->,blue!55!black,thick] (t1) -- (t2);
+  \draw[->,blue!55!black,thick] (t2) -- (t3);
+  \draw[->,black!45,dashed] (f) -- (b1);
+  \draw[->,black!45,dashed] (b1) -- (b2);
+  \draw[->,black!45,dashed] (b2) -- (b3);
+\end{tikzpicture}
 
-把 \(f\) 在 \(X\) 处的变化线性近似：当 \(X\) 扰动一个很小的 \(dX\) 时，
+\emph{上下两条路通向同一个矩阵；上面一条从头到尾没有出现过下标。}
+\end{center}
+
+图上那条实线是本节要走的路线，三步都是可以机械执行的：套微分规则、用迹的循环性质把 \(\mathrm dX\) 挪到最右端、把它前面那一坨转置一下读出来。下面那条虚线不是错的，只是每一步都在跟指标搏斗，而且中途丢掉的形状信息到最后还得靠人脑补回去。下面把实线的三步逐个说清楚。
+
+\subsection{微分是线性化，\(\mathrm dX\) 只是占位符}
+
+先把 \(\mathrm dX\) 的身份说定。它不是``一个极小的矩阵''，也不需要任何关于无穷小的哲学。它是一个与 \(X\) 同形的符号，代表``扰动发生在哪个位置、朝哪个方向''，而 \(\mathrm df\) 是 \(f\) 相应变化的线性主部：
 
 \[
-f(X+dX)-f(X)\approx df,
+f(X+\mathrm dX)-f(X)=\mathrm df+o(\norm{\mathrm dX}_F),
 \]
 
-其中 \(df\) 对 \(dX\) 线性。\(dX\) 不是``一个极小的矩阵''，它是一个与 \(X\) 同形的占位符号，记录``变化发生在哪个位置以及什么方向''。获取 \(df\) 不需要特殊的极限技巧——直接用你熟悉的运算规则，只要忽略 \((dA)(dB)\) 级别的二阶小量：
+其中 \(\mathrm df\) 对 \(\mathrm dX\) 线性。这与上一单元的 \(Df(X)[H]\) 是同一件事，换了个书写习惯：把 \(H\) 写成 \(\mathrm dX\)，好处是可以在一行式子里连着用乘法、转置、迹的规则往下推。
+
+规则只有三条，都从代入展开、扔掉二阶项得来：
 
 \[
-d(A+B)=dA+dB,
+\mathrm d(A+B)=\mathrm dA+\mathrm dB,
+\qquad
+\mathrm d(AB)=(\mathrm dA)B+A\,\mathrm dB,
+\qquad
+\mathrm d(A^{\trans})=(\mathrm dA)^{\trans}.
 \]
+
+乘积那条要留意顺序不能动，矩阵乘法不可交换。取 \(Y=X^{\trans}X\) 试一次：代入 \(X+\mathrm dX\) 展开得 \(X^{\trans}X+(\mathrm dX)^{\trans}X+X^{\trans}\mathrm dX+(\mathrm dX)^{\trans}\mathrm dX\)，末项是二阶量，去掉后
 
 \[
-d(AB)=(dA)B+A(dB),
+\mathrm dY=(\mathrm dX)^{\trans}X+X^{\trans}\mathrm dX.
 \]
+
+条件对一遍。``扔掉二阶项''之所以合法，是因为 Fréchet 可微性要求余项除以 \(\norm{\mathrm dX}_F\) 后趋于零，而 \((\mathrm dX)^{\trans}\mathrm dX\) 的 Frobenius 范数不超过 \(\norm{\mathrm dX}_F^2\)，正好满足。对于由加、乘、转置、迹、逆、行列式复合出来的函数，这一步永远成立；碰到 \(\max\)、绝对值、取整这类地方就要停下来单独看，那里的可微性本身是有条件的。
+
+\subsection{Frobenius 内积把梯度钉成唯一的那个矩阵}
+
+两个同形矩阵的 Frobenius 内积是逐元素乘积求和：
 
 \[
-d(A^{\trans})=(dA)^{\trans}.
+\ip{A}{B}_F=\sum_{i,j}A_{ij}B_{ij}=\trace(A^{\trans}B).
 \]
 
-例如 \(Y=X^{\trans}X\) 的微分：把 \(X+dX\) 代入，
+它对称、双线性、正定，矩阵空间在它之下就是一个普通的欧氏空间，``两个矩阵的距离''``投影到某个子空间''这类说法才有依据。
+
+梯度的定义随之而来：\(\nabla_X f\) 是使
 
 \[
-Y+dY=(X+dX)^{\trans}(X+dX)=X^{\trans}X+(dX)^{\trans}X+X^{\trans}dX+(dX)^{\trans}dX.
+\mathrm df=\ip{\nabla_X f}{\mathrm dX}_F=\trace\bigl((\nabla_X f)^{\trans}\mathrm dX\bigr)
 \]
 
-扔掉最后那个二阶小量，得到
+对一切 \(\mathrm dX\) 成立的那个矩阵。内积的正定性保证这样的矩阵至多一个：若两个矩阵都满足，它们的差与所有 \(\mathrm dX\) 内积为零，取 \(\mathrm dX\) 等于这个差本身即得差为零。唯一性是这套方法能用的前提——只要你把 \(\mathrm df\) 整理成了内积形式，前面那个矩阵就是梯度，没有第二种可能，也不必回头验算。
+
+\subsection{一个完整范例走完三步}
+
+回到开头的最小二乘。记残差 \(R=AX-B\)，于是 \(f=\tfrac12\trace(R^{\trans}R)\)。
+
+第一步，写微分。乘积规则给出 \(\mathrm df=\tfrac12\trace\bigl((\mathrm dR)^{\trans}R+R^{\trans}\mathrm dR\bigr)\)。迹在转置下不变，两项相等，因子 \(\tfrac12\) 被吃掉：
 
 \[
-dY=(dX)^{\trans}X+X^{\trans}dX.
+\mathrm df=\trace(R^{\trans}\mathrm dR).
 \]
 
-这就是上一章方向导数中把 \(H\) 换成 \(dX\) 的结果。微分记法把``沿特定方向的变化率''升级为``对所有可能方向统一的线性映射''。
+顺带解释一下那个 \(\tfrac12\) 是怎么来的。它是建模者自己加的归一化，不加的话微分里会留下一个 \(2\)，梯度表达式多一个因子；最优解不受影响。这类常数没有定理可背，只有约定可查。
 
-\subsection{Frobenius 内积把矩阵空间变成向量空间}
+第二步，把 \(\mathrm dR\) 换成 \(\mathrm dX\)。\(A\) 与 \(B\) 是常量，\(\mathrm dA=0\)、\(\mathrm dB=0\)，故 \(\mathrm dR=A\,\mathrm dX\)，代入得 \(\mathrm df=\trace(R^{\trans}A\,\mathrm dX)\)。
 
-两个同形矩阵 \(A,B\) 的 Frobenius 内积定义为逐元素乘积之和：
+第三步，读取。为了对上 \(\trace(G^{\trans}\mathrm dX)\)，把 \(R^{\trans}A\) 写成某个矩阵的转置：\(R^{\trans}A=(A^{\trans}R)^{\trans}\)，于是
 
 \[
-\langle A,B\rangle_F = \sum_{i,j}A_{ij}B_{ij}
-=\trace(A^{\trans}B).
+\mathrm df=\trace\bigl((A^{\trans}R)^{\trans}\mathrm dX\bigr),
+\qquad
+\nabla_X f=A^{\trans}(AX-B).
 \]
 
-它满足欧氏内积的全部性质：对称、线性、正定。矩阵空间的几何直觉——“两个矩阵之间的距离”“投影到某个子空间”——全都建立在这个内积上。
+形状核对：\(A^{\trans}\) 是 \(50\times 100\)，\(AX-B\) 是 \(100\times 30\)，乘出来 \(50\times 30\)，与 \(X\) 同形。跟前面那个 Kronecker 版本对照一下，同样的信息，这边可以直接抄进代码，而且每个因子为什么在那个位置都看得见。
 
-关键洞察在于：如果能把 \(df\) 写成 Frobenius 内积的形式
+\subsection{最后一步的转置是最容易漏的地方}
 
-\[
-df = \langle G, dX\rangle_F = \trace(G^{\trans}dX),
-\]
-
-那么 \(G\) 就是梯度 \(\nabla_X f\)。梯度是内积空间中唯一满足 \(df=\langle\nabla f,dX\rangle\) 的那个元素。
-
-于是整个技术路线就清楚了：用微分规则算出 \(df\)，利用 trace 的循环性质把它整理到 \(dX\) 出现在右端、前面是一个矩阵的转置的形式，读出来就是梯度。
-
-\subsection{从微分到梯度：一个完整范例}
-
-回到开头的最小二乘。定义残差 \(R=AX-B\)。先算 \(f\) 的微分：
-
-\[
-f=\frac12\trace(R^{\trans}R),
-\]
-
-\[
-df=\frac12\trace\bigl((dR)^{\trans}R+R^{\trans}dR\bigr).
-\]
-
-两项都是标量——\(\trace((dR)^{\trans}R)=\trace(R^{\trans}dR)\) 因为迹在转置下不变——所以
-
-\[
-df=\trace(R^{\trans}dR).
-\]
-
-这一步省掉了因子 \(1/2\)。为什么要主动在目标函数前加 \(1/2\)？因为不加的话微分是 \(2\trace(R^{\trans}dR)\)，梯度里就多一个因子 2。加 \(1/2\) 纯粹是为了梯度表达式更干净，不改变最优解。它是建模者自己选的归一化，不是什么需要背的定理。
-
-下一步，\(dR=A\,dX\)。注意这里 \(dA=0\) 因为 \(A\) 是常量，\(dB=0\) 同理。代入：
-
-\[
-df=\trace(R^{\trans}A\,dX).
-\]
-
-现在 \(dX\) 在 trace 的最右端。为了匹配 \(\trace(G^{\trans}dX)\)，循环移动：
-
-\[
-df=\trace(R^{\trans}A\,dX)
-=\trace\bigl((A^{\trans}R)^{\trans}dX\bigr).
-\]
-
-读取梯度：
-
-\[
-\nabla_X f = A^{\trans}R = A^{\trans}(AX-B).
-\]
-
-你再回头看一眼那个 Kronecker 积版本——\(A^{\trans}(AX-B)\) 的矩阵形状和因子顺序一目了然，可以立刻与原始问题对应。
-
-\subsection{循环移动的每一步都要匹配形状}
-
-Trace 的循环性质是唯一可以``移动因子''的操作：
+能挪动因子的操作只有迹的循环性质：
 
 \[
 \trace(ABC)=\trace(BCA)=\trace(CAB).
 \]
 
-它不是任意交换——\(\trace(ABC)\) 一般不等于 \(\trace(ACB)\)。循环必须保持乘积顺序，只能整体轮换。
-
-利用循环可以实现 Frobenius 内积中的因子移动。例如，
+它是整体轮换，不是任意交换，\(\trace(ABC)\) 一般不等于 \(\trace(ACB)\)。轮换配合转置，可以把内积里的因子从一侧搬到另一侧：
 
 \[
-\langle A,BC\rangle_F
-=\trace(A^{\trans}BC)
-=\trace(CA^{\trans}B)
-=\trace\bigl((AC^{\trans})^{\trans}B\bigr)
-=\langle AC^{\trans},B\rangle_F.
+\ip{A}{BC}_F=\trace(A^{\trans}BC)=\trace(CA^{\trans}B)
+=\trace\bigl((AC^{\trans})^{\trans}B\bigr)=\ip{AC^{\trans}}{B}_F.
 \]
 
-这个性质在梯度推导中反复出现：你想把 \(dX\) 从表达式中间移到最右端，中间经过的因子会被``吞''进梯度转置的内部。
+推导中反复用到的就是这个动作：把 \(\mathrm dX\) 从表达式中间挪到最右端，路上遇到的因子被吞进梯度的转置里面。
 
-最常见的错误就出在最后一步。如果微分整理到
+出错最集中的是最后那一下。假设整理到了
 
 \[
-df=\trace(BA\,dX),
+\mathrm df=\trace(BA\,\mathrm dX),
 \]
 
-直接与 \(\trace(G^{\trans}dX)\) 比较，\(G^{\trans}=BA\)，所以
+与 \(\trace(G^{\trans}\mathrm dX)\) 比较，得到的是 \(G^{\trans}=BA\)，因此 \(G=A^{\trans}B^{\trans}\)，而不是 \(BA\)。把 \(\mathrm dX\) 前面那一坨直接叫作梯度，是这套方法里最高频的失误，尤其在 \(BA\) 恰好是方阵时形状检查还抓不住。可靠的做法是每次都把定义式 \(\trace\bigl((\nabla_X f)^{\trans}\mathrm dX\bigr)\) 完整写出来再比对，不靠视觉记忆决定要不要转置。
+
+\subsection{推导一个新层的梯度不必展开到元素}
+
+这套流程真正省力的场合是给新结构写反向传播。设某一层的输出是 \(Y=\sigma(XW)\)，下游传来的量是 \(\nabla_Y L\)，你要的是 \(\nabla_W L\) 和 \(\nabla_X L\)。按流程走：先写 \(\mathrm dL=\ip{\nabla_Y L}{\mathrm dY}_F\)，再把 \(\mathrm dY=\sigma'(XW)\odot(\mathrm dX\,W+X\,\mathrm dW)\) 代进去。逐元素乘 \(\odot\) 与 Frobenius 内积之间有一条现成的搬移规则 \(\ip{A}{B\odot C}_F=\ip{A\odot B}{C}_F\)，用它把 \(\sigma'\) 挪到左边，记 \(\Delta=\nabla_Y L\odot\sigma'(XW)\)，剩下的就是
 
 \[
-G=(BA)^{\trans}=A^{\trans}B^{\trans},
+\mathrm dL=\ip{\Delta}{\mathrm dX\,W}_F+\ip{\Delta}{X\,\mathrm dW}_F
+=\ip{\Delta W^{\trans}}{\mathrm dX}_F+\ip{X^{\trans}\Delta}{\mathrm dW}_F,
 \]
 
-不是 \(BA\)。把 \(dX\) 前面的东西不经转置地称作梯度，是出错最集中的地方。避免这个错误的最可靠方法是每次都显式写出梯度定义 \(\trace((\nabla f)^{\trans}dX)\)，而不是依赖视觉记忆判断要不要转置。
+两个梯度一次读出：\(\nabla_X L=\Delta W^{\trans}\)，\(\nabla_W L=X^{\trans}\Delta\)。整个过程没有出现一个下标，也没有用到任何需要背的矩阵求导公式；用到的只有微分规则、内积搬移和一次形状核对。换成注意力里的 \(QK^{\trans}\)、归一化层里的均值方差、低秩分解里的两个因子，步骤完全一样。这也是为什么框架的自定义算子文档总在讲``给定上游梯度，返回下游梯度''——那正是 \(\mathrm dL\) 被整理成内积之后括号里剩下的东西。
 
-\subsection{损失用和还是平均影响梯度尺度}
+\subsection{和与平均只差一个因子，却改变有效步长}
 
-目标函数定义为样本损失之和还是平均，会改变梯度的大小，从而改变同一学习率下的有效步长和正则化强度的解释。两个公式如果只差一个 \(1/n\) 因子，可能各自对应不同的目标定义，都是正确的——但它们对应的优化问题不完全相同。这种差异不是数学错误，但需要在调整学习率和权重衰减时保持一致。
+目标函数写成样本损失之和还是平均，梯度会整体差一个 \(1/n\)。两份资料的公式若只差这个因子，多半各自对应了不同的目标定义，都成立。数学上没有对错，工程上要当心：同一个学习率下有效步长差了 \(n\) 倍，权重衰减相对于损失的比重也跟着变。换批大小、换成梯度累积、从复现代码里搬公式，这三处最容易埋雷。写下梯度之前先确认目标里有没有那个 \(1/n\)，比事后调学习率省事。
 
-\subsection{变量有约束时需要额外的一步}
+\subsection{变量有约束时要先确认扰动空间}
 
-当 \(X\) 被要求对称时，\(dX\) 也必须对称。只有对称扰动才能被接受，反对称扰动不在定义域内。如果直接按无约束方法求出的梯度 \(G\)，它的反对称部分与任何对称扰动的内积为零：
-
-设 \(K^{\trans}=-K\) 且 \(H^{\trans}=H\)，则
+如果 \(X\) 被要求对称，那么可接受的 \(\mathrm dX\) 也必须对称，按无约束流程读出的 \(G\) 就不能直接当梯度用。原因可以算出来：设 \(K^{\trans}=-K\)、\(H^{\trans}=H\)，则
 
 \[
-\trace(KH)=\trace\bigl((KH)^{\trans}\bigr)
-=-\trace(HK)=-\trace(KH),
+\trace(KH)=\trace\bigl((KH)^{\trans}\bigr)=\trace(H^{\trans}K^{\trans})=-\trace(HK)=-\trace(KH),
 \]
 
-这推出 \(\trace(KH)=0\)，即 \(\langle K,H\rangle_F=0\)。反对称部分对梯度的有效分量没有贡献：在对称变量空间中，只有 \(G\) 的对称部分对目标函数的变化负责。因此对称约束下的正确梯度是
+故 \(\trace(KH)=0\)。斜对称部分与任何对称扰动的内积都是零，对目标函数的变化没有贡献。留下负责的那一半：
 
 \[
-\operatorname{sym}(G)=\frac12(G+G^{\trans}),
+\operatorname{sym}(G)=\tfrac12\bigl(G+G^{\trans}\bigr),
 \]
 
-这正是上一章方向导数中引入的对称化算子。是否需要这一步取决于变量空间的定义，不能从公式本身推测。
+它自身对称，且对所有对称 \(H\) 有 \(\ip{G}{H}_F=\ip{\operatorname{sym}(G)}{H}_F\)。协方差矩阵、核矩阵、图的邻接权重上做优化时，漏掉这一步会让更新方向带上一个不属于问题的分量。要不要做这一步，取决于变量空间是怎么定义的，从公式本身看不出来。
+
+到这里，单个函数的梯度已经可以机械地算出来。可实际的模型是几十层复合起来的，微分要一层层往回传，而传的时候有一个自由度还没用上：一串矩阵连乘，从哪一端开始乘是你说了算的。下一节就来算这笔账。

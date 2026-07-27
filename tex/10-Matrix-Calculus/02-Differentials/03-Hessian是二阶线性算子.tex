@@ -1,121 +1,121 @@
 \section{Hessian 是二阶线性算子}
 \label{sec:10-Matrix-Calculus/02-Differentials/03}
 
-对标量函数 \(f:\R^n\to\R\)，梯度的一阶变化由 Hessian 控制：
+你打算在训练里试一次二阶方法。教科书上的 Newton 步是 \(p=-\bigl(\nabla^2f(x)\bigr)^{-1}\nabla f(x)\)，看起来只是解一个线性方程组。可模型有 \(10^8\) 个参数，那个矩阵就有 \(10^{16}\) 个元素，按单精度存要四万 TB。别说求逆，写下来都做不到。
+
+于是二阶方法在深度学习里常被一句``维度太高''打发掉。这句话只对了一半。存不下的是那张表，而算法要的从来不是表。共轭梯度解 \(\nabla^2f(x)\,p=-\nabla f(x)\) 时，每一轮只问一件事：给定一个向量 \(v\)，\(\nabla^2f(x)\,v\) 等于多少。Lanczos 想估计一下最大最小特征值，问的也是同一件事。只要能回答这个问题，那张表根本不必出现。
+
+要看清这一点，得先把 Hessian 从``二阶偏导数排成的方阵''这个印象里拽出来。
+
+\begin{center}
+\begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,>=stealth]
+  \draw[black!55,rounded corners=3pt,fill=blue!5] (2.50,0.30) rectangle (4.50,3.65);
+  \node[black!75] at (3.50,1.98) {\(\nabla^2 f(x)\)};
+  % 第一行：两个槽都不填
+  \node[black!70] at (1.25,3.05) {不填};
+  \draw[->,black!45] (1.80,3.05) -- (2.45,3.05);
+  \draw[->,black!45] (4.55,3.05) -- (5.05,3.05);
+  \draw[black!45,fill=black!8] (5.15,2.60) rectangle (6.05,3.50);
+  \node[black!60] at (5.60,3.05) {\(n\times n\)};
+  \node[anchor=west,black!60] at (6.55,3.05) {\(n^2\) 个数：参数上亿时存不下};
+  % 第二行：填一个槽
+  \draw[black!60,fill=blue!16] (1.12,1.55) rectangle (1.37,2.40);
+  \node[black!70] at (0.78,1.98) {\(v\)};
+  \draw[->,black!60] (1.80,1.98) -- (2.45,1.98);
+  \draw[->,black!60] (4.55,1.98) -- (5.05,1.98);
+  \draw[black!60,fill=orange!30] (5.27,1.55) rectangle (5.52,2.40);
+  \node[anchor=west,black!70] at (6.55,1.98) {Hessian-向量积：一次反向加一次前向};
+  % 第三行：两个槽都填
+  \draw[black!60,fill=blue!16] (0.95,0.55) rectangle (1.20,1.25);
+  \draw[black!60,fill=blue!16] (1.30,0.55) rectangle (1.55,1.25);
+  \node[black!70] at (1.25,0.22) {\(u,\ v\)};
+  \draw[->,black!60] (1.85,0.90) -- (2.45,0.90);
+  \draw[->,black!60] (4.55,0.90) -- (5.05,0.90);
+  \fill[orange!60!black] (5.40,0.90) circle (2.4pt);
+  \node[anchor=west,black!70] at (6.55,0.90) {沿一对方向的曲率：一个数};
+\end{tikzpicture}
+
+\emph{同一个二阶算子：两个槽都填上得到一个曲率数，只填一个得到一列，一个都不填才是那张存不下的表。}
+\end{center}
+
+图里那个方框有两个槽。填满两个方向得到一个标量，这是二阶导数最原本的身份——一个双线性形式，吃进两个方向，吐出一个数。只填一个槽，剩下的是一个从向量到向量的线性算子，这正是数值算法要用的形态。把两个槽都空着、按坐标基把所有取值列成表格，才得到那个 \(n\times n\) 的矩阵。三种形态是同一个对象，代价却相差悬殊。下面按这个顺序展开。
+
+\subsection{二阶导数是一个双线性形式}
+
+从一阶出发。\(f:\R^n\to\R\) 的微分是 \(\mathrm df=\nabla f(x)^{\trans}\mathrm dx\)。梯度本身是 \(x\) 的函数，对它再求一次导，得到的是``梯度怎样随位置变化''：
 
 \[
-d(\nabla f)=\nabla^2f(x)\,dx.
+\mathrm d(\nabla f)=\nabla^2f(x)\,\mathrm dx.
 \]
 
-二阶 Taylor 展开为
+把这个变化再与一个方向配对，就得到二阶微分 \(\mathrm d^2f=\mathrm dx^{\trans}\nabla^2f(x)\,\mathrm dx\)。允许两个方向不同，写成 \(B(u,v)=u^{\trans}\nabla^2f(x)v\)，它对每个变元都线性，这就是双线性形式的定义。二阶 Taylor 展开
 
 \[
-f(x+h) = f(x)+\nabla f(x)^{\trans}h
-+\frac12h^{\trans}\nabla^2f(x)h
-+o(\norm{ h}^2).
+f(x+h)=f(x)+\nabla f(x)^{\trans}h+\tfrac12h^{\trans}\nabla^2f(x)h+o(\norm{h}^2)
 \]
-Hessian 不只是"二阶偏导表"，它是把一个输入方向映成梯度变化的线性算子。二次型
+
+里出现的正是它在 \(u=v=h\) 处的取值，度量的是沿 \(h\) 的局部曲率。
+
+把它当算子看还是当双线性形式看，取决于你要做什么。想知道某个方向陡不陡，填两个槽读那个数；想解方程或做迭代，填一个槽把它当矩阵作用；想画出全部信息，才需要那张表。二次型与正定性的几何在\hyperref[sec:03-Linear-Algebra/06-Symmetric-and-Positive-Definite-Matrices/02]{``二次型与正定性：每个方向上的能量是否为正''}里已经铺过，这里的 \(\nabla^2f(x)\) 只是把那套语言搬到了函数的局部。
+
+凸性的二阶判据就是对所有方向的曲率提要求：\(\nabla^2f(x)\succeq0\) 在整个凸定义域上成立，等价于 \(f\) 凸。判据本身在凸优化部分证过，这里只强调它是一句关于双线性形式取值的话，而不是关于矩阵元素的话。
+
+\subsection{对称性是一条有条件的定理}
+
+\(\nabla^2f\) 对称——混合偏导可以交换次序——这件事用得太顺手，容易忘了它需要条件。若 \(f\) 在某邻域内二阶偏导存在且连续，则 \(\partial^2f/\partial x_i\partial x_j=\partial^2f/\partial x_j\partial x_i\)，Hessian 对称。这是 Clairaut--Schwarz 定理，前提是那个连续性。
+
+条件对一遍。二阶偏导仅仅存在是不够的，标准反例是 \(f(x,y)=xy(x^2-y^2)/(x^2+y^2)\)（原点处取 \(0\)），它在原点两个混合偏导都存在，却分别等于 \(-1\) 和 \(1\)。这类函数在工程里罕见，因为常用模型由光滑运算搭成，但结论要记准：对称性是定理，不是记号约定。真正会遇到麻烦的是分段定义的地方——\(\relu\) 网络的二阶信息在折点处根本没定义，自动微分返回的对称矩阵是分段光滑区域内部的结果，跨过折点不成立。
+
+对称性一旦成立，好处成串出现：谱定理保证特征值全实、特征向量可取正交，曲率有了``最陡与最平方向''的解释；共轭梯度这类只对对称正定矩阵成立的算法才能用上；存储也可以只留一半。这些都建立在同一个前提上。
+
+\subsection{矩阵变量下 Hessian 只能当算子用}
+
+变量是矩阵时，坚持``二阶导数是一张表''会立刻碰壁。设 \(X\in\R^{m\times n}\)，梯度 \(\nabla_Xf\) 也是 \(m\times n\)，那么二阶导数要记录``\(m\times n\) 个输入方向各自引起 \(m\times n\) 个输出分量的变化''，逐元素展开就是一个四阶数组，\(m^2n^2\) 个元素，指标写起来也难看。
+
+算子写法没有这个问题：
 
 \[
-h^{\trans}\nabla^2f(x)h
+\mathcal H_X[H]=D(\nabla_Xf)[H],
 \]
 
-则测量沿方向 \(h\) 的局部曲率。
-
-\subsection{二阶微分怎样出现}
-
-一阶微分写成
+输入一个与 \(X\) 同形的扰动，输出一个与 \(X\) 同形的矩阵。拿上一节推完的矩阵最小二乘验证，\(f(X)=\tfrac12\norm{AX-B}_F^2\)，梯度 \(\nabla_Xf=A^{\trans}(AX-B)\)。对它再微分一次，\(A\) 和 \(B\) 是常量，直接得到
 
 \[
-df=\nabla f^{\trans}dx.
+\mathcal H_X[H]=A^{\trans}AH.
 \]
 
-再次微分，并把 \(dx\) 视为固定方向，得到
+配上一个方向读曲率：
 
 \[
-d^2f = dx^{\trans}\nabla^2f\,dx.
+\ip{H}{\mathcal H_X[H]}_F=\trace\bigl(H^{\trans}A^{\trans}AH\bigr)=\norm{AH}_F^2\ge0,
 \]
-若 \(f\) 二次连续可微，混合偏导相等，Hessian 对称。若光滑性不足，偏导存在也未必能自由交换；对称性有定理条件，不是排版规定。
 
-凸优化中的二阶判据正是：
+对所有 \(H\) 成立，所以这个目标是凸的。全程没有出现四阶数组，也没有出现一个下标。注意 \(\mathcal H_X[H]=A^{\trans}AH\) 这个式子本身就是可以直接编码的：给一个 \(H\)，做两次矩阵乘法即得，和一次前向差不多贵。
+
+\subsection{Hessian-向量积不需要那个矩阵}
+
+回到向量变量。给定方向 \(v\)，要的是
 
 \[
-\nabla^2f(x)\succeq0
-\quad\text{对整个凸定义域成立}.
+\nabla^2f(x)\,v=D(\nabla f)(x)[v],
 \]
 
-它说每个方向的二阶变化都非负；这一判据的等价性在凸优化部分已经证明。
+也就是梯度这个向量值函数沿 \(v\) 的方向导数。有两条现成的算法。一条是对梯度做一次前向模式微分，即在反向传播之上再套一层 JVP，业内叫 forward-over-reverse。另一条是先算标量 \(g(x)=\nabla f(x)^{\trans}v\)（把 \(v\) 当常量），再对它做一次普通的反向传播，因为 \(\nabla g=\nabla^2f\,v\)。两条路都只需要常数倍于一次梯度计算的开销，占用的内存也是 \(O(n)\) 而不是 \(O(n^2)\)。
 
-\subsection{矩阵变量的 Hessian 更适合看成算子}
+有了这个原语，一批二阶方法在高维下就活了过来。Newton-CG 用共轭梯度求解 \(\nabla^2f(x)p=-\nabla f(x)\)，每一轮只要一次 HVP，从不组装矩阵；这类``只需要矩阵作用而不需要矩阵''的迭代法是\hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/04]{``大型稀疏系统与 Krylov 迭代''}的主题，那里讲清楚了为什么几十轮就能给出够用的解。Lanczos 用同样的原语估计谱的两端，可以回答``当前这一点附近有多少负曲率''，这正是\hyperref[sec:09-Convex-Optimization/08-Nonconvex-and-Stochastic-Optimization/02]{``二阶结构区分局部极小与鞍点''}里要判断的事。影响函数、曲率诊断、二阶信赖域方法，用的都是这一个接口。至于 Newton 方向本身为什么值得费这个劲，见\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/02]{``Newton 法用曲率校正方向''}。
 
-若 \(X\in\R^{m\times n}\)，梯度 \(\nabla_Xf\) 也是矩阵。Hessian 将矩阵扰动 \(H\) 映射成另一个矩阵：
+有一处要保持清醒。HVP 是对你写下的那个程序求导，不是对某个理想数学函数求导。程序里的浮点误差、\(\relu\) 折点上的约定、随机采样带来的函数变动，全都原样继承下来；小批量上算出的曲率还带着采样噪声。它是一个高效的原语，不是抽象 Hessian 的无条件精确 oracle。
+
+\subsection{Gauss--Newton 丢掉一半曲率换来半正定}
+
+有时候不但不需要完整的 Hessian，还主动不要它。对非线性最小二乘 \(f(x)=\tfrac12\norm{r(x)}_2^2\)，梯度是 \(\nabla f=J_r^{\trans}r\)。再微分一次，\(\mathrm d\nabla f=J_r^{\trans}\mathrm dr+(\mathrm dJ_r^{\trans})r\)，其中 \(\mathrm dr=J_r\,\mathrm dx\)，第二项按分量展开是 \(\sum_ir_i\nabla^2r_i\,\mathrm dx\)。于是
 
 \[
-\mathcal H_X[H] = D(\nabla_Xf)[H].
-\]
-若强行逐元素展开，需要四阶张量；大多数算法只需要算子对给定方向的作用。
-
-以上一节完整推导过的矩阵最小二乘为例：
-
-\[
-f(X)=\frac12\norm{ AX-B}_F^2,
+\nabla^2f=J_r^{\trans}J_r+\sum_ir_i\nabla^2r_i.
 \]
 
-梯度是
+Gauss--Newton 直接扔掉第二项，只用 \(J_r^{\trans}J_r\)。理由有两层：它天然半正定，因为 \(h^{\trans}J_r^{\trans}J_rh=\norm{J_rh}_2^2\ge0\)，于是解出的方向一定是下降方向；而且它只需要一阶导数信息，代价低得多。什么时候可信也说得清楚——第二项带着残差 \(r_i\) 作系数，残差小或模型接近线性时它就小。远离解、残差很大时，被丢掉的可能恰是关键曲率，Levenberg--Marquardt 再加一项阻尼把稳定性找补回来。
 
-\[
-\nabla_Xf=A^{\trans}(AX-B).
-\]
+这个例子给出的判断值得单独记下：二阶近似并非越完整越好。一个结构化的近似可以换来正定性、更低的成本和更稳的方向，让出的是普遍性——它只在某个区域内可信，而那个区域必须说清楚。深度学习里流行的 K-FAC、各种对角或 Kronecker 近似，走的都是同一条路子。
 
-沿方向 \(H\) 的梯度变化为
-
-\[
-\mathcal H_X[H] = A^{\trans}AH.
-\]
-二阶方向量为
-
-\[
-\langle H,\mathcal H_X[H]\rangle_F = \norm{ AH}_F^2\ge0,
-\]
-所以目标凸。整个推导无需构造四阶数组。
-
-\subsection{Hessian-vector product 可由自动微分得到}
-
-对向量变量，给定方向 \(v\)，
-
-\[
-\nabla^2f(x)v = D(\nabla f)(x)[v].
-\]
-可以对梯度做一次 JVP，也可以对方向导数 \(\nabla f(x)^{\trans}v\) 再求梯度。现代自动微分系统用正反模式组合计算 HVP，成本与少数次梯度计算同阶，远小于存储完整 \(n\times n\) Hessian。
-
-这使共轭梯度 Newton、曲率诊断和影响函数在高维中成为可能。但 HVP 仍继承原程序的数值误差与不可微约定；它不是抽象 Hessian 的无条件精确 oracle。
-
-\subsection{Gauss--Newton 保留残差的一部分曲率}
-
-对非线性最小二乘
-
-\[
-f(x)=\frac12\norm{ r(x)}_2^2,
-\]
-
-梯度为
-
-\[
-\nabla f=J_r^{\trans}r.
-\]
-
-对它再微分一次：\(d\nabla f=J_r^{\trans}\,dr+(dJ_r^{\trans})\,r\)，其中 \(dr=J_r\,dx\)，而 \((dJ_r^{\trans})\,r\) 按分量展开为 \(\sum_i r_i\nabla^2r_i\,dx\)。于是 Hessian 分解为
-
-\[
-\nabla^2f = J_r^{\trans}J_r
-+\sum_i r_i\nabla^2r_i.
-\]
-Gauss--Newton 忽略第二项，使用
-
-\[
-J_r^{\trans}J_r\succeq0.
-\]
-
-当残差小或模型近似线性时，这个近似合理，并且天然半正定（\(h^{\trans}J_r^{\trans}J_rh=\norm{ J_rh}_2^2\ge0\)）；远离解、残差很大时则可能缺失重要曲率。Levenberg--Marquardt 再加入阻尼以提高稳定性。
-
-这个例子说明二阶近似不是越完整越好。结构化近似可以换取正定性、较低计算成本与更稳健的方向，但必须说明在哪个区域可信。
+矩阵微积分到这里已经备齐了一阶与二阶的工具。剩下的是把它用熟：迹、逆、行列式这些反复出现的结构各有一套整理套路，下一单元把它们逐个拆开。

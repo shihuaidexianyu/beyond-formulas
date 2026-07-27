@@ -3,7 +3,7 @@
 
 十个数据点，九次多项式，训练残差严格为零。这个拟合无可挑剔，也毫无内容——它只是把那十个点换了一种写法。极端一点，最强的``模型''就是整张数据表本身：训练误差同样为零，泛化能力同样是零。
 
-问题不在于拟合得太好，而在于我们一直只盯着账本的一栏。残差被压到零，代价是模型那一栏膨胀了，可那一栏从来没被计价。最小描述长度（minimum description length，MDL）做的事就是把两栏放进同一个单位。
+问题不在于拟合得太好，而在于我们一直只盯着账本的一栏。残差被压到零，模型那一栏于是膨胀了，可那一栏从来没被计价。最小描述长度（minimum description length，MDL）做的事就是把两栏放进同一个单位。
 
 \subsection{把模型和残差记进同一本账}
 
@@ -39,7 +39,7 @@ L(x)=-\log_2 Q(x),
   \node[font=\footnotesize,black!75,right] at (4.35,0.62) {\(L(D\given M)\)};
   \node[font=\footnotesize,black!85,right] at (4.05,3.05) {总长度};
   \node[font=\footnotesize,black!70,below] at (1.536,-0.12) {最短处};
-  \node[font=\footnotesize,black!55,align=center] at (0.75,3.55) {欠拟合：\\模型短，数据长};
+  \node[font=\footnotesize,black!55,align=center] at (1.15,3.55) {欠拟合：\\模型短，数据长};
   \node[font=\footnotesize,black!55,align=center] at (5.05,3.75) {过拟合：\\数据短，模型长};
 \end{tikzpicture}
 

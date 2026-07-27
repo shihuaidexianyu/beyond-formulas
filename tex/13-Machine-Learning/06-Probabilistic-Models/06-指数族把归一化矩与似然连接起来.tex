@@ -1,164 +1,147 @@
 \section{指数族把归一化、矩与似然连接起来}
 \label{sec:13-Machine-Learning/06-Probabilistic-Models/06}
 
-Bernoulli、Poisson、Gaussian 看似拥有不同的概率公式，参数估计时却反复出现同一种结构：数据先被压缩成若干求和或均值，似然梯度再要求经验统计量等于模型统计量。指数族把这条共同骨架写成
+你在一个建模库里接连实现了几个估计器。Bernoulli 的最大似然是数出 \(1\) 的比例；Poisson 的是样本均值；已知方差的 Gaussian 还是样本均值；GMM 的 M 步是责任加权的均值与二阶矩；HMM 的发射参数更新也是同一副样子。三份推导各写一遍，得到的代码几乎可以互相复制粘贴——都是先把数据压成几个求和，再令模型的某个期望等于它。
+
+反复出现的结构值得怀疑。这些分布的公式看上去毫无关系，为什么估计方程会长成同一个模样？答案不在任何一个分布里，而在它们共同所属的那个族。
+
+\subsection{一个族的形状由充分统计量和一个归一化函数定下}
+
+指数族把上述共同骨架写成
 
 \[
-p(x\mid\eta)
-=h(x)
-\exp\left(
-\eta^{\trans}T(x)-A(\eta)
-\right).
+p(x\given\eta)=h(x)\exp\bigl(\eta^{\trans}T(x)-A(\eta)\bigr),
 \]
 
-\(T(x)\) 是充分统计量，\(\eta\) 是自然参数，\(h(x)\) 是不依赖参数的 base measure，而
+其中 \(T(x)\) 是充分统计量，\(\eta\) 是自然参数，\(h(x)\) 是与参数无关的基测度，而
 
 \[
-A(\eta)
-=\log\int
-h(x)\exp\left(
-\eta^{\trans}T(x)
-\right)\,dx
+A(\eta)=\log\int h(x)\exp\bigl(\eta^{\trans}T(x)\bigr)\,dx
 \]
 
-是 log-partition function。离散情形将积分换成求和。\(A\) 不是为了美观补上的常数；它负责保证密度积分为 1，也承载了这个分布族的矩与曲率。
+是 log-partition function（离散情形把积分换成求和）。\(A\) 不是为了让式子好看才补上的常数，它要保证密度积分为 \(1\)，并且——这是本节的主线——它同时装着这个族的全部矩信息。
 
-\subsection{自然参数空间由积分是否有限决定}
-
-允许的自然参数集合是
+允许的自然参数只能取在 \(\mathcal H=\set{\eta:A(\eta)<\infty}\) 内，并非任意向量都合法。均值与方差都未知的一维 Gaussian 可以写成
 
 \[
-\mathcal H
-=\set{
-\eta:
-A(\eta)<\infty
-}.
-\]
-
-并非任意向量都能代入。例如已知方差 \(\sigma^2\) 的 Gaussian 可写成
-
-\[
-p(x\mid\mu)
-=h(x)
-\exp\left(
-\frac{\mu}{\sigma^2}x
--\frac{\mu^2}{2\sigma^2}
-\right),
-\]
-
-其自然参数是 \(\eta=\mu/\sigma^2\)。若均值和方差都未知，则可取
-
-\[
-T(x)=
-\begin{bmatrix}
-x\\x^2
-\end{bmatrix},
+T(x)=\begin{bmatrix}x\\x^2\end{bmatrix},
 \qquad
-\eta=
-\begin{bmatrix}
-\mu/\sigma^2\\
--1/(2\sigma^2)
-\end{bmatrix},
+\eta=\begin{bmatrix}\mu/\sigma^2\\-1/(2\sigma^2)\end{bmatrix},
 \]
 
-第二个自然参数必须小于零，否则对 \(x\) 的积分发散。自然参数空间的边界因此常对应方差退化、概率集中或最大似然不存在。
+第二个分量必须严格为负，否则 \(\exp(\eta_2x^2)\) 在两端发散，积分不存在。自然参数空间的边界因此对应着方差退化、概率彻底集中、或者最大似然解跑掉这类退化情形，后面会看到具体例子。
 
-原始参数和自然参数也不一定一一对应。若充分统计量存在线性冗余，不同 \(\eta\) 可能产生相同分布，称为非最小表示。最小表示下，参数几何与 log-partition 的严格凸性更清楚。
+参数化本身也需要一点小心。若 \(T(x)\) 的各分量之间存在线性冗余，不同的 \(\eta\) 会给出同一个分布，这叫非最小表示。换成最小表示之后，参数与分布一一对应，下面关于严格凸性的说法才成立。
 
-\subsection{Log-partition 的一阶导数给出均值}
+\subsection{Log-partition 求一次导是均值，求两次导是协方差}
 
-在可以交换求导与积分的条件下，
+在可以交换求导与积分的条件下，直接对 \(A\) 求梯度：
 
 \[
 \nabla_\eta A(\eta)
-=\frac{
-\int T(x)h(x)
-\exp\left(
-\eta^{\trans}T(x)
-\right)\,dx
-}{
-\int h(x)
-\exp\left(
-\eta^{\trans}T(x)
-\right)\,dx
-}
+=\frac{\int T(x)h(x)\exp(\eta^{\trans}T(x))\,dx}
+{\int h(x)\exp(\eta^{\trans}T(x))\,dx}
 =\E_\eta[T(X)].
 \]
 
-对 \(A\) 再求导得到
+分母正是配分函数，分子把 \(T(x)\) 带进同一个积分，商就是期望。再求一次导，
 
 \[
-\nabla_\eta^2 A(\eta)
-=\Cov_\eta(T(X)).
+\nabla_\eta^2A(\eta)=\Cov_\eta\bigl(T(X)\bigr).
 \]
 
-协方差矩阵半正定，所以 \(A\) 是凸函数；在最小正则指数族中通常严格凸。归一化、期望和曲率由同一个函数统一：\(\nabla A\) 把自然参数送到 mean parameter，\(\nabla^2A\) 描述统计量对参数变化的敏感度，也与 Fisher information 相连。
+协方差矩阵半正定，所以 \(A\) 是凸函数；最小表示的正则指数族中它严格凸。于是归一化、期望与曲率被同一个函数管起来：\(\nabla A\) 把自然参数映到均值参数，\(\nabla^2A\) 描述统计量对参数变动的敏感程度，也正是 Fisher 信息，可对照\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}。
 
-这与前面\hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/06]{``配分函数把能量变成全局概率''}中的公式相同。指数族把能量限制为统计量的线性组合，因此 partition gradient 变成明确的 moment map。
+以 Bernoulli 为例把这件事画出来。写成指数族形式 \(p(x\given\eta)=\exp(\eta x-\log(1+e^\eta))\)，\(x\in\set{0,1}\)，自然参数就是 log-odds，\(A(\eta)=\log(1+e^\eta)\)，于是 \(\nabla A(\eta)=\sigma(\eta)\)。
+
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+
+% ---------- 左：A(eta) ----------
+\begin{scope}
+\draw[gray!60,->] (-3.4,0) -- (3.6,0);
+\draw[gray!60,->] (0,-0.25) -- (0,3.7);
+\node[font=\scriptsize,anchor=north] at (3.5,-0.05) {\(\eta\)};
+
+\draw[black!30,dashed] (0,0) -- (3.4,3.4);
+\draw[violet,very thick] plot[domain=-3.3:3.3,samples=90]
+  (\x,{ln(1+exp(\x))});
+\draw[blue!70,thick] (-0.6,0.146) -- (3.0,2.775);
+\fill[blue!80] (1,1.313) circle (2pt);
+
+\node[font=\scriptsize,violet,anchor=west] at (0.15,3.35) {\(A(\eta)=\log(1+e^{\eta})\)};
+\node[font=\scriptsize,blue!70,anchor=west] at (1.5,0.95) {斜率 \(=\E_\eta[T(X)]\)};
+\node[font=\scriptsize,anchor=north] at (0.2,-0.15) {自然参数};
+\end{scope}
+
+% ---------- 右：均值映射 ----------
+\begin{scope}[shift={(7.6,0)}]
+\draw[gray!60,->] (-3.4,0) -- (3.6,0);
+\draw[gray!60,->] (0,-0.25) -- (0,3.2);
+\node[font=\scriptsize,anchor=north] at (3.5,-0.05) {\(\eta\)};
+
+\draw[black!35,dashed] (-3.3,2.5) -- (3.3,2.5);
+\node[font=\scriptsize,anchor=east] at (-0.08,2.5) {\(1\)};
+\node[font=\scriptsize,anchor=east] at (-0.08,0.18) {\(0\)};
+
+\draw[violet,very thick] plot[domain=-3.3:3.3,samples=90]
+  (\x,{2.5/(1+exp(-\x))});
+\fill[blue!80] (1,1.828) circle (2pt);
+\draw[gray!55,dashed] (1,0) -- (1,1.828);
+
+\node[font=\scriptsize,anchor=west] at (-3.3,2.85) {\(\nabla A(\eta)=\sigma(\eta)\)};
+\node[font=\scriptsize,anchor=east] at (3.3,1.6) {够不到边界};
+\end{scope}
+
+\end{tikzpicture}
+\end{center}
+
+\emph{左边曲线的斜率就是右边的高度；边界那条虚线只能逼近，不能落上去。}
+
+左图那条切线的斜率读出的是分布的均值，这正是 \(\nabla A=\E[T]\) 的几何含义；曲线越弯，同样的参数扰动带来的均值变化越大，对应 \(\nabla^2A=\Cov(T)\)。右图是同一件事的另一种画法：均值映射把整条实轴压进开区间 \((0,1)\)，两端的虚线够不到。这张图稍后会解释一个常见的训练故障。
+
+同样的代数在\hyperref[sec:13-Machine-Learning/08-Sampling-and-Inference/06]{``配分函数把能量变成全局概率''}里以能量模型的面目出现。区别在于指数族把能量限制成统计量的线性组合，配分函数的梯度因而退化成一个明确的矩映射，而不是一般能量模型里那个难算的期望。最大熵原理从另一头给出同一族分布：在若干矩约束下熵最大的分布必是指数族形式，见\hyperref[sec:07-Information-Theory/01-Information-and-Entropy/04]{``最大熵原理：从约束到分布''}。
 
 \subsection{独立样本只通过充分统计量进入似然}
 
-对独立样本 \(x_{1:n}\)，联合密度为
+对独立样本 \(x_{1:n}\)，联合密度是
 
 \[
-p(x_{1:n}\mid\eta)
-=\left(\prod_{i=1}^{n}h(x_i)\right)
-\exp\left(
-\eta^{\trans}\sum_{i=1}^{n}T(x_i)
--nA(\eta)
-\right).
+p(x_{1:n}\given\eta)
+=\Bigl(\prod_{i=1}^nh(x_i)\Bigr)
+\exp\Bigl(\eta^{\trans}\sum_{i=1}^nT(x_i)-nA(\eta)\Bigr).
 \]
 
-参数相关部分只依赖
+与参数有关的部分只碰到 \(S_n=\sum_iT(x_i)\)。按 Fisher--Neyman 分解，\(S_n\) 是 \(\eta\) 的充分统计量：不论样本量多大，参数推断需要的东西被压进一个固定维数的向量。要注意``充分''的确切含义——给定 \(S_n\) 后原始数据对参数不再提供额外的似然信息，但它对别的问题仍可能重要。样本顺序、离群结构、模型是否失配，这些都在压缩中消失了，所以充分统计量不能拿来做模型诊断，边界见\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/01]{``充分统计量保留了哪些参数信息''}。
+
+现在把开头那个疑问收掉。对数似然的梯度为
 
 \[
-S_n=\sum_{i=1}^{n}T(x_i).
+\nabla_\eta\ell(\eta)=\sum_{i=1}^nT(x_i)-n\nabla A(\eta),
 \]
 
-由 Fisher--Neyman factorization，\(S_n\) 是 \(\eta\) 的充分统计量。充分表示``给定 \(S_n\) 后，原始样本对参数不再提供额外 likelihood 信息''，不表示它保留了数据对所有其他任务的信息。样本顺序、异常结构或模型失配仍可能在压缩后消失。
-
-对数似然梯度为
+令其为零，内点上的最大似然解满足
 
 \[
-\nabla_\eta\ell(\eta)
-=\sum_{i=1}^{n}T(x_i)
--n\nabla A(\eta).
+\frac1n\sum_{i=1}^nT(x_i)=\E_{\widehat\eta}[T(X)].
 \]
 
-内部极大似然解因此满足
+经验矩等于模型矩——矩匹配不是某种巧合或者启发式，它就是指数族似然的一阶条件。Bernoulli 的 \(T(x)=x\) 于是给出样本比例，Gaussian 的 \(T(x)=(x,x^2)^{\trans}\) 给出样本均值与二阶矩，GMM 的 M 步在责任加权之后仍是这套方程。Hessian 是
 
 \[
-\frac1n\sum_{i=1}^{n}T(x_i)
-=\E_{\widehat\eta}[T(X)].
+\nabla_\eta^2\ell(\eta)=-n\Cov_\eta\bigl(T(X)\bigr),
 \]
 
-这就是 moment matching，它直接来自指数族 likelihood 的一阶条件。Hessian 为
+半负定，所以最小表示下的对数似然是凹的，局部极大即全局极大（凹性的判据见\hyperref[sec:09-Convex-Optimization/03-Convex-Functions/01]{``弦在图像上方意味着什么''}）。这也解释了 EM 的 M 步为什么总能闭式：完全数据的对数似然若属于指数族，M 步不过是在加权的充分统计量上再做一次矩匹配。
 
-\[
-\nabla_\eta^2\ell(\eta)
-=-n\Cov_\eta(T(X)),
-\]
+\subsection{当经验矩落到边界上，MLE 就不存在}
 
-所以最小表示下的 log-likelihood 是凹的，自然参数空间中的局部极大值也是全局极大值。
+回到右图。若样本里既有 \(0\) 又有 \(1\)，经验均值落在开区间内部，矩匹配给出一个有限的 \(\widehat\eta\)。若全部观测都是 \(1\)，经验均值等于 \(1\)，恰好落在均值参数空间的边界——那条虚线上没有任何 \(\eta\) 的像。似然沿 \(\eta\to+\infty\) 单调上升却永不取到上确界，有限的最大似然解不存在。
 
-\subsection{边界数据可能把 MLE 推到无穷远}
+Logistic 回归里完全可分的数据是同一件事的高维版本：存在一个方向，沿它放大系数能让似然持续增加，优化器于是一路把范数推大。日志上看到系数发散、迭代不收敛，第一反应不该是换优化器或调步长，而是检查经验矩是不是贴上了边界。加先验、加 \(\ell_2\) 正则、或者换一个不那么饱和的模型都能把解拉回有限区域，只是估计的对象已经不再是原来那个。
 
-对 Bernoulli 分布，
+\subsection{指数族不是``常见分布''的同义词}
 
-\[
-p(x\mid\eta)
-=\exp\left(
-\eta x-\log(1+e^\eta)
-\right),
-\qquad x\in\set{0,1},
-\]
+这套代数好用，但它的适用范围比印象中窄。有限维指数族要求样本量增加时充分统计量的维数保持固定，Uniform 这种支撑依赖参数的分布不满足正则条件，重尾分布往往写不成这个形式。混合模型更值得单独一提：每个成分都是指数族，隐变量边缘掉之后的观测似然却含着对数里的求和，凹性随之丢失——前面几节反复遇到的局部最优问题，不会因为成分属于指数族而消失。
 
-自然参数是 log-odds，\(\nabla A(\eta)=\sigma(\eta)\)。若样本中既有 0 又有 1，moment matching 给出有限的样本比例；若全部观测为 1，则经验均值位于 mean parameter space 边界，只能令 \(\eta\to+\infty\) 逼近它，没有有限 MLE。
-
-Logistic regression 中完全分离的数据出现同样现象：likelihood 可以沿某个参数方向持续增加，而有限系数不存在。优化器迭代很久不是数值算法太差，而可能是目标根本没有有限最优点。先验、正则化或改变模型能把解拉回有限区域，但也相应改变了估计问题。
-
-\subsection{指数族不是``所有常见分布''的同义词}
-
-有限维指数族要求数据维度增加时，充分统计量维数仍固定。混合模型、重尾分布和参数相关支撑可能不满足常规正则条件；即便能写成某种指数形式，也未必拥有平滑开放的自然参数空间。混合模型的 component label 未知时，观测 likelihood 中的对数求和也不会因各成分属于指数族就自动变凸。
-
-下一节再利用这套代数解释共轭先验为何能保持 posterior 形式不变。
+即便能写成指数形式，也要看自然参数空间是否开、是否光滑，否则上面关于导数与凹性的推理逐条失效。把这些条件核对清楚之后，指数族给出的回报是相当大的：一个统一的估计方程、一个凹的目标、一个把参数几何与信息几何连起来的入口（见\hyperref[sec:12-Real-Analysis-Support/09-Information-Geometry/01]{``统计流形把参数族变成几何对象''}），以及广义线性模型的整套框架（见\hyperref[sec:13-Machine-Learning/02-Linear-Models/05]{``GLM 用链接函数连接均值与线性预测子''}）。还有一项回报尚未兑现：如果似然属于指数族，先验该怎么选，才能让 Bayes 更新之后的后验仍然待在同一族里。下一节处理这个问题。

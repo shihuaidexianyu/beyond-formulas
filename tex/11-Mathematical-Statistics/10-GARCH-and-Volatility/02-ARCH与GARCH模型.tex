@@ -1,128 +1,141 @@
 \section{ARCH 与 GARCH 的随机过程结构}
 \label{sec:11-Mathematical-Statistics/10-GARCH-and-Volatility/02}
 
-ARCH 与 GARCH 把条件方差写成自回归随机过程。参数控制冲击的短期影响、波动的持久性、以及新信息与旧波动的相对权重。平稳性条件来自随机过程理论，不是任意的技术假设。
+上一节把问题推到了这一步：告警阈值要跟着条件标准差走，于是得先有一个 \(\hat\sigma_t\)。最省事的做法是滚动窗口标准差，取最近二十期算一个。上线以后你会发现两件事。窗口取短了，估计自己抖得比数据还厉害；取长了，一次真实的波动上升要过好几天才反映出来。更难看的是第三件事：某个大值滑出窗口的那一天，\(\hat\sigma_t\) 会毫无理由地掉一个台阶，告警数量随之跳变。
 
-\subsection{ARCH(q)：方差依赖历史冲击}
+滚动窗口的毛病在于它对二十期以内的历史一视同仁，对二十期以外的完全遗忘。真实的波动记忆不长这样——昨天的冲击最重要，前天次之，一个月前的还有一点点，但不该在某个整数天数上突然归零。这一节要做的，就是把这条平滑衰减的权重曲线用两三个参数写出来。
 
-ARCH(q) 模型由 Engle（1982）提出：
+\subsection{ARCH 让条件方差依赖过去的冲击平方}
+
+Engle（1982）给出的第一步很直接：既然大冲击预示大波动，就让条件方差是历史冲击平方的加权和。ARCH(\(q\)) 模型写作
 
 \[
+\varepsilon_t=\sigma_tz_t,
+\qquad
 \sigma_t^2=\omega+\alpha_1\varepsilon_{t-1}^2+\cdots+\alpha_q\varepsilon_{t-q}^2,
 \]
 
-其中 \(\varepsilon_t=\sigma_tz_t\) 是残差（非标准化），\(\omega>0\)，\(\alpha_i\ge0\)。
+其中 \(z_t\) 独立同分布、均值零方差一，\(\omega>0\)，\(\alpha_i\ge0\)。非负约束不是形式上的洁癖：\(\sigma_t^2\) 必须为正才有意义，而正性最容易的保证方式就是让所有系数非负、常数项为正。
 
-ARCH(1) 是最简单的形式：\(\sigma_t^2=\omega+\alpha\varepsilon_{t-1}^2\)。昨天的冲击平方 \(\varepsilon_{t-1}^2\) 大，今天的方差就大——波动率聚集自然产生。
+ARCH 已经比滚动窗口好：权重可以随滞后递减，不再是断崖式截断。但它有个实际困难。要让记忆持续到三十期以外，就得取 \(q\ge 30\)，也就是估三十多个参数，还都要满足非负与求和约束。样本量再大，这些参数的估计也会互相打架，拟合出来的权重曲线常常是锯齿状的。
 
-ARCH(1) 的平稳性条件可以从随机过程推导。把 \(\varepsilon_t^2\) 写成
+\subsection{GARCH 把方差的过去也放进去}
+
+Bollerslev（1986）加了一项，改动小，效果大。GARCH(\(p,q\)) 写作
 
 \[
-\varepsilon_t^2=\sigma_t^2z_t^2=(\omega+\alpha\varepsilon_{t-1}^2)z_t^2.
+\sigma_t^2=\omega+\sum_{i=1}^q\alpha_i\varepsilon_{t-i}^2+\sum_{j=1}^p\beta_j\sigma_{t-j}^2 .
 \]
 
-取期望（假设 \(z_t\) 与 \(\varepsilon_{t-1}\) 独立，\(\E z_t^2=1\)）：
+绝大多数实证工作用的是最简单的 GARCH(1,1)：
 
 \[
-\E[\varepsilon_t^2]=\omega+\alpha\E[\varepsilon_{t-1}^2].
+\sigma_t^2=\omega+\alpha\varepsilon_{t-1}^2+\beta\sigma_{t-1}^2 .
 \]
 
-若 \(\E[\varepsilon_t^2]\) 收敛到常数 \(v\)，则 \(v=\omega+\alpha v\)，即 \(v=\omega/(1-\alpha)\)。这要求 \(\alpha<1\)；\(\alpha\ge1\) 时方差发散或不存在。
-
-更严格的平稳性分析（涉及 \(\varepsilon_t^2\) 作为随机差分方程的解）给出相同条件：\(\alpha<1\) 时 \(\varepsilon_t^2\) 是平稳的 AR(1) 型过程，\(\alpha\ge1\) 时非平稳。
-
-ARCH(q) 的平稳性条件是 \(\sum_{i=1}^q\alpha_i<1\)，推导类似但涉及高阶差分方程。
-
-\subsection{GARCH(p,q)：方差也依赖历史方差}
-
-GARCH(p,q) 由 Bollerslev（1986）推广，把条件方差写成
+三个参数。要看清它为什么够用，把递推式反复代入自己：
 
 \[
-\sigma_t^2=\omega+\sum_{i=1}^q\alpha_i\varepsilon_{t-i}^2+\sum_{j=1}^p\beta_j\sigma_{t-j}^2.
+\begin{aligned}
+\sigma_t^2
+&=\omega+\alpha\varepsilon_{t-1}^2+\beta\big(\omega+\alpha\varepsilon_{t-2}^2+\beta\sigma_{t-2}^2\big)\\
+&=\omega(1+\beta)+\alpha\big(\varepsilon_{t-1}^2+\beta\varepsilon_{t-2}^2\big)+\beta^2\sigma_{t-2}^2\\
+&=\ \cdots\\
+&=\frac{\omega}{1-\beta}+\alpha\sum_{j=0}^{\infty}\beta^{\,j}\varepsilon_{t-1-j}^2 ,
+\end{aligned}
 \]
 
-GARCH(1,1) 是最常用的形式：
+最后一步在 \(\abs{\beta}<1\) 时成立。GARCH(1,1) 等价于一个权重按 \(\beta^{\,j}\) 几何衰减的无穷阶 ARCH。想要的那条平滑衰减曲线出现了，而它只花了两个参数：\(\alpha\) 定第一期的权重，\(\beta\) 定衰减速度。
+
+这个手法在书里已经见过。\hyperref[sec:06-Random-Processes/06-ARMA-and-ARIMA/02]{``MA 与 ARMA：冲击的持久影响''}里，AR 项让有限个参数展开成无穷阶 MA，从而用两三个系数表达一条长长的冲击响应。GARCH 对条件方差做了同一件事：\(\beta\) 扮演 AR 的角色，把有限的参数摊成无限的记忆。ARMA 管条件均值的长记忆，GARCH 管条件方差的长记忆，用的是同一个技巧。
+
+\subsection{平稳性条件 \texorpdfstring{\(\alpha+\beta<1\)}{alpha+beta<1} 是判断模型的第一道关}
+
+把 \(\sigma_t^2\) 的方程转成关于 \(\varepsilon_t^2\) 的方程。记 \(v_t=\varepsilon_t^2-\sigma_t^2\)，由 \(\E[\varepsilon_t^2\given\mathcal F_{t-1}]=\sigma_t^2\) 知 \(v_t\) 是鞅差，\(\E v_t=0\)。代入整理得
 
 \[
-\sigma_t^2=\omega+\alpha\varepsilon_{t-1}^2+\beta\sigma_{t-1}^2.
+\varepsilon_t^2=\omega+(\alpha+\beta)\varepsilon_{t-1}^2+v_t-\beta v_{t-1}.
 \]
 
-GARCH(1,1) 的平稳性条件推导：令 \(v_t=\varepsilon_t^2-\sigma_t^2\)（方差创新），则
+这是一个 ARMA(1,1)，自回归系数正是 \(\alpha+\beta\)。取无条件期望，若 \(\E[\varepsilon_t^2]\) 收敛到常数 \(\bar\sigma^2\)，则 \(\bar\sigma^2=\omega+(\alpha+\beta)\bar\sigma^2\)，于是
 
 \[
-\varepsilon_t^2=\omega+(\alpha+\beta)\varepsilon_{t-1}^2-\beta v_{t-1}+v_t.
+\bar\sigma^2=\frac{\omega}{1-\alpha-\beta},
+\qquad \alpha+\beta<1 .
 \]
 
-取期望（\(\E v_t=0\)，因为 \(\E[\varepsilon_t^2]=\E[\sigma_t^2]\)）：
+\begin{proposition}
+设 \(\omega>0\)，\(\alpha\ge0\)，\(\beta\ge0\)。GARCH(1,1) 存在无条件方差有限的弱平稳解，当且仅当 \(\alpha+\beta<1\)，此时无条件方差为 \(\omega/(1-\alpha-\beta)\)。
+\end{proposition}
+
+条件对账值得做一遍。正性由 \(\omega>0\) 与 \(\alpha,\beta\ge0\) 保证；\(v_t\) 是鞅差这一步用到 \(z_t\) 的条件方差为一；把 \(\E[\varepsilon_t^2]\) 换成常数这一步默认了极限存在，而 \(\alpha+\beta<1\) 正是让这个几何级数收敛的条件。注意这里只要求二阶矩有限，四阶矩要另算，条件更紧（对正态创新是 \((\alpha+\beta)^2+2\alpha^2<1\)），这一点在算峰度或做稳健标准误时会咬人。
+
+\(\alpha+\beta\) 的含义在预测公式里最清楚。GARCH(1,1) 的 \(h\) 步条件方差预测是
 
 \[
-\E[\varepsilon_t^2]=\omega+(\alpha+\beta)\E[\varepsilon_{t-1}^2].
+\E[\sigma_{t+h}^2\given\mathcal F_t]
+=\bar\sigma^2+(\alpha+\beta)^{h-1}\big(\sigma_{t+1}^2-\bar\sigma^2\big).
 \]
 
-若 \(\E[\varepsilon_t^2]\) 收敛到 \(v\)，则 \(v=\omega+(\alpha+\beta)v\)，即 \(v=\omega/(1-\alpha-\beta)\)。这要求 \(\alpha+\beta<1\)；\(\alpha+\beta\ge1\) 时方差发散或不存在。
+当前波动偏离长期水平多少，这个偏离就以 \((\alpha+\beta)^{h-1}\) 的速度往回收。半衰期是 \(\ln 0.5/\ln(\alpha+\beta)\)。
 
-参数的经济含义：
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+\draw[->] (0,0) -- (11,0) node[right,font=\scriptsize] {\(h\)};
+\draw[->] (0,-0.3) -- (0,3.5) node[above,font=\scriptsize] {\(\E[\sigma_{t+h}^2\given\mathcal F_t]-\bar\sigma^2\)};
+\draw[gray!45,dashed] (0,0) -- (10.6,0);
+\node[font=\scriptsize,gray!45!black,above] at (7.8,0.03) {\(\bar\sigma^2\)};
+\foreach \x/\l in {0/0,2.5/10,5/20,7.5/30,10/40}
+  \draw[gray!60] (\x,0) -- (\x,-0.12) node[below,font=\scriptsize] {\l};
+% alpha+beta = 1
+\draw[red!70!black,line width=0.9pt] (0,3) -- (10,3);
+\node[font=\scriptsize,red!70!black,right] at (10.05,3) {\(\alpha+\beta=1.0\)};
+% alpha+beta = 0.95
+\draw[orange!85!black,line width=0.9pt] plot[smooth] coordinates {
+(0.000,3.000) (0.500,2.708) (1.000,2.444) (1.500,2.205) (2.000,1.990) (2.500,1.796)
+(3.000,1.621) (3.500,1.463) (4.000,1.320) (4.500,1.192) (5.000,1.075) (5.500,0.971)
+(6.000,0.876) (6.500,0.791) (7.000,0.713) (7.500,0.644) (8.000,0.581) (8.500,0.524)
+(9.000,0.473) (9.500,0.427) (10.000,0.386)};
+\node[font=\scriptsize,orange!85!black,right] at (10.05,0.386) {\(\alpha+\beta=0.95\)};
+% alpha+beta = 0.7
+\draw[blue!65!black,line width=0.9pt] plot[smooth] coordinates {
+(0.000,3.000) (0.500,1.470) (1.000,0.720) (1.500,0.353) (2.000,0.173) (2.500,0.085)
+(3.000,0.042) (3.500,0.020) (4.000,0.010) (4.500,0.005) (5.000,0.002) (5.500,0.001)
+(6.000,0.000) (7.000,0.000) (8.500,0.000) (10.000,0.000)};
+\node[font=\scriptsize,blue!65!black,right] at (3.1,0.45) {\(\alpha+\beta=0.7\)};
+\draw[gray!70,dotted] (0,3) -- (0,0);
+\node[font=\scriptsize,left] at (-0.05,3) {冲击};
+\end{tikzpicture}
+\end{center}
 
-\begin{itemize}
-\tightlist
-\item
-  \(\omega\)：长期平均方差的基准水平（\(\omega/(1-\alpha-\beta)\) 是无条件方差）；
-\item
-  \(\alpha\)：新冲击的短期影响（``新闻''对波动率的即时冲击）；
-\item
-  \(\beta\)：旧波动的持久性（``旧波动''的衰减速率）。
-\end{itemize}
+\emph{同一个冲击注入后，条件方差偏离长期水平的部分怎样衰减：\(0.7\) 两期减半，\(0.95\) 要十三期，\(1.0\) 永不回落。}
 
-\(\alpha+\beta\) 接近 1 时，波动率高度持久——冲击的影响持续很久。\(\alpha+\beta\ge1\) 时，方差爆炸或随机游走，非平稳。
+图里三条线的差别就是三种运维现实。\(\alpha+\beta=0.7\)，一次流量尖峰的影响两天就散掉，明天的容量按长期水平备就行。\(\alpha+\beta=0.95\)，半衰期十三期，一次事故之后接近两周内的风险敞口都高于常态，这段时间里按长期均值做的容量规划会持续偏低。到了 \(\alpha+\beta=1.0\)，那条线根本不回来。
 
-\subsection{GARCH 与 ARMA 的对应}
+\subsection{和等于一：IGARCH 与它的现实身份}
 
-GARCH(1,1) 的 \(\varepsilon_t^2\) 方程可以写成 ARMA(1,1) 形式：
+\(\alpha+\beta=1\) 时无条件方差 \(\omega/(1-\alpha-\beta)\) 不存在，模型叫 IGARCH（整合 GARCH）。它并非病态的东西：条件方差仍然是良定义的正过程，严平稳解仍然存在，坏掉的只是二阶矩。这与\hyperref[sec:06-Random-Processes/06-ARMA-and-ARIMA/03]{``ARIMA：非平稳序列的差分处理''}里单位根的处境类似——过程还在，只是不再向某个固定水平回归。
+
+取 \(\omega=0\)、\(\alpha=1-\lambda\)、\(\beta=\lambda\)，递推式变成
 
 \[
-\varepsilon_t^2=\omega+(\alpha+\beta)\varepsilon_{t-1}^2-\beta v_{t-1}+v_t.
+\sigma_t^2=(1-\lambda)\varepsilon_{t-1}^2+\lambda\sigma_{t-1}^2 ,
 \]
 
-这是 ARMA(1,1)：\(\varepsilon_t^2\) 是自回归项 \((\alpha+\beta)\varepsilon_{t-1}^2\) 加滑动平均项 \(-\beta v_{t-1}+v_t\)。GARCH 的平稳性条件 \(\alpha+\beta<1\) 对应 ARMA 的平稳性条件。
+一个指数加权移动平均。业界长期使用的 RiskMetrics 波动率估计（\(\lambda=0.94\)）就是这个式子。所以 IGARCH 不是理论上的边角料，它是很多人不知不觉中已经在用的模型。只是它承诺了一件相当强的事：今天的冲击对一年后的方差预测仍有完整的影响。
 
-这个对应解释了 GARCH 的 ACF：\(\varepsilon_t^2\) 的 ACF 指数衰减，速率由 \(\alpha+\beta\) 决定。GARCH(1,1) 的 \(\varepsilon_t^2\) 是 ARMA(1,1) 过程，其 ACF 为
+实际拟合中，\(\hat\alpha+\hat\beta\) 落在 \(0.97\) 到 \(0.995\) 之间是家常便饭。这时候要留个心眼：高持久性有时是真实的，有时是没被建模的结构突变冒充的。一个方差水平在中途换了台阶的序列，用单一 GARCH 去拟合，参数会被推向近似单位根，因为那是唯一能同时解释前后两段的方式。区分这两种情形要靠子样本估计——把数据切两半分别拟合，若 \(\hat\omega\) 差得很远而 \(\hat\alpha+\hat\beta\) 双双回落，那就是结构突变而非长记忆。
+
+\subsection{平方序列的自相关是可以对表的}
+
+ARMA(1,1) 的表示还给出一个可以直接和数据比对的量。GARCH(1,1) 下 \(\varepsilon_t^2\) 的自相关为
 
 \[
-\rho_1=\frac{\alpha(1-\beta^2-\alpha\beta)}{1-\beta^2-2\alpha\beta},
+\rho_1=\frac{\alpha\big(1-\beta^2-\alpha\beta\big)}{1-\beta^2-2\alpha\beta},
 \qquad
-\rho_k=(\alpha+\beta)\rho_{k-1}\ (k\ge2).
+\rho_k=(\alpha+\beta)\rho_{k-1}\quad(k\ge2),
 \]
 
-这是 GARCH 的指纹：平方序列的 ACF 首值后指数衰减。
+即首项之后按 \(\alpha+\beta\) 几何衰减。上一节图里那排缓慢下降的柱子，正是 \(\alpha+\beta\) 接近一的样子。反过来用：先从样本平方自相关的衰减率粗估 \(\alpha+\beta\)，再从 \(\rho_1\) 的大小分离出 \(\alpha\)，就得到一组像样的初值，交给下一节的最大似然去精修。
 
-\subsection{GARCH 的预测与矩结构}
-
-GARCH(1,1) 的 \(h\) 步预测方差为
-
-\[
-\E[\sigma_{t+h}^2\mid\mathcal F_t]
-=\omega\frac{1-(\alpha+\beta)^h}{1-\alpha-\beta}
-+(\alpha+\beta)^h\sigma_t^2.
-\]
-
-预测方差从当前值 \(\sigma_t^2\) 指数回归到长期平均 \(\omega/(1-\alpha-\beta)\)，回归速率由 \(\alpha+\beta\) 决定。\(\alpha+\beta\) 越大，回归越慢，波动率预测越持久。
-
-GARCH 的高阶矩存在性依赖更严格的条件。\(\E[\varepsilon_t^4]\) 存在要求 \((\alpha+\beta)^2+\alpha^2(\E z_t^4-1)<1\)（对 Gaussian \(z_t\)，这是 \((\alpha+\beta)^2+2\alpha^2<1\)）。厚尾分布（Student-t）的矩条件更苛刻。
-
-\subsection{GARCH 的边界}
-
-标准 GARCH 假设：创新 \(z_t\) 独立同分布、条件方差对称响应正负冲击、参数恒定。以下情况需要扩展：
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{杠杆效应}：负冲击比正冲击引起更大波动，需要 EGARCH 或 GJR-GARCH；
-\item
-  \textbf{长记忆}：\(\varepsilon_t^2\) 的 ACF 按幂律衰减，需要 FIGARCH（分数积分 GARCH）；
-\item
-  \textbf{结构突变}：参数随时间变化，需要 Markov 转换 GARCH 或时变参数模型；
-\item
-  \textbf{多元}：多个相关序列的协方差矩阵，需要 DCC-GARCH 或 BEKK。
-\end{itemize}
-
-GARCH 的价值在于它是``条件方差建模的最简完整框架''：参数少、可解释、平稳性条件明确。下一节看 GARCH 的估计、诊断与扩展。
+有一点必须先说明白，否则后面的一切都会被误读。上面所有公式算的都是 \(\sigma_t^2\)，也就是 \(\varepsilon_t\) 的散布度；关于 \(\varepsilon_t\) 本身的条件均值，模型从头到尾只说了一句 \(\E[\varepsilon_t\given\mathcal F_{t-1}]=0\)。GARCH 预测的是波动幅度，不是方向。下一节从参数估计开始，把这句话的实践含义讲透。

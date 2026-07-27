@@ -1,147 +1,123 @@
 \section{自然梯度沿分布几何下降}
 \label{sec:12-Real-Analysis-Support/09-Information-Geometry/02}
 
-Part 10 的``梯度来自内积，而不只是偏导排列''已经点明核心前提：欧氏梯度 \(\nabla f\) 不过是导数泛函在欧氏内积下的代表元。换一个内积，就换一个代表元。本节做的事是把这条原理搬进统计流形——在这个流形上，自然的内积不是 \(\langle u, v \rangle = u^{\trans} v\)，而是 Fisher 度量。由此诞生的梯度叫自然梯度，它是``参数空间中沿分布几何的最速下降方向''。
+一个高斯策略网络，输出均值和标准差。把标准差直接当参数学，训练早期动辄发散；改成学 \(\log\sigma\)，同样的学习率、同样的数据、同样的初始化，曲线立刻平顺。模型族一点没变，换的只是记录参数的方式。既然待优化的分布族是同一个，训练轨迹凭什么随记法而变？上一节已经给出答案的前半段：欧氏尺子依赖坐标。这一节把尺子换掉，看下降方向会变成什么。
 
-\subsection{从 Bernoulli MLE 的奇怪现象说起}
+\subsection{最速下降取决于你允许怎样的一步}
 
-\(n\) 次独立 Bernoulli 试验，成功 \(S\) 次。负对数似然：
-
-\[
-L(\theta) = -S \log \theta - (n - S) \log(1 - \theta).
-\]
-
-欧氏梯度：
+``梯度方向是下降最快的方向''这句话省略了一个前提。把一步更新写成受约束的线性化问题就能看见它：
 
 \[
-\nabla_\theta L = -\frac{S}{\theta} + \frac{n - S}{1 - \theta}.
+\Delta^{\star}=\argmin_{\Delta}\ \nabla L(\theta)^{\trans}\Delta
+\qquad\text{s.t.}\qquad
+\Delta \text{ 落在某个以 } 0 \text{ 为心的小集合内}.
 \]
 
-设真值 \(\widehat{\theta} = S/n = 0.99\)。在 \(\theta = 0.01\) 处，梯度约 \(-99 + 0.01 \approx -99\)，极大。在 \(\theta = 0.99\) 附近梯度接近零。数值上：远离真值时梯度飞起，需要很小的步长才能不飞走；接近真值时梯度消失，又需要足够大的步长才能有实质移动。
+目标函数只用到梯度，所有的选择余地都在那个约束集合的形状里。取欧氏球 \(\norm{\Delta}_2\le\varepsilon\)，解是 \(-\varepsilon\nabla L/\norm{\nabla L}_2\)；取别的形状，解就指向别处。
 
-一个自然的应对：换参数化。不用概率 \(\theta\)，改用 logit \(\eta = \log(\theta/(1-\theta))\)。\(\eta \in (-\infty, \infty)\) 无界，梯度不再在边界发散。\(\eta\) 空间中 gradient descent 行为良好。
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+\begin{scope}[shift={(3.0,2.2)}]
+% 线性化损失的等值线
+\foreach \y in {0.9,0.3,-0.3,-0.9}
+  \draw[gray!55,dashed] (-2.3,\y) -- (2.3,\y);
+\node[gray!80,right] at (2.4,0.3) {\(\nabla L^{\trans}\Delta=\text{常数}\)};
+% 两条支撑线
+\draw[gray!70] (-2.3,-1.2) -- (2.3,-1.2);
+\draw[gray!70] (-2.3,-1.487) -- (2.3,-1.487);
+% 欧氏球与 Fisher 球
+\draw[thick] (0,0) circle (1.2);
+\draw[thick,rotate around={40:(0,0)}] (0,0) ellipse (2.2 and 0.6);
+% 两个方向
+\draw[->,very thick] (0,0) -- (0,-1.2);
+\draw[->,very thick] (0,0) -- (-1.483,-1.487);
+\fill (0,0) circle (0.06);
+% 标注
+\draw[gray!70] (-1.05,1.75) -- (-0.6,1.039);
+\node[left] at (-1.05,1.75) {\(\norm{\Delta}_2\le\varepsilon\)};
+\draw[gray!70] (1.05,1.75) -- (1.40,1.50);
+\node[right] at (1.05,1.75) {\(\Delta^{\trans}I(\theta)\Delta\le\varepsilon^{2}\)};
+\node[fill=white,inner sep=1pt,right] at (0.12,-1.32) {\(-\nabla L\)};
+\node[below] at (-1.483,-1.62) {\(-I(\theta)^{-1}\nabla L\)};
+\end{scope}
+\end{tikzpicture}
+\end{center}
 
-但这是治标。每次换个问题就得重新想办法调参数化——今天 Bernoulli 用 logit 好使，明天 Gamma 分布用什么？一定有一个更深的结构在不同参数化的行为差异之下统一着这些现象。
+\emph{同一个梯度、同一组线性化等值线；信任域是圆时最速方向朝正下方，信任域是 Fisher 椭圆时它偏向椭圆被拉长的那一侧。}
 
-\subsection{欧氏梯度追不上坐标变换}
-
-重参数化 \(\eta = \eta(\theta)\) 时，链式法则给出的不是``同一个向量用新坐标表示''：
+图里两个箭头都指向各自信任域上``线性化损失最低''的那个边界点。圆是各向同性的，所以答案与 \(\nabla L\) 平行；椭圆在某个方向上宽，允许在那个方向上多走，答案随之偏转。把约束换成 Fisher 椭圆
 
 \[
-\nabla_\eta L = \Bigl( \frac{\partial \theta}{\partial \eta} \Bigr)^{\trans} \nabla_\theta L.
+\Delta^{\trans}I(\theta)\,\Delta\le\varepsilon^2,
 \]
 
-梯度向量本身按 Jacobian 的转置变换。两个坐标系下的梯度方向可以完全不同：一个坐标系中的``最陡方向''，在另一个坐标系中可能是平缓的。
+意思是限制这一步造成的\emph{分布}改变，而不限制参数数值的改变——因为上一节已经说明，这个二次型度量的正是分布的可区分程度。
 
-这不是数值计算的细节。如果``最速下降''本身随用什么尺子量而变化，尺子就和问题结构不匹配。参数高度相关的极端情形：两个参数对分布的影响几乎相同，欧氏几何下沿对角方向梯度几乎为零（调两个参数一前一后，分布几乎不变），沿反对角方向梯度极大（调两个参数一正一负，分布剧变）。梯度下降在一条狭长谷中来回撞击两侧坡面——Z 字形的锯齿路径。
+\subsection{自然梯度是 Fisher 度量下的那个代表元}
 
-换一套坐标可以暂时拉直谷，但只要你仍然用欧氏内积量步长，病态会在另一个参数化下重新现身。问题不是坐标选错了——是欧氏几何本身不是这个问题的正确几何。
-
-\subsection{Fisher 度量：用分布差异来量参数距离}
-
-两个分布 \(p_\theta\) 和 \(p_{\theta + d\theta}\) 有多远？KL 散度的二阶 Taylor 展开给出答案：
+同样的东西可以用内积的语言说一遍，得到的公式更好用。方向导数 \(v\mapsto \nabla L(\theta)^{\trans}v\) 是切空间上的一个线性泛函。所谓梯度，是把这个泛函用内积表示出来的那个向量：在欧氏内积下它是 \(\nabla L\)，在 Fisher 内积 \(g_\theta(u,v)=u^{\trans}I(\theta)v\) 下，要找的向量 \(\widetilde\nabla L\) 满足
 
 \[
-\mathrm{KL}(p_\theta \,\|\, p_{\theta + d\theta})
-\approx \frac{1}{2} d\theta^{\trans} I(\theta) \, d\theta,
+v^{\trans}\nabla L(\theta)=g_\theta\bigl(\widetilde\nabla L(\theta),\,v\bigr)
+=v^{\trans}I(\theta)\,\widetilde\nabla L(\theta)
+\qquad\text{对一切 } v .
 \]
 
-其中 \(I(\theta)\) 是 Fisher 信息矩阵。\(d\theta^{\trans} I(\theta) d\theta\) 度量的不是参数向量本身改变了多少，而是参数改变导致的分布改变了多少。这两个量在参数空间的不同区域可能差几个数量级。
-
-取一个简单的两极例子。Bernoulli 模型中，\(\theta = 0.01\) 时，参数从 \(0.01\) 变成 \(0.02\)——分布从几乎永远零变成仍然几乎永远零——差异极小。\(\theta = 0.5\) 时，同样的 \(d\theta = 0.01\) 造成的分布改变大得多。欧氏内积 \(d\theta^{\trans} (0.01)^2 = 10^{-4}\) 对两个情况一视同仁。Fisher 内积 \(I(0.01) \times (0.01)^2 \approx (1/(0.01 \times 0.99)) \times 10^{-4} \approx 0.01\)，而 \(I(0.5) \times (0.01)^2 = 4 \times 10^{-4}\)——前者比后者大 25 倍。
-
-Fisher 度量自动在分布变化慢的区域放大步长，在变化快的区域缩小步长。这个补偿恰好是欧氏梯度在边界附近行为的反面——欧氏梯度在边界附近巨大，而 Fisher 度量的逆也巨大，两者相乘刚好抵消。
-
-\subsection{自然梯度：换度量后重找代表元}
-
-导数泛函 \(dL_\theta(v)\) 是一个线性映射。在欧氏内积下，存在一个向量——欧氏梯度——满足
+两边对任意 \(v\) 相等，于是
 
 \[
-dL_\theta(v) = \langle \nabla_\theta L, v \rangle_{\text{Euc}} = v^{\trans} \nabla_\theta L.
+\widetilde\nabla L(\theta)=I(\theta)^{-1}\nabla L(\theta).
 \]
 
-在 Fisher 内积 \(g_\theta(u, v) = u^{\trans} I(\theta) v\) 下，同样存在一个代表元——自然梯度 \(\widetilde{\nabla}_\theta L\)——满足
+这个向量叫自然梯度，对应的更新是 \(\theta_{k+1}=\theta_k-\alpha I(\theta_k)^{-1}\nabla L(\theta_k)\)。它与信任域的说法给出同一个方向，只差一个正的缩放因子。
+
+\subsection{换坐标时自然梯度跟着走，欧氏梯度不跟}
+
+作可逆光滑变换 \(\eta=\eta(\theta)\)，记 \(J=\partial\eta/\partial\theta\)。链式法则给出 \(\nabla_\theta L=J^{\trans}\nabla_\eta L\)，而上一节的度量变换律是 \(I_\theta=J^{\trans}I_\eta J\)。两者一合：
 
 \[
-dL_\theta(v) = g_\theta(\widetilde{\nabla}_\theta L, v) = v^{\trans} I(\theta) \, \widetilde{\nabla}_\theta L.
+\widetilde\nabla_\theta L
+=I_\theta^{-1}\nabla_\theta L
+=J^{-1}I_\eta^{-1}J^{-\trans}J^{\trans}\nabla_\eta L
+=J^{-1}\,\widetilde\nabla_\eta L .
 \]
 
-两个等式右边都等于 \(v^{\trans} \nabla_\theta L\)，因此
+这正是切向量在坐标变换下的规律。翻译成实际操作：在 \(\theta\) 坐标下走一步自然梯度，与先换到 \(\eta\) 坐标、在那里走一步自然梯度、再换回来，得到同一个点（就一阶而言）。欧氏梯度做不到这一点，它按 \(J^{\trans}\) 变换，方向会随坐标漂移。开头那个 \(\sigma\) 与 \(\log\sigma\) 的差别，在自然梯度下消失。
+
+这种``对坐标变换免疫''的性质并不新鲜。Newton 法的仿射不变性说的是同一件事：用 Hessian 的逆作预条件，问题作可逆线性变换后迭代轨迹不变，见\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/02]{``Newton 法用曲率校正方向''}。两者的形式都是``正定矩阵的逆乘梯度''，区别在矩阵的来源：Hessian 来自目标函数在当前点的曲率，会随数据批次波动、也可能不正定；Fisher 信息只依赖模型族 \(\set{p_\theta}\)，按定义半正定。极大似然的情形下二者渐近一致，因为对数似然的 Hessian 期望等于 Fisher 信息的相反数。
+
+\subsection{Bernoulli 上一算，两处发散互相抵消}
+
+\(n\) 次独立试验成功 \(S\) 次，负对数似然 \(L(\theta)=-S\log\theta-(n-S)\log(1-\theta)\)，欧氏梯度
 
 \[
-\widetilde{\nabla}_\theta L = I(\theta)^{-1} \, \nabla_\theta L.
+\nabla_\theta L=-\frac{S}{\theta}+\frac{n-S}{1-\theta}
+=\frac{n\theta-S}{\theta(1-\theta)}
 \]
 
-自然梯度就是欧氏梯度在 Fisher 度量下的``升指标''。它的几何含义是：在参数空间中的单位 Fisher 球 \(\{v : v^{\trans} I(\theta) v \le 1\}\) 上，方向导数最大的方向。这与欧氏梯度在欧氏单位球上的角色平行——球的形状变了，但最速下降的定义没变。
-
-坐标不变性是自然梯度的标志性性质。若 \(\eta = \eta(\theta)\) 是重参数化，
+在 \(\theta\to0\) 处发散。Fisher 信息是 \(n/\bigl(\theta(1-\theta)\bigr)\)，它同样发散，而它的逆趋于零。两处发散相乘：
 
 \[
-\widetilde{\nabla}_\eta L = \Bigl( \frac{\partial \eta}{\partial \theta} \Bigr) \, \widetilde{\nabla}_\theta L.
+\widetilde\nabla_\theta L
+=\frac{\theta(1-\theta)}{n}\cdot\frac{n\theta-S}{\theta(1-\theta)}
+=\frac{n\theta-S}{n}
+=\theta-\widehat\theta ,
 \]
 
-这不同于欧氏梯度的 Jacobian 转置变换。自然梯度按向量场的推进法则（pushforward）变换——它是参数空间上的一个切向量，坐标变换时按切向量的规则走。用 \(\theta\) 算自然梯度再转到 \(\eta\)，和直接用 \(\eta\) 算自然梯度，得到同一个向量。自然梯度下降的几何轨迹不因参数化的选择而改变——它只感知分布族本身的几何。
+其中 \(\widehat\theta=S/n\)。下降方向 \(-\widetilde\nabla L=\widehat\theta-\theta\) 始终直指最大似然解，步长 \(\alpha=1\) 一步到位。边界附近欧氏梯度的爆炸，被度量的逆恰好中和；这两处的发散源出同一个 \(\theta(1-\theta)\)，抵消不是巧合。
 
-\subsection{Bernoulli 再算一遍，这次自然梯度下场}
+\subsection{实践中拿到手的都是近似，代价各不相同}
 
-单个 Bernoulli 观测的 Fisher 信息：
+理想的自然梯度在深度学习里没法直接算。参数量 \(d\) 达到 \(10^8\) 以上时，\(I(\theta)\) 有 \(d^2\) 个元素，求逆是 \(O(d^3)\)，光是存下来就不可能。落地的做法都是在近似 \(I(\theta)\)，牺牲掉的东西体现在两处：近似得多粗，以及坐标不变性还剩多少。
 
-\[
-I_{\text{single}}(\theta) = \E\Bigl[ \Bigl( \frac{\partial}{\partial \theta} \log p_\theta(x) \Bigr)^2 \Bigr]
-= \theta \cdot \Bigl( \frac{1}{\theta} \Bigr)^2 + (1-\theta) \cdot \Bigl( \frac{-1}{1-\theta} \Bigr)^2
-= \frac{1}{\theta(1-\theta)}.
-\]
+最省事的是只保留对角元。这时预条件矩阵是 \(\diag\bigl(I_{11},\dots,I_{dd}\bigr)\)，求逆退化成逐坐标除法。Adam 走的接近这条路线：它按坐标累积梯度平方的滑动平均 \(\hat v_t\)，再用 \(\hat v_t^{-1/2}\) 缩放梯度。梯度平方的期望在对数似然损失下正是经验 Fisher 的对角元，所以 Adam 可以读成一个很粗的对角自然梯度——只是它开了平方根，得到的是 \(I^{-1/2}\) 而非 \(I^{-1}\) 量级的缩放。这一点让它在实践中更保守，也让它与自然梯度的对应关系只是形似。对角近似换来的不变性也相应缩水：它对每个坐标各自的缩放免疫，对混合了不同坐标的一般变换无能为力。参数间强相关时，被忽略的非对角块正是病态的来源，可参考\hyperref[sec:14-Deep-Learning/03-Optimization-and-Training/02]{``动量与 Adam 在平均什么''}。
 
-\(n\) 次独立观测的 Fisher 信息累加为 \(n / (\theta(1-\theta))\)。
+K-FAC 走得更远一点。它按层拆开，把每层的 Fisher 块近似成两个小矩阵的 Kronecker 积 \(A\otimes G\)，其中 \(A\) 来自该层输入的二阶统计、\(G\) 来自反传信号的二阶统计。Kronecker 积的逆等于两个因子的逆的 Kronecker 积，于是 \(O(d^3)\) 被压到两个小矩阵求逆。换来这个速度的是两件事：那条``输入统计与梯度统计独立''的假设并不成立，以及要周期性重估并缓存 \(A,G\) 的逆，显存与调度都得额外安排。
 
-自然梯度：
+还有两处细节在工程上绕不开。其一是用经验 Fisher（在观测标签上平均）代替真 Fisher（在模型自己的预测分布上取期望），二者在模型拟合不好时差别明显。其二是阻尼：\(I(\theta)\) 在过参数化模型上接近奇异，实际用的总是 \(I(\theta)+\lambda \mathrm{Id}\)，而 \(\lambda\) 一旦调大，更新就退回普通梯度下降。回看那张图，阻尼做的事情是把 Fisher 椭圆往圆的方向捏。
 
-\[
-\begin{aligned}
-\widetilde{\nabla}_\theta L
-&= \frac{\theta(1-\theta)}{n}
-\Bigl( -\frac{S}{\theta} + \frac{n - S}{1 - \theta} \Bigr) \\[4pt]
-&= \frac{\theta(1-\theta)}{n} \cdot
-\frac{- (n - S)\theta + S(1 - \theta)}{\theta(1-\theta)} \\[4pt]
-&= \frac{S(1 - \theta) - (n - S)\theta}{n} \\[4pt]
-&= \frac{S - n\theta}{n} = \frac{S}{n} - \theta.
-\end{aligned}
-\]
+\subsection{它改的是方向，不是问题本身}
 
-最终结果是 \(\widehat{\theta} - \theta\)：当前参数与 MLE 的差。方向永远直指真值。在 \(\theta \to 0\) 处，欧氏梯度中 \(S/\theta\) 发散——Fisher 信息 \(I(\theta) \propto 1/(\theta(1-\theta))\) 同样发散，其逆 \(I(\theta)^{-1} = \theta(1-\theta)/n\) 趋向零。两个发散相乘，相互抵消。Fisher 几何自动把``分布趋近确定时微小的参数移动对应巨大的分布变化''这一事实编码进了度量，梯度不再爆炸。
+自然梯度不会让非凸目标变凸，不会消除随机梯度的噪声，也修不了设定错误的模型。它只回答一个问题：给定要下降的目标和要保护的分布，这一步该往哪儿迈。
 
-\subsection{与 Newton 法放在一起看}
-
-Newton 方向是 \(-H^{-1} \nabla L\)（\(H\) 是 \(L\) 的 Hessian）。自然梯度是 \(-I(\theta)^{-1} \nabla L\)。形式一致：正定矩阵预条件梯度。但矩阵的来源分道扬镳：
-
-\begin{itemize}
-\tightlist
-\item
-  Hessian \(H\) 来自目标函数 \(L\) 在当前点的二阶展开——包含残差、标签、正则项的全部信息。可以不正定，可以在数据中剧烈波动。
-\item
-  Fisher 信息 \(I(\theta)\) 只依赖模型族 \(\{p_\theta\}\)——与数据无关，与目标函数的具体形式无关。按定义正半定，在正则条件下正定。
-\end{itemize}
-
-在指数族的对数似然下，\(H\) 的期望恰好是 \(I(\theta)\)，所以渐近意义上两者趋同。但有限样本中，观测 Hessian 和期望 Fisher 可以差很多——前者逐批波动，后者光滑不变。自然梯度用的是模型几何预条件，Newton 法用的是目标曲率预条件。一个是几何的，一个是分析的。
-
-\subsection{计算中不得不做的近似}
-
-精确 Fisher 信息需要在整个数据分布上取期望，通常不可得。实际使用的替代方案：
-
-\begin{itemize}
-\tightlist
-\item
-  经验 Fisher：在样本上做平均，而非期望。统计上有偏，但可算。
-\item
-  对角 Fisher：只保留对角元，忽略参数间的相关结构。代价是在参数高度相关的子空间，对角 Fisher 可能重新引入 Fisher 原本要消除的病态。
-\item
-  K-FAC：将 Fisher 近似为分块 Kronecker 积，在深度网络某些层结构下效率较高，但不是普适的。
-\end{itemize}
-
-近似的引入意味着自然梯度的坐标不变性在实践中只是近似成立。近似的质量取决于模型结构和对角/分块假设是否大致符合参数间真实的依赖关系。
-
-自然梯度也只改变下降方向，不改目标函数的非凸性、随机梯度噪声或模型设定偏差。深度学习中它通常作为 SGD 或 Adam 的预条件器层叠上去，不是整个优化器的替代。
-
-\subsection{落点}
-
-自然梯度把``参数空间中怎样下降''从坐标技巧提升成了几何选择。选 Fisher 度量，就是选``按分布区分难度来量步长''。它与 Newton 法共享预条件思路，但用模型本身的局部几何代替目标函数的曲率信息。下一节补全 KL 散度和 Fisher 度量的局部二阶关系，完成信息几何的最小闭环。
+约束``一步造成的分布改变不超过多少''这个想法本身，比自然梯度的具体公式走得更远——强化学习里的信任域方法直接把 KL 散度写进约束，而不是用它的二阶近似。要理解那条约束的几何含义，还差最后一块拼图：KL 散度与 Fisher 度量在局部到底是什么关系。下一节补上。

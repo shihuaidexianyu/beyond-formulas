@@ -1,198 +1,158 @@
 \section{Score 与 Fisher 信息衡量局部可辨认性}
 \label{sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02}
 
-充分统计量告诉了你``哪些数据就够了''。但还有一个更深的问题：给了你足够的统计量，你对参数到底能判断到多精确？
-
-想象两个参数值 \(\theta_1\) 和 \(\theta_2\) 靠得非常近。如果它们对应的数据分布在任何有限样本下都几乎一样，那么不管样本量多大，你也很难说清楚真实的到底是 \(\theta_1\) 还是 \(\theta_2\)。反过来，如果似然函数在真实参数附近像刀锋一样陡峭，稍有偏离分布就剧烈变化，那么数据一出来，你就能把参数锁定在一个很窄的范围里。
-
-Fisher 信息想衡量的，正是这种``局部可辨认性''。它把 log-likelihood 的斜率---也就是参数微小变化时数据分布的敏感度---变成一个可计算的数字。
-
-\subsection{Score：单次观测对参数的``一阶投票''}
-
-对单个观测 \(X\sim p_\theta\)，定义 score 函数：
+一次优惠券实验：五万次曝光，记录每次的折扣力度 \(d_i\) 与是否下单，拟合 logistic 回归
 
 \[
-U_\theta(X) = \frac{\partial}{\partial\theta}\log p_\theta(X).
+p_i=\frac{1}{1+e^{-(\beta_0+\beta_1 d_i)}},
 \]
 
-（记号提醒：上一节里 \(U(X)\) 表示任意估计量。从本节起，\(U_\theta\) 专指 score。）
+想同时得到基线购买倾向 \(\beta_0\) 与折扣敏感度 \(\beta_1\)。结果是优化器跑了两次给出两组差很远的系数，标准误大到区间横跨零点，而两个系数的相关系数是 \(-0.998\)。工程侧先怀疑求解器，换了优化算法，换了初值，症状照旧。
 
-Score 衡量的是：参数 \(\theta\) 稍微动一点，这单个数据点的 log-likelihood 会跟着动多少。如果某种 \(X\) 取值下 score 的绝对值很大，说明在这个数据的``视角''下，\(\theta\) 的微小改变就会让模型对这个数据的解释发生明显变化。
+翻回数据才看到问题：这五万次曝光发的是同一档折扣。所有 \(d_i\) 相等时，\(\beta_0+\beta_1 d\) 这一个数可以由无穷多组 \((\beta_0,\beta_1)\) 拼出来，高基线配低敏感与低基线配高敏感对数据的解释一模一样。似然沿着某个方向是平的，优化器落在哪儿全看初值。
 
-但单个 score 值不是可靠指标---数据是随机的，同一个 \(\theta\) 下面产生的不同 \(X\) 会给出不同的 \(U_\theta\)。我们需要把 score 的随机波动纳入考虑。
+这类故障不能靠看点估计发现，得看似然函数在真值附近的形状。
 
-\subsection{Score 的期望是零，不是巧合}
+\begin{center}
+\begin{tikzpicture}[x=1.2cm,y=0.78cm,font=\small,>=stealth]
+  \draw[->,black!55] (-3.2,-3.2) -- (3.9,-3.2) node[right,font=\footnotesize] {\(\theta\)};
+  \draw[dashed,black!60] (0,-4.7) -- (0,0.3);
+  \node[font=\footnotesize,black!75,anchor=south] at (0,0.3) {真值 \(\theta_0\)};
+  \draw[dashed,black!35] (-3.1,-1) -- (3.1,-1);
+  \node[font=\footnotesize,black!60,anchor=south east] at (3.15,-0.95) {\(\ell\) 下降同样多};
+  \draw[very thick,blue!55!black,domain=-1.15:1.15,samples=61,smooth] plot (\x,{-2.2*\x*\x});
+  \draw[blue!55!black,domain=-2.9:2.9,samples=81,smooth] plot (\x,{-0.35*\x*\x});
+  \node[font=\footnotesize,anchor=west] at (1.2,-2.9) {\(\ell\) 尖};
+  \node[font=\footnotesize,anchor=west] at (2.98,-2.94) {\(\ell\) 平};
+  \draw[dotted,black!55] (-0.674,-1) -- (-0.674,-3.6);
+  \draw[dotted,black!55] (0.674,-1) -- (0.674,-3.6);
+  \draw[dotted,black!55] (-1.69,-1) -- (-1.69,-4.5);
+  \draw[dotted,black!55] (1.69,-1) -- (1.69,-4.5);
+  \draw[<->,very thick,blue!55!black] (-0.674,-3.6) -- (0.674,-3.6);
+  \node[font=\footnotesize,anchor=west] at (0.78,-3.6) {参数被按在窄区间里};
+  \draw[<->,blue!55!black] (-1.69,-4.5) -- (1.69,-4.5);
+  \node[font=\footnotesize,anchor=west] at (1.78,-4.5) {同样的数据说不清};
+\end{tikzpicture}
 
-在可以交换求导与积分、支持集不随参数变化等正则条件下：
+\emph{同一个真值、同样的对数似然降幅，尖的那条把参数锁进窄区间，平的那条留下一大片说得通的取值。}
+\end{center}
+
+图里两条曲线的峰在同一个位置，也就是说两种情形下最优点估计可以完全一样。差别只在峰的两侧：粗线陡，参数稍微挪一点，数据的解释力马上变差；细线缓，挪出去很远似然也没掉多少。优惠券实验的病灶就是细线，只不过发生在二维参数空间的某一个方向上。Fisher 信息要做的，是把``峰有多尖''变成一个可以计算、可以在实验开跑前估出来的数。
+
+\subsection{Score 记录参数微调时似然的反应}
+
+对单个观测 \(X\sim p_\theta\)，score 函数是对数似然对参数的导数：
+
+\[
+U_\theta(X)=\frac{\partial}{\partial\theta}\log p_\theta(X).
+\]
+
+记号上留个心：上一节里 \(U(X)\) 指任意一个估计量，从这里起 \(U_\theta\) 专指 score。
+
+它读的是一个局部量。某次观测算出的 \(U_\theta\) 绝对值大，说明在这条数据看来，\(\theta\) 挪一点点，模型对它的解释就会明显变好或明显变差；绝对值接近零，说明这条数据对 \(\theta\) 往哪边调没有意见。单条 score 本身不是可用的指标，因为它随数据变；能用的是它在整个分布下的表现。
+
+\subsection{Score 在真值处平均为零}
+
+在可以交换求导与积分、支持集不随参数变化的正则条件下，
 
 \[
 \begin{aligned}
 \E_\theta[U_\theta(X)]
-&= \int \frac{\partial}{\partial\theta}\log p_\theta(x)\; p_\theta(x)\,dx \\
-&= \int \frac{\partial}{\partial\theta}p_\theta(x)\,dx
-= \frac{\partial}{\partial\theta}\int p_\theta(x)\,dx
-= \frac{\partial}{\partial\theta}1 = 0.
+&=\int\frac{\partial}{\partial\theta}\log p_\theta(x)\cdot p_\theta(x)\,dx\\
+&=\int\frac{\partial}{\partial\theta}p_\theta(x)\,dx
+=\frac{\partial}{\partial\theta}\int p_\theta(x)\,dx
+=\frac{\partial}{\partial\theta}1=0.
 \end{aligned}
 \]
 
-Score 的平均值是零。这个事实值得你停下来想一下：对于真实的 \(\theta\)，模型在平均意义上不会系统性地``偏向''某一个方向。如果你在真实参数处站好，数据对你的平均推力是零。
+骨架只有三步：把对数导数还原成密度导数，把导数挪到积分外，对常数 \(1\) 求导。条件对一遍——第二步要求交换求导与积分合法，第三步要求积分区域不随 \(\theta\) 移动。Uniform\((0,\theta)\) 这种支持集会动的模型两条都不满足，本节所有结论对它都不成立。
 
-于是 score 的方差自然就是一个有意义的量：score 波动越大，说明单个数据点对参数微小变化的反应越不稳定---有些数据点强烈指向``往大调''，有些强烈指向``往小调''。反应越剧烈，数据越能帮你锁定参数。
+期望为零这件事说的是：站在真值上，数据对参数的平均推力恰好抵消。有些观测把估计往上推，有些往下拉，长期看没有系统性方向。于是可以拿来度量的就只剩波动幅度——推力越是忽大忽小，说明单条数据对参数的位置越敏感。
 
-Fisher 信息就定义为 score 的二阶矩（也就是方差，因为期望为零）：
+\subsection{Fisher 信息既是 score 的方差，也是似然的平均曲率}
 
-\[
-I(\theta) = \E_\theta[U_\theta(X)^2] = \Var_\theta(U_\theta(X)).
-\]
-
-对向量参数 \(\theta=(\theta_1,\ldots,\theta_k)\)，推广为矩阵：
+Fisher 信息定义为 score 的二阶矩，由上一小节它同时就是方差：
 
 \[
-I(\theta) = \E_\theta\bigl[U_\theta(X)\,U_\theta(X)^{\trans}\bigr],
+I(\theta)=\E_\theta\bigl[U_\theta(X)^2\bigr]=\Var_\theta\bigl(U_\theta(X)\bigr).
 \]
 
-每个矩阵元是 score 两个分量乘积的期望。
+向量参数下推广成矩阵 \(I(\theta)=\E_\theta[U_\theta U_\theta^{\trans}]\)，第 \((j,k)\) 个元素是两个分量 score 乘积的期望。
 
-\subsection{负曲率形式：同一样东西的另一张脸}
-
-对 \(\E_\theta[U_\theta]=0\) 两边再对 \(\theta\) 求导（仍假设可以交换求导与积分）：
+这个定义读起来还是关于斜率的，跟图里的``尖''对不上。把两者接起来只需要再求一次导。对恒等式 \(\E_\theta[U_\theta]=0\) 关于 \(\theta\) 求导，仍假定可以交换，并用 \(\partial_\theta p_\theta=U_\theta\,p_\theta\)：
 
 \[
-\begin{aligned}
-0 &= \frac{\partial}{\partial\theta}\int \frac{\partial}{\partial\theta}\log p_\theta(x)\; p_\theta(x)\,dx \\
-&= \int \left[
-\frac{\partial^2}{\partial\theta^2}\log p_\theta(x)
-+ \left(\frac{\partial}{\partial\theta}\log p_\theta(x)\right)^2
-\right] p_\theta(x)\,dx.
-\end{aligned}
+0=\int\Bigl[\frac{\partial^2}{\partial\theta^2}\log p_\theta(x)+\Bigl(\frac{\partial}{\partial\theta}\log p_\theta(x)\Bigr)^2\Bigr]p_\theta(x)\,dx,
 \]
 
-推导中用到了 \(\frac{\partial}{\partial\theta}p_\theta = U_\theta\,p_\theta\)。移项得到：
+移项即得
 
 \[
-I(\theta) = -\E_\theta\left[\frac{\partial^2}{\partial\theta^2}\log p_\theta(X)\right].
+I(\theta)=-\E_\theta\Bigl[\frac{\partial^2}{\partial\theta^2}\log p_\theta(X)\Bigr].
 \]
 
-第一个形式（score 平方的期望）告诉你：信息量来自 score 的波动幅度。第二个形式（负 Hessian 期望）告诉你：信息量也等于 log-likelihood 在真实参数处的平均负曲率。似然函数越``尖''，负曲率越大，信息越多。
+右边是对数似然二阶导的负期望，也就是平均曲率。图里粗线的曲率大，对应的 \(I(\theta)\) 就大。两种写法在正则模型下等价，遇到边界参数、参数相关的支持集或非光滑似然时得逐条重查条件，不能随手互换；模型设定错误时它们也会分家，后面还会回到这一点。
 
-两种形式在正则模型下等价，但用到边界参数、参数相关支持集或非光滑似然时需要逐条检查条件，不能随手互换。
+\subsection{一条 Bernoulli 样本值多少信息，取决于 \(\theta\) 落在哪}
 
-\subsection{Bernoulli 信息：一条样本说了多少}
-
-对单个 Bernoulli 观测，\(\log p_\theta(X)=X\log\theta+(1-X)\log(1-\theta)\)。Score：
+单个 Bernoulli 观测的对数似然是 \(X\log\theta+(1-X)\log(1-\theta)\)，score
 
 \[
-U_\theta(X) = \frac{X}{\theta} - \frac{1-X}{1-\theta}
-= \frac{X-\theta}{\theta(1-\theta)}.
+U_\theta(X)=\frac{X}{\theta}-\frac{1-X}{1-\theta}=\frac{X-\theta}{\theta(1-\theta)}.
 \]
 
-取平方后求期望。\(\E[X-\theta]=0\)，\(\Var(X)=\theta(1-\theta)\)，所以单个观测的 Fisher 信息为
+分子的方差是 \(\theta(1-\theta)\)，平方取期望后
 
 \[
-I_1(\theta)=\E[U_\theta^2]=\frac{\Var(X)}{\theta^2(1-\theta)^2}=\frac{1}{\theta(1-\theta)}.
+I_1(\theta)=\frac{\theta(1-\theta)}{\theta^2(1-\theta)^2}=\frac{1}{\theta(1-\theta)}.
 \]
 
-\(n\) 个独立样本的 score 是各自 score 的和，交叉协方差为零（独立），因此
+独立样本的 score 是各条 score 之和，交叉项协方差为零，因此 \(I_n(\theta)=n\,I_1(\theta)\)。信息随样本量线性增长，不确定范围按 \(1/\sqrt n\) 收窄，这和经验一致。
+
+值得盯一眼的是那个因子。\(\theta=0.5\) 处信息最小，一条样本给 \(4\) 个单位；\(\theta\) 挪向 \(0.01\)，一条样本给 \(101\) 个单位。同一份日志、同一个样本量，估一个接近 \(0.5\) 的转化率和估一个接近 \(0.01\) 的转化率，似然曲面的尖锐程度差了二十多倍——不过这里的信息是关于概率尺度上的绝对误差说的，若关心的是相对误差，罕见事件反而更难估，稍后重参数化那一小节会说明这两种读法为何不矛盾。至于 \(\theta\) 真的取到 \(0\) 或 \(1\)，公式给出的无穷大不能当真，那是非规则边界，正态渐近与下一节的下界都不适用。
+
+\subsection{矩阵的秩暴露了哪个方向问不清}
+
+回到优惠券实验。第 \(i\) 次曝光对信息矩阵的贡献是
 
 \[
-I_n(\theta)=n I_1(\theta)=\frac{n}{\theta(1-\theta)}.
+I_i(\beta)=p_i(1-p_i)\begin{pmatrix}1&d_i\\ d_i&d_i^2\end{pmatrix},
 \]
 
-信息随样本量 \(n\) 线性增长，这和直觉一致：样本越多，你对 \(\theta\) 能判断得越精确。标准误按 \(1/\sqrt{n}\) 缩小。
+前面的标量是 Bernoulli 那一项在 \(p_i\) 处的信息经链式法则折算的结果，后面的矩阵由这次曝光的输入方向 \((1,d_i)^{\trans}\) 决定。全部 \(d_i\) 相等时，每一项都是同一个秩为一的矩阵的倍数，加起来仍然秩一。信息矩阵奇异，沿着某个方向一阶敏感度为零，标准误在那个方向上没有定义——五万条记录改成五百万条也不会变。开头那次``求解器有问题''的排查，方向从一开始就错了。
 
-但 \(1/(\theta(1-\theta))\) 这个因子很值得看。在 \(\theta=0.5\) 处，信息最小（方差最大），一条样本提供 4 单位信息。\(\theta\) 趋近 0 或 1 时，信息趋于无穷。不是因为极端概率更容易估计，而是公式在边界失效了---\(\theta=0\) 或 1 是非规则边界，正态渐近、Cram\'er--Rao 下界和这个内部信息公式都不可直接使用。
+同一个公式还给出另外两条判断。若折扣水平选在几乎人人下单或几乎无人下单的区段，\(p_i(1-p_i)\) 趋近零，即便方向矩阵满秩，每条记录的贡献也接近零，这是花了预算却没买到信息的典型方式。若把折扣换成药物剂量，数学结构一字不变，但可选的剂量范围受安全约束限死，Fisher 信息此时是比较备选方案的工具，它能告诉你哪种设计的可辨认性更高，不能替你取消约束。信息量取决于样本量，也取决于输入覆盖了参数空间的哪些方向，而后者往往是实验开跑前就已经定死的。
 
-\subsection{向量参数：信息矩阵的秩说明了什么}
+\subsection{观测信息是这一份数据的曲率，Fisher 信息是它的平均}
 
-现在换一个两参数模型。你在评估顾客对优惠券的反应：第 \(i\) 次展示的优惠为 \(d_i\)（比如折扣比例），购买概率由 logistic 回归连接：
+真正拿到手的只有一份数据 \(x\)。它的观测信息是对数似然在该点的负二阶导
 
 \[
-p_i = \operatorname{logistic}(\beta_0 + \beta_1 d_i),\qquad
-\operatorname{logistic}(z)=\frac{1}{1+e^{-z}}.
+J(\theta;x)=-\frac{\partial^2}{\partial\theta^2}\ell(\theta;x),
 \]
 
-你需要同时估计基线倾向 \(\beta_0\) 和优惠敏感度 \(\beta_1\)。单次观测对信息矩阵的贡献含权重 \(p_i(1-p_i)\) 和方向向量 \((1,d_i)^{\trans}\)：
+不含任何期望运算，直接由这份数据算出。上面那条恒等式说的正是 \(I(\theta)=\E_\theta[J(\theta;X)]\)：Fisher 信息是观测信息在所有可能数据上的平均。图里的两条曲线因此有两种读法，读成手上这一次实际得到的似然曲线，量的是 \(J\)；读成同一机制下重复实验的平均形状，量的是 \(I\)。
+
+极大似然估计的协方差常用 \(J(\hat\theta;x)^{-1}\) 或 \(I(\hat\theta)^{-1}\) 估计，大样本下接近，有限样本下可以差出不少。\(J\) 如实反映手上这份数据碰巧有多陡，\(I\) 做了平均因而更稳，前提是它假定模型没设定错。模型确实错了的时候，score 的方差与负 Hessian 的期望不再相等，正确的协方差要写成三明治形式 \(H^{-1}JH^{-1}\)，其中 \(H\) 取负 Hessian 的期望或观测值，\(J=\E[U_\theta U_\theta^{\trans}]\)。模型正确时 \(H=J=I\)，三明治退回 \(I^{-1}\)；模型错误时两层各自有独立含义，这也是稳健标准误的来源。
+
+\subsection{换一把尺子量参数，数值会变，几何不变}
+
+令 \(\eta=g(\theta)\) 换一种参数化，链式法则给出 \(U_\eta=U_\theta\,d\theta/d\eta\)，平方取期望后
 
 \[
-I_1(\beta) = p_i(1-p_i)\begin{pmatrix}1 & d_i\\ d_i & d_i^2\end{pmatrix}.
+I_\eta(\eta)=I_\theta(\theta)\Bigl(\frac{d\theta}{d\eta}\Bigr)^2.
 \]
 
-现在看三个具体困境。
+用概率、用 logit \(\eta=\log\bigl(\theta/(1-\theta)\bigr)\)、还是用百分比来表达同一个参数，Fisher 信息的数值不同。上一小节里罕见事件``信息更多''的说法，正是绑在概率这把尺子上的；换成 logit 尺度，\(\theta\) 趋近 \(0\) 时信息反而趋近零，与``罕见事件难估''的经验对上。所以引用一个 Fisher 信息的数值，必须同时交代参数用什么刻度写。
 
-第一个困境：如果所有顾客看到完全相同的优惠 \(d_i\equiv d\)。设计矩阵只有一个方向，任意 \(n\) 次重复观测的信息矩阵的秩都是 1。无论你再增加多少同样优惠条件下的记录，基线和敏感度都无法分离。Fisher 信息矩阵奇异，意味着模型本身在这个参数化下不可识别---你无法从数据中分辨``高基线加低敏感''和``低基线加高敏感''。
-
-第二个困境：如果你选的优惠水平恰好落在几乎人人购买或几乎无人购买的区间，\(p_i\) 接近 0 或 1，\(p_i(1-p_i)\) 极小。每条记录贡献的信息近乎为零，即便方向矩阵满秩。
-
-第三个困境更严肃。如果这是一个药物剂量反应实验，把优惠 \(d_i\) 换成剂量，数学结构一字不差，但后果完全不同。实验设计需要覆盖足够宽的剂量范围来分离基线和斜率，而伦理和安全约束又限死了某些剂量不能试。Fisher 信息可以帮你比较哪些允许方案能提供更高的可辨认性，但它不能取消现实约束。
-
-这三个困境指向同一个教训：信息量不只取决于样本量，还取决于你的输入覆盖了参数空间的哪些方向。
-
-\subsection{观测信息与期望信息：这一份数据的曲率 vs 所有可能数据的平均曲率}
-
-实际计算时你只有手头这一份数据 \(x\)。它的观测信息定义为
+数值会变，但组合量 \(I(\theta)\,(d\theta)^2\) 在重参数化下不变，它像一把嵌在参数空间里的局部尺子。这一点在 KL 散度的二阶展开中兑现：相邻两个参数值满足
 
 \[
-J(\theta;x) = -\frac{\partial^2}{\partial\theta^2}\ell(\theta;x).
+\KL\bigl(p_\theta\,\Vert\,p_{\theta+d\theta}\bigr)\approx\tfrac12\,I(\theta)\,(d\theta)^2,
 \]
 
-而 Fisher 信息 \(I(\theta)=\E_\theta[J(\theta;X)]\) 是对所有可能数据做平均。
+于是 Fisher 信息量的是参数的微小移动在分布空间里走出了多远。信息大，两个靠得很近的参数值在数据分布上分得开，有限样本就能区分；信息小，它们在数据看来几乎是同一个分布，图里的细线画的就是这种情形。把这把尺子当成优化时的度量，梯度下降就变成自然梯度，详见\hyperref[sec:12-Real-Analysis-Support/09-Information-Geometry/02]{``自然梯度沿分布几何下降''}；几何一侧的完整说法见\hyperref[sec:12-Real-Analysis-Support/09-Information-Geometry/03]{``KL 散度与 Fisher 度量的局部关系''}。
 
-MLE \(\hat\theta\) 的协方差阵常用两种方式估计：
+矩阵版本的退化也有了几何解释。\(I(\theta)\) 有零特征值，意味着沿对应方向移动参数在一阶上不改变分布，模型在该方向不可识别。成因不止一种：参数冗余、标签交换对称、或者像优惠券实验那样输入没有覆盖到相应方向。检查特征值与条件数能发现弱识别，但别指望某个阈值一刀切——优化里的 Hessian 病态还掺着样本噪声与参数化的影响，与统计上的不可识别有关联而不等同。
 
-\[
-J(\hat\theta;x)^{-1}\quad\text{或}\quad I(\hat\theta)^{-1}.
-\]
-
-两者在大样本下常接近，但有限样本下可以不同。\(J\) 反映的是你手上这份特定数据的局部曲率---如果这份数据碰巧给了你一个很平的似然，\(J\) 会很小，区间会宽。\(I\) 则是对所有可能数据的平均预期，它不看手气。
-
-选择哪个不是纯粹的理论问题。如果模型是正确设定的，用 \(I(\hat\theta)\) 可能更稳定（因为做了平均）。如果怀疑模型有偏差，\(J(\hat\theta)\) 至少如实反映了手头数据的信息量。
-
-而如果模型是错误设定的，score 方差与负 Hessian 期望不再相等，两个``信息''概念分道扬镳。此时正确的协方差估计需要三明治形式：
-
-\[
-H^{-1}J H^{-1},
-\]
-
-其中 \(H\) 是负 Hessian 的期望（或观测值），\(J=\E[U U^{\trans}]\) 是 score 的外积二阶矩。模型正确时 \(H=J=I\)，三明治退化回 \(I^{-1}\)；模型错误时 \(H\neq J\)，三明治的每一层都有独立的意义。
-
-\subsection{重参数化改变数值但保留几何}
-
-把参数换一个刻度：\(\eta=g(\theta)\)。链式法则：
-
-\[
-U_\eta = U_\theta\cdot\frac{d\theta}{d\eta}.
-\]
-
-标量参数下平方取期望：
-
-\[
-I_\eta(\eta) = I_\theta(\theta)\left(\frac{d\theta}{d\eta}\right)^2.
-\]
-
-Fisher 信息的数值依赖你用什么尺子量参数。用概率 \(\theta\)、logit \(\eta=\log(\theta/(1-\theta))\) 还是百分比，会得到不同的信息数值。这条性质和 MAP 的非不变性来自同一个根源。
-
-但数值依赖并不意味着 Fisher 信息没有几何内容。取微小参数位移 \(d\theta\)，组合量
-
-\[
-I(\theta)\,(d\theta)^2
-\]
-
-在重参数化下保持不变---它像一个嵌在参数空间里的局部度量，不管你用什么坐标表示。
-
-这个几何直觉在 KL 散度的二阶展开中得到证实。对于靠近的两个参数值：
-
-\[
-\KL(p_\theta\,\Vert\,p_{\theta+d\theta})
-\approx
-\frac12\,I(\theta)\,(d\theta)^2.
-\]
-
-Fisher 信息因此衡量了分布空间中两个相邻参数之间的``信息距离''：信息越大，两个靠得很近的参数值在数据分布上就分得越开，也就越容易被有限样本区分。
-
-\subsection{奇异信息矩阵意味着什么}
-
-当向量参数的 Fisher 信息矩阵 \(I(\theta)\) 有零特征值，沿对应的特征方向改变参数对分布的一阶影响为零。可能原因包括：参数天生不可识别、模型含有冗余参数、标签交换对称性、或在当前参数点的局部退化（比如 logistic 回归中 \(p_i(1-p_i)=0\) 的极端情况）。
-
-优化中的 Hessian 奇异和统计不可识别有关联但不等同。前者还受具体样本噪声和参数化方式影响；后者是模型本身的属性。检查信息矩阵的特征值和条件数有助于发现弱识别问题，但不能仅凭某个数值阈值就断定一个模型可识别或不可识别。
-
-Fisher 信息从一个极其简洁的定义出发---log-likelihood 斜率的方差---串联起了估计精度、实验设计、KL 几何和模型可识别性。它不告诉你答案，但它告诉你在给定的模型和数据采集方式下，你最多能知道多少。
+图里那条粗线还剩一句话没兑现。峰越尖，参数被按得越紧，这句话到目前为止仍是定性的：\(I(\theta)\) 大，不确定范围小，但小到多少？下一节把它写成一个不等式，并且说明为什么那是一条谁也绕不过去的下界。

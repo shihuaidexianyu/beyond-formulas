@@ -1,196 +1,183 @@
 \section{Gaussian 图模型用精度矩阵编码条件独立}
 \label{sec:13-Machine-Learning/07-Graphical-and-Sequential-Models/02}
 
-相关矩阵常被用来画网络：两个变量相关系数大，就在它们之间连边。但相关反映的是边缘关系，可能由共同变量或间接路径产生。Gaussian 图模型提供一个少见的精确对应：在联合 Gaussian 假设下，协方差的零表示边缘独立，精度矩阵的零表示给定其余变量后的条件独立。
+你拿到六十个脑区的 fMRI 时间序列，想画一张``哪些脑区直接耦合''的网络图。最顺手的做法是算相关矩阵，把相关系数超过阈值的那些对连起来。结果是一张几乎全连的图：\(1770\) 对里有一千多对显著。降低阈值图更糊，提高阈值又只剩下几条最强的边，中间那些说不清是直接耦合还是隔着第三个脑区传过来的。相关系数回答的是两个变量之间有没有关联，而你想问的是扣掉所有别的脑区之后还剩不剩关联——这是两个不同的问题。
 
-设
+上一节说，无向图的边表示给定其余全部变量后仍然存在的依赖。在联合 Gauss 的假设下，这句话可以落到矩阵元素上：协方差的零对应边缘独立，精度矩阵的零对应条件独立。
 
-\[
-X\sim\mathcal N(\mu,\Sigma),
-\qquad
-K=\Sigma^{-1},
-\]
+\subsection{同一个分布，协方差稠密而精度稀疏}
 
-其中 \(K\) 称为 precision matrix。两种零元素承担不同语义：
+设 \(X\sim\mathcal N(\mu,\Sigma)\)，记 \(K=\Sigma^{-1}\) 为精度矩阵。两种零元素承担不同语义：
 
 \[
 \Sigma_{ij}=0
 \quad\Longleftrightarrow\quad
 X_i\perp X_j,
-\]
-
-\[
+\qquad
 K_{ij}=0
 \quad\Longleftrightarrow\quad
-X_i\perp X_j
-\mid X_{-\set{i,j}}.
+X_i\perp X_j\given X_{-\set{i,j}}.
 \]
 
-第一个等价依赖 Gaussian 中``不相关即独立''；第二个才是无向图缺边使用的关系。
+左边那条依赖 Gauss 分布里``不相关即独立''这一特权，换成别的分布就不成立；右边那条才是无向图缺边所用的关系。
 
-\subsection{条件 Gaussian 来自 Schur complement}
+差别有多大，看一个四变量的例子。取平稳 AR(1)：\(X_t=\rho X_{t-1}+\varepsilon_t\)，\(\rho=0.8\)。相关矩阵的元素是 \(\rho^{\abs{i-j}}\)，于是 \(\operatorname{Corr}(X_1,X_4)=0.512\)——放进相关网络里，这是一条相当粗的边。而 \(K\) 是三对角的，\(K_{14}=0\)，意味着给定 \(X_2,X_3\) 之后 \(X_1\) 与 \(X_4\) 条件独立。那条 \(0.512\) 完全是沿着链传过来的。
 
-把变量分块为 \(X_A,X_B\)，协方差相应写成
+\begin{center}
+\begin{tikzpicture}[line width=0.7pt]
+\foreach \i/\j/\s in {0/0/72,1/1/72,2/2/72,3/3/72,
+  0/1/56,1/0/56,1/2/56,2/1/56,2/3/56,3/2/56,
+  0/2/40,2/0/40,1/3/40,3/1/40,
+  0/3/26,3/0/26}
+  {\fill[black!\s] (0.5*\j,-0.5*\i) rectangle ++(0.5,-0.5);}
+\draw[step=0.5,black!55] (0,-2) grid (2,0);
+\node at (1,0.4) {\(\Sigma\)：十六个元素全非零};
+\begin{scope}[shift={(4.4,0)}]
+  \foreach \i/\j/\s in {0/0/72,1/1/72,2/2/72,3/3/72,
+    0/1/56,1/0/56,1/2/56,2/1/56,2/3/56,3/2/56}
+    {\fill[black!\s] (0.5*\j,-0.5*\i) rectangle ++(0.5,-0.5);}
+  \draw[step=0.5,black!55] (0,-2) grid (2,0);
+  \node at (1,0.4) {\(K=\Sigma^{-1}\)：只剩三对角};
+\end{scope}
+% 左：相关网络，四点全连
+\begin{scope}[shift={(0,-3.3)}]
+  \draw (0,0) -- (0.667,0);
+  \draw (0.667,0) -- (1.333,0);
+  \draw (1.333,0) -- (2,0);
+  \draw (0,0) .. controls (0.667,0.62) .. (1.333,0);
+  \draw (0.667,0) .. controls (1.333,0.62) .. (2,0);
+  \draw (0,0) .. controls (1,-0.85) .. (2,0);
+  \foreach \x/\lab in {0/1,0.667/2,1.333/3,2/4}{
+    \fill[white] (\x,0) circle (0.18);
+    \draw (\x,0) circle (0.18);
+    \node[font=\small] at (\x,0) {\lab};
+  }
+  \node at (1,-1.4) {按相关连边};
+\end{scope}
+% 右：条件依赖网络，链
+\begin{scope}[shift={(4.4,-3.3)}]
+  \draw (0,0) -- (0.667,0);
+  \draw (0.667,0) -- (1.333,0);
+  \draw (1.333,0) -- (2,0);
+  \foreach \x/\lab in {0/1,0.667/2,1.333/3,2/4}{
+    \fill[white] (\x,0) circle (0.18);
+    \draw (\x,0) circle (0.18);
+    \node[font=\small] at (\x,0) {\lab};
+  }
+  \node at (1,-1.4) {按精度连边};
+\end{scope}
+\draw[black!35] (3.2,-4.9) -- (3.2,0.7);
+\end{tikzpicture}
+\end{center}
+
+\emph{同一个 AR(1) 分布：相关矩阵处处非零，精度矩阵只留下相邻项。}
+
+图里左右两侧描述的是同一个四维 Gauss 分布，只是问了不同的问题。左边那张全连图没有说错任何事实，它如实报告了每一对都相关；它只是没有回答你关心的那个问题。
+
+\subsection{条件化就是取 Schur 补}
+
+把变量分成两块 \(X_A,X_B\)，协方差相应分块。若 \(\Sigma_{BB}\) 可逆，则
 
 \[
-\Sigma=
-\begin{bmatrix}
-\Sigma_{AA}&\Sigma_{AB}\\
-\Sigma_{BA}&\Sigma_{BB}
-\end{bmatrix}.
-\]
-
-若 \(\Sigma_{BB}\) 可逆，则
-
-\[
-X_A\mid X_B=x_B
+X_A\given X_B=x_B
 \sim
-\mathcal N\left(
-\mu_A
-+\Sigma_{AB}\Sigma_{BB}^{-1}
-(x_B-\mu_B),
+\mathcal N\bigl(
+\mu_A+\Sigma_{AB}\Sigma_{BB}^{-1}(x_B-\mu_B),
 \;
-\Sigma_{AA}
--\Sigma_{AB}\Sigma_{BB}^{-1}\Sigma_{BA}
-\right).
+\Sigma_{AA}-\Sigma_{AB}\Sigma_{BB}^{-1}\Sigma_{BA}
+\bigr).
 \]
 
-条件 covariance 是一个 Schur complement。观察 \(X_B\) 只会消除能由 \(B\) 线性解释的那部分不确定性，不会把剩余 covariance 凭空设为零。
+条件协方差是一个 Schur 补。观察 \(X_B\) 只削掉能被 \(B\) 线性解释的那部分不确定性，剩下的方差不会因为``已经看过很多变量''而自动趋于零。
 
-若只取单个节点 \(i\)，用 precision 形式整理条件密度可得
+取 \(A=\set{i}\)、\(B\) 为其余全部变量，用精度形式整理同一个式子，得到
 
 \[
-X_i\mid X_{-i}=x_{-i}
+X_i\given X_{-i}=x_{-i}
 \sim
-\mathcal N\left(
-\mu_i
--K_{ii}^{-1}
-K_{i,-i}(x_{-i}-\mu_{-i}),
+\mathcal N\bigl(
+\mu_i-K_{ii}^{-1}K_{i,-i}(x_{-i}-\mu_{-i}),
 \;
 K_{ii}^{-1}
-\right).
+\bigr).
 \]
 
-条件均值只依赖 \(K_{ij}\neq0\) 的变量。因此在 Gaussian Markov random field 中，节点 \(i\) 的邻居正是 precision matrix 第 \(i\) 行的非零 off-diagonal 位置。
-
-控制其他变量后的 partial correlation 为
+条件均值里只出现 \(K_{ij}\neq 0\) 的那些变量。节点 \(i\) 的邻居就是精度矩阵第 \(i\) 行的非零非对角位置，前一段的三对角结构因此直接读成一条链。与之配套的是偏相关系数
 
 \[
-\rho_{ij\cdot -\set{i,j}}
-=-\frac{K_{ij}}
-{\sqrt{K_{ii}K_{jj}}}.
+\rho_{ij\cdot-\set{i,j}}
+=-\frac{K_{ij}}{\sqrt{K_{ii}K_{jj}}},
 \]
 
-零 partial correlation 与条件独立在 Gaussian 情形中等价；离开 Gaussian 族后，零 partial correlation 通常只排除线性条件关系，不能推出完整条件独立。
+它为零当且仅当 \(K_{ij}=0\)。这条等价随 Gauss 假设成立而成立：离开 Gauss 族，偏相关为零只排除了线性的条件关系，非线性依赖照样可以存在。
 
-\subsection{Canonical density 把矩阵元素变成图上的势}
+\subsection{二次型展开后，矩阵元素就是图上的势}
 
-中心化后，Gaussian density 可写成
-
-\[
-p(x)
-\propto
-\exp\left(
--\frac12x^{\trans}Kx
-\right).
-\]
-
-展开二次型：
+中心化之后 Gauss 密度写成 \(p(x)\propto\exp(-\tfrac12 x^{\trans}Kx)\)，把二次型展开：
 
 \[
 -\frac12x^{\trans}Kx
-=-\frac12\sum_iK_{ii}x_i^2
+=-\frac12\sum_i K_{ii}x_i^2
 -\sum_{i<j}K_{ij}x_ix_j.
 \]
 
-对角项形成单节点势，非零 \(K_{ij}\) 形成 pairwise interaction。若 \(K_{ij}=0\)，density 中没有 \(x_ix_j\) 交互项，图中便没有边。正定约束 \(K\succ0\) 同时保证积分有限和 covariance 存在；任意稀疏对称矩阵都不能直接作为合法 precision。
+对角项是单节点势，非零的 \(K_{ij}\) 是一条边上的成对相互作用。若 \(K_{ij}=0\)，密度里根本没有 \(x_ix_j\) 这一项，图上也就没有这条边——上一节讲的无向图分解，在这里退化成了矩阵元素的读法。
 
-这与一般 Markov random field 的配分函数不同之处在于，Gaussian 二次型的归一化常数有闭式：
+约束 \(K\succ0\) 同时保证积分收敛与协方差存在，也意味着不能随手写一个稀疏对称矩阵当精度用：稀疏容易，正定不容易，两者要一起满足。
+
+Gauss 情形与一般无向图模型的分水岭在归一化常数上。上一节说配分函数 \(Z\) 要对全空间求和，在这里它有闭式：
 
 \[
-A(K,\mu)
-=\frac d2\log(2\pi)
--\frac12\log\det K
-+\frac12\mu^{\trans}K\mu
+A(K,\mu)=\frac d2\log(2\pi)-\frac12\log\det K+\frac12\mu^{\trans}K\mu .
 \]
 
-在相应 canonical parameterization 下可计算。高维学习仍需 log-determinant 与线性求解，但不必枚举指数多个离散状态。
+计算从指数级枚举降到一次 Cholesky 分解，量级是 \(O(d^3)\) 甚至更少（矩阵稀疏时）。连续、二次、正定这三个条件换来了可算的 \(Z\)，这也是 Gauss 图模型能在几万个节点上做精确推断、而离散 Markov 随机场往往做不到的原因。
 
-\subsection{Gaussian Bayesian network 用结构方程规定方向}
+\subsection{有向 Gauss 模型道德化后才是无向图}
 
-给变量选定拓扑顺序，可以写线性 structural equations
+给变量选定拓扑顺序，可以写线性结构方程
 
 \[
-X_i
-=\sum_{j\in\operatorname{pa}(i)}
-B_{ij}X_j
-+\varepsilon_i,
+X_i=\sum_{j\in\operatorname{pa}(i)}B_{ij}X_j+\varepsilon_i,
 \qquad
-\varepsilon_i
-\overset{\mathrm{ind}}\sim
-\mathcal N(0,\omega_i^2).
+\varepsilon_i\ \text{相互独立},\ \varepsilon_i\sim\mathcal N(0,\omega_i^2).
 \]
 
-向量形式为
+向量形式为 \(X=BX+\varepsilon\)，按拓扑顺序排列后 \(B\) 严格下三角、\(\Omega=\Var(\varepsilon)\) 对角。解出 \(X=(I-B)^{-1}\varepsilon\)，于是
 
 \[
-X=BX+\varepsilon,
+\Sigma=(I-B)^{-1}\Omega(I-B)^{-\trans},
 \qquad
-\varepsilon\sim\mathcal N(0,\Omega),
+K=(I-B)^{\trans}\Omega^{-1}(I-B).
 \]
 
-其中按拓扑顺序排列后 \(B\) 严格下三角，\(\Omega\) 为对角矩阵。于是
+第二个式子值得盯一会儿。\(K_{ij}\) 是 \((I-B)\) 的第 \(i\) 列与第 \(j\) 列经 \(\Omega^{-1}\) 加权的内积，只要存在某个 \(k\) 同时以 \(i\) 和 \(j\) 为父节点，这个内积就一般不为零。换句话说，DAG 里两个没有连边的父节点，在无向图里会被连上——这正是上一节碰撞结构的矩阵版本：给定共同子节点会打开通道，而无向图的边描述的恰好是给定其余全部变量后的依赖。把 DAG 转成无向图时先给每个节点的父节点两两连边、再抹去方向，这一步叫道德化，它损失的信息就是碰撞结构。
+
+\subsection{高维下样本协方差不可逆，稀疏得靠正则化}
+
+给定中心化样本的经验协方差 \(S\)，对数似然中与精度有关的部分为
 
 \[
-\Sigma
-=(I-B)^{-1}
-\Omega
-(I-B)^{-\trans},
+\ell(K)\propto\log\det K-\trace(SK),\qquad K\succ0,
 \]
+
+在 \(S\) 可逆时的最大值点是 \(K=S^{-1}\)。可是 \(d\) 接近或超过样本量 \(n\) 时 \(S\) 奇异，逆根本不存在；即便勉强可逆，最小特征值附近的噪声也会被求逆放大，产生成片的虚假强边。六十个脑区、两百个时间点已经落在这个尴尬区间里。
+
+图 lasso 在似然上加一个非对角的 \(L_1\) 惩罚：
 
 \[
-K
-=(I-B)^{\trans}
-\Omega^{-1}
-(I-B).
+\widehat K\in\argmax_{K\succ0}
+\left[\log\det K-\trace(SK)-\lambda\sum_{i\ne j}\abs{K_{ij}}\right].
 \]
 
-DAG 中一条有向边描述局部条件均值对父节点的依赖；无向 Gaussian 图中的边描述给定所有其余变量后的条件依赖。把 DAG 变成无向图时常需连接共同子节点的父节点再去掉方向。
+惩罚项把小的 \(K_{ij}\) 压成精确的零，于是解本身就带着一张图。\(\lambda\) 越大图越稀疏，但它是偏差与方差之间的一个选择，不是``真实边数''的客观刻度：换一个 \(\lambda\)，边集就换一批。惩罚还对变量尺度敏感，通常需要先标准化，否则单位大的变量会被系统性地判为无边。
 
-\subsection{从样本 covariance 到稀疏图需要正则化}
+计算上不要先求 \(S^{-1}\) 再修补。Cholesky 分解、对数行列式与线性方程求解都能直接利用正定结构，数值上稳得多。拿到解之后值得再看三个数：最小特征值离零有多远，条件数有多大，以及在自助重抽样下同一条边出现的频率。
 
-给定中心化样本的 empirical covariance \(S\)，Gaussian log-likelihood 对 precision 的参数相关部分为
+\subsection{一张稀疏图是估计结果，不是机制图}
 
-\[
-\ell(K)
-\propto
-\log\det K
--\trace(SK),
-\qquad K\succ0.
-\]
+前面每一步都挂着条件。联合 Gauss 若不成立，精度的零不再等价于条件独立，只等价于偏相关为零；重尾或非线性依赖会让两者分家。若存在未观测的共同原因，它会在观测变量的精度矩阵里留下一片非零，逼算法补上现实中不存在的直接连接。测量误差和样本选择也会改变边集。
 
-无约束 MLE 在 \(S\) 可逆时为 \(K=S^{-1}\)。当变量数接近或超过样本数时，\(S\) 奇异；即使可逆，小 eigenvalue 也会让逆矩阵极不稳定并产生大量虚假大边。
+因此报告一张 Gauss 图模型时，四层条件最好分开写清楚：联合 Gauss 是否站得住，精度用什么方法估计，\(\lambda\) 依据什么选定，边在重抽样或新数据上是否复现。边的方向更是另一回事——无向图本来就不带方向，而结构方程里的方向来自你选的拓扑顺序，观察数据无法把它定下来。
 
-Graphical lasso 解
-
-\[
-\widehat K
-\in
-\argmax_{K\succ0}
-\left[
-\log\det K
--\trace(SK)
--\lambda
-\sum_{i\ne j}\abs{K_{ij}}
-\right].
-\]
-
-off-diagonal \(L_1\) penalty 鼓励稀疏条件依赖图。\(\lambda\) 越大，图通常越稀疏；它代表偏差---方差选择，不是发现真实边数的客观刻度。变量尺度会影响 penalty，因此通常需要先标准化或使用加权 penalty。
-
-计算时不应显式形成 \(S^{-1}\) 来再做修补。Cholesky factorization、log-determinant 和线性系统求解能更稳定地利用正定结构；估计结果还应检查最小 eigenvalue、条件数和不同 \(\lambda\) 下边集稳定性。
-
-\subsection{一张稀疏图仍然只是条件模型}
-
-隐藏共同原因会让观测变量的 precision 结构变稠密；非 Gaussian 尾部和非线性依赖可能让零 precision 不再等价于条件独立；样本选择与测量误差也会改变边。因而 learned edge 既不是直接因果作用，也不是现实中不可再分的机制。
-
-可靠解释应分四层报告：联合 Gaussian 假设是否合理，precision 如何估计，正则化怎样选择，边在重抽样或新数据中是否稳定。只有在额外因果假设或干预信息下，图的方向和因果意义才有进一步依据。
+链结构在本节只是个玩具例子，实际用途却不小：只要把节点排成时间轴，三对角精度矩阵描述的就是一条线性动态系统的轨迹。下一节让这条链动起来，看看在时间方向上做 Gauss 条件化会得到什么。

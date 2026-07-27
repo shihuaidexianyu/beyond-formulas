@@ -43,16 +43,17 @@ Pf^{(k)}=\omega^{-k}f^{(k)},
   \node[right,black!70] at (0.42,0.24) {\(2\pi/8\)};
   \node at (0,-2.75) {八次单位根};
   \begin{scope}[shift={(6.4,0)}]
-    \draw[black!40] (-0.3,0) -- (5.0,0);
-    \draw[blue!55!black,thin] plot[domain=0:4.55,samples=80] (\x,{1.3*cos(deg(2*pi*\x/5.2))});
+    \draw[black!40] (-0.3,1.35) -- (5.0,1.35);
+    \draw[blue!55!black,thin] plot[domain=0:4.55,samples=80] (\x,{1.35+cos(deg(2*pi*\x/5.2))});
     \foreach \j in {0,...,7} {
-      \fill[blue!65!black] ({0.65*\j},{1.3*cos(45*\j)}) circle (2pt);
-      \draw[blue!65!black] ({0.65*\j},0) -- ({0.65*\j},{1.3*cos(45*\j)});
+      \fill[blue!65!black] ({0.65*\j},{1.35+cos(45*\j)}) circle (2pt);
+      \draw[blue!65!black] ({0.65*\j},1.35) -- ({0.65*\j},{1.35+cos(45*\j)});
     }
-    \draw[red!55!black,thin] plot[domain=0:4.55,samples=140] (\x,{-1.3*cos(deg(6*pi*\x/5.2))});
+    \draw[black!40] (-0.3,-1.35) -- (5.0,-1.35);
+    \draw[red!55!black,thin] plot[domain=0:4.55,samples=140] (\x,{-1.35+cos(deg(6*pi*\x/5.2))});
     \foreach \j in {0,...,7} {
-      \fill[red!60!black] ({0.65*\j},{-1.3*cos(135*\j)}) circle (2pt);
-      \draw[red!60!black] ({0.65*\j},0) -- ({0.65*\j},{-1.3*cos(135*\j)});
+      \fill[red!60!black] ({0.65*\j},{-1.35+cos(135*\j)}) circle (2pt);
+      \draw[red!60!black] ({0.65*\j},-1.35) -- ({0.65*\j},{-1.35+cos(135*\j)});
     }
     \node at (2.2,-2.75) {\(k=1\)（上）与 \(k=3\)（下）的实部采样};
   \end{scope}

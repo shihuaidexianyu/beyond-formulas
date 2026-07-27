@@ -1,126 +1,93 @@
 \section{信息几何怎样统一统计与优化}
 \label{sec:12-Real-Analysis-Support/10-Essential-Structures/03}
 
-统计推断与优化看似两个领域：一个关心估计的准确性，一个关心算法的收敛性。信息几何把它们统一起来：统计流形上的 Fisher 度量、自然梯度、以及最大似然作为测地流，揭示了估计与优化的深层几何结构。
+同一个 Bernoulli 模型，写两套参数。一套用成功概率 \(p\)，一套用 logit \(\eta=\log\frac{p}{1-p}\)。数据不变，负对数似然不变，梯度下降的步长都取 \(0.01\)。跑起来两条轨迹却完全不同：\(p\) 坐标下的迭代在 \(p\) 逼近 \(0\) 时被巨大的梯度弹开，\(\eta\) 坐标下的迭代不紧不慢地走。模型没变，数据没变，只有坐标变了。那么``步长 \(0.01\)''到底是多长？
 
-\subsection{先感受困难：为什么欧氏梯度有时失效}
+要回答它，得先有一把不随坐标变化的尺子。找到这把尺子之后，会有三件本来分属统计、信息论和优化的事落到同一张图上。
 
-考虑一个具体问题：估计 Gaussian 分布的均值 \(\mu\) 和方差 \(\sigma^2\)。最直接的方法是用梯度下降最小化负对数似然：
+\subsection{尺子应该量分布的可区分度}
 
+参数之间的欧氏距离没有意义，因为它随参数化改变。有意义的问法是：把 \(\theta\) 换成 \(\theta+\delta\) 之后，分布变了多少，或者说这两个分布多容易被数据区分开。这个量信息论里已经有了，就是 KL 散度，见\hyperref[sec:07-Information-Theory/03-Divergences/01]{``错误模型的代价：从交叉熵到 KL 散度''}一节里从编码代价出发的推导。
+
+KL 不对称，也不满足三角不等式，当不了距离。但在局部，它退化成一个漂亮的二次型。
+
+\begin{theorem}
+设 \(\set{p_\theta}\) 满足通常的正则条件：支撑集不依赖 \(\theta\)，\(\theta\mapsto p_\theta(x)\) 二阶可微，且求导可以穿过积分号两次。则
 \[
-L(\mu,\sigma^2)=\frac{n}{2}\log\sigma^2+\frac{1}{2\sigma^2}\sum_{i=1}^n(x_i-\mu)^2.
-\]
-
-欧氏梯度是
-
-\[
-\nabla_\mu L=\frac{1}{\sigma^2}\sum(\mu-x_i),
+\KL(p_\theta\,\|\,p_{\theta+\delta})
+=\tfrac12\,\delta^{\trans} I(\theta)\,\delta+o\big(\norm{\delta}^2\big),
 \qquad
-\nabla_{\sigma^2}L=\frac{n}{2\sigma^2}-\frac{1}{2\sigma^4}\sum(x_i-\mu)^2.
+I(\theta)=\E_\theta\!\big[\nabla_\theta\log p_\theta\,\nabla_\theta\log p_\theta^{\trans}\big].
 \]
+\end{theorem}
 
-但这里有一个问题：\(\mu\) 和 \(\sigma^2\) 的尺度差异很大（\(\mu\) 是位置参数，\(\sigma^2\) 是尺度参数），欧氏梯度下降会优先更新尺度大的方向，导致收敛慢且不稳定。
+展开三步就完。零阶项是 \(\KL(p_\theta\|p_\theta)=0\)；一阶项是 \(-\E_\theta[\nabla_\theta\log p_\theta]\)，score 的期望为零，故消失；二阶项是 \(-\E_\theta[\nabla^2_\theta\log p_\theta]\)，在同一组正则条件下它等于 \(I(\theta)\)。
 
-更一般地，欧氏梯度把参数空间看作平坦的，但实际上参数空间有曲率：某些方向（如同时改变 \(\mu\) 和 \(\sigma^2\)）导致分布剧烈变化，某些方向（如只改变 \(\mu\) 而 \(\sigma^2\) 很大）导致分布几乎不变。欧氏梯度忽略了这种几何结构。
+条件对账要认真做，因为两处都用到了穿过积分号求导。支撑集依赖 \(\theta\) 时（例如 \(\Uniform(0,\theta)\)），score 的期望不为零，一阶项不消失，展开式作废；缺少可控的差商包络时，交换极限与积分本身就不合法，见\hyperref[sec:12-Real-Analysis-Support/04-Limits-and-Integration/03]{``求导穿过积分号需要控制差商''}一节。\(I(\theta)\) 的定义与它作为局部可辨认性度量的统计含义，在\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}一节。
 
-\subsection{统计流形：参数空间的几何}
+值得注意的是主项关于 \(\delta\) 是偶的：\(\KL(p_{\theta+\delta}\|p_\theta)\) 展开后的二阶项完全相同。KL 的方向性是二阶以上的效应，在无穷小尺度上看不见。这就是把 \(I(\theta)\) 当作黎曼度量的依据——\hyperref[ch:105]{``信息几何：参数空间中的分布几何''}一章正是从这里开始把参数族做成几何对象。
 
-信息几何单元已经介绍了统计流形：参数空间 \(\Theta\) 是流形，Fisher 信息 \(I(\theta)\) 是黎曼度量。这个度量不是任意的，而是由分布的局部可区分性决定：
+\begin{center}
+\begin{tikzpicture}[>=stealth,line width=0.8pt]
+\draw[rotate around={25:(0,0)},gray,line width=0.5pt] (0,0) ellipse (1.05 and 0.52);
+\draw[rotate around={25:(0,0)},gray,line width=0.5pt] (0,0) ellipse (1.8 and 0.9);
+\draw[rotate around={25:(0,0)},gray,line width=0.5pt] (0,0) ellipse (2.55 and 1.28);
+\draw[rotate around={-32:(0.49,1.09)},line width=0.6pt] (0.49,1.09) ellipse (0.62 and 0.26);
+\fill (0.49,1.09) circle (1.8pt);
+\node at (0.10,1.66) {\footnotesize \(\theta\)};
+\draw[->] (0.49,1.09) -- (0.94,-1.77);
+\node[below] at (0.94,-1.82) {\footnotesize 欧氏最速方向};
+\draw[->,dashed] (0.49,1.09) -- (3.04,-0.50);
+\node[right] at (3.12,-0.50) {\footnotesize 自然梯度方向};
+\node at (-2.30,1.95) {\footnotesize 损失等值线};
+\draw[gray,line width=0.5pt] (-1.85,1.74) -- (-1.55,0.62);
+\end{tikzpicture}
+\end{center}
 
+\emph{小椭圆是 Fisher 度量下``一步''所能到达的范围；把它换成正圆，箭头就转回实线那一条。}
+
+\subsection{三件事落在同一张图上}
+
+第一件已经写完：KL 在局部就是 Fisher 度量诱导的平方距离，依据是上面那条展开式加正则条件。
+
+第二件是自然梯度。在 Fisher 度量下把``走一步''定义为 \(\delta^{\trans}I(\theta)\delta\le\varepsilon^2\)，再问哪个 \(\delta\) 把损失 \(L\) 降得最多。把 \(L\) 线性化成 \(L(\theta+\delta)\approx L(\theta)+g^{\trans}\delta\)（\(g=\nabla_\theta L\)），问题成了在椭球约束下最小化线性泛函，用 \(I\) 诱导的内积做 Cauchy--Schwarz 即得唯一解
 \[
-g_\theta(u,v)=u^\trans I(\theta)v,
-\qquad
-I(\theta)=\E_\theta\!\left[
-\nabla_\theta\log p_\theta\,
-\nabla_\theta\log p_\theta^\trans
-\right].
+\delta=-\frac{\varepsilon}{\sqrt{g^{\trans}I^{-1}g}}\;I(\theta)^{-1}g,
 \]
+方向就是自然梯度 \(I(\theta)^{-1}\nabla_\theta L\)。它对坐标不变，这一点可以直接验算：在重参数化 \(\theta=\varphi(\xi)\) 下记 Jacobian 为 \(J\)，则梯度按 \(g\mapsto J^{\trans}g\) 变换，Fisher 矩阵按 \(I\mapsto J^{\trans}IJ\) 变换，于是 \(I^{-1}g\mapsto J^{-1}I^{-1}g\)——它像一个切向量那样变换，指的是同一个方向。前提是 \(I(\theta)\) 正定，也就是模型在 \(\theta\) 处局部可辨认。细节见\hyperref[sec:12-Real-Analysis-Support/09-Information-Geometry/02]{``自然梯度沿分布几何下降''}一节。
 
-Fisher 度量把``参数差''变成``分布差''：两个参数点欧氏距离很近，若它们诱导的分布几乎相同，Fisher 距离就小；反之，若分布截然不同，Fisher 距离就大。
+开头那道题现在能算了。设 \(n\) 次试验中成功 \(k\) 次，记 \(\bar y=k/n\)。在 \(p\) 坐标下 \(\nabla_p L=\frac{np-k}{p(1-p)}\)，\(I(p)=\frac{n}{p(1-p)}\)，自然梯度是 \(p-\bar y\)。在 \(\eta\) 坐标下 \(\nabla_\eta L=np-k\)，\(I(\eta)=np(1-p)\)，自然梯度是 \(\frac{p-\bar y}{p(1-p)}\)，而它引起的 \(p\) 的一阶变化是 \(p(1-p)\cdot\frac{p-\bar y}{p(1-p)}=p-\bar y\)。两套坐标给出同一个位移。欧氏梯度则相差一个 \(p(1-p)\) 的因子，在 \(p\to0\) 时一边爆炸一边收缩，那正是两条轨迹分道扬镳的原因。
 
-\subsection{自然梯度：几何正确的下降方向}
-
-自然梯度是 Fisher 度量下的最速下降方向：
-
+第三件是最大似然。记经验分布为 \(\hat P_n\)，直接算：
 \[
-\widetilde\nabla_\theta L=I(\theta)^{-1}\nabla_\theta L.
+\KL(\hat P_n\,\|\,p_\theta)=-H(\hat P_n)-\frac1n\sum_{i=1}^n\log p_\theta(x_i).
 \]
+第一项与 \(\theta\) 无关，所以最大化似然与最小化 \(\KL(\hat P_n\|p_\theta)\) 是同一件事。这是恒等式，不需要任何假设。把它读成几何语言：最大似然是把经验分布按 KL 投影到模型这张流形上。
 
-它的关键性质是坐标不变性：重参数化不改变自然梯度下降的几何行为。这与欧氏梯度形成对比——欧氏梯度随坐标改变，自然梯度不随坐标改变。
-
-自然梯度的几何解释是：它沿着分布空间中``最陡''的方向下降，而不是参数空间中``最陡''的方向。这解释了为什么自然梯度在参数相关或尺度差异大的情况下更稳健——它自动适应分布的几何，而不是参数的几何。
-
-\subsection{具体例子：Gaussian 分布的自然梯度}
-
-回到 Gaussian 分布的例子。Fisher 信息矩阵是
-
+对指数族，投影这个词有更硬的含义。设 \(p_\theta(x)=h(x)\exp\big(\theta^{\trans}T(x)-A(\theta)\big)\)，\(\hat\theta\) 由矩匹配 \(\E_{\hat\theta}[T]=\frac1n\sum_i T(x_i)\) 确定，则对任意 \(\theta\)，
 \[
-I(\mu,\sigma^2)=\begin{pmatrix}
-\frac{1}{\sigma^2} & 0\\
-0 & \frac{1}{2\sigma^4}
-\end{pmatrix}.
+\KL(\hat P_n\,\|\,p_\theta)=\KL(\hat P_n\,\|\,p_{\hat\theta})+\KL(p_{\hat\theta}\,\|\,p_\theta).
 \]
+两边按定义展开、用矩匹配把 \(\E_{\hat P_n}[T]\) 换成 \(\E_{\hat\theta}[T]\)，等号即成立。这是勾股等式，\(\hat\theta\) 是垂足，剩余项 \(\KL(\hat P_n\|p_{\hat\theta})\) 度量模型族本身的失配。最大似然的统计侧论证见\hyperref[sec:11-Mathematical-Statistics/02-Point-Estimation/03]{``最大似然选择最能解释数据的参数''}一节，几何侧的坐标与对偶结构见\hyperref[sec:12-Real-Analysis-Support/09-Information-Geometry/01]{``统计流形把参数族变成几何对象''}一节。
 
-自然梯度是
+\subsection{为什么偏偏是 Fisher 度量}
 
-\[
-\widetilde\nabla_\mu L=\sigma^2\cdot\frac{1}{\sigma^2}\sum(\mu-x_i)=\sum(\mu-x_i),
-\]
+这三条能拼起来，靠的是同一个 \(I(\theta)\)。它并非随手选的。
 
-\[
-\widetilde\nabla_{\sigma^2}L=2\sigma^4\cdot\left(\frac{n}{2\sigma^2}-\frac{1}{2\sigma^4}\sum(x_i-\mu)^2\right)
-=n\sigma^2-\sum(x_i-\mu)^2.
-\]
+\begin{theorem}
+（Chentsov）在有限样本空间上，若要求统计流形上的黎曼度量在充分统计量诱导的 Markov 变换下不增，则这样的度量在正数倍意义下唯一，即 Fisher 度量。
+\end{theorem}
 
-与欧氏梯度相比，自然梯度自动调整了尺度：\(\mu\) 的更新不依赖 \(\sigma^2\)，\(\sigma^2\) 的更新不依赖 \(\mu\) 的尺度。这解释了为什么自然梯度收敛更快且更稳定。
+这条定理的分量在于它把``应该用哪把尺子''从品味问题变成了推论：一旦承认数据处理不该凭空增加可区分度，度量就被定死了。它的原始形式针对有限样本空间，连续情形需要额外的技术条件，引用时值得说清楚这一点。
 
-\subsection{最大似然作为测地流}
+\subsection{统一到局部为止}
 
-最大似然估计（MLE）在统计流形上有一个深刻的几何解释：MLE 路径是 Fisher 度量下的测地流。
+范围要划清楚。三条命题拼成的是局部图景。全局上 KL 与 Fisher 度量诱导的测地距离是两个不同的对象：前者是 \(A\) 的 Bregman 散度，不对称；后者对称且满足三角不等式。它们只在二阶展开的意义上一致，把``KL 是距离的平方''推广到有限位移是错的。
 
-考虑似然函数 \(\ell(\theta)=\log p_\theta(x)\)。MLE 是 \(\ell\) 的最大点，而 Fisher 度量下的梯度流方程
+第二处断点在正定性。过参数化的神经网络在很多 \(\theta\) 处 \(I(\theta)\) 奇异：存在整片不改变输出函数的参数方向，沿这些方向分布毫无变化。此时 \(I^{-1}\) 不存在，实现里用伪逆或者加阻尼 \(I(\theta)+\lambda\,\mathrm{Id}\)，坐标不变性随之只在商掉这些方向之后的空间上成立。这是把统计流形搬到深度学习时的实际代价，不是可以略去的技术细节。
 
-\[
-\dot\theta=-\widetilde\nabla_\theta\ell=-I(\theta)^{-1}\nabla_\theta\ell
-\]
+第三处是算力。\(I\) 是 \(d\times d\) 的，\(d\) 上百万时既存不下也求不了逆。K-FAC 与 Shampoo 一类方法用 Kronecker 结构或者块对角去近似它，近似做得越粗，上面那条坐标不变性剩得越少。这些属于工程近似，与前面的定理不在同一层级，混着引用会让人误以为二阶方法自带几何保证。
 
-的解就是测地线（在 Fisher 度量下局部最短路径）。这条测地线从初始点流向 MLE，其几何性质（曲率、速度）由 Fisher 度量决定。
+于是这一节的账可以这样结：局部二次展开、椭球约束下的最速方向、以及经验分布的 KL 投影，都是可以逐步核验的陈述；Chentsov 定理为度量的选择兜底；而``深度学习的优化是在分布空间里做几何''是启发，它提示方向，不承担证明。
 
-这个对应不是形式类比：最大似然估计的几何性质（收敛速度、稳定性、对初始值的敏感性）由统计流形的曲率决定。曲率大的区域（参数变化导致分布剧烈变化），MLE 收敛快但不稳定；曲率小的区域（参数变化几乎不改变分布），MLE 收敛慢但稳定。
-
-\subsection{指数族的对偶几何}
-
-指数族 \(p_\theta(x)=h(x)\exp(\theta^\trans T(x)-A(\theta))\) 的统计流形有特殊的对偶结构：自然参数 \(\theta\) 与期望参数 \(\mu=\E_\theta[T(X)]=\nabla A(\theta)\) 互为 Legendre 对偶。
-
-在这对坐标下，KL 散度有显式形式：
-
-\[
-\KL(p_\theta\|p_{\theta'})
-=A(\theta')-A(\theta)-\mu^\trans(\theta'-\theta),
-\]
-
-即 \(A\) 的 Bregman 散度。Bregman 散度在无穷小位移下退化为 \(\frac12 d\theta^\trans I(\theta)d\theta\)，正是 Fisher 度量。
-
-对偶几何揭示了指数族的深层结构：自然参数是``分布的坐标''，期望参数是``数据可见的统计量''，Legendre 变换在两者之间切换。MLE 是 moment matching（\(\mu=\) 样本均值），这解释了几何上``把数据投影到期望参数空间''的过程。
-
-\subsection{信息几何在 AI 可解释性中的角色}
-
-信息几何为理解深度学习提供了几何框架：
-
-\begin{itemize}
-\tightlist
-\item
-  \textbf{参数空间的几何}：神经网络的参数空间是一个高维统计流形，Fisher 信息决定局部几何；
-\item
-  \textbf{自然梯度下降}：二阶优化方法（K-FAC、Shampoo）可以视为自然梯度的近似，它们利用 Fisher 信息适应参数空间的几何；
-\item
-  \textbf{插值路径}：两个模型之间的插值路径在 Fisher 度量下是测地线，其几何性质决定插值模型的行为；
-\item
-  \textbf{模式连接}：两个训练好的模型之间可能存在低损失路径（mode connectivity），这与统计流形的拓扑结构有关。
-\end{itemize}
-
-这些应用不是完整的理论，但提供了理解深度学习的几何视角：不是``参数空间中的优化''，而是``分布空间中的几何''。
-
-\subsection{落点}
-
-信息几何把统计推断与优化统一起来：Fisher 度量描述分布的局部可区分性，自然梯度是几何正确的下降方向，最大似然是测地流，指数族的对偶几何揭示深层结构。理解这些，就是理解为什么某些估计方法有效、什么时候会失效、以及失效时应该回到哪里。
+信息几何统一的是``两个分布差多远''这一类问题。有一类问题它统一不了：同一个联合分布可以由不同的生成机制产生，而分布之间的任何距离都看不出这个差别。下一节处理这件事。

@@ -34,7 +34,7 @@ y_{n+1}=y_n+h\,f(t_n,y_n),\qquad t_{n+1}=t_n+h .
   \draw[thick,black!75] plot[domain=0:2.15,samples=90] (\x,{exp(-\x)});
   \node[above right,font=\footnotesize,black!75] at (1.5,0.223) {真解 \(e^{-t}\)};
   \draw[thick,blue!60] (0,1) -- (0.5,0.5) -- (1,0.25) -- (1.5,0.125) -- (2,0.0625);
-  \node[below,font=\footnotesize,blue!65] at (0.72,0.36) {Euler 折线};
+  \node[below,font=\footnotesize,blue!65] at (1.52,0.075) {Euler 折线};
   \draw[line width=1.6pt,red!70] (0.5,0.5) -- (0.5,0.6065);
   \draw[line width=1.6pt,red!70] (1,0.25) -- (1,0.3033);
   \draw[line width=1.6pt,red!70] (1.5,0.125) -- (1.5,0.1516);
@@ -44,10 +44,12 @@ y_{n+1}=y_n+h\,f(t_n,y_n),\qquad t_{n+1}=t_n+h .
   \draw[dashed,black!55] (2,0.0758) -- (2,0.1353);
   \foreach \t/\y in {0/1,0.5/0.5,1/0.25,1.5/0.125,2/0.0625}
     \fill[blue!70] (\t,\y) circle (1.6pt);
-  \node[right,font=\footnotesize,red!70] at (2.04,0.069) {本步新犯的错};
-  \node[right,font=\footnotesize,black!65] at (2.04,0.105) {前面带过来的};
-  \draw[->,>=stealth,black!45] (0.28,0.86) -- (0.2,0.79);
-  \node[right,font=\footnotesize,black!65] at (0.26,0.9) {斜率只在这一点上读一次};
+  \draw[black!45] (1.18,0.78) -- (1.03,0.345);
+  \node[right,font=\footnotesize,black!65] at (1.16,0.80) {前面几步带过来的};
+  \draw[red!50] (1.18,0.58) -- (1.03,0.275);
+  \node[right,font=\footnotesize,red!70] at (1.16,0.60) {这一步新犯的错};
+  \draw[->,>=stealth,black!45] (0.13,1.03) -- (0.03,0.995);
+  \node[right,font=\footnotesize,black!65] at (0.12,1.06) {斜率只在这一点读一次};
 \end{tikzpicture}
 
 \emph{折线从初值出发，每段都沿着自己起点处的斜率直行。红色那截是这一步新产生的偏差，它上面的虚线是前面几步的偏差被方程输运过来的部分；节点上的缺口是两者之和。}
@@ -65,7 +67,7 @@ y(t_n+h)=y(t_n)+h\,f\bigl(t_n,y(t_n)\bigr)+\frac{h^2}{2}\,y''(\xi_n),
 
 Euler 步恰好取了前两项。假如这一步从精确解出发，它单步产生的偏差——局部截断误差——是 \(O(h^2)\)。
 
-但在固定区间 \([0,T]\) 上要走 \(N\approx T/h\) 步。\(N\) 个 \(O(h^2)\) 加起来是 \(O(h)\)。这个换算是整篇的骨架：局部指数比全局高一阶，高出来的那一阶被步数 \(1/h\) 吃掉了。把两者混为一谈，声称 Euler 的误差是 \(O(h^2)\)，是这套理论里最常见的一次口误，而且代价不小——按二阶估的步长，实际精度会差出一个数量级。
+但在固定区间 \([0,T]\) 上要走 \(N\approx T/h\) 步。\(N\) 个 \(O(h^2)\) 加起来是 \(O(h)\)。这个换算是整篇的骨架：局部指数比全局高一阶，高出来的那一阶被步数 \(1/h\) 吃掉了。把两者混为一谈，声称 Euler 的误差是 \(O(h^2)\)，是这套理论里最常见的一次口误，而且后果不小——按二阶估的步长，实际精度会差出一个数量级。
 
 严格一点的账要把``误差还会被放大''也算进去。记全局误差 \(e_n=y(t_n)-y_n\)，用精确解的展开减去递推式，
 

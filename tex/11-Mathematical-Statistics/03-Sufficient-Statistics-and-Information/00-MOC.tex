@@ -1,36 +1,9 @@
-完整样本可能很大，但关于参数的有效信息未必同样复杂。Bernoulli 序列的成功位置不同，却只通过成功总数影响似然；另一方面，即使保留全部数据，有限噪声也会限制估计精度。
+存储账单压过了日志本身的价值，于是有人提议只留每天的计数与求和。这个提议成不成立，取决于两个问题：删掉细节以后，还能不能算出原来要算的结论；就算什么都不删，这批数据又最多能把参数说到多准。本单元把这两个问题接成一条链——先问压缩能否无损，再问精度的上限在哪，最后把上限写成一个可以拿到会上用的数字。
 
-抛一枚硬币10次，结果可以是 \(2^{10}=1024\) 种不同序列，但似然只依赖成功次数 \(k\)：
-\[
-\text{likelihood}(\theta) = \theta^k(1-\theta)^{10-k}.
-\]
-记录 \((H,T,H,H,T,H,T,H,H,T)\) 与 \((H,H,H,H,H,H,T,T,T,T)\) 若成功次数同为6，它们关于 \(\theta\) 的似然完全相等。充分统计量 \(T=\sum_{i=1}^{10} X_i\) 将样本从1024种可能序列压缩到11种可能结果，不丢失任何关于 \(\theta\) 的模型信息。
+第一步是分清哪些数据细节对参数是多余的。给定统计量 \(T\) 后样本的条件分布若不再依赖 \(\theta\)，则原始数据对该参数不再有话可说，这就是充分性；因子分解定理把这个判断变成对联合密度的一次代数观察，指数族则解释了为什么固定长度的摘要在实践中如此常见，从而使流式聚合与分片合并成为可能。这是\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/01]{``充分统计量保留了哪些参数信息''}。
 
-本单元从``能否无损压缩''走向``精度能有多高''：
+第二步是把``这份数据对参数说得有多死''量化。对数似然对参数的导数称为 score，它在真值处平均为零，方差就是 Fisher 信息；同一个量还等于对数似然的平均负曲率，于是似然曲面越尖，参数越容易辨认，越平则数据说不清。向量参数下信息矩阵的退化方向，直接对应实验设计没有覆盖到的方向。这是\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}。
 
-\begin{enumerate}
-\tightlist
-\item
-  充分统计量保留了哪些参数信息用条件分布和因子分解定理说明何时摘要不会丢失参数信息，并通过 Rao--Blackwell 化解释其用途。
-\item
-  Score 与 Fisher 信息衡量局部可辨认性把 log-likelihood 的随机斜率和曲率转化为样本携带的信息。
-\item
-  Cramér--Rao 界给无偏估计设下限从 Cauchy--Schwarz 推出方差下界，并明确效率结论依赖的正则条件。
-\end{enumerate}
+第三步是把曲率换算成方差的硬下限。任何无偏估计量的方差都不低于 Fisher 信息的倒数，推导只用了一次协方差恒等式与一次 Cauchy--Schwarz，正则条件与无偏性在其中各出场一次。这条界的用处是分诊：估计量还在下界上方，换方法有收益；已经贴住下界，就只能加数据或改模型设定。这是\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/03]{``Cramér--Rao 界给无偏估计设下限''}。
 
-Fisher 信息不是 Shannon 熵的另一个名字。它描述参数微小改变时分布有多容易被区分，是局部、参数化相关的几何量。
-
-\subsection{怎么读这一章}
-
-三篇从压缩、局部敏感度和精度下界逐步推进。先看充分统计量何时能在不损失参数信息的前提下压缩样本，再用 score 与 Fisher 信息量化似然对参数的反应，最后理解 Cramér--Rao 界究竟约束哪一类估计量。
-
-\subsection{本章篇目}
-
-以下篇目按概念依赖排列；若从具体问题进入，也可以先打开最接近当前困惑的一篇，再沿篇内链接回补。
-
-\begin{itemize}
-\tightlist
-\item \hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/01]{``充分统计量保留了哪些参数信息''}；
-\item \hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}；
-\item \hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/03]{``Cramér--Rao 界给无偏估计设下限''}。
-\end{itemize}
+有三处容易串味的地方值得预先标出。Fisher 信息不是 Shannon 熵换个名字，它是局部的、依赖参数化的量，度量的是参数微小移动后分布有多容易被区分；充分性与低维压缩是两件事，原始数据本身永远充分，却一个字节都没省；Cramér--Rao 界只约束无偏估计，有偏估计可以走到界的下面，正则化改善均方误差的空间正来自这个缺口。三篇里反复出现的正则条件也不是装饰，支持集随参数移动的模型会让其中大部分结论整块失效。

@@ -1,79 +1,108 @@
 \section{统计流形把参数族变成几何对象}
 \label{sec:12-Real-Analysis-Support/09-Information-Geometry/01}
 
-参数化统计模型 \(\{p_\theta:\theta\in\Theta\}\) 把参数空间 \(\Theta\) 映射到分布空间。若这个映射足够光滑且可辨识，参数空间本身就带有一个几何结构：它不仅是坐标的容器，还是一个流形，其上的``距离''由分布的区分难度决定。
+把一个二分类模型的输出概率挪动 \(0.01\)。从 \(0.50\) 挪到 \(0.51\)，谁也看不出预测有什么变化；从 \(0.989\) 挪到 \(0.999\)，错误率却可能少掉一半。参数尺子上这两步一样长，落到分布上差得很远。同一种别扭在训练里换了副面孔：给权重加 \(L^2\) 惩罚、用参数移动幅度衡量两个 checkpoint 的差异、按固定学习率截断更新步长，用的都是参数空间的欧氏距离，而我们关心的从来是模型输出的分布变了多少。
 
-\subsection{参数空间是流形，分布空间是函数空间}
+\subsection{参数上的等距在分布上不是等距}
 
-设 \(\Theta\subseteq\R^d\) 是开集，映射 \(\theta\mapsto p_\theta\) 光滑（\(p_\theta(x)\) 对 \(\theta\) 可微）。则 \(\Theta\) 是 \(\R^d\) 的开子流形，其切空间 \(T_\theta\Theta\cong\R^d\)。但每个点 \(\theta\) 对应的不是向量，而是整个分布 \(p_\theta\)——一个函数或测度。参数空间是流形，分布空间是函数空间；前者是后者的坐标。
+先把这件事画出来。取两个独立 Bernoulli 分量组成的模型，参数是 \((\theta_1,\theta_2)\in(0,1)^2\)，在参数空间里划一张等间距的网格。若改用``两个分布有多容易被样本区分''来度量同一张网格，格子的大小立刻变得不均匀。
 
-这与``参数化像''的构造完全同构：参数空间 \(\Theta\) 是定义域，分布空间是环境空间，映射 \(\theta\mapsto p_\theta\) 是嵌入。但环境空间不是有限维的——它是概率分布组成的无穷维空间。统计流形的几何因此是``无穷维空间中的有限维曲面''。
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+% 左：参数坐标下的等距网格
+\fill[gray,opacity=0.45] (1.8,1.8) rectangle (2.25,2.25);
+\fill[gray,opacity=0.45] (4.05,4.05) rectangle (4.5,4.5);
+\draw[step=0.45,gray!70,very thin] (0,0) grid (4.5,4.5);
+\draw[thick] (0,0) rectangle (4.5,4.5);
+\node at (2.25,-0.55) {参数坐标 \(\theta\)};
+\node at (2.25,5.1) {等间距划分};
+% 右：按可区分程度重新度量
+\begin{scope}[shift={(7.0,0)}]
+\fill[gray,opacity=0.45] (1.96,1.96) rectangle (2.25,2.25);
+\fill[gray,opacity=0.45] (3.58,3.58) rectangle (4.5,4.5);
+\foreach \t in {0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1}{
+  \draw[gray!70,very thin] ({0.05*asin(sqrt(\t))},0) -- ({0.05*asin(sqrt(\t))},4.5);
+  \draw[gray!70,very thin] (0,{0.05*asin(sqrt(\t))}) -- (4.5,{0.05*asin(sqrt(\t))});
+}
+\draw[thick] (0,0) rectangle (4.5,4.5);
+\node at (2.25,-0.55) {按分布可区分程度度量};
+\node at (2.25,5.1) {同一张网格};
+\end{scope}
+\end{tikzpicture}
+\end{center}
 
-Bernoulli 模型是最简单的例子：\(\theta\in(0,1)\) 是一维开区间，每个点对应一个 Bernoulli 分布。Gaussian 模型 \((\mu,\sigma^2)\in\R\times(0,\infty)\) 是二维开半平面，每个点对应一个正态分布。参数空间的维数就是模型的``自由度''，与数据空间维数无关。
+\emph{参数空间里等间距的网格，换成``分布差多少''的尺子之后疏密不均：靠近边界的那一格被拉开，中部的那一格被压紧。}
 
-\subsection{Fisher 信息逐点定义内积}
+图上两个被涂灰的格子在左边一样大，在右边相差三倍有余。原因可以算出来：Bernoulli 分布 \(\theta\) 与 \(\theta+d\theta\) 之间的区分难度正比于 \(d\theta/\sqrt{\theta(1-\theta)}\)，分母在 \(\theta\to0\) 或 \(\theta\to1\) 时趋于零。同样一步 \(d\theta=0.01\)，在 \(\theta=0.5\) 附近几乎不改变什么，在 \(\theta=0.99\) 附近却把``几乎必然''推向``必然''。开头那个 \(0.989\) 到 \(0.999\) 的例子，说的就是右图边界那一格。
 
-Fisher 信息矩阵
+\subsection{把 Fisher 信息当作逐点的尺子}
+
+要把上面的观察写成几何，需要一个在每个参数点上都有定义的内积。设 \(\Theta\subseteq\R^d\) 是开集，映射 \(\theta\mapsto p_\theta\) 光滑且模型可辨识。定义
 
 \[
 I(\theta)=\E_\theta\!\left[
 \nabla_\theta\log p_\theta(X)\,
-\nabla_\theta\log p_\theta(X)^\trans
-\right].
+\bigl(\nabla_\theta\log p_\theta(X)\bigr)^{\trans}
+\right],
 \]
 
-在正则条件下它对称半正定；若模型可辨识且正则，它正定。把 \(I(\theta)\) 当作切空间 \(T_\theta\Theta\) 上的内积，
+即 score 的协方差矩阵，它衡量的是数据对参数扰动有多敏感，详见\hyperref[sec:11-Mathematical-Statistics/03-Sufficient-Statistics-and-Information/02]{``Score 与 Fisher 信息衡量局部可辨认性''}。正则条件下它对称半正定，可辨识时正定。
 
+\begin{definition}[Fisher--Rao 度量]
+在切空间 \(T_\theta\Theta\cong\R^d\) 上定义内积
 \[
-g_\theta(u,v)=u^\trans I(\theta)v,
-\qquad u,v\in T_\theta\Theta,
+g_\theta(u,v)=u^{\trans}I(\theta)\,v ,
+\qquad u,v\in T_\theta\Theta .
 \]
+配上这个度量的参数空间称为统计流形，\(g\) 称为 Fisher--Rao 度量。
+\end{definition}
 
-就得到统计流形上的黎曼度量，称为 Fisher--Rao 度量。
+于是参数族获得了黎曼流形的全部装备：曲线长度由 \(\int\sqrt{\dot\theta^{\trans}I(\theta)\dot\theta}\,dt\) 给出，两点之间的距离是最短曲线的长度，角度与体积也随之有了意义。度量、切空间与长度的一般框架见\hyperref[sec:12-Real-Analysis-Support/08-Manifold-Basics/03]{``黎曼度量让弯曲空间有长度''}，这里只是把抽象定义里的那个 \(g\) 换成了具体的 \(I(\theta)\)。
 
-这个度量的意义与欧氏度量完全不同：它量的是``沿方向 \(u\) 微小改变参数，分布改变多少''，而不是``参数数值差多少''。两个参数点欧氏距离很近，若它们诱导的分布几乎相同（例如高维 Gaussian 中 \(\mu\) 沿某个数据缺失的方向），Fisher 距离就小；反之，若分布截然不同，Fisher 距离就大。``近''的标准从参数数值变成了分布行为。
+一维 Bernoulli 模型里 \(I(\theta)=1/(\theta(1-\theta))\)，弧长元 \(ds=d\theta/\sqrt{\theta(1-\theta)}\)，积分给出 \(s(\theta)=2\arcsin\sqrt{\theta}\)。上图右侧的网格线画的正是这个坐标：把等间距的 \(\theta\) 送进 \(s\)，出来的间距在两端被拉长。
 
-重参数化 \(\eta=\eta(\theta)\) 时，Fisher 信息按链式法则变换：
+\subsection{换一套坐标，几何不动}
+
+统计流形的一个关键性质是它不依赖参数化方式。作可逆光滑变换 \(\eta=\eta(\theta)\)，链式法则给出
 
 \[
-I_\eta(\eta)
-=\left(\frac{\partial\theta}{\partial\eta}\right)^\trans
+I_\eta(\eta)=
+\left(\frac{\partial\theta}{\partial\eta}\right)^{\trans}
 I_\theta(\theta)
 \left(\frac{\partial\theta}{\partial\eta}\right),
 \]
 
-这正是黎曼度量在坐标变换下的变换规则。因此 Fisher 几何不依赖参数化——用概率 \(\theta\)、logit \(\eta=\log(\theta/(1-\theta))\) 或任何其他坐标，流形上的距离、角度、测地线都相同。
+这恰好是黎曼度量在坐标变换下的变换规律。矩阵的元素变了，可它作用在切向量上算出的长度没变，因为切向量本身按 \(\partial\eta/\partial\theta\) 的方式反向变换，两处的 Jacobian 相消。
 
-\subsection{指数族给出最干净的例子}
+所以用概率 \(\theta\) 记录、用 logit \(\eta=\log\bigl(\theta/(1-\theta)\bigr)\) 记录、或者用别的什么坐标，Fisher 距离都是同一个数。这与欧氏距离形成对照：\(\abs{\theta_1-\theta_2}\) 与 \(\abs{\eta_1-\eta_2}\) 完全是两回事，谁大谁小都可能翻转。参数空间的欧氏距离依赖于我们碰巧选了哪套坐标，而坐标是人挑的。
 
-指数族
-
-\[
-p_\theta(x)=h(x)\exp\bigl(\theta^\trans T(x)-A(\theta)\bigr)
-\]
-
-的 score 是 \(\nabla_\theta\log p_\theta(x)=T(x)-\nabla A(\theta)\)，所以
+指数族给出最干净的算例。对
 
 \[
-I(\theta)=\Cov_\theta(T(X))=\nabla^2A(\theta),
+p_\theta(x)=h(x)\exp\bigl(\theta^{\trans}T(x)-A(\theta)\bigr),
 \]
 
-即 log-partition 的 Hessian。Fisher 度量因此是 \(A\) 的 Hessian 度量，也称 Hessian 几何。\(A\) 严格凸（最小表示下）确保度量正定；自然参数空间是一个凸区域，Fisher 几何在其上定义良好。
+score 是 \(T(x)-\nabla A(\theta)\)，于是 \(I(\theta)=\Cov_\theta\bigl(T(X)\bigr)=\nabla^2A(\theta)\)。Fisher 度量成了 log-partition 函数的 Hessian，而 \(A\) 在最小表示下严格凸，度量的正定性由凸性直接保证。Gaussian、Bernoulli、Poisson 都落在这个框架里，度量可以手算。
 
-Bernoulli 的 log-partition 是 \(A(\theta)=\log(1+e^\theta)\)，其二阶导数是 \(e^\theta/(1+e^\theta)^2\)，所以 Fisher 度量为
+\subsection{欧氏梯度下降用的是左图那把尺子}
+
+回到优化。梯度下降的一步可以写成带信任域的线性化问题：
 
 \[
-g_\theta=\frac{e^\theta}{(1+e^\theta)^2}\,d\theta^2.
+\theta_{k+1}=\argmin_{\theta}\ \Bigl\{
+L(\theta_k)+\nabla L(\theta_k)^{\trans}(\theta-\theta_k)
+\ \ \text{s.t.}\ \ \norm{\theta-\theta_k}_2\le\varepsilon
+\Bigr\},
 \]
 
-在 logit 坐标 \(\eta=\log(\theta/(1-\theta))\) 下，这变成 \(g_\eta=(1/4)\operatorname{sech}^2(\eta/2)\,d\eta^2\)。两种坐标下的度量形式不同，但几何相同：从 \(\theta=0.5\) 到 \(\theta=0.9\) 的 Fisher 距离，无论用哪种坐标计算都一样。
+解出来正是 \(\theta_k-\alpha\nabla L(\theta_k)\)。约束里那个 \(\norm{\cdot}_2\) 就是左图的均匀网格：它认为参数空间每个方向、每个位置的一步长度都一样。若模型在某些方向上对参数极其敏感、在另一些方向上近乎不动，这条约束会同时做两件不合适的事——在敏感方向上迈得太大，在迟钝方向上磨蹭不前。学习率于是变成一个左右为难的折中，\hyperref[sec:09-Convex-Optimization/06-Optimization-Algorithms/01]{``梯度下降真正难在步长''}描述的正是这种折中。
 
-\subsection{参数空间的边界行为}
+由此还能解释一个实践现象：同一个模型换一种参数化，训练动力学会变。把方差参数写成 \(\sigma\) 还是 \(\log\sigma\)、把概率写成 \(p\) 还是 logit、把权重乘上一个固定的缩放因子再学，欧氏梯度下降给出的轨迹并不相同，因为欧氏尺子随着坐标一起变了。而模型族本身、以及它上面的 Fisher 几何，从头到尾没有动过。
 
-Fisher 度量在参数空间边界附近常出现退化或发散。Bernoulli 的 \(\theta\to0\) 或 \(1\) 时，score 方差趋于零（分布几乎确定），Fisher 信息 \(1/(\theta(1-\theta))\to\infty\)——边界在 Fisher 几何下被推到无穷远。这与``边界参数使 MLE 不存在或位于边界''的现象同源：边界处的分布族在几何上不再像内部。
+\subsection{几何在边界与退化处需要另作交代}
 
-Gaussian 的 \(\sigma^2\to0\) 时，Fisher 信息矩阵的 \(\sigma^2\) 分量也发散。这些边界行为提醒我们：统计流形的几何在参数空间内部良好，在边界附近需要单独处理——紧化、边界坐标或改变模型都是可能的选择。
+Fisher 度量并不处处规矩。Bernoulli 在 \(\theta\to0\) 或 \(1\) 时 \(I(\theta)\to\infty\)，边界被推到无穷远处——从流形内部出发，走不到``必然''那个点。这与最大似然估计落在边界时的种种病态是同一件事在几何侧的显形。
 
-\subsection{落点}
+另一端的麻烦是退化。过参数化的神经网络里，大量参数方向对输出分布毫无影响，\(I(\theta)\) 在这些方向上取零，正定性失效，得到的是半黎曼结构而非黎曼结构：不同的参数点可以对应同一个分布，距离为零。这时``统计流形''这个词要谨慎使用，实践中的做法通常是加阻尼项或限制在一个有效子空间上。
 
-统计流形把``参数''从``数''提升为``几何点''，Fisher 度量把``参数差''提升为``分布差''。下一节用这个几何重新看优化：梯度下降在 Fisher 几何下长什么样，为什么它比普通梯度下降更稳健。
+尺子既然换了，沿着它下降的方向也要跟着换。下一节把 Fisher 度量放进优化步骤，看梯度方向被改写成什么样子。

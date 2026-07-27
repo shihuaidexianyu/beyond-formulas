@@ -1,66 +1,103 @@
 \section{LDA 与收缩：判别方向的几何与高维失效}
 \label{sec:13-Machine-Learning/06-Probabilistic-Models/02}
 
-上一节把 LDA 写成共享协方差的 GDA——Bayes 规则下二次项抵消，边界是线性的。这回答了 LDA 从哪里来，却没有回答两个更实际的问题：这个线性边界在几何上是什么？为什么高维小样本时它常常失效，以及收缩怎样修复。
+一份基因表达数据摆在面前：\(n=72\) 个样本，\(p=7129\) 个探针，任务是区分两种白血病亚型。把数据丢进 LDA，训练集上两类被完美分开，投影后的两团点中间隔着一道宽阔的空白。留出集上准确率却只有 \(0.55\)，几乎与抛硬币相同。代码没有写错，标签没有泄漏，公式也是教科书上的那一个。问题出在 \(\widehat\Sigma^{-1}\) 这一步——上一节把 LDA 推导为共享协方差的 GDA 时，我们默认了 \(\Sigma\) 是已知的。
 
-\subsection{Fisher 视角：让类间分离与类内弥散之比最大}
+这一节要回答两件事：那条线性边界在几何上到底做了什么，以及为什么它在 \(p\) 与 \(n\) 可比时会以这种方式崩掉。
 
-Fisher 的出发点不是概率模型，而是一个可分性准则：把数据投影到方向 \(w\) 上，投影后两类均值之差应尽可能大，类内方差应尽可能小。写成比值，
+\subsection{判别方向不是均值连线，而是白化之后的均值连线}
 
-\[
-J(w)=\frac{(w^\trans(\mu_1-\mu_0))^2}{w^\trans\Sigma w}
-=\frac{w^\trans S_b w}{w^\trans S_w w},
-\]
-
-其中 \(S_b=(\mu_1-\mu_0)(\mu_1-\mu_0)^\trans\) 是类间散度（二分类时秩为 1），\(S_w=\Sigma\) 是共享的类内散度。这是 Rayleigh 商；对 \(w\) 求极值，一阶条件给出
+Fisher 的出发点与概率模型无关，是一个纯粹的可分性准则：把数据投影到方向 \(w\) 上，希望投影后两类均值离得远、类内散得窄。写成比值就是
 
 \[
-S_b w=\lambda S_w w,
+J(w)=\frac{\bigl(w^{\trans}(\mu_1-\mu_0)\bigr)^2}{w^{\trans}\Sigma w}
+=\frac{w^{\trans}S_bw}{w^{\trans}S_ww},
 \]
 
-而 \(S_b w\) 总是 \((\mu_1-\mu_0)\) 的倍数，所以解就是
+其中 \(S_b=(\mu_1-\mu_0)(\mu_1-\mu_0)^{\trans}\) 是类间散度矩阵（二分类时秩为 \(1\)），\(S_w=\Sigma\) 是共享的类内散度。这是一个 Rayleigh 商，极值点满足广义特征方程 \(S_bw=\lambda S_ww\)。由于 \(S_bw\) 无论 \(w\) 取什么都平行于 \(\mu_1-\mu_0\)，方程立刻解开：
 
 \[
-w^\ast\propto S_w^{-1}(\mu_1-\mu_0)=\Sigma^{-1}(\mu_1-\mu_0).
+w^{\ast}\propto S_w^{-1}(\mu_1-\mu_0)=\Sigma^{-1}(\mu_1-\mu_0).
 \]
 
-与两类共享协方差 GDA 的判别函数 \(\delta_k(x)\) 对比：两类线性系数之差沿 \(\Sigma^{-1}(\mu_1-\mu_0)\) 方向。两条路线——Bayes 规则下的生成式分类、Rayleigh 商下的判别方向——因而给出同一个判别方向；类别先验仍会改变截距与阈值。离开共享协方差 Gaussian 假设，Fisher 方向仍是一个合理的线性投影，但一般不再等于 Bayes 最优边界。
+把它与上一节的 \(\delta_k(x)=x^{\trans}\Sigma^{-1}\mu_k-\tfrac12\mu_k^{\trans}\Sigma^{-1}\mu_k+\log\pi_k\) 对照：两类判别函数相减，线性系数正是 \(\Sigma^{-1}(\mu_1-\mu_0)\)。生成式路线从 Bayes 规则出发，Fisher 路线从 Rayleigh 商出发，两者落在同一个方向上；类别先验只改变截距，也就是沿这个方向切一刀的位置。
 
-几何上，\(\Sigma^{-1}\) 做的事是白化：先用 \(\Sigma^{-1/2}\) 把椭球形类内云变成球形，再在球面几何里找均值连线方向。类内弥散大的方向被压缩，类间差异因此按信噪比而非欧氏距离度量——这正是 Mahalanobis 距离的含义。
+\(\Sigma^{-1}\) 干的事情是白化。下图左边是原始空间：两类的类内云都沿同一个斜方向拉长，均值连线（虚线箭头）看上去很自然，但沿它投影时，两团点在这个方向上的弥散也最大，重叠严重。右边是用 \(\Sigma^{-1/2}\) 把椭球压回球形之后的样子，此时``离得远''与``散得窄''不再冲突，均值连线就是最优投影方向。把这个方向拉回原始坐标，得到的就是与均值连线明显偏离的 \(w^{\ast}\)（实线箭头）。
 
-\subsection{高维失效：\(\widehat\Sigma^{-1}\) 是失真最厉害的环节}
+\begin{center}
+\begin{tikzpicture}[>=stealth,scale=1.0]
 
-实际中 \(\Sigma\) 未知，用样本协方差 \(\widehat\Sigma\) 代入。当 \(p/n\to c>0\)，\(\widehat\Sigma\) 的特征值弥散到 MP 律的支撑 \([(1-\sqrt c)^2,(1+\sqrt c)^2]\) 上，即使真实 \(\Sigma=I\)。求逆会放大这种失真：最小的样本特征值靠近 \((1-\sqrt c)^2\)，其倒数把对应方向上的噪声放大到 \(1/(1-\sqrt c)^2\) 倍。\(c\to1\) 时这个因子爆炸；\(p\ge n\) 时 \(\widehat\Sigma\) 干脆奇异，\(w^\ast\) 根本不存在。
+% ---------- 左：原始空间 ----------
+\begin{scope}
+\draw[gray!50,->] (0.1,0.4) -- (4.7,0.4);
+\draw[gray!50,->] (0.3,0.2) -- (0.3,3.9);
 
-判别方向 \(w^\ast\) 对 \(\Sigma^{-1}\) 的依赖是线性的，所以谱失真直接传递为方向失真：\(\widehat w\) 会在``样本协方差的小特征值方向''上获得虚假的大分量——那些方向恰恰是噪声主导的方向。表现上，训练集里分离完美的方向在新数据上崩溃。
+\draw[blue!60,rotate around={45:(1.2,2.0)}] (1.2,2.0) ellipse (1.0 and 0.30);
+\draw[blue!30,rotate around={45:(1.2,2.0)}] (1.2,2.0) ellipse (1.5 and 0.45);
+\draw[red!60,rotate around={45:(3.0,2.6)}] (3.0,2.6) ellipse (1.0 and 0.30);
+\draw[red!30,rotate around={45:(3.0,2.6)}] (3.0,2.6) ellipse (1.5 and 0.45);
 
-\subsection{收缩 LDA：向结构化目标折回}
+\fill[blue!70] (1.2,2.0) circle (2.2pt);
+\fill[red!70] (3.0,2.6) circle (2.2pt);
 
-修复沿用两条思路。
+\draw[black!55,dashed,->,thick] (2.1,2.3) -- (3.43,2.74);
+\draw[black,->,very thick] (2.1,2.3) -- (3.26,1.51);
+\draw[black!45] (2.9,3.32) -- (3.32,2.86);
+\node[font=\scriptsize,black!55] at (2.55,3.5) {\(\mu_1-\mu_0\)};
+\node[font=\scriptsize] at (3.75,1.25) {\(w^{\ast}=\Sigma^{-1}(\mu_1-\mu_0)\)};
+\node[font=\scriptsize] at (2.4,-0.05) {原始空间：类内云被拉长};
+\end{scope}
 
-\textbf{Ledoit--Wolf 收缩。}把 \(\widehat\Sigma\) 向一个结构化目标（如单位阵的倍数 \(\bar\sigma^2 I\)）收缩：
+% ---------- 右：白化之后 ----------
+\begin{scope}[shift={(6.2,0)}]
+\draw[gray!50,->] (0.1,0.4) -- (4.7,0.4);
+\draw[gray!50,->] (0.3,0.2) -- (0.3,3.9);
+
+\draw[blue!60] (1.4,2.8) circle (0.48);
+\draw[blue!30] (1.4,2.8) circle (0.74);
+\draw[red!60] (3.2,1.7) circle (0.48);
+\draw[red!30] (3.2,1.7) circle (0.74);
+
+\fill[blue!70] (1.4,2.8) circle (2.2pt);
+\fill[red!70] (3.2,1.7) circle (2.2pt);
+\draw[black,->,very thick] (1.4,2.8) -- (3.2,1.7);
+\node[font=\scriptsize,anchor=west] at (0.55,0.85) {均值连线即判别方向};
+\node[font=\scriptsize] at (2.4,-0.05) {白化之后：类内云变成球};
+\end{scope}
+
+\end{tikzpicture}
+\end{center}
+
+\emph{判别方向按信噪比而非欧氏距离度量差异：方差大的方向被压扁，均值差在那里不值钱。}
+
+这也解释了 Mahalanobis 距离为什么是这里的自然度量。沿类内方差大的方向，同样的均值差异被噪声淹没；\(\Sigma^{-1}\) 给这个方向记上一个小权重，把判别方向掰向``差异不大但很干净''的那一侧。上图里 \(w^{\ast}\) 与均值连线几乎成直角，正是这种掰动的极端情形。离开共享协方差 Gaussian 假设，Fisher 方向仍然是一个可用的线性投影准则，但它与 Bayes 最优边界之间不再有等号。
+
+\subsection{高维失效发生在求逆那一步，不在均值那一步}
+
+真实的 \(\Sigma\) 当然未知，实践中代入样本协方差 \(\widehat\Sigma\)。麻烦从这里开始。当 \(p/n\to c>0\) 时，即使真实协方差就是 \(I\)，\(\widehat\Sigma\) 的特征值也不会集中在 \(1\) 附近，而是弥散到 Marchenko--Pastur 律的支撑区间 \([(1-\sqrt c)^2,(1+\sqrt c)^2]\) 上，形状由 \(c\) 完全决定（推导见\hyperref[sec:11-Mathematical-Statistics/09-Random-Matrix-Theory/02]{``Marchenko--Pastur 律给出谱的精确形状''}）。
+
+单看 \(\widehat\Sigma\)，这种弥散还算温和。求逆把它放大成灾难：最小的样本特征值落在 \((1-\sqrt c)^2\) 附近，取倒数后变成 \(1/(1-\sqrt c)^2\)。\(c=0.5\) 时这个因子约为 \(11.7\)，\(c=0.9\) 时约为 \(400\)，\(c\to1\) 时发散；而 \(p\ge n\) 时 \(\widehat\Sigma\) 直接奇异，\(w^{\ast}\) 连定义都没有。
+
+\(w^{\ast}\) 对 \(\widehat\Sigma^{-1}\) 的依赖是线性的，谱的失真于是原封不动地传递成方向的失真。被放大的恰好是样本协方差的小特征值方向，也就是噪声主导的方向；估计出的 \(\widehat w\) 会在那里获得虚假的巨大分量。开头那份基因数据的表现由此得到解释：训练集上完美分离的方向，是被噪声挑出来的方向，它在新样本上没有任何理由继续有效。同一个机制在 PCA 与随机投影里以另一副面孔出现，可参照\hyperref[sec:11-Mathematical-Statistics/09-Random-Matrix-Theory/03]{``谱偏差怎样影响 PCA 与随机投影''}。
+
+值得注意的是，均值估计 \(\widehat\mu_k\) 的误差随 \(1/\sqrt{n}\) 缩小，与维数关系不大。崩掉的从来不是均值那一端。
+
+\subsection{收缩把弥散的谱挤回去，换来的前提是各方向方差相近}
+
+Ledoit--Wolf 收缩把 \(\widehat\Sigma\) 向一个结构化目标折回，最常见的目标是单位阵的倍数：
 
 \[
-\widetilde\Sigma=(1-\rho)\widehat\Sigma+\rho\bar\sigma^2 I,
-\qquad \rho\in[0,1].
+\widetilde\Sigma=(1-\rho)\widehat\Sigma+\rho\bar\sigma^2I,
+\qquad\rho\in[0,1],\quad
+\bar\sigma^2=\tfrac1p\trace(\widehat\Sigma).
 \]
 
-\(\rho\) 由最小化 \(\widetilde\Sigma\) 与真实 \(\Sigma\) 的期望误差（MSE）选出，有闭式估计。几何上，收缩把 MP 律弥散开的特征值向目标值 \(\bar\sigma^2\) 挤压：大特征值压小、小特征值抬大，求逆时的噪声放大被限制。统计上，这是偏差--方差权衡的又一个实例：收缩引入对 \(\Sigma\) 的偏差假设（各方向方差相近），换取 \(\widetilde\Sigma^{-1}\) 的方差大幅下降。
+在特征值层面这个式子读起来很直白：每个 \(\widehat\lambda_i\) 被换成 \((1-\rho)\widehat\lambda_i+\rho\bar\sigma^2\)，大的压小、小的抬高，MP 律撑开的那条区间被向中心挤压。求逆时最危险的那一端因此被托住，\(1/\widetilde\lambda_{\min}\) 不再随 \(c\to1\) 爆炸。收缩系数 \(\rho\) 可以通过最小化 \(\widetilde\Sigma\) 与真实 \(\Sigma\) 的期望平方误差来选，且有闭式估计。
 
-\textbf{对角收缩与正则化 LDA。}更强的假设是直接取对角阵 \(\widetilde\Sigma=\diag(\widehat\Sigma)\)，即假设类内各特征不相关——这退化为 Naive Bayes 的 Gaussian 版本。在高维却常常优于全协方差 LDA：估计参数从 \(O(p^2)\) 降到 \(O(p)\)，相关性误差小于求逆误差。
+让出的东西写在假设里：收缩相当于宣称各方向的方差本来就差不多，这在真实协方差谱确实很分散时是一个偏差。用\hyperref[sec:11-Mathematical-Statistics/02-Point-Estimation/01]{``偏差、方差与均方误差''}的语言，这是拿一点偏差换 \(\widetilde\Sigma^{-1}\) 方差的大幅下降，与 Ridge 回归在 \(X^{\trans}X\) 上加 \(\lambda I\) 是同一个动作，只是发生在协方差矩阵而非 Gram 矩阵上。
 
-多分类推广（\(K>2\)）：\(S_b\) 的秩至多是 \(K-1\)，Fisher 判别给出一组方向（\(S_w^{-1}S_b\) 的特征向量），构成降到 \(K-1\) 维的判别子空间。高维下的处理与二分类相同：先收缩 \(S_w\)，再做广义特征分解。
+更激进的做法是直接取 \(\widetilde\Sigma=\diag(\widehat\Sigma)\)，即假设类内各特征互不相关，这退化成上一节 Naive Bayes 的 Gaussian 版本。听上去粗糙，高维下却经常胜过全协方差 LDA：待估参数从 \(O(p^2)\) 降到 \(O(p)\)，丢掉相关结构带来的偏差，往往小于求逆放大的方差。开头那份基因数据用对角 LDA 重跑，留出准确率通常能回到 \(0.85\) 以上。
 
-\subsection{边界清单}
+多分类的推广不改变故事。\(K\) 类时 \(S_b\) 的秩至多为 \(K-1\)，广义特征问题 \(S_w^{-1}S_bw=\lambda w\) 给出一组方向，张成一个 \(K-1\) 维的判别子空间，数据投影到其中再分类。高维下的处理与二分类相同：先收缩 \(S_w\)，再做广义特征分解。
 
-\begin{itemize}
-\tightlist
-\item
-  LDA 的两个前提——类条件 Gaussian、共享协方差——缺一不可验。各类 \(\Sigma_k\) 差异大时应改用 QDA，且 QDA 对协方差估计误差更敏感，高维下更需收缩。
-\item
-  在两类共享协方差 Gaussian 模型下，Fisher 方向与 Bayes 线性判别方向一致；离开这些条件，它只是一个投影准则。
-\item
-  收缩强度 \(\rho\) 本身也由数据估计，自带方差；小样本时交叉验证选 \(\rho\) 常优于闭式 MSE 公式。
-\item
-  收缩修复的是 \(\widehat\Sigma\) 的谱，不修复模型错设。类边界非线性时，收缩 LDA 与朴素 LDA 一样无能为力。
-\end{itemize}
+最后要说清楚收缩不做什么。它修的是 \(\widehat\Sigma\) 的谱，不是模型的形状。若各类的协方差结构确实不同，正确的应对是 QDA 而非更强的收缩——而 QDA 每类各估一个 \(\Sigma_k\)，可用样本量被切成 \(K\) 份，对估计误差更敏感，反过来更依赖收缩。若真实边界本就不是线性的，收缩 LDA 与朴素 LDA 一样无能为力。至于 \(\rho\) 本身，它也是从数据里估出来的，自带波动；样本很小时，用交叉验证在网格上选 \(\rho\) 常常比闭式公式稳。到这里，类别标签一直被当作已知。下一节把这个前提拿掉：如果连每个样本属于哪一类都看不见，这些椭球还能不能估出来。

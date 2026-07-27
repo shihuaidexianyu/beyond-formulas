@@ -1,209 +1,202 @@
 \section{\texorpdfstring{Softmax 交叉熵为何化简为 \(p-y\)}{Softmax 交叉熵为何化简为 p-y}}
 \label{sec:10-Matrix-Calculus/04-Applications/02}
 
-多分类模型对每个样本输出 logits \(z\in\R^K\)。softmax 把它变成概率向量：
+你在一个框架里搭分类头，图省事，用两个现成算子接起来：先 softmax 得到概率，再把概率喂给交叉熵。训练跑得起来，但两件事不对劲。类别数 \(K=1000\) 时显存比预期紧张，而且训到后期偶尔冒出 \texttt{nan}。把这两步换成框架自带的那个吃 logits 的合并损失，两个毛病同时消失，数学上算的还是同一个量。
+
+这一节要说明那个合并算子里发生了什么。它牵出的结论比一个工程技巧大：softmax 与交叉熵是配对的，配对使得梯度收缩成
 
 \[
-p_i = \frac{e^{z_i}}{\sum_j e^{z_j}}.
+\nabla_z\ell=p-y,
 \]
 
-正确类别用 one-hot \(y\) 标记（\(y_c=1\)，其余为 0），交叉熵损失：
+预测概率减去标签，没有 Jacobian，没有除法，没有任何非线性的残留。
+
+\subsection{按定义走，会先造一个 \texorpdfstring{\(K\times K\)}{K 乘 K} 的中间量}
+
+先把笨路走完，因为它暴露的东西正是后面要绕开的。
+
+模型对每个样本输出 logits \(z\in\R^K\)，softmax 给出 \(p_i=e^{z_i}/\sum_je^{z_j}\)，正确类别用 one-hot 向量 \(y\) 标记，损失为 \(\ell=-\sum_iy_i\log p_i\)。
+
+链式法则要求先算 softmax 的 Jacobian。逐元素求导得 \(\partial p_i/\partial z_j=p_i(\delta_{ij}-p_j)\)，写成矩阵是
 
 \[
-\ell(z,y) = -\sum_i y_i\log p_i.
+J=\diag(p)-pp^{\trans}.
 \]
 
-训练需要 \(\nabla_z\ell\)。初看之下，这是两个操作的复合：softmax 非线性（\(z\to p\)），再套交叉熵（\(p\to\ell\)）。链式法则说先算 softmax 的 Jacobian \(\partial p/\partial z\)（一个 \(K\times K\) 矩阵），再乘 \(\partial\ell/\partial p\)（一个 \(K\) 维向量），得到一个 \(K\) 维梯度。ImageNet \(K=1000\)，每步都在构造百万级矩阵去拿千维答案。这不是数学错，是计算浪费。
-
-\subsection{走一趟笨路，看清中间发生什么}
-
-动手走一遍。softmax 的偏导数（\(\delta_{ij}\) 是 Kronecker \(\delta\)）：
-
-\[
-\frac{\partial p_i}{\partial z_j} = p_i(\delta_{ij}-p_j).
-\]
-
-矩阵形式：
-
-\[
-J_{\mathrm{softmax}} = \diag(p) - pp^{\trans}.
-\]
-
-这是一个对角矩阵减去秩一外积——形式已算简洁，但仍然是 \(K^2\) 个元素。
-
-交叉熵对概率的导数：\(\partial\ell/\partial p_i = -y_i/p_i\)。乘起来，逐分量：
+再算交叉熵对概率的导数，\(\partial\ell/\partial p_i=-y_i/p_i\)。两者相乘：
 
 \[
 \begin{aligned}
 \frac{\partial\ell}{\partial z_j}
-&= \sum_i \frac{\partial\ell}{\partial p_i}\frac{\partial p_i}{\partial z_j} \\
-&= \sum_i p_i(\delta_{ij}-p_j)\left(-\frac{y_i}{p_i}\right) \\
-&= -\sum_i \delta_{ij}y_i + p_j\sum_i y_i \\
-&= -y_j + p_j.
+&=\sum_i\Bigl(-\frac{y_i}{p_i}\Bigr)p_i(\delta_{ij}-p_j)\\
+&=-\sum_i\delta_{ij}y_i+p_j\sum_iy_i\\
+&=p_j-y_j,
 \end{aligned}
 \]
 
-最后一步用了 \(\sum_i y_i = 1\)（one-hot 标签分量之和为 1）。结果极度简洁：\textbf{梯度就是模型预测的概率减真实标签。}
+最后一步用了 \(\sum_iy_i=1\)。结果是干净的，路径不是。为了拿到一个 \(K\) 维答案，中途构造了一个 \(K\times K\) 的矩阵，\(K=1000\) 时是每个样本一百万个数。而且路上出现过 \(y_i/p_i\)：若目标类别的概率下溢到零，这一项发散，只是随后乘上的 \(p_i\) 恰好把它约掉。约得掉是因为两步被当作一个整体来算；一旦拆成两个独立算子、各自算出局部梯度再相乘，那个发散的中间值就真的会被物化出来。
 
-这条路走通了，路径上两处隐患也一并暴露。第一，中间出现了 \(y_i/p_i\)。训练初期，真实类别的预测概率可能很小（比如均匀分布时 \(p_c\approx 1/K\)），\(y_c/p_c = K\)，不算问题。但一旦某个非目标类别的概率 \(p_i\) 趋近于零，对应的 \(y_i=0\)，\(0/0\) 型的未定义没有出现——真正的危险来自目标类别的 \(p_c\) 趋近于零时 \(y_c/p_c = 1/p_c\) 发散，幸好反向传播中我们从不单独计算 \(y_i/p_i\)，而是整体乘上 \(p_i(\delta_{ij}-p_j)\)，发散被抵消。但这个抵消仅在使用完整复合梯度时才可靠——如果你在计算图中把 softmax 和交叉熵拆成两个独立算子、分别计算局部梯度再乘，中间值可能已经在某一步越界。
+\begin{center}
+\begin{tikzpicture}[font=\small,>=stealth]
+  \node[font=\footnotesize] (z1) at (0,1.75) {\(z\)};
+  \node[draw,black!55,rounded corners,inner sep=4pt,minimum width=17mm] (sm) at (0,0.85) {softmax};
+  \node[font=\footnotesize] (p1) at (0,0) {\(p\)};
+  \node[draw,black!55,rounded corners,inner sep=4pt,minimum width=17mm] (ce) at (0,-0.85) {交叉熵};
+  \node[font=\footnotesize] (l1) at (0,-1.75) {\(\ell\)};
+  \draw[->,black!55] (z1) -- (sm);
+  \draw[->,black!55] (sm) -- (p1);
+  \draw[->,black!55] (p1) -- (ce);
+  \draw[->,black!55] (ce) -- (l1);
+  \draw[->,red!60!black,thick] (1.05,-1.7) -- (1.05,1.7);
+  \node[font=\footnotesize,red!60!black,anchor=west] at (1.15,-0.85) {\(-y/p\)};
+  \node[font=\footnotesize,red!60!black,anchor=west] at (1.15,0.85) {\(\diag(p)-pp^{\trans}\)};
+  \node[font=\footnotesize,black!60,anchor=west] at (1.15,0.28) {\(K\times K\) 中间量};
+  \node[font=\footnotesize,black!70] at (0.6,-2.5) {拆成两个算子};
 
-第二处隐患：你构造了完整的 softmax Jacobian。即使在 \(\diag(p)-pp^{\trans}\) 这个简洁形式下，它仍然是 \(O(K^2)\) 存储。梯度公式只有一个对角的 \(p_j\) 减 \(y_j\)——凭什么绕那么远？把 softmax 和交叉熵拆成两层各自独立的链式乘法，是在不该拆的地方拆了一刀。
+  \begin{scope}[shift={(6.5,0)}]
+    \node[font=\footnotesize] (z2) at (0,1.75) {\(z\)};
+    \node[draw,blue!55!black,rounded corners,fill=blue!5,inner sep=5pt,align=center] (mg) at (0,0) {softmax 与交叉熵\\合并为一个算子};
+    \node[font=\footnotesize] (l2) at (0,-1.75) {\(\ell\)};
+    \draw[->,black!55] (z2) -- (mg);
+    \draw[->,black!55] (mg) -- (l2);
+    \draw[->,red!60!black,thick] (2.05,-1.7) -- (2.05,1.7);
+    \node[font=\footnotesize,red!60!black,anchor=west] at (2.15,0.2) {\(p-y\)};
+    \node[font=\footnotesize,black!60,anchor=west] at (2.15,-0.35) {\(K\) 个数};
+    \node[font=\footnotesize,black!70] at (0,-2.5) {合并成一个算子};
+  \end{scope}
+\end{tikzpicture}
 
-\subsection{换条路：把损失写成 logits 的直接函数}
+\emph{同一个梯度的两条计算路径：左边为了得到 \(K\) 个数先造了 \(K^2\) 个数，右边不经过概率，直接给出 \(p-y\)。}
+\end{center}
 
-交叉熵的结构暗示了更短的路。写出 \(\log p_i\)：
+图里右边那条路要用的推导只有两行，而且不碰 Jacobian。
+
+\subsection{把损失写成 logits 的函数，指数就自己消掉了}
+
+交叉熵里出现的是 \(\log p_i\)，而 softmax 的对数有一个特别的形状：
 
 \[
-\log p_i = z_i - \log\sum_j e^{z_j}.
+\log p_i=z_i-\log\sum_je^{z_j}.
 \]
 
-代入损失：
+除法变成减法，指数只在第二项里，且第二项与下标 \(i\) 无关。代进损失：
 
 \[
 \begin{aligned}
-\ell &= -\sum_i y_i\Bigl(z_i - \log\sum_j e^{z_j}\Bigr) \\
-&= -\sum_i y_i z_i + \Bigl(\sum_i y_i\Bigr)\log\sum_j e^{z_j} \\
-&= -y^{\trans}z + \logsumexp(z).
+\ell&=-\sum_iy_i\Bigl(z_i-\log\sum_je^{z_j}\Bigr)\\
+&=-\sum_iy_iz_i+\Bigl(\sum_iy_i\Bigr)\log\sum_je^{z_j}\\
+&=-y^{\trans}z+\logsumexp(z).
 \end{aligned}
 \]
 
-交叉熵裂成两项。第一项 \(-y^{\trans}z\)：logits 的线性函数，梯度直接是 \(-y\)。第二项 \(\logsumexp(z) = \log\sum_j e^{z_j}\)：它对标量 \(z_i\) 的偏导数是
+损失裂成两块。第一块是 logits 的线性函数，梯度是常向量 \(-y\)。第二块是 \(\logsumexp(z)=\log\sum_je^{z_j}\)，对它求偏导，
 
 \[
-\frac{\partial}{\partial z_i}\log\sum_j e^{z_j}
-= \frac{e^{z_i}}{\sum_j e^{z_j}}
-= p_i,
+\frac{\partial}{\partial z_i}\log\sum_je^{z_j}=\frac{e^{z_i}}{\sum_je^{z_j}}=p_i,
 \]
 
-即 \(\nabla_z\logsumexp(z) = p\)。合起来：\(\nabla_z\ell = p - y\)。
+也就是 \(\nabla_z\logsumexp(z)=p\)。两块相加即得 \(\nabla_z\ell=p-y\)。
 
-两行推导。没有 Jacobian，没有 \(y_i/p_i\)，没有 \(K\times K\) 的中间量。关键在于 \textbf{log-softmax 这一步的合并}：把 softmax 的非线性与取对数的操作一步消化。交叉熵随后只是对这些 log-概率做线性组合——而 logits 中的线性项给出梯度 \(-y\)，LSE 的非线性项给出梯度 \(+p\)。
+推导里没有出现 Jacobian，没有出现 \(y_i/p_i\)，也没有出现任何 \(K\times K\) 的对象。softmax 的分母在取对数那一步就被拆走了，剩下的非线性全部集中在 \(\logsumexp\) 里，而 \(\logsumexp\) 的梯度恰好就是 softmax 本身。
 
-更一般地看：只有在交叉熵这个特定的损失函数下，\(\log p_i = z_i - \logsumexp(z)\) 才能把 \(p_i\) 中的指数从分母移出来，让损失对 logits 的依赖变成线性部分加 LSE 部分。如果把交叉熵换成均方误差 \(\|p-y\|^2\)，那条穿过 softmax Jacobian 的路径就避不开了——没有巧合可以消掉。交叉熵 + softmax 是目前分类任务的事实标准，不是没有原因的：除了概率解释和信息论背景外，它的梯度刚好是所有合理损失中计算最便宜的那一类。
+拿一组数字核对一遍。取 \(z=(2,1,0)\)，真实类别是第一类，\(y=(1,0,0)\)。指数和为 \(e^2+e+1\approx11.107\)，于是 \(p\approx(0.6653,\,0.2447,\,0.0900)\)，损失 \(\ell=-\log0.6653\approx0.4076\)，梯度 \(p-y\approx(-0.3347,\,0.2447,\,0.0900)\)。符号也讲得通：正确类别那一项为负，反向传播会推高它的 logit；两个错误类别为正，它们的 logit 会被压低，压低的力度按当前概率分配。
 
-\subsection{用一组具体数字验证一遍}
+\subsection{\texorpdfstring{\(\logsumexp\)}{LSE} 是 log-partition 函数，它的梯度就是期望}
 
-令 \(z=[2,1,0]\)，真实类别为第 0 类：\(y=[1,0,0]\)。
+化简为什么这么彻底，答案在 \(\logsumexp\) 的身份上。
 
-计算 softmax：\(\sum e^{z_j}=e^2+e^1+e^0\approx 7.389+2.718+1=11.107\)。
+把 \(z\) 当作参数，考虑 \(K\) 个类别上的分布族 \(p(i\mid z)\propto e^{z_i}\)。归一化常数是 \(\sum_je^{z_j}\)，它的对数 \(A(z)=\logsumexp(z)\) 在统计里叫 log-partition 函数（也叫累积量生成函数）。这类分布族的一条基本性质是：log-partition 函数对自然参数的梯度，等于充分统计量的期望。这里的充分统计量是类别的 one-hot 指示向量，它的期望就是概率向量本身，于是
+
 \[
-p_0\approx 0.6653,\quad p_1\approx 0.2447,\quad p_2\approx 0.0900.
+\nabla_zA(z)=\E_{p}[\,\text{one-hot}\,]=p.
 \]
 
-交叉熵：\(\ell = -\log 0.6653\approx 0.4076\)。
+上一小节那个偏导数计算，是这条一般性质在最简单的情形下的验算。
 
-梯度 \(\nabla_z\ell = p - y = [-0.3347,\;0.2447,\;0.0900]\)。
-
-验证直觉：增大 \(z_0\)（正确类别的 logit），\(p_0\) 增大，损失减小——梯度 \(p_0-y_0=-0.3347\) 为负，反向传播会推高 \(z_0\)。增大 \(z_1\)（错误类别），\(p_1\) 增大，挤占 \(p_0\) 的空间，损失增大——梯度 \(p_1-y_1=0.2447\) 为正，反向传播会压低 \(z_1\)。
-
-每个梯度分量只涉及该分量的预测和标签，不依赖其他分量的交叉项——这解释了为什么 \(O(K^2)\) 的 Jacobian 最终坍缩为 \(O(K)\) 的梯度：交叉项在求和时被 \(\sum_i y_i=1\) 这把梳子理干净了。
-
-\subsection{Hessian 与平移不变性}
-
-二阶导数更有意思：
+交叉熵在这套记号下是 \(\ell=-y^{\trans}z+A(z)\)，也就是负对数似然。它的梯度
 
 \[
-\nabla_z^2\ell = \diag(p) - pp^{\trans} \succeq 0.
+\nabla_z\ell=\underbrace{p}_{\text{模型的期望}}-\underbrace{y}_{\text{观测到的}}
 \]
 
-它是半正定的——交叉熵作为 logits 的函数是凸函数。对任意 \(v\in\R^K\)：
+是``模型认为该出现的''减去``实际出现的''。这个形式在所有指数族的最大似然估计里都成立，不是分类问题特有的：矩匹配是这类模型极大似然的通用刻画，梯度为零就是模型期望等于经验频率。softmax 与交叉熵之所以配得这么严丝合缝，是因为 softmax 把 logits 当作自然参数，而交叉熵正是这个族的负对数似然，两者是同一个数学对象的两面（信息论侧的讨论见\hyperref[sec:07-Information-Theory/03-Divergences/01]{``错误模型的代价：从交叉熵到 KL 散度''}，最大熵与指数族的关系见\hyperref[sec:07-Information-Theory/01-Information-and-Entropy/04]{``最大熵原理：从约束到分布''}）。
+
+换一个损失，配对就断了。把交叉熵换成 \(\norm{p-y}_2^2\)，损失不再是 \(z\) 的线性项加 \(A(z)\)，\(\log\) 与 \(\exp\) 没有相消的机会，那条穿过 softmax Jacobian 的路径就避不开，梯度里会留下 \(p_i(1-p_i)\) 这样的因子——在模型很自信时它逼近零，梯度消失。这也是分类任务不用平方损失的一个直接理由。
+
+\subsection{框架把两者合成一个算子，为的是两件事}
+
+现在可以回答开头那个问题了。合并算子带来的第一项收益是上面这条化简：反向只需要 \(p-y\)，成本 \(O(K)\)，而拆开算要先物化 \(O(K^2)\) 的 Jacobian。第二项收益是数值稳定，它同样只有在合并之后才拿得到。
+
+指数是最容易溢出的运算。\(z_i=1000\) 时 \(e^{z_i}\) 早已超出 float32 的上限 \(3.4\times10^{38}\)。恒等式
 
 \[
-v^{\trans}Hv = \sum_i p_i v_i^2 - \Bigl(\sum_i p_i v_i\Bigr)^2 = \Var_{i\sim p}(v_i) \ge 0.
+\logsumexp(z)=m+\log\sum_je^{z_j-m},\qquad m=\max_jz_j
 \]
 
-把 \(p_i\) 看作类别上的概率分布，二次型就是 \(v\) 在此分布下的方差。方差恒非负——这是 Hessian 半正定的一个漂亮概率论解释。
+把所有指数的自变量压到非正数，最大的一项恰为 \(e^0=1\)，上溢不可能发生。减最大值不是事后打的补丁，它是 \(\logsumexp\) 的标准实现方式。
 
-沿全一向量 \(\mathbf{1}\)：\(p\) 分布在常数方向上的方差为零。对应地，\(H\mathbf{1} = p - p(\sum_i p_i) = p-p = 0\)。同时梯度在这个方向也是零：\((p-y)^{\trans}\mathbf{1} = 1-1=0\)。这不是巧合：给所有 logits 同时加同一个常数 \(\Delta\)，softmax 输出不变——分子分母同时乘以 \(e^\Delta\) 相消。因此交叉熵对 logits 的常值平移不敏感，Hessian 的零空间正好是这个平移方向。
+下溢那一侧靠 log-softmax 处理。log-概率应当直接按 \(z_i-\logsumexp(z)\) 计算，而不是先算出 \(p_i\) 再取对数：某个 \(p_i\) 下溢成零之后 \(\log0=-\infty\)，而 \(z_i-\logsumexp(z)\) 只是一个绝对值较大的负数，全程留在对数域，这与\hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/01]{``在对数域中稳定计算概率''}是同一条纪律。合并算子的内部走的正是这条路：从 logits 直接算损失，概率向量只在需要它的时候（比如反向的 \(p-y\)）才成形，而那时它已经不参与任何除法。
 
-优化时这个平坦方向无伤大雅——梯度下降沿它不会动——但如果做 Newton 法或自然梯度下降，需要用伪逆或阻尼来处置这个零特征值。
+低精度训练要再加一层留意。减最大值挡住了上溢，挡不住精度本身的损失：两个相差很小的 logits 在 float16 下可能被舍入成同一个数，指数之后仍然相同，归一化就分辨不出来。当前框架的通行做法是把 max 和 sum 这两个归约在内部用 float32 完成，再转回低精度。
 
-\subsection{批量分类器：从单样本到矩阵}
+带 mask 的注意力和序列模型里还有一个边界情形。无效位置的 logits 常被置成 \(-\infty\)，只要每行至少留一个有效位置，softmax 就能正常归一化；整行全被 mask 时不存在合法的概率分布，\(\logsumexp\) 得到 \(-\infty\)，相减产生未定义。这不是 softmax 能自行处理的情况，必须由调用方在外面把空行挑出来。
 
-设 \(X\in\R^{n\times d}\)，\(W\in\R^{d\times K}\)，\(b\in\R^K\)。logits：
+\subsection{Hessian 是 \texorpdfstring{\(p\)}{p} 下的方差，零空间是平移方向}
+
+再求一次导。\(\nabla_z\ell=p-y\) 中只有 \(p\) 依赖 \(z\)，而 \(\partial p/\partial z\) 就是前面那个 Jacobian，于是
 
 \[
-Z = XW + \mathbf{1}b^{\trans}\in\R^{n\times K}.
+\nabla_z^2\ell=\diag(p)-pp^{\trans}.
 \]
 
-令 \(P\in\R^{n\times K}\) 逐行 softmax，\(Y\) 为逐行标签。平均交叉熵损失对 logits 的梯度，由单样本结果逐行代入再除以 \(n\)：
+对任意 \(v\in\R^K\)，
 
 \[
-\bar Z = \frac1n(P-Y).
+v^{\trans}(\nabla_z^2\ell)v=\sum_ip_iv_i^2-\Bigl(\sum_ip_iv_i\Bigr)^2=\Var_{i\sim p}(v_i)\ge0.
 \]
 
-用加横线的字母表示标量损失对某中间量的梯度，形状与该中间量一致。
+二次型是 \(v\) 在分布 \(p\) 下的方差，非负，所以交叉熵作为 logits 的函数是凸的。这也符合上一小节的框架：log-partition 函数的二阶导数是充分统计量的协方差矩阵，一阶给期望、二阶给协方差是同一条性质的连续两项。
 
-全微分：\(dL = \trace(\bar Z^{\trans}dZ) = \trace\bigl(\bar Z^{\trans}(X\,dW + \mathbf{1}\,db^{\trans})\bigr)\)。
+沿全一方向方差为零，于是 \(\nabla_z^2\ell\,\mathbf1=p-p(\sum_ip_i)=0\)。梯度在这个方向上也是零，\((p-y)^{\trans}\mathbf1=1-1=0\)。原因是 softmax 对 logits 的整体平移不敏感：给所有 \(z_i\) 加同一个常数，分子分母同乘 \(e^\Delta\) 后相消，\(p\) 不变。参数因此是过完备的，Hessian 有一个恒定的零特征值。梯度下降不会往这个方向走，无伤大雅；Newton 法或自然梯度要对 Hessian 求逆，就必须用伪逆或加阻尼，否则那个零特征值会让求解爆掉。
 
-拆分两项。来自 \(dW\)：
+\subsection{批量版本只是把单样本结果逐行摞起来}
+
+把结果搬到一个批次上。设 \(X\in\R^{n\times d}\)、\(W\in\R^{d\times K}\)、\(b\in\R^K\)，logits 为 \(Z=XW+\mathbf1b^{\trans}\in\R^{n\times K}\)，\(P\) 是 \(Z\) 逐行 softmax 的结果，\(Y\) 是逐行 one-hot 标签。用加横线的字母表示损失对某中间量的梯度，形状与该量一致。平均交叉熵对 logits 的梯度就是单样本结果逐行代入再除以 \(n\)：
 
 \[
-\trace(\bar Z^{\trans}X\,dW) = \trace\bigl((X^{\trans}\bar Z)^{\trans}dW\bigr)
+\bar Z=\frac1n(P-Y).
+\]
+
+剩下的是上一单元的 trace 整理。全微分 \(dL=\trace(\bar Z^{\trans}dZ)\)，而 \(dZ=X\,dW+\mathbf1\,db^{\trans}\)，拆成两项。对 \(W\)，
+
+\[
+\trace(\bar Z^{\trans}X\,dW)=\trace\bigl((X^{\trans}\bar Z)^{\trans}dW\bigr)
 \;\Longrightarrow\;
-\nabla_W L = X^{\trans}\bar Z = \frac1n X^{\trans}(P-Y).
+\nabla_WL=X^{\trans}\bar Z=\frac1nX^{\trans}(P-Y),
 \]
 
-形状：\(X^{\trans}\) 是 \(d\times n\)，\(\bar Z\) 是 \(n\times K\)，乘积 \(d\times K\)，与 \(W\) 一致。
-
-来自 \(db\)：
+形状 \(d\times K\)，与 \(W\) 一致。对 \(b\)，
 
 \[
-\trace(\bar Z^{\trans}\mathbf{1}\,db^{\trans})
-= \trace(db^{\trans}\bar Z^{\trans}\mathbf{1})
-= (\bar Z^{\trans}\mathbf{1})^{\trans}db
+\trace(\bar Z^{\trans}\mathbf1\,db^{\trans})=(\bar Z^{\trans}\mathbf1)^{\trans}db
 \;\Longrightarrow\;
-\nabla_b L = \bar Z^{\trans}\mathbf{1} = \frac1n (P-Y)^{\trans}\mathbf{1}.
+\nabla_bL=\bar Z^{\trans}\mathbf1=\frac1n(P-Y)^{\trans}\mathbf1,
 \]
 
-形状为 \(K\)——沿样本轴的求和，把 \(n\times K\) 压缩到 \(K\) 维。
+形状 \(K\)，是沿样本轴的求和。与上一节二分类的结果对照，\(X^{\trans}\) 那一格再次原样不动，换掉的只有 \(\delta\)。
 
-\subsection{数值稳定：减最大值是公式的血肉，不是后加的补丁}
+\subsection{标签平滑与温度：一个不动公式，一个动}
 
-直接算 \(e^{z_i}\)：\(z_i=1000\) 时 \(e^{1000}\) 超出 float32 可表示范围（\(\approx 3.4\times 10^{38}\)），溢出为 \(+\infty\)。恒等式救场：
+两个常见的改动值得放在一起看，因为它们对反向的影响完全不同。
+
+标签平滑把 one-hot 换成 \(\tilde y=(1-\varepsilon)y+\varepsilon q\)，\(q\) 通常取均匀分布。回看上面的推导，唯一用到标签的地方是 \(\sum_iy_i=1\)，而 \(\tilde y\) 照样满足，所以梯度仍是 \(p-\tilde y\)，公式一个字不改。变的是最优解：正确类别的目标概率从 \(1\) 降到 \((1-\varepsilon)+\varepsilon/K\)，模型不再被推向无限自信，logits 也不会无限增大。这是一个改目标不改反向的修改。
+
+温度则相反。\(p=\softmax(z/T)\) 改的是前向计算图，链式法则多出一个因子：
 
 \[
-\logsumexp(z) = m + \log\sum_j e^{z_j-m},\qquad m=\max_j z_j.
+\nabla_z\ell=\frac1T(p-y).
 \]
 
-所有指数项 \(\le 0\)，最大项恰为 \(e^0=1\)，无上溢。log-softmax 应直接计算
+\(T\gg1\) 时 \(p\) 趋近均匀，梯度整体缩小；\(T\ll1\) 时 \(p\) 趋近 argmax，梯度几乎集中在最大的那个 logit 上，方差大且不稳。知识蒸馏里用高温软化教师分布，同时要把损失乘上 \(T^2\) 补偿这个 \(1/T\)，否则蒸馏项的量级会随温度漂移。改一行前向而忘了反向的这个因子，梯度尺度就错了，而损失曲线看上去仍然在下降——这类错误不会报错，只会让调参结果变得无法解释。
 
-\[
-z_i - \logsumexp(z),
-\]
-
-永远不先算出 \(p_i\)（某些分量可能下溢为零）再取 \(\log\)。\(\log(0)=-\infty\)，而 \(z_i-\logsumexp(z)\) 不会碰这个问题——即使某个 \(z_i\) 远小于最大值，它的 log-概率只是一个绝对值较大的负数，所有运算安全地留在 log 域。
-
-带有 mask 的注意力或序列模型中，无效位置的 logits 常被设为 \(-\infty\)。每行至少保留一个有效位置时 softmax 可正常归一化；若整行全被 mask，不存在合法概率分布——这不是 softmax 能处理的，必须由调用方在外部显式处理空 mask 行。
-
-低精度训练（float16、bfloat16）再加一层微妙性：减最大值防了上溢，却无法恢复低精度下已被丢弃的微小差异。两个彼此很接近的 logits，在 float16 中可能变成相等的数，指数后相等，归一化就丢掉分辨力。在关键归约操作（max、sum）中内部使用 float32，是当前框架的标准妥协。
-
-\subsection{标签平滑与温度：公式没变，问法变了}
-
-标签平滑把 one-hot \(y\) 换成
-
-\[
-\tilde y = (1-\varepsilon)y + \varepsilon q,
-\]
-
-\(q\) 常取均匀分布 \(q_i=1/K\)。全部推导只用到 \(\sum_i y_i=1\)，\(\tilde y\) 依然满足，梯度仍是
-
-\[
-\nabla_z\ell = p - \tilde y.
-\]
-
-形式不变，但最优预测变了：不再要求正确类别的概率趋近 1，而是趋向 \((1-\varepsilon) + \varepsilon/K\)。这改变了模型的校准行为（预测概率不再过度自信），而没有改动反向传播公式本身。
-
-温度 \(T>0\) 改变的是计算图的前向：
-
-\[
-p = \softmax(z/T).
-\]
-
-链式法则因此多出一个因子：
-
-\[
-\nabla_z\ell = \frac1T(p - y).
-\]
-
-高温 \(T\gg1\)：softmax 趋近均匀，\(p\approx 1/K\)，梯度幅度缩小——每步更新更谨慎。低温 \(T\ll1\)：softmax 趋近 argmax，梯度只在最大 logit 附近非零，其他位置近乎零——训练不稳定，方差大。忘记在梯度中补上 \(1/T\) 会让梯度尺度错位，这是实践中常见的坑：看上去只改了一行前向代码，反向也必须跟着变。任何``和标准公式看起来一样''的表达式，必须先对抗实际计算图中的每一个变换。
+到此为止，梯度都是对一层或两层手工推的。真实网络有几十层、上百个算子，不可能每一层都这样推一遍。下一节把这套推导安置到计算图上：每个节点只需要知道自己的局部导数，图的结构负责把它们按正确的顺序乘起来。

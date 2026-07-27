@@ -74,7 +74,7 @@
 
 这张椭圆图在别处还会以别的名字出现。把样本协方差矩阵做特征分解、按特征值降序取前 \(k\) 个方向，就是主成分分析（见\hyperref[sec:13-Machine-Learning/04-Dimensionality-Reduction/01]{``PCA 从最大方差到最小重构误差''}）；多元 Gaussian 的等密度面正是这族椭球（见\hyperref[sec:05-Probability/06-Common-Distributions/05]{``Gaussian 与多元 Gaussian''}）；Kalman 滤波里随时间演化的误差椭球也是同一个对象。它们共用的数学内容，就是上面那条 \(\Var(a^{\trans}X)=a^{\trans}\Sigma a\)。
 
-若某个 \(\lambda_i=0\)，则 \(\Var(q_i^{\trans}X)=0\)，即 \(q_i^{\trans}X\) 几乎必然等于一个常数：数据看似住在 \(d\) 维空间，实际被压在一张低维仿射平面上。椭球在那个方向上被拍扁成零厚度。这在实践中就是共线性——\(\Sigma\) 不可逆，任何需要 \(\Sigma^{-1}\) 的公式当场崩掉。常见的修补是改用 \(\Sigma+\varepsilon I\)，代价是把每个方向的方差都虚报了 \(\varepsilon\)。
+若某个 \(\lambda_i=0\)，则 \(\Var(q_i^{\trans}X)=0\)，即 \(q_i^{\trans}X\) 几乎必然等于一个常数：数据看似住在 \(d\) 维空间，实际被压在一张低维仿射平面上。椭球在那个方向上被拍扁成零厚度。这在实践中就是共线性——\(\Sigma\) 不可逆，任何需要 \(\Sigma^{-1}\) 的公式当场崩掉。常见的修补是改用 \(\Sigma+\varepsilon I\)，这一改把每个方向的方差都虚报了 \(\varepsilon\)。
 
 \subsection{线性变换的传播规则}
 

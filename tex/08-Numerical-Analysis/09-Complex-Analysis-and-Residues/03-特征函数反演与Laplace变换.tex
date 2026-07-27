@@ -33,7 +33,7 @@ Cauchy 分布是个好教训。它的特征函数是 \(\varphi(t)=e^{-\abs t}\)�
 f(x)=\frac1{2\pi}\int_{-\infty}^{\infty}e^{-itx}e^{-\abs t}\,dt .
 \]
 
-看到 Fourier 积分就想封围道，这里会当场翻车：\(e^{-\abs t}\) 在 \(t=0\) 有折角，没有跨越原点的解析延拓，任何绕过原点的围道都无从谈起。正确做法是在 \(t=0\) 处把正负半轴分开，各自是一个能收敛的初等积分：
+看到 Fourier 积分就想封围道，这里会当场出岔子：\(e^{-\abs t}\) 在 \(t=0\) 有折角，没有跨越原点的解析延拓，任何绕过原点的围道都无从谈起。正确做法是在 \(t=0\) 处把正负半轴分开，各自是一个能收敛的初等积分：
 
 \[
 \int_{-\infty}^{\infty}e^{-itx}e^{-\abs t}\,dt
@@ -68,7 +68,7 @@ f(x)=\sum_j\operatorname{Res}\bigl(e^{sx}\hat f(s),\,s_j\bigr),
 求和跑遍被扫过的奇点。一阶极点 \(s_j\) 贡献 \(c_j e^{s_j x}\)，\(m\) 阶极点贡献 \(x^{m-1}e^{s_j x}\) 量级的项。有理传递函数做部分分式分解再逐项查表，做的就是这件事，只是没把留数的名字叫出来。
 
 \begin{center}
-\begin{tikzpicture}[scale=0.9,font=\small,>=stealth]
+\begin{tikzpicture}[scale=0.85,font=\small,>=stealth]
   \begin{scope}
     \draw[black!30,dashed] (0,-2.2) -- (0,2.2);
     \draw[->,black!55] (-3.7,0) -- (1.9,0) node[right,font=\footnotesize] {\(\operatorname{Re}s\)};
@@ -85,12 +85,12 @@ f(x)=\sum_j\operatorname{Res}\bigl(e^{sx}\hat f(s),\,s_j\bigr),
   \begin{scope}[shift={(6.9,1.75)}]
     \draw[black!35] (0,0) -- (3.3,0);
     \draw[blue!65!black,thick] plot[domain=0:3.3,samples=60] (\x,{0.6*exp(-2.2*\x)});
-    \node[right,font=\footnotesize,blue!55!black] at (3.45,0.1) {\(e^{-2.2x}\)：迅速消失};
+    \node[right,font=\footnotesize,blue!55!black] at (3.45,0.1) {\(e^{-2.2x}\)：很快消失};
   \end{scope}
   \begin{scope}[shift={(6.9,0)}]
     \draw[black!35] (0,0) -- (3.3,0);
     \draw[orange!80!black,thick] plot[domain=0:3.3,samples=120] (\x,{0.6*exp(-0.7*\x)*cos(4.2*\x r)});
-    \node[right,font=\footnotesize,orange!70!black] at (3.45,0.1) {\(e^{-0.7x}\cos(4.2x)\)：慢衰减的振荡};
+    \node[right,font=\footnotesize,orange!70!black] at (3.45,0.1) {\(e^{-0.7x}\cos(4.2x)\)：衰减振荡};
   \end{scope}
   \begin{scope}[shift={(6.9,-1.75)}]
     \draw[black!35] (0,0) -- (3.3,0);
@@ -106,7 +106,7 @@ f(x)=\sum_j\operatorname{Res}\bigl(e^{sx}\hat f(s),\,s_j\bigr),
 
 这个判据在别处已经出现过好几次，只是名字不同。\hyperref[sec:15-Differential-Equations-and-Dynamical-Systems/01-ODE-Theory/02]{``线性系统与矩阵指数''}里，\(\dot y=Ay\) 的解由 \(e^{At}\) 给出，长期行为看 \(A\) 的谱横坐标（特征值实部的最大值）；\hyperref[sec:08-Numerical-Analysis/06-ODE/03]{``稳定区域与刚性方程''}里，数值格式稳定与否看 \(\lambda h\) 落在稳定区域的哪一侧，而 \(\lambda\) 正是那些特征值。三者说的是同一件事：对常系数线性方程做 Laplace 变换，微分变成乘 \(s\)，方程变成代数式，分母恰好是特征多项式，于是 \(\hat f\) 的极点就是特征根。特征根、矩阵特征值、传递函数极点——三个词，一处位置。
 
-沿这条线还能读出刚性的来源。刚性方程的特征值实部相差几个数量级，翻译成极点，就是有的极点远在左边（对应飞快衰掉的分量），有的贴着虚轴（对应慢慢演化的分量）。显式格式的步长被最左边那个极点卡住，而人们真正关心的是最右边那个。刻度差得越远，格式越难做。
+沿这条线还能读出刚性的来源。刚性方程的特征值实部相差几个数量级，翻译成极点，就是有的极点远在左边（对应飞快衰掉的分量），有的贴着虚轴（对应慢慢演化的分量）。显式格式的步长被最左边那个极点卡住，而人们要看的是最右边那个。刻度差得越远，格式越难做。
 
 \subsection{生成函数的奇点决定计数序列的形状}
 

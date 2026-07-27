@@ -1,169 +1,115 @@
 \section{Bayesian 线性回归把系数不确定性传到预测}
 \label{sec:13-Machine-Learning/02-Linear-Models/04}
 
-你有一个线性模型 \(y = x^{\trans}\beta + \varepsilon\)，最小二乘给出了 \(\widehat\beta = (X^{\trans}X)^{-1}X^{\trans}y\)。一个新客户的 \(x_*\) 来了，你把 \(\widehat\beta\) 往里一代，得到点预测 \(x_*^{\trans}\widehat\beta\)，然后画上 ±2 标准误的置信区间。评审的人问：``这个区间是什么意思？''你迟疑了一下——这个区间是关于 \(\widehat\beta\) 在重复抽样下的分布，不是关于这一个客户的这一个 \(y_*\) 会在哪个范围。
+\subsection{评审问，这条误差棒管的是谁}
 
-\textbf{困境是}：系数本身不确定，但点估计掩盖了这份不确定；经典的重复抽样区间回答的又是估计程序的长期性质，不是当前这一笔预测的可信区间。我们需要一种方法，把系数的后验分布完整保留下来，并在预测时把这份不确定积分进去，让预测区间直接表达我们对这个 \(x_*\) 的 \(y_*\) 的相信程度。
+一个门店备货模型上线前要过评审。拟合的是 \(y=x^{\trans}\beta+\varepsilon\)，最小二乘给出 \(\widehat\beta\)，新门店的特征 \(x_*\) 代进去得到点预测 458 件，报告上配了一条 \(\pm 2\SE\) 的区间。评审问这条棒子管的是谁：是这家新店下个月的实际销量，还是别的什么。
 
-\subsection{先搁下 \(\sigma^2\) 未知的现实，从最简单的 Gaussian 共轭开始}
+答案让人不太舒服。\(\SE\bigl(x_*^{\trans}\widehat\beta\bigr)\) 描述的是把整个采数据加拟合的流程重复无数次时，那条直线在 \(x_*\) 处的高度会怎样摆动；它既不包含这家店自己的随机波动，也不是对``这一笔预测''的信念陈述。备货的人想要的是后者，而经典区间给的是前者（两种区间各自在说什么，见\hyperref[ch:089]{``区间估计：让不确定性进入答案''}）。
 
-先假定噪声方差已知，避免同时处理两层不确定性。模型为：
+要把``我对这家店的销量相信到什么程度''直接写出来，得先给系数一个概率分布，再在预测时把系数积掉。
 
+\subsection{两份精度直接相加}
+
+先假定噪声方差 \(\sigma^2\) 已知，把一层不确定性搁到后面。模型是
 \[
-y\mid\beta \sim \mathcal N(X\beta,\sigma^2I),
+y\given\beta\sim\mathcal N(X\beta,\sigma^2I),
 \qquad
-\beta \sim \mathcal N(m_0,S_0),
+\beta\sim\mathcal N(m_0,S_0),\quad S_0\succ 0,
 \]
+设计矩阵 \(X\) 视为给定。\(m_0\) 是看数据之前对系数最合理的猜测，\(S_0\) 表达对这个猜测的把握。
 
-其中 \(S_0\) 正定，设计矩阵 \(X\) 视为给定。prior 均值 \(m_0\) 是你看到数据前对系数最合理的猜测，\(S_0\) 表达你对这个猜测的信心——对角元素大表示你不太确定该系数在哪儿。
-
-截距如果包含在 \(\beta\) 中，要注意：截距项的 prior scale 通常应该比其他系数宽松，否则你相当于在收缩截距——这在数学上合法，但在背景知识上，截距通常是位置参数，没有理由把它也拉向零。
-
-\subsection{Posterior 来自两个二次型相加}
-
-log posterior 的计算，忽略与 \(\beta\) 无关的常数：
-
+后验的骨架是两个二次型相加再配方。丢掉与 \(\beta\) 无关的常数，
 \[
-\log p(\beta\mid y,X)
-=
--\frac1{2\sigma^2}
-\norm{y-X\beta}_2^2
--\frac12
-\norm{\beta-m_0}_{S_0^{-1}}^2
-+C,
+\log p(\beta\given y,X)=-\frac{1}{2\sigma^2}\norm{y-X\beta}_2^2-\frac12(\beta-m_0)^{\trans}S_0^{-1}(\beta-m_0)+C .
 \]
-
-其中 \(\norm{u}_{M}^2=u^{\trans}Mu\)。第一项是数据的似然贡献——残差平方和，第二项是 prior 贡献——当前候选 \(\beta\) 偏离 prior 均值有多远。
-
-两个二次型都是关于 \(\beta\) 的凸函数。展开并收集同类项：定义 posterior precision
-
+两项都是 \(\beta\) 的二次函数，和仍是二次函数，指数上是二次函数的密度只能是 Gaussian。展开收集二次项与一次项，得到
 \[
-\Lambda_n = S_0^{-1} + \sigma^{-2}X^{\trans}X
+\Lambda_n=S_0^{-1}+\sigma^{-2}X^{\trans}X,\qquad
+h_n=S_0^{-1}m_0+\sigma^{-2}X^{\trans}y,\qquad
+\beta\given y,X\sim\mathcal N\bigl(\Lambda_n^{-1}h_n,\ \Lambda_n^{-1}\bigr).
 \]
+条件对账：用到 \(S_0\) 正定（否则 \(S_0^{-1}\) 不存在，先验也不是 proper 的），用到噪声协方差是 \(\sigma^2I\) 且 \(\sigma^2\) 已知，用到 \(X\) 不随 \(\beta\) 变化。没有用到 \(X^{\trans}X\) 可逆——这一点下面还要单独讲。共轭性为什么让更新保持在同一族里，见\hyperref[sec:13-Machine-Learning/06-Probabilistic-Models/07]{``共轭先验让 Bayesian 更新保持同一形式''}。
 
-以及 information vector
+精度相加这条式子值得盯一会儿。先验精度和数据精度按方向叠加，数据只在 \(X^{\trans}X\) 有能量的方向上提高精度；样本没有覆盖到的方向，后验精度仍旧等于先验精度。先验不是可以随手设掉的初始条件，它决定了数据沉默的方向上后验停在哪里。
 
+\subsection{Ridge 只用了后验的一个点}
+
+后验众数是最小化
 \[
-h_n = S_0^{-1}m_0 + \sigma^{-2}X^{\trans}y.
+\frac{1}{2\sigma^2}\norm{y-X\beta}_2^2+\frac12(\beta-m_0)^{\trans}S_0^{-1}(\beta-m_0)
 \]
+的那个 \(\beta\)。取 \(m_0=0\)、\(S_0=\tau^2I\)，同乘 \(2\sigma^2\) 之后正是 \(\norm{y-X\beta}_2^2+\lambda\norm{\beta}_2^2\)，其中 \(\lambda=\sigma^2/\tau^2\)。上一节的 Ridge 就是这个先验下的 MAP。
 
-完成平方后，posterior 同样是高斯：
+这个对应有边界。给不同系数不同的先验方差、或者对截距放宽先验，MAP 就不再是标准 Ridge；上一节提到的``换了单位同一个 \(\lambda\) 含义就变''，在这里读作先验尺度必须跟着特征尺度走。更要紧的是 MAP 只是一个点，它把 \(S_n=\Lambda_n^{-1}\) 整个丢掉了。协方差矩阵记录的是系数之间的联合不确定：哪些线性组合被数据钉死了，哪些组合仍然可以自由滑动。共线时，\(S_n\) 在 \(\beta_1-\beta_2\) 方向上有一个大的特征值，这正是上一节那个``分不清谁贡献了多少''的定量表述。
 
+\subsection{预测方差分成两段，只有一段会随样本消失}
+
+对新特征 \(x_*\)，模型规定 \(Y_*=x_*^{\trans}\beta+\varepsilon_*\)。把 \(\beta\) 按后验积掉——两个 Gaussian 的线性组合仍是 Gaussian——得到
 \[
-S_n = \Lambda_n^{-1},\qquad
-m_n = S_nh_n,
-\qquad
-\beta\mid y,X \sim \mathcal N(m_n,S_n).
+Y_*\given x_*,X,y\sim\mathcal N\bigl(x_*^{\trans}m_n,\ \sigma^2+x_*^{\trans}S_nx_*\bigr).
 \]
+方差的两段各有出处：\(\sigma^2\) 是这家店自己的随机波动，\(x_*^{\trans}S_nx_*\) 是我们对 \(\beta\) 的无知在 \(x_*\) 方向上的投影。同分布的数据越多，后者越小；前者不动。样本量能买到对系数的了解，买不到对世界的确定。
 
-这个结构的含义是：prior precision 和 data precision 直接相加。数据只在 \(X^{\trans}X\) 有信息的方向上增加精度；样本没有足够变异的方向上，posterior 仍然靠 prior 撑着。Prior 不是``可以忽略的初始条件''，而是决定那些数据沉默的方向上 posterior 会收缩到哪里的锚。
+\begin{center}
+\begin{tikzpicture}[>=stealth]
+  \fill[black!12]
+    plot[domain=-2.4:2.4,samples=60] ({\x},{0.32*\x+sqrt(0.16+0.10*\x*\x)})
+    -- plot[domain=2.4:-2.4,samples=60] ({\x},{0.32*\x-sqrt(0.16+0.10*\x*\x)})
+    -- cycle;
+  \draw[->,black!60] (-2.8,-1.55) -- (3.0,-1.55) node[below] {\footnotesize \(x\)};
+  \draw[dashed,black!70] (-2.4,-1.168) -- (2.4,1.168);
+  \draw[dashed,black!70] (-2.4,-0.368) -- (2.4,1.968);
+  \draw[very thick] (-2.4,-0.768) -- (2.4,1.568);
+  \fill (-1.2,-0.31) circle (1.5pt);
+  \fill (-0.8,-0.34) circle (1.5pt);
+  \fill (-0.35,0.02) circle (1.5pt);
+  \fill (0.15,-0.02) circle (1.5pt);
+  \fill (0.6,0.34) circle (1.5pt);
+  \fill (1.05,0.22) circle (1.5pt);
+  \draw[black!60] (-1.3,-1.42) -- (-1.3,-1.55) -- (1.3,-1.55) -- (1.3,-1.42);
+  \node[black!60,below] at (0,-1.62) {\footnotesize 训练数据覆盖范围};
+  \node[right] at (2.45,1.97) {\footnotesize \(\pm 2\sigma\)};
+  \node[right] at (2.45,2.55) {\footnotesize 含参数不确定};
+  \draw[black!45] (2.42,2.5) -- (2.15,2.15);
+\end{tikzpicture}
+\end{center}
 
-\subsection{MAP 链接到 Ridge，但 Ridge 只是冰山的尖}
+\emph{虚线带只含观测噪声，宽度处处一样；阴影带还含系数不确定，离开数据覆盖的方向就张开。}
 
-posterior mode 等价于最小化
+图里两条虚线相距 \(4\sigma\)，与 \(x\) 无关。阴影带在数据密集处几乎贴着虚线，往两端逐渐撑开，撑开的那部分全部来自 \(x_*^{\trans}S_nx_*\)。这条形状是 Bayesian 线性回归相对点估计最实在的收益：模型在自己没见过的区域会主动把话说软。
 
+一组新样本 \(X_*\) 的联合预测是 \(\mathcal N\bigl(X_*m_n,\ \sigma^2I+X_*S_nX_*^{\trans}\bigr)\)，非对角元素不为零。逐点报告边际区间会丢掉这个结构：若后验里 \(\beta\) 偏高，一整批门店的预测会同时偏高，而各自的边际区间看不出这种同向移动。总量的区间要从联合分布里算，不能把逐点区间简单相加。
+
+\subsection{远近由 \(S_n\) 定义，不由欧氏距离定义}
+
+\(x_*^{\trans}S_nx_*\) 是一个二次型，它衡量的不是 \(x_*\) 离训练数据中心有多远，而是 \(x_*\) 指向哪些方向。落在训练设计充分激活的方向上，\(S_n\) 在那里已经被压得很小，区间不会怎么变宽；落在设计几乎没有覆盖的方向上——比如一个从未同时出现过的特征组合——同样的欧氏距离会换来大得多的方差。``离数据远''这句话应当在 \(S_n\) 诱导的度量下理解。
+
+这也意味着先验尺度必须与特征尺度一起被记录和版本管理。特征标准化之后，各向同性先验对所有方向施加同等收缩；不标准化时，同一个 \(\tau\) 对以元为单位和以万元为单位的两个变量施加的实际约束差了四个数量级。换单位不该悄悄改变推断结论。
+
+外推时还有一层区间盖不住的东西。就算后验预测带在边缘张得很开，它仍然建立在``均值确实是线性的''这个前提上。真实关系若有弯曲，再宽的带也可能整段偏在一侧。Bayesian 给出的是给定模型之后的条件不确定性，模型形式本身错了的那部分无知，不在这个积分里。
+
+\subsection{先验补上秩亏方向，但那不叫学到了}
+
+\(p>n\) 或特征线性相关时 \(X^{\trans}X\) 秩亏，最小二乘的解不唯一。加了 proper 先验之后 \(\Lambda_n=S_0^{-1}+\sigma^{-2}X^{\trans}X\) 一定可逆，后验唯一，预测分布照样算得出来。这是数值上的好消息，读解释时却要克制。
+
+在那些秩亏方向上，后验精度全部来自 \(S_0^{-1}\)，也就是说后验等于先验，数据一个字也没说。报告后验均值时若不区分哪些方向被数据推动过、哪些方向只是先验的回声，读者会把先验当成结论。一个可操作的检查是比较先验方差与后验方差沿各个方向的比值：比值接近 1 的方向，数据没有贡献。这与上一节判断共线的做法是同一件事换了语言。
+
+\subsection{\(\sigma^2\) 未知时，尾巴自己变厚}
+
+现实里 \(\sigma^2\) 当然未知。给 \(\sigma^2\) 一个 inverse-gamma 先验、并让 \(\beta\) 在给定 \(\sigma^2\) 时为 Gaussian，这个 normal--inverse-gamma 族仍然共轭，系数与噪声水平可以一起更新。把两者都积掉之后，后验预测不再是 Gaussian 而是多元 Student-t，自由度随样本量增长。
+
+厚尾不是修辞。把 \(\sigma^2\) 固定成残差 MSE 这个点估计，相当于假装噪声水平已经知道，有限样本下这会低估极端情形的概率；Student-t 的尾部把``连噪声多大都还没定''这层不确定折算了进来。若给 \(\sigma^2\) 用很弱的 improper 先验，得先验证联合后验是不是 proper——样本不足或设计秩亏时积分可能发散，无信息先验不等于没有假设。
+
+\subsection{实现里不出现逆矩阵}
+
+\(S_n=\Lambda_n^{-1}\) 是写给人看的。算的时候对 \(\Lambda_n\) 做 Cholesky 分解 \(\Lambda_n=LL^{\trans}\)，后验均值由 \(\Lambda_nm_n=h_n\) 回代求得，采样用 \(m_n+L^{-\trans}z\)，对数行列式由 \(2\sum_i\log L_{ii}\) 得到，全程不形成逆矩阵（理由见\hyperref[sec:08-Numerical-Analysis/07-Numerical-Methods-for-ML/03]{``需要的是解，而不是逆矩阵''}与\hyperref[sec:08-Numerical-Analysis/05-Numerical-Linear-Algebra/03]{``Cholesky：利用正定结构''}）。\(p\gg n\) 时用 Woodbury 恒等式
 \[
-\frac1{2\sigma^2}\norm{y-X\beta}_2^2
-+\frac12\norm{\beta-m_0}_{S_0^{-1}}^2.
+\bigl(\sigma^{-2}X^{\trans}X+S_0^{-1}\bigr)^{-1}
+=S_0-S_0X^{\trans}\bigl(\sigma^2I+XS_0X^{\trans}\bigr)^{-1}XS_0
 \]
+把主要运算搬到 \(n\times n\) 空间。等号右边的形式已经只通过 \(XS_0X^{\trans}\) 依赖数据，把它换成一个核矩阵就得到 Gaussian process 回归（见\hyperref[sec:13-Machine-Learning/09-Kernel-Methods-and-Gaussian-Processes/05]{``Gaussian process 把核变成函数先验''}）。
 
-若取 \(m_0=0\)、\(S_0=\tau^2I\)，乘以 \(2\sigma^2\) 后得到
+最后一步是验区间而不是只画区间。后验预测检查的做法是从后验预测里生成若干套假数据，看它们的残差分布、极值和分组均值与真实数据是否像；再在独立数据上数一遍名义 \(95\%\) 区间的实际覆盖率。覆盖率系统性偏低，说明似然或先验哪里错了，加迭代次数和提高浮点精度都修不好。
 
-\[
-\norm{y-X\beta}_2^2 + \lambda\norm{\beta}_2^2,
-\qquad \lambda=\frac{\sigma^2}{\tau^2}.
-\]
-
-所以 isotropic zero-mean Gaussian prior 的 MAP 恰好就是 Ridge 的解。这里有两个细节容易被忽略：
-
-一是``零均值 isotropic prior 的 MAP = Ridge''这个等式只在 prior 参数化特定的情况下成立。如果你给不同系数不同的 prior 方差，或给截距不加惩罚，MAP 就不再等同于标准的 Ridge。
-
-二是 MAP 只是一个点。完整 Bayesian 分析保留了 \(S_n\)——协方差矩阵刻画了系数之间的联合不确定性：哪些系数组合被数据精确定位了，哪些组合几乎不能分辨。接下来在预测时，我们要把这份协方差矩阵真的用上。
-
-\subsection{Proper prior 让秩亏设计也能给出唯一后验}
-
-当 \(p>n\) 或特征线性相关时，\(X^{\trans}X\) 秩亏，最小二乘有无穷多解。但加上一个 proper Gaussian prior 后，prior precision \(S_0^{-1}\) 填补了缺秩方向，使 posterior precision \(\Lambda_n\) 可逆。此时可以得到唯一的 posterior mean 和预测分布。
-
-但有一条必须恪守的纪律：数值解存在，不代表数据已经识别了所有系数。某些方向上 posterior 的收缩几乎全部来自 prior 的贡献，数据并未提供额外的辨认信息。在这些方向上，后验事实上就是先验——你只是在用 prior 做插值，而不是在学习。正确解读 posterior 需要分清 prior 在哪些方向上是``活跃的''。
-
-\subsection{Posterior predictive：把系数积分掉}
-
-对新特征向量 \(x_*\)，模型规定
-
-\[
-Y_* = x_*^{\trans}\beta + \varepsilon_*,
-\qquad \varepsilon_* \sim \mathcal N(0,\sigma^2).
-\]
-
-plug-in 预测只用 \(x_*^{\trans}m_n\) 加上噪声 \(\sigma^2\)，但这也只捕捉了噪声，没捕捉系数的不确定。完整的 posterior predictive 是把 \(\beta\) 对 posterior 积分：
-
-\[
-Y_*\mid x_*,X,y
-\sim
-\mathcal N\left(
-x_*^{\trans}m_n,\;
-\sigma^2 + x_*^{\trans}S_n x_*
-\right).
-\]
-
-预测方差的分解有明确的语义：
-
-\[
-\underbrace{\sigma^2}_{\text{观测噪声}}
-+
-\underbrace{x_*^{\trans}S_n x_*}_{\text{参数不确定性}}.
-\]
-
-第一项是这个世界的固有噪声——即使你完全知道 \(\beta\)，新样本也是随机的。第二项是你的知识缺口——你不确定 \(\beta\) 到底在哪，而 \(x_*\) 的方向恰好放大或缩小了这份不确定。
-
-随着同分布数据的增加，第二项通常会缩小（posterior 越来越集中），但第一项不会消失。你可以用更多样本降低你对系数的无知，却无法用更多样本消除测量本身的可变性。
-
-对一组新设计矩阵 \(X_*\)，联合预测为
-
-\[
-y_*\mid X_*,X,y
-\sim
-\mathcal N\left(
-X_*m_n,\;
-\sigma^2I + X_* S_n X_*^{\trans}
-\right).
-\]
-
-不同新预测之间因为共享同一个后验抽出的 \(\beta\) 而产生相关。如果你逐点报告区间，会丢失一个关键结构：多个预测可能因为系数的不确定而一起偏高或偏低，逐点边际区间看不到这种协同移动。
-
-\subsection{不确定性的几何：不只看距离，更要看方向}
-
-\(x_*^{\trans}S_n x_*\) 这个二次型揭示了一个重要的几何事实：不确定性的扩大不只取决于 \(x_*\) 离训练数据中心的欧氏距离，更取决于 \(x_*\) 指向哪些特征方向。
-
-若 \(x_*\) 主要沿训练数据充分覆盖的方向延伸，\(S_n\) 在那个方向上收缩得很小，预测不确定性不大。但若 \(x_*\) 含有训练设计几乎没激活的方向——例如一个此前从未出现的交互项——该项可以很大。``离训练数据远''是在 \(S_n\) 诱导的 Mahalanobis 度量下衡量的，不是原始坐标的几何距离。
-
-这一观察对特征处理的启示是：prior scale 必须与特征尺度一起被记录。特征标准化后，isotropic prior 确实对所有方向施加了相同的收缩；但如果特征未标准化，用同一个 \(\tau\) 对不同物理单位的变量施加的是完全不同的实际收缩力。改变单位不应该悄悄改变科学推断，因此 prior 的设计必须跟随特征变换一起版本管理。
-
-多项式外推时还有另一重危险：posterior 区间可能会变宽以示警告，但这个区间仍然建立在``线性均值形式正确''的前提之上。如果真实关系有弯曲，再宽的区间也未必覆盖真实值。Bayesian 不确定性是给定模型之后的\textbf{条件不确定性}，不自动包含模型选择错误带来的那层无知。
-
-\subsection{未知噪声方差：从正态走到 Student-t}
-
-现实中 \(\sigma^2\) 几乎肯定未知。如果用一个与 \(\sigma^2\) 匹配的 normal--inverse-gamma prior——也就是给 \(\sigma^2\) 一个 inverse-gamma 分布，并在给定 \(\sigma^2\) 时 \(\beta\) 仍是正态——那么你可以同时更新系数与噪声方差。积分掉两者后，posterior predictive 变成 multivariate Student-t：尾部更厚，反映的是``我们连噪声水平都不确定''这个额外的不确定性来源。
-
-与把 \(\sigma^2\) 固定为某个点估计（比如残差 MSE）相比，Student-t 分布用更重的尾部告诉你：有限样本下，你对极端预测的防备还不够。如果只给 \(\sigma^2\) 一个极弱的 improper prior，需要检查联合 posterior 是否 proper——样本数不足或设计秩亏时，积分可能发散。无信息先验也不是按下删除键就能消除假设。
-
-\subsection{数值实现：永远不显式求逆}
-
-公式写 \(S_n = \Lambda_n^{-1}\) 是为了沟通概念。计算时，解线性系统
-
-\[
-\Lambda_n m_n = h_n
-\]
-
-得到 posterior mean，用 Cholesky 分解 \(\Lambda_n\) 来采样或计算 log determinant。当特征数 \(p\) 远大于样本数 \(n\)，可以用 Woodbury identity 把主要运算转换到 \(n\times n\) 空间：
-
-\[
-(\sigma^{-2}X^{\trans}X + S_0^{-1})^{-1}
-= S_0 - S_0 X^{\trans}(\sigma^2 I + X S_0 X^{\trans})^{-1} X S_0.
-\]
-
-选 primal 还是 dual 形式，应由维度和条件数共同决定。
-
-画完公式还不够。从 posterior 的窄宽判断模型质量就像只看误差条长短不问条是否盖住了真相。应该做 posterior predictive checks：生成数据和真实数据的残差分布一致吗？尾部合理吗？改变 prior scale 后结论是否剧烈翻转？在独立数据上核对预测区间的 coverage——如果区间系统性地漏掉某一类样本，增加 MCMC 迭代数或换更高精度的浮点运算都不能修复错误的 likelihood 假设。
-
-Bayesian 线性回归把前面三条线合成一条：最小二乘提供线性几何，Ridge 提供向零的收缩，Gaussian 共轭提供了完整的后验分布——而这份后验不只是用来画 error bar 的装饰，它直接决定了预测时你对新样本的认知程度。
+本节的先验、似然和链接方式都锁定在 Gaussian 上，换一种响应类型就得整套重来。下一节把这件事做成通则：响应分布、连接函数和线性预测子各司其职，前面几节的线性回归与 logistic 回归会作为同一张表里的两行出现。
