@@ -9,6 +9,11 @@
 /main.toc
 /main.xdv
 
+# Per-chapter build outputs
+/build/
+/pdf/chapters/
+/ch*.tex
+
 # Isolated-compile probes (see CLAUDE.md); nul is a Git-Bash-on-Windows artifact
 # created when a command uses the cmd.exe-style redirect `> nul`
 /_probe*
