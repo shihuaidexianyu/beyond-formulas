@@ -45,13 +45,35 @@ if ($File -match '\.pdf$') {
         throw "PDF must be inside $outputDir to auto-resolve source: $File"
     }
     $rel = $inputPath.Substring($outputDirFull.Length).TrimStart('\', '/')
-    $sourceRel = [System.IO.Path]::ChangeExtension($rel, ".tex")
-    $sourcePath = Join-Path (Join-Path $root "tex") $sourceRel
-    if (-not (Test-Path $sourcePath)) {
-        throw "Cannot map PDF back to a source tex file: $sourcePath"
+    if ($rel -match '[\\/]') {
+        # New naming: pdf/sections mirrors the tex/ tree.
+        $sourceRel = [System.IO.Path]::ChangeExtension($rel, ".tex")
+        $sourcePath = Join-Path (Join-Path $root "tex") $sourceRel
+        if (-not (Test-Path $sourcePath)) {
+            throw "Cannot map PDF back to a source tex file: $sourcePath"
+        }
+        $File = [System.IO.Path]::GetFullPath($sourcePath)
+        Write-Host "Resolved PDF $rel -> source $sourceRel" -ForegroundColor Yellow
+    } else {
+        # Legacy naming: flat sec-<path-with-dashes>.pdf. Match against the
+        # complete tex/ tree so hyphens inside path segments stay unambiguous.
+        $legacyTarget = $rel.Substring(0, $rel.Length - 4)   # drop .pdf
+        $texRoot = Join-Path $root "tex"
+        $legacyMatch = Get-ChildItem -Path $texRoot -Recurse -Filter *.tex | Where-Object {
+            $candidateRel = $_.FullName.Substring($texRoot.Length).TrimStart('\', '/')
+            $candidate = 'sec-' + ($candidateRel -replace '[\\/]', '-' -replace '\.tex$', '')
+            $candidate -eq $legacyTarget
+        }
+        if (-not $legacyMatch) {
+            throw "Cannot map legacy PDF back to a source tex file: $rel"
+        }
+        if ($legacyMatch.Count -gt 1) {
+            throw "Legacy PDF maps to multiple source tex files: $rel"
+        }
+        $sourceRel = [System.IO.Path]::GetFullPath($legacyMatch[0].FullName)
+        $File = $sourceRel
+        Write-Host "Resolved legacy PDF $rel -> source $($legacyMatch[0].Name)" -ForegroundColor Yellow
     }
-    $File = [System.IO.Path]::GetFullPath($sourcePath)
-    Write-Host "Resolved PDF $rel -> source $sourceRel" -ForegroundColor Yellow
 }
 
 Write-Host "=== Generate section wrapper: $File ===" -ForegroundColor Cyan
