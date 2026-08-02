@@ -46,7 +46,9 @@
 
 1. 用 VS Code 打开 `tex/` 下任意一篇文件；
 2. 按 `Ctrl+Shift+B` 即可只编译当前篇；
-3. 输出位于 `pdf/sections/`，文件名带完整相对路径。
+3. 输出位于 `pdf/sections/<tex/ 下相对路径>.pdf`，目录结构与 `tex/` 镜像；
+4. 如果任务触发时当前活动标签是某篇生成的 PDF，脚本会自动反解出对应的
+   `.tex` 再编译，仍按 `Ctrl+Shift+B` 即可。
 
 首次使用前，需要先让根目录存在新鲜的 `main.aux`（完整编译一次或运行
 `.\scripts\build_chapters.ps1 -Full`）。单篇编译依赖 `main.aux` 来解析跨篇

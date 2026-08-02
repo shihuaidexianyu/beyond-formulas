@@ -21,9 +21,6 @@ from pathlib import Path
 HYPERREF_RE = re.compile(r"^\s*\\usepackage\s*\{[^}]*hyperref[^}]*\}")
 LABEL_RE = re.compile(r"\\label\s*\{\s*([^}]+)\s*\}")
 NEWLABEL_RE = re.compile(r"^\s*\\newlabel\s*\{\s*([^}]+)\s*\}")
-UNSAFE_FILENAME_CHARS = re.compile(r'[\\/:*?"<>|]')
-
-
 def read_lines(path: Path) -> list[str]:
     return path.read_text(encoding="utf-8").splitlines()
 
@@ -52,11 +49,6 @@ def make_xr_preamble(preamble_lines: list[str], aux_stem: str) -> list[str]:
             new_lines.append(rf"\externaldocument{{{aux_stem}}}")
             inserted = True
     return new_lines
-
-
-def safe_filename(text: str) -> str:
-    # 保留中文字符，仅去掉 Windows 文件名非法字符
-    return UNSAFE_FILENAME_CHARS.sub("-", text).strip()
 
 
 def resolve_target(root: Path, arg: str) -> str:
@@ -136,11 +128,11 @@ def main():
     wrapper_path = root / wrapper_name
     wrapper_path.write_text("\n".join(preamble + body) + "\n", encoding="utf-8")
 
-    rel = Path(target).with_suffix("")
-    stub = rel.as_posix()
-    if stub.startswith("tex/"):
-        stub = stub[len("tex/"):]
-    pdf_name = "sec-" + safe_filename(stub.replace("/", "-")) + ".pdf"
+    # Mirror the tex/ directory tree under pdf/sections/ so a PDF path can be
+    # resolved back to its source tex file deterministically.
+    pdf_name = Path(target).with_suffix(".pdf").as_posix()
+    if pdf_name.startswith("tex/"):
+        pdf_name = pdf_name[len("tex/"):]
     info = {"wrapper": wrapper_name, "pdf": pdf_name, "target": target}
     if args.meta:
         meta_path = args.meta.resolve()

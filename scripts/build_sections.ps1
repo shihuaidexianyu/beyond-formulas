@@ -36,6 +36,24 @@ Ensure-Dir $outputDir
 Ensure-Dir $buildDir
 Set-Location $root
 
+# If the task was started while a generated PDF is the active tab (VS Code hands
+# the active file to ${file}), resolve that PDF back to its source tex file.
+if ($File -match '\.pdf$') {
+    $inputPath = [System.IO.Path]::GetFullPath($File)
+    $outputDirFull = [System.IO.Path]::GetFullPath($outputDir)
+    if (-not $inputPath.StartsWith($outputDirFull, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "PDF must be inside $outputDir to auto-resolve source: $File"
+    }
+    $rel = $inputPath.Substring($outputDirFull.Length).TrimStart('\', '/')
+    $sourceRel = [System.IO.Path]::ChangeExtension($rel, ".tex")
+    $sourcePath = Join-Path (Join-Path $root "tex") $sourceRel
+    if (-not (Test-Path $sourcePath)) {
+        throw "Cannot map PDF back to a source tex file: $sourcePath"
+    }
+    $File = [System.IO.Path]::GetFullPath($sourcePath)
+    Write-Host "Resolved PDF $rel -> source $sourceRel" -ForegroundColor Yellow
+}
+
 Write-Host "=== Generate section wrapper: $File ===" -ForegroundColor Cyan
 $pyOut = & $Python scripts/build_sections.py --root $root --meta $metaPath --file $File 2>&1
 $pyOut | ForEach-Object { Write-Host "  $_" }
@@ -69,6 +87,8 @@ foreach ($args_ in $passes) {
 }
 
 if (Test-Path $srcPdf) {
+    $dstDir = Split-Path $dstPdf -Parent
+    Ensure-Dir $dstDir
     Move-Item $srcPdf $dstPdf -Force
 } else {
     throw "Expected output not found: $srcPdf"
