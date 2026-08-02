@@ -33,17 +33,17 @@ Select-String -Path main.log -Pattern 'Undefined control sequence|LaTeX Warning:
 
 Zero errors and zero undefined references is the pass condition.
 
-### Style scanners
+### Style checks (per section)
 
-`tmp/readability/scan_*.py` are read-only Python scanners that check the source conventions below (unescaped `%`, `$...$`, curly quotes, `^\top`, `\Pr`, macro-glue artifacts, tail-bullet endings, oversized `\norm`). Run from the repo root:
+`scripts/check_section.ps1` runs read-only style checks on the current 篇 (the VS Code task is `检查当前篇`). It wraps `scripts/check_section.py`, which checks the conventions below and prints line numbers: unescaped `%`, unescaped `$…$`, curly quotes, straight quotes, `^\top`/bare `^T`, `\mathsf`/`\mathbb`, `\Pr`, and a篇 ending on a single `itemize`. The old `tmp/readability/scan_*.py` scripts are absent from the current checkout and must not be treated as available.
+
+Run from the repo root:
 
 ```powershell
-python tmp/readability/scan_artifacts.py    # 综合扫描：宏粘连 / \mathbb / ^\top / “” / $ / \Pr
-python tmp/readability/scan_percent.py      # 未转义的 %（会吞掉行尾）
-python tmp/readability/scan_tail_bullets.py # 以单条 itemize 结尾的篇
+.\scripts\check_section.ps1 -File tex\01-Mathematical-Language\01-Logic\03-量词与否定.tex
 ```
 
-`tmp/readability/apply_*.py` and `fix_*.py` are one-shot batch rewriters from past migrations — read before reusing; they mutate `tex/` in place.
+Review progress lives in `docs/review.md` (`- [ ]` / `- [~]` / `- [x]`) and `python scripts/review_summary.py` summarizes it.
 
 ### Structural check
 

@@ -21,16 +21,11 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$root = Split-Path -Parent $PSScriptRoot
+. (Join-Path $PSScriptRoot "section_common.ps1")
+$root = Get-SectionRoot
 $outputDir = Join-Path (Join-Path $root "pdf") "sections"
 $buildDir = Join-Path $root "build"
 $metaPath = Join-Path $buildDir "sections-meta.json"
-
-function Ensure-Dir($path) {
-    if (-not (Test-Path $path)) {
-        New-Item -ItemType Directory -Force -Path $path | Out-Null
-    }
-}
 
 Ensure-Dir $outputDir
 Ensure-Dir $buildDir
@@ -38,43 +33,7 @@ Set-Location $root
 
 # If the task was started while a generated PDF is the active tab (VS Code hands
 # the active file to ${file}), resolve that PDF back to its source tex file.
-if ($File -match '\.pdf$') {
-    $inputPath = [System.IO.Path]::GetFullPath($File)
-    $outputDirFull = [System.IO.Path]::GetFullPath($outputDir)
-    if (-not $inputPath.StartsWith($outputDirFull, [System.StringComparison]::OrdinalIgnoreCase)) {
-        throw "PDF must be inside $outputDir to auto-resolve source: $File"
-    }
-    $rel = $inputPath.Substring($outputDirFull.Length).TrimStart('\', '/')
-    if ($rel -match '[\\/]') {
-        # New naming: pdf/sections mirrors the tex/ tree.
-        $sourceRel = [System.IO.Path]::ChangeExtension($rel, ".tex")
-        $sourcePath = Join-Path (Join-Path $root "tex") $sourceRel
-        if (-not (Test-Path $sourcePath)) {
-            throw "Cannot map PDF back to a source tex file: $sourcePath"
-        }
-        $File = [System.IO.Path]::GetFullPath($sourcePath)
-        Write-Host "Resolved PDF $rel -> source $sourceRel" -ForegroundColor Yellow
-    } else {
-        # Legacy naming: flat sec-<path-with-dashes>.pdf. Match against the
-        # complete tex/ tree so hyphens inside path segments stay unambiguous.
-        $legacyTarget = $rel.Substring(0, $rel.Length - 4)   # drop .pdf
-        $texRoot = Join-Path $root "tex"
-        $legacyMatch = Get-ChildItem -Path $texRoot -Recurse -Filter *.tex | Where-Object {
-            $candidateRel = $_.FullName.Substring($texRoot.Length).TrimStart('\', '/')
-            $candidate = 'sec-' + ($candidateRel -replace '[\\/]', '-' -replace '\.tex$', '')
-            $candidate -eq $legacyTarget
-        }
-        if (-not $legacyMatch) {
-            throw "Cannot map legacy PDF back to a source tex file: $rel"
-        }
-        if ($legacyMatch.Count -gt 1) {
-            throw "Legacy PDF maps to multiple source tex files: $rel"
-        }
-        $sourceRel = [System.IO.Path]::GetFullPath($legacyMatch[0].FullName)
-        $File = $sourceRel
-        Write-Host "Resolved legacy PDF $rel -> source $($legacyMatch[0].Name)" -ForegroundColor Yellow
-    }
-}
+$File = Resolve-SectionInput -File $File -OutputDir $outputDir -Root $root
 
 Write-Host "=== Generate section wrapper: $File ===" -ForegroundColor Cyan
 $pyOut = & $Python scripts/build_sections.py --root $root --meta $metaPath --file $File 2>&1

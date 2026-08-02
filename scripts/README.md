@@ -13,6 +13,11 @@
 
 - `build_chapters.py` — 解析 `main.tex`、生成本章编译入口、生成过滤后的外部标签 aux。
 - `build_chapters.ps1` — 编排完整书/单章的编译、重命名、清理。
+- `build_sections.py` — 生成“当前篇”临时编译入口。
+- `build_sections.ps1` — 编排当前篇的两遍编译，并保留与 PDF 同名的 SyncTeX 文件。
+- `section_common.ps1` — 编译/检查脚本共用的路径反解、目录工具。
+- `check_section.py`、`check_section.ps1` — 对当前篇做只读风格检查。
+- `review_summary.py` — 汇总 `docs/review.md` 的审校进度。
 
 ## 用法
 
@@ -38,6 +43,12 @@
 
 # 保留单章 aux/log 以便排查
 .\scripts\build_chapters.ps1 -Chapter ch:004 -KeepAux
+
+# 只检查当前篇的风格（不改文件）
+.\scripts\check_section.ps1 -File tex\01-Mathematical-Language\01-Logic\03-量词与否定.tex
+
+# 查看审校进度
+python scripts\review_summary.py
 ```
 
 ### VS Code 一键编译当前篇
@@ -52,6 +63,34 @@
 
 新版 PDF 输出到嵌套目录；旧版平铺的 `sec-...pdf` 文件名也可识别，会自动
 反解。旧的 `sec-*` PDF 与新 PDF 并存是正常的，删除它们只影响本地缓存。
+
+### VS Code 快捷操作
+
+`tasks.json` 里有两个任务：
+
+- `编译当前篇`：默认构建任务，`Ctrl+Shift+B` 触发；
+- `检查当前篇`：只跑风格检查，不改文件。
+
+如果想把“编译/检查”也绑定独立快捷键，在用户级 `keybindings.json` 加入：
+
+```json
+{
+  "key": "ctrl+alt+b",
+  "command": "workbench.action.tasks.runTask",
+  "args": "编译当前篇",
+  "when": "editorTextFocus && resourceExtname == .tex"
+},
+{
+  "key": "ctrl+alt+k",
+  "command": "workbench.action.tasks.runTask",
+  "args": "检查当前篇",
+  "when": "editorTextFocus && resourceExtname == .tex"
+}
+```
+
+`.vscode/settings.json` 已关闭 LaTeX Workshop 的保存即自动编译
+（`latex-workshop.autoBuild.run: never`），并把默认输出目录隔离到 `build/`。
+全量编译仍按需手动运行 `.\scripts\build_chapters.ps1 -Full`。
 
 首次使用前，需要先让根目录存在新鲜的 `main.aux`（完整编译一次或运行
 `.\scripts\build_chapters.ps1 -Full`）。单篇编译依赖 `main.aux` 来解析跨篇
@@ -79,3 +118,9 @@
 - 如果 `main.aux` 不存在，脚本会要求先运行 `-Full`。
 - 如果正文有改动，建议先 `-Full` 刷新 `main.aux`，再编译单章。
 - 检查 `pdf/chapters/chNNN.log`（使用 `-KeepAux`）可定位单章编译错误。
+
+### 审校进度
+
+`docs/review.md` 用 `- [ ]` / `- [~]` / `- [x]` 记录待校订、校订中、已过审。
+当前焦点默认放微积分导数部分；完成一篇后把对应行改成 `- [x]`，再执行
+`python scripts\review_summary.py` 看汇总。

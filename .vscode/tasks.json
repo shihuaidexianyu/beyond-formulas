@@ -26,6 +26,28 @@
         "clear": true,
         "panel": "dedicated"
       }
+    },
+    {
+      "label": "检查当前篇",
+      "type": "shell",
+      "command": "pwsh",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}\\scripts\\check_section.ps1",
+        "-File",
+        "${file}"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "clear": true,
+        "panel": "dedicated"
+      }
     }
   ]
 }
