@@ -23,7 +23,7 @@ xelatex -interaction=nonstopmode main.tex
 
 Two passes are required to stabilize the TOC and `\hyperref` cross-references. Or `latexmk -xelatex main.tex`.
 
-**There is no per-file build.** Sections are pulled in with `\input` (not `\include`), so `\includeonly` is unavailable — the only way to check a single edited section is a full compile.
+**There is no true per-file build.** Sections are pulled in with `\input` (not `\include`), so `\includeonly` is unavailable. For quick preview there is a per-section wrapper build: `.\scripts\build_sections.ps1 -File <篇文件>`. It reuses `main.tex`'s preamble and macros via a temporary root-level wrapper, imports `main.aux` with `xr-hyper`, and compiles only that section into `pdf/sections/`. It needs a fresh `main.aux` (full compile once), and its output is a preview, not the paginated book; full two-pass compile remains the validation gate.
 
 After compiling, the validation gate is:
 

@@ -14,6 +14,10 @@
 /pdf/chapters/
 /ch*.tex
 
+# Per-section (single 篇) build outputs
+/pdf/sections/
+/_sec*.tex
+
 # Isolated-compile probes (see CLAUDE.md); nul is a Git-Bash-on-Windows artifact
 # created when a command uses the cmd.exe-style redirect `> nul`
 /_probe*

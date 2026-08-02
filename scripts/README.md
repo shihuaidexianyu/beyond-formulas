@@ -20,6 +20,9 @@
 # 只编译完整书（刷新 main.aux）
 .\scripts\build_chapters.ps1 -Full
 
+# 只编译当前篇（单个 篇 tex 文件），快速预览
+.\scripts\build_sections.ps1 -File tex\01-Mathematical-Language\01-Logic\03-量词与否定.tex
+
 # 先编译完整书，再编译全部单章
 .\scripts\build_chapters.ps1 -All
 
@@ -36,6 +39,19 @@
 # 保留单章 aux/log 以便排查
 .\scripts\build_chapters.ps1 -Chapter ch:004 -KeepAux
 ```
+
+### VS Code 一键编译当前篇
+
+仓库内的 `.vscode/tasks.json` 把这个编译命令设成了默认构建任务：
+
+1. 用 VS Code 打开 `tex/` 下任意一篇文件；
+2. 按 `Ctrl+Shift+B` 即可只编译当前篇；
+3. 输出位于 `pdf/sections/`，文件名带完整相对路径。
+
+首次使用前，需要先让根目录存在新鲜的 `main.aux`（完整编译一次或运行
+`.\scripts\build_chapters.ps1 -Full`）。单篇编译依赖 `main.aux` 来解析跨篇
+引用；如果正文改动较大，记得阶段性刷新一次 `main.aux`，跨篇引用文字/页码
+才会同步到最新。
 
 ## 输出
 
