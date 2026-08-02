@@ -1,13 +1,15 @@
 <#
 .SYNOPSIS
-    编译当前篇（单个 篇 tex 文件）为独立 PDF，用于快速预览。
+    Compile a single section (篇) into its own PDF for fast preview.
 
 .DESCRIPTION
-    生成包含全书前言与宏的临时入口，导入根目录 main.aux 的标签，
-    只编译被打开的单个篇文件。需要先至少完整编译一次 main.tex。
+    Creates a temporary wrapper that reuses the book preamble and macros,
+    imports the root main.aux labels with xr-hyper, and compiles only the
+    active section into pdf/sections. Run one full main.tex compile first
+    so main.aux is fresh.
 
 .EXAMPLE
-    .\scripts\build_sections.ps1 -File tex\01-Mathematical-Language\01-Logic\03-量词与否定.tex
+    .\scripts\build_sections.ps1 -File tex\02-Calculus\03-Differentiation\05-linear-approx.tex
 #>
 [CmdletBinding()]
 param(
@@ -20,7 +22,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$outputDir = Join-Path $root "pdf" "sections"
+$outputDir = Join-Path (Join-Path $root "pdf") "sections"
 $buildDir = Join-Path $root "build"
 $metaPath = Join-Path $buildDir "sections-meta.json"
 
@@ -34,15 +36,15 @@ Ensure-Dir $outputDir
 Ensure-Dir $buildDir
 Set-Location $root
 
-Write-Host "=== 生成当前篇编译入口：$File ===" -ForegroundColor Cyan
+Write-Host "=== Generate section wrapper: $File ===" -ForegroundColor Cyan
 $pyOut = & $Python scripts/build_sections.py --root $root --meta $metaPath --file $File 2>&1
 $pyOut | ForEach-Object { Write-Host "  $_" }
 if ($LASTEXITCODE -ne 0) {
-    throw "生成当前篇入口失败。"
+    throw "Failed to generate section wrapper."
 }
 
 if (-not (Test-Path $metaPath)) {
-    throw "无法找到 build_sections.py 的元数据文件：$metaPath"
+    throw "Metadata file missing: $metaPath"
 }
 $info = Get-Content $metaPath -Encoding UTF8 -Raw | ConvertFrom-Json
 $wrapperName = $info.wrapper
@@ -58,10 +60,10 @@ $passes = @(
 )
 $passNum = 1
 foreach ($args_ in $passes) {
-    Write-Host "  第 $passNum 次 xelatex：$wrapperName ..."
+    Write-Host "  xelatex pass $passNum : $wrapperName ..."
     & $Xelatex @args_
     if ($LASTEXITCODE -ne 0) {
-        throw "$wrapperName 第 $passNum 次编译失败（退出码 $LASTEXITCODE）。"
+        throw "$wrapperName compile failed (exit code $LASTEXITCODE)."
     }
     $passNum++
 }
@@ -69,7 +71,7 @@ foreach ($args_ in $passes) {
 if (Test-Path $srcPdf) {
     Move-Item $srcPdf $dstPdf -Force
 } else {
-    throw "未找到预期输出：$srcPdf"
+    throw "Expected output not found: $srcPdf"
 }
 
 $log = Join-Path $outputDir "$base.log"
@@ -77,7 +79,7 @@ if (Test-Path $log) {
     $fatal = Select-String -Path $log -Pattern '^! |Undefined control sequence|Emergency stop'
     if ($fatal) {
         $fatal | ForEach-Object { Write-Host $_ -ForegroundColor Red }
-        throw "$wrapperName 存在致命 LaTeX 错误。"
+        throw "$wrapperName has fatal LaTeX errors."
     }
 }
 
@@ -88,4 +90,4 @@ if (Test-Path $wrapperPath) {
     Remove-Item $wrapperPath -Force
 }
 
-Write-Host "完成：$dstPdf" -ForegroundColor Green
+Write-Host "Done: $dstPdf" -ForegroundColor Green
