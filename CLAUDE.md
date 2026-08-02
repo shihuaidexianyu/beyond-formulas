@@ -43,7 +43,7 @@ Run from the repo root:
 .\scripts\check_section.ps1 -File tex\01-Mathematical-Language\01-Logic\03-量词与否定.tex
 ```
 
-Review progress lives in `docs/review.md` (`- [ ]` / `- [~]` / `- [x]`) and `python scripts/review_summary.py` summarizes it.
+Review progress lives in `docs/review.md` (`- [ ]` / `- [~]` / `- [x]`), `.\scripts\mark_reviewed.ps1 -File <篇文件>` auto-flips the section's part/unit to reviewed, and `python scripts/review_summary.py` summarizes it.
 
 ### Structural check
 
