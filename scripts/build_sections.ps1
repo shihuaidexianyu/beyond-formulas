@@ -95,8 +95,8 @@ $srcPdf = Join-Path $outputDir "$base.pdf"
 $dstPdf = Join-Path $outputDir $pdfName
 
 $passes = @(
-    @("-interaction=nonstopmode", "-output-directory", $outputDir, $wrapperPath),
-    @("-interaction=nonstopmode", "-output-directory", $outputDir, $wrapperPath)
+    @("-interaction=nonstopmode", "-synctex=1", "-output-directory", $outputDir, $wrapperPath),
+    @("-interaction=nonstopmode", "-synctex=1", "-output-directory", $outputDir, $wrapperPath)
 )
 $passNum = 1
 foreach ($args_ in $passes) {
@@ -112,6 +112,12 @@ if (Test-Path $srcPdf) {
     $dstDir = Split-Path $dstPdf -Parent
     Ensure-Dir $dstDir
     Move-Item $srcPdf $dstPdf -Force
+    $srcSynctex = Join-Path $outputDir "$base.synctex.gz"
+    if (Test-Path $srcSynctex) {
+        $dstStem = [System.IO.Path]::GetFileNameWithoutExtension($pdfName)
+        $dstSynctex = Join-Path $dstDir "$dstStem.synctex.gz"
+        Move-Item $srcSynctex $dstSynctex -Force
+    }
 } else {
     throw "Expected output not found: $srcPdf"
 }
@@ -126,7 +132,7 @@ if (Test-Path $log) {
 }
 
 if (-not $KeepAux) {
-    Get-ChildItem -Path $outputDir -Filter "$base.*" | Where-Object { $_.Extension -ne '.pdf' } | Remove-Item -Force
+    Get-ChildItem -Path $outputDir -Filter "$base.*" | Where-Object { $_.Name -notlike '*.synctex.gz' } | Remove-Item -Force
 }
 if (Test-Path $wrapperPath) {
     Remove-Item $wrapperPath -Force
