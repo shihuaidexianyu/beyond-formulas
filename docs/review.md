@@ -5,7 +5,7 @@
 ## 总体
 
 - [x] 01 数学语言
-- [~] 02 微积分
+- [x] 02 微积分
 - [ ] 03 线性代数
 - [ ] 04 离散数学
 - [ ] 05 概率论
@@ -41,7 +41,7 @@
 
 - [x] 函数与预备知识：先看清什么量依赖什么量（01-Functions-and-Precalculus）
 - [x] 极限与连续：不必到达，也能控制趋势（02-Limits-and-Continuity）
-- [~] 导数：用局部直线理解瞬时变化（03-Differentiation）
+- [x] 导数：用局部直线理解瞬时变化（03-Differentiation）
 - [ ] 积分：把无数微小贡献累积起来（04-Integration）
 - [ ] 数列与级数：无限过程何时产生有限结果（05-Sequences-and-Series）
 - [ ] 多元微积分：变化有方向，累积有几何（06-Multivariable-Calculus）
