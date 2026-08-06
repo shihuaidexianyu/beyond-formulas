@@ -1,129 +1,174 @@
 \section{无穷级数与部分和}
-\label{sec:02-Calculus/05-Sequences-and-Series/02}
 
-写下
+\subsection{引言：如何定义``无穷多个数相加''？}
 
+在数学中，当我们写下表达式
 \[
-\sum_{n=1}^{\infty}a_n
+\sum_{n=1}^{\infty} a_n = a_1 + a_2 + a_3 + \cdots
+\]
+时，直观的理解往往是``把所有项依次加起来''。然而，加法运算本质上是\textbf{二元运算}，有限步的运算只能处理有限个加数。在运算层面，我们无法直接完成``无限次加法''。
+
+因此，``无穷个数的总和''并不是有限加法的自然延伸，而必须借助\textbf{极限}的概念重新给予精确定义。
+
+\subsection{核心定义：部分和与级数的敛散性}
+
+为了规避``无穷次相加''的操作，我们将问题转化为对有限项和取极限的过程。
+
+\begin{definition}[部分和与级数收敛性]
+设 \(\{a_n\}\) 为一个数列。
+\begin{enumerate}
+    \item 称 \(S_N = \sum_{n=1}^{N} a_n = a_1 + a_2 + \cdots + a_N\) 为级数 \(\sum_{n=1}^{\infty} a_n\) 的\textbf{前 \(N\) 项部分和}（Partial Sum）。
+    \item 若部分和数列 \(\{S_N\}\) 当 \(N \to \infty\) 时的极限存在且为有限实数 \(S\)，即
+    \[
+    \lim_{N \to \infty} S_N = S,
+    \]
+    则称级数 \(\sum_{n=1}^{\infty} a_n\) \textbf{收敛}（Convergent），并称 \(S\) 为该级数的\textbf{和}，记作 \(\sum_{n=1}^{\infty} a_n = S\)。
+    \item 若极限 \(\lim_{N \to \infty} S_N\) 不存在或为无穷大，则称级数 \(\sum_{n=1}^{\infty} a_n\) \textbf{发散}（Divergent）。
+\end{enumerate}
+\end{definition}
+
+\begin{remark}
+级数的求和过程本质上是\textbf{对部分和数列取了一次极限}，并不包含真正的无限次加法。这也说明了：改变或去掉级数的前有限项，不会影响整个级数的敛散性（仅可能改变其最终收敛到的和）。
+\end{remark}
+
+\subsection{几何级数：闭合表达式与判别基准}
+
+几何级数（等比级数）是极少数能够显式写出部分和 \(S_N\) 的级数之一。
+
+对于几何级数 \(\sum_{n=0}^{\infty} r^n = 1 + r + r^2 + \cdots\)，当 \(r \neq 1\) 时，其前 \(N+1\) 项部分和为：
+\[
+S_N = \sum_{n=0}^{N} r^n = \frac{1 - r^{N+1}}{1 - r}.
 \]
 
-的时候，脑子里的动作是``把它们全部加起来''。可加法是二元运算，一次只吃两个数；有限步只能消化有限项，这个动作永远做不完。符号里承诺的东西，在运算层面根本不存在。
+对 \(S_N\) 取极限，级数的敛散性完全取决于 \(r^{N+1}\) 的行为：
+\begin{itemize}
+    \item \textbf{当 \(|r| < 1\) 时}：\(\lim_{N \to \infty} r^{N+1} = 0\)，故 \(\lim_{N \to \infty} S_N = \frac{1}{1 - r}\)，级数\textbf{收敛}。
+    \item \textbf{当 \(|r| > 1\) 时}：\(\lim_{N \to \infty} r^{N+1} = \infty\)，级数\textbf{发散}。
+    \item \textbf{当 \(r = 1\) 时}：\(S_N = N + 1 \to \infty\)，级数\textbf{发散}。
+    \item \textbf{当 \(r = -1\) 时}：\(S_N\) 在 \(1\) 与 \(0\) 之间震荡，极限不存在，级数\textbf{发散}。
+\end{itemize}
 
-所以``无穷个数的总和''不是加法的自然延伸，它得被重新定义一次。而定义它的材料，上一节刚刚备齐。
-
-\subsection{把做不完的事换成一个极限}
-
-先只加前 \(N\) 项：
-
+\begin{example}
+循环小数 \(0.999\dots\) 可表示为几何级数：
 \[
-S_N=\sum_{n=1}^N a_n.
+0.999\dots = \frac{9}{10} + \frac{9}{100} + \frac{9}{1000} + \cdots = \sum_{n=1}^{\infty} 9 \times 10^{-n}.
+\]
+利用几何级数求和公式（首项 \(a_1 = 0.9\)，公比 \(r = 0.1\)）：
+\[
+S = \frac{0.9}{1 - 0.1} = 1.
+\]
+这表明 \(0.999\dots\) 的极限值严格等于 \(1\)。
+\end{example}
+
+\subsection{必要的门票：通项趋于零}
+
+\begin{theorem}[收敛的必要条件]
+若级数 \(\sum_{n=1}^{\infty} a_n\) 收敛，则其通项必定趋于零，即
+\[
+\lim_{n \to \infty} a_n = 0.
+\]
+\end{theorem}
+
+\begin{proof}
+设 \(\lim_{N \to \infty} S_N = S\)。利用关系式 \(a_n = S_n - S_{n-1}\)，两边取极限得：
+\[
+\lim_{n \to \infty} a_n = \lim_{n \to \infty} (S_n - S_{n-1}) = \lim_{n \to \infty} S_n - \lim_{n \to \infty} S_{n-1} = S - S = 0.
+\]
+\end{proof}
+
+\begin{remark}
+该定理常用于\textbf{发散性测试}：若 \(\lim_{n \to \infty} a_n \neq 0\)（或极限不存在），则级数 \(\sum a_n\) 必发散。例如 \(\sum \frac{n}{n+1}\) 中，通项极限为 \(1 \neq 0\)，故直接判定发散。
+\end{remark}
+
+\subsection{核心反例：调和级数}
+
+通项趋于零仅是收敛的\textbf{必要条件}，而非\textbf{充分条件}。最具代表性的反例为\textbf{调和级数}（Harmonic Series）：
+\[
+\sum_{n=1}^{\infty} \frac{1}{n} = 1 + \frac{1}{2} + \frac{1}{3} + \frac{1}{4} + \cdots
 \]
 
-每个 \(S_N\) 都是老老实实的有限和，随手可算。这些数排成一列 \(S_1,S_2,S_3,\dots\)，就是一个数列。于是定义：级数 \(\sum a_n\) 收敛，当且仅当部分和数列 \((S_N)\) 收敛；这时它的和就是 \(\lim_{N\to\infty}S_N\)。否则称级数发散。
+虽然通项 \(\lim_{n \to \infty} \frac{1}{n} = 0\)，但该级数是\textbf{发散}的。
 
-整个定义里没有一次无限加法。每一步都有限，最后只对一个数列取一次极限——那件事上一节已经处理干净了。这也解释了为什么改动级数的前几项不影响敛散性：那只是把 \((S_N)\) 整体平移一个常数，尾部行为纹丝不动。
 
-顺带一提，``一个无限过程是否给出有限结果''这个问题结构，在 \hyperref[ch:013]{``积分：把无数微小贡献累积起来''} 里已经出现过一次；那里用的是分割加细，这里用的是截断加长，骨架相同。
 
-\subsection{几何级数：少数能把部分和写出来的例子}
-
-\(S_N=1+r+\cdots+r^N\) 乘以 \(r\) 再相减，中间项成对消去，得到 \(S_N(1-r)=1-r^{N+1}\)，于是 \(r\neq1\) 时
-
+\paragraph{证明（Cauchy 缩放分组法）：}
+将项按 \(2^{k}\) 长度进行分组累加：
 \[
-S_N=\frac{1-r^{N+1}}{1-r}.
+\sum_{n=1}^{\infty} \frac{1}{n} = 1 + \frac{1}{2} + \left(\frac{1}{3} + \frac{1}{4}\right) + \left(\frac{1}{5} + \frac{1}{6} + \frac{1}{7} + \frac{1}{8}\right) + \cdots
 \]
+观察各组的下界：
+\begin{align*}
+\frac{1}{3} + \frac{1}{4} &> \frac{1}{4} + \frac{1}{4} = \frac{1}{2}, \\
+\frac{1}{5} + \frac{1}{6} + \frac{1}{7} + \frac{1}{8} &> \frac{1}{8} \times 4 = \frac{1}{2}, \\
+& \;\;\vdots
+\end{align*}
+第 \(k\) 个括号包含 \(2^{k-1}\) 项，且每项均大于等于末项 \(\frac{1}{2^k}\)，因此每组的贡献均大于 \(\frac{1}{2}\)。由于可以划分为无穷多个这样的组，部分和 \(S_{2^k} > 1 + \frac{k}{2}\)，当 \(k \to \infty\) 时，\(S_N \to \infty\)。故调和级数发散。
 
-极限的行为完全被 \(r^{N+1}\) 支配。\(\abs r<1\) 时它趋于零，级数收敛到 \(1/(1-r)\)；\(\abs r>1\) 时它爆掉；\(r=1\) 给出 \(S_N=N+1\)；\(r=-1\) 给出在 0 和 1 之间跳的部分和，同样没有极限。
+\begin{remark}[直观对比]
+级数是否收敛，取决于\textbf{通项衰减的速度}：
+\begin{itemize}
+    \item 几何级数（如 \(a_n = 2^{-n}\)）以指数速度衰减，尾部足够``轻''，因而收敛；
+    \item 调和级数（\(a_n = n^{-1}\)）衰减速度太慢，虽然单项变小，但项数增长的累积效应依然会导致总和爆发。
+\end{itemize}
+\end{remark}
 
-这个封闭式让一个老问题变得平淡：\(0.999\ldots\) 就是 \(\frac{9/10}{1-1/10}=1\)。它不是一个``永远差一点''的未完成过程，那个省略号从来就代表极限，而极限恰好是 1。
 
-几何级数还有一个身份：它是全章唯一一把随手可用的尺子。后面所有的判别法，追到底都是拿别的级数跟它或者跟 \(p\) 级数比。
-
-\subsection{项趋于零只是门票}
-
-若 \(\sum a_n\) 收敛于 \(S\)，则 \(a_n=S_n-S_{n-1}\to S-S=0\)。所以通项趋于零是必要条件——看到 \(\sum n/(n+1)\) 通项趋于 1，不必再想别的，直接判发散。
-
-麻烦在于反向不成立，而且反例就摆在最显眼的位置。
-
-\subsection{调和级数把裂缝撕开}
-
-\[
-\sum_{n=1}^{\infty}\frac1n=1+\frac12+\frac13+\frac14+\cdots
-\]
-
-通项趋于零，必要条件全额通过。但把项按长度翻倍分组：
-
-\[
-1+\frac12+\underbrace{\Bigl(\frac13+\frac14\Bigr)}_{2\text{ 项}}
-+\underbrace{\Bigl(\frac15+\cdots+\frac18\Bigr)}_{4\text{ 项}}
-+\underbrace{\Bigl(\frac19+\cdots+\frac1{16}\Bigr)}_{8\text{ 项}}+\cdots
-\]
-
-第 \(k\) 组有 \(2^{k-1}\) 项，每项都不小于组内末项 \(1/2^k\)，所以整组至少贡献 \(2^{k-1}\cdot 2^{-k}=1/2\)。这样的组有无穷多个，部分和越得过任何上界。
-
-值得盯住的是失败发生在哪一层。项确实在变小，问题是变小的速度赶不上项数增长的速度：每翻一倍的长度就补回半个单位。调和级数不是在某一项上不够小，它是整段尾巴不够轻。
-
-\begin{center}
-\begin{tikzpicture}[x=0.78cm,y=1.05cm,font=\small,>=stealth]
-  \draw[->,black!60] (0.4,0) -- (15.4,0);
-  \node[below,black!60] at (15.3,-0.02) {\(N\)};
-  \draw[->,black!60] (0.4,-0.1) -- (0.4,3.8);
-  \node[left,black!60] at (0.35,3.6) {\(S_N\)};
-  \draw[black!55,dashed] (0.4,2) -- (14.6,2);
-  \node[right,black!65,font=\footnotesize] at (14.7,1.95) {\(2\)};
-  \draw[blue!65!black,thick]
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[x=0.75cm, y=1.0cm, font=\small, >=stealth]
+  % 坐标轴
+  \draw[->, black!60] (0.4,0) -- (15.4,0) node[right] {\(N\)};
+  \draw[->, black!60] (0.4,-0.1) -- (0.4,3.8) node[above] {\(S_N\)};
+  
+  % 渐近线
+  \draw[black!55, dashed] (0.4,2) -- (14.6,2) node[right, font=\footnotesize] {\(2\)};
+  
+  % 几何级数部分和曲线 (收敛)
+  \draw[blue!65!black, thick]
     (1,1) -- (2,1.5) -- (3,1.75) -- (4,1.875) -- (5,1.938) -- (6,1.969)
     -- (7,1.984) -- (8,1.992) -- (9,1.996) -- (10,1.998) -- (11,1.999)
     -- (12,2.0) -- (13,2.0) -- (14,2.0);
-  \draw[red!60!black,thick]
+    
+  % 调和级数部分和曲线 (发散)
+  \draw[red!60!black, thick]
     (1,1) -- (2,1.5) -- (3,1.833) -- (4,2.083) -- (5,2.283) -- (6,2.45)
     -- (7,2.593) -- (8,2.718) -- (9,2.829) -- (10,2.929) -- (11,3.020)
     -- (12,3.103) -- (13,3.180) -- (14,3.252);
-  \draw[->,red!60!black,thick,dashed] (14,3.252) -- (15.1,3.6);
+  \draw[->, red!60!black, thick, dashed] (14,3.252) -- (15.1,3.6);
+  
+  % 关键数据点
   \fill[blue!65!black] (4,1.875) circle (1.6pt);
   \fill[blue!65!black] (8,1.992) circle (1.6pt);
   \fill[red!60!black] (4,2.083) circle (1.6pt);
   \fill[red!60!black] (8,2.718) circle (1.6pt);
-  \node[right,red!60!black,font=\footnotesize,align=left] at (11.2,3.55) {\(\sum 1/n\)};
-  \node[right,blue!65!black,font=\footnotesize,align=left] at (11.2,1.6) {\(\sum 2^{-n+1}\)};
+  
+  % 标签
+  \node[right, red!60!black, font=\footnotesize] at (11.2,3.55) {\(\sum \frac{1}{n}\)（调和级数）};
+  \node[right, blue!65!black, font=\footnotesize] at (11.2,1.6) {\(\sum 2^{-n+1}\)（几何级数）};
 \end{tikzpicture}
+\caption{几何级数与调和级数部分和 \(S_N\) 的增长趋势对比}
+\label{fig:harmonic-vs-geometric}
+\end{figure}
 
-\emph{两条曲线的头两个点完全重合，第三个点开始分道。蓝线被 2 挡住，红线只是爬得慢——它按 \(\ln N\) 的速度继续上升，没有任何上界拦得住它。}
-\end{center}
+\subsection{计算规范与审敛工具}
 
-图上这条红线正是长期运行系统里最难察觉的一类隐患。设想每处理第 \(n\) 个请求泄漏 \(1/n\) 兆字节内存：监控面板上最近一次泄漏小到看不见，处理完 \(N\) 个请求后的累计泄漏却是 \(\ln N\) 量级，不会停。``单次增量在减小''和``累计状态已受控''是两笔账，第二笔要查的是部分和。
+\subsubsection{裂项相消的严谨性}
+对于形如 \(a_n = \frac{1}{n} - \frac{1}{n+k}\) 的级数，\textbf{切忌直接在无穷级数展开式中对消}。
 
-同一件事在随机逼近里被反过来利用。随机梯度下降的步长序列 \(\alpha_t\) 被要求满足 \(\sum_t\alpha_t=\infty\)：正因为这个和发散，算法才有可能从任意远的初值走到最优解附近。发散在那里不是缺陷，是必需品。下一节会补上配套的另一半条件。
-
-\subsection{相消结构与一个容易错的手法}
-
-若 \(a_n=\frac1n-\frac1{n+1}\)，部分和里所有中间项成对抵消：
-
+正确做法是先写出有限项部分和 \(S_N\)，化简残留的边界项后再取极限。例如对于 \(a_n = \frac{1}{n} - \frac{1}{n+2}\)：
 \[
-S_N=\Bigl(1-\frac12\Bigr)+\Bigl(\frac12-\frac13\Bigr)+\cdots+\Bigl(\frac1N-\frac1{N+1}\Bigr)=1-\frac1{N+1}\to1.
+S_N = \left(1 - \frac{1}{3}\right) + \left(\frac{1}{2} - \frac{1}{4}\right) + \left(\frac{1}{3} - \frac{1}{5}\right) + \cdots + \left(\frac{1}{N} - \frac{1}{N+2}\right) = 1 + \frac{1}{2} - \frac{1}{N+1} - \frac{1}{N+2}.
 \]
+取极限得 \(\lim_{N \to \infty} S_N = \frac{3}{2}\)。若凭直觉随意划消，极易遗漏存活的边界项。
 
-陷阱在于跳过 \(S_N\) 直接在无穷符号里``首尾相消''。换成 \(a_n=\frac1n-\frac1{n+2}\) 就会当场出错：错位是两格，存活下来的边界项有两个，和是 \(1+\frac12=\frac32\)，不是 1。相消必须在有限的 \(S_N\) 上做完，看清剩下哪几项，再取极限。
+\subsubsection{柯西（Cauchy）收敛准则}
+当无法显式写出部分和 \(S_N\) 的表达式时，可利用实数完备性，通过级数自身的项来判定敛散性：
 
-\subsection{不知道极限值也能判断收敛}
-
-按定义判断收敛，得先有一个候选的 \(S\)。多数时候没有。Cauchy 准则绕开了这个要求：
-
+\begin{theorem}[级数的 Cauchy 收敛准则]
+级数 \(\sum_{n=1}^{\infty} a_n\) 收敛的充要条件是：对任意给定的 \(\varepsilon > 0\)，存在正整数 \(N\)，使得对任意的 \(m > n \ge N\)，均有
 \[
-\sum a_n\ \text{收敛}
-\iff
-\forall\varepsilon>0,\;\exists N,\;\forall m>n\ge N,\;
-\Bigl|\sum_{k=n+1}^{m}a_k\Bigr|<\varepsilon.
+\left| S_m - S_n \right| = \left| \sum_{k=n+1}^{m} a_k \right| < \varepsilon.
 \]
+\end{theorem}
 
-它说的是，从足够远的地方起，随便截一段尾巴出来加，总量都小于容差。这个条件只用到级数自身的项，不提极限值。
-
-背后仍是完备性：条件左边等价于部分和数列是 Cauchy 列，而实数系保证每个 Cauchy 列都收敛。级数收敛这件事，追到底是实数完备性在兜底——换到有理数上，同样的部分和可能哪儿也不去。
-
-``尾部能否被任意压扁''这个提法后面还会反复出现，绝对收敛、一致收敛都是它的变体，只是压扁的对象换了。
-
-\subsection{尾巴的重量才是问题}
-
-把 \(1+\frac12+\frac14+\cdots\) 和 \(1+\frac12+\frac13+\cdots\) 并排放，差别不在任何单独一项上——两者的项都趋于零，前十项的大小也在同一量级。差别在缩水的方式：几何级数每前进一步项就减半，调和级数从第 \(n\) 项到第 \(n+1\) 项只缩了 \(1/(n+1)\) 的比例，几乎等于没缩。
-
-于是判断级数敛散的任务有了明确形状：在通项已经趋于零之后，进一步确认尾部累积是否真被压在一个有限量以内。对于所有项同号的级数，部分和只能朝一个方向走，这件事会容易得多。下一节就从这块有利地形开始。
+该准则的直观含义是：\textbf{只要从足够远的位置起，任意截取一段尾巴进行累加，其绝对值都可以被压扁在任意小容差以内。}

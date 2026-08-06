@@ -1,38 +1,129 @@
 一个迭代算法跑到第 \(n\) 轮，本轮的修正量已经小到日志里看不出变化。这轮修正是 \(1/n\) 量级——听起来完全可以忽略。那么整个训练过程累积下来的漂移量呢？也可以忽略吗？
 
-不可以。\(\sum_{n\le N}1/n\) 大约是 \(\ln N\)，没有上界。每一步都微不足道，走上无穷多步，照样可以走到任意远的地方。反过来，若每轮修正是 \(1/n^2\) 量级，累计漂移就被压在 \(\pi^2/6\) 以内，永远越不过去。两种衰减在图上几乎分不开，命运却完全相反。
+答案是不行。调和级数 \(\sum 1/n\) 的增长虽然极其缓慢，但部分和是无界的——只要步数足够多，积少成多依然可以走向无穷远。反过来，若每轮修正是 \(1/n^2\) 量级，累积漂移就会被严格压在 \(\pi^2/6\) 以内，永远无法越界。两种衰减在曲线变化上几乎难以区分，最终的命运却完全相反。
 
-本章处理的就是这一类判断：一个无限过程，什么时候产生有限的结果。答案不取决于单次增量有多小，而取决于尾部衰减得够不够快。全章的判别工具——比较、积分、比值、根值——回答的都是同一个问题，只是各自拿了不同的尺子去量同一段尾巴。
+这正是本章要处理的核心问题：\textbf{一个无限累加的过程，究竟在什么条件下才能产生有限的结果？}
 
-\begin{center}
-\begin{tikzpicture}[x=1cm,y=1cm,font=\small,>=stealth]
-  \fill[red!8]  (0,-0.5) rectangle (6.4,0.5);
-  \fill[blue!8] (6.4,-0.5) rectangle (13.2,0.5);
-  \draw[black!45] (0,-0.5) rectangle (13.2,0.5);
-  \draw[->,black!55] (0.2,0) -- (13.0,0);
-  \draw[black!75,thick] (6.4,-0.8) -- (6.4,0.8);
-  \node[above,black!70] at (3.2,0.6) {部分和无界};
-  \node[above,black!70] at (9.8,0.6) {部分和有上界};
-  \fill (1.3,0) circle (1.7pt);  \node[below] at (1.3,-0.1)  {\(1/\sqrt n\)};
-  \fill (3.3,0) circle (1.7pt);  \node[below] at (3.3,-0.1)  {\(1/n\)};
-  \fill (5.3,0) circle (1.7pt);  \node[below] at (5.3,-0.1)  {\(1/(n\ln n)\)};
-  \fill (7.6,0) circle (1.7pt);  \node[below] at (7.6,-0.1)  {\(1/(n\ln^2 n)\)};
-  \fill (9.9,0) circle (1.7pt);  \node[below] at (9.9,-0.1)  {\(1/n^2\)};
-  \fill (12.1,0) circle (1.7pt); \node[below] at (12.1,-0.1) {\(2^{-n}\)};
-  \node[black!60,font=\footnotesize] at (13.0,0.75) {衰减更快};
+答案不取决于单次增量有多小，而取决于尾部衰减得够不够快。全章的判别工具——比较、积分、比值、根值——回答的都是同一个问题，只是各自拿了不同的尺子去衡量同一段尾巴。
+
+\subsection*{直觉几何化：从``矩形和''到``曲边梯形面积''}
+
+理解离散级数收敛性最直观的视角是\textbf{面积}。将离散求和 \(\sum_{n=1}^N f(n)\) 视为一系列宽度为 \(1\)、高度为 \(f(n)\) 的矩形面积总和；而连续函数积分 \(\int_1^\infty f(x)\,\mathrm{d}x\) 则是曲线下方的连续面积。
+
+只要 \(f(x)\) 单调递减，连续曲线的面积就构成了离散矩形和的天然上下界：
+\begin{equation*}
+\int_1^{N+1} f(x)\,\mathrm{d}x \;\le\; \sum_{n=1}^N f(n) \;\le\; f(1) + \int_1^N f(x)\,\mathrm{d}x
+\end{equation*}
+
+因此，\textbf{级数是否收敛，完全等价于曲线下方的尾部面积是否有限}。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{groupplot}[
+    group style={group size=2 by 1, horizontal sep=1.5cm},
+    width=7.2cm, height=5.5cm,
+    xmin=1, xmax=5.5,
+    ymin=0, ymax=1.2,
+    axis lines=middle,
+    xlabel={\(x\)}, ylabel={\(y\)},
+    every axis x label/.style={at={(axis description cs:1,0)},anchor=west},
+    every axis y label/.style={at={(axis description cs:0,1)},anchor=south},
+    xtick={1,2,3,4,5},
+    ytick={0.5,1},
+    domain=1:5.2,
+    samples=100
+]
+
+% 左图：1/x (发散)
+\nextgroupplot[title={\small (a) \(f(x) = 1/x\)（面积 \(\int_1^\infty \frac{1}{x}\mathrm{d}x = \infty\)）}]
+  \fill[red!15] (1,0) rectangle (2,1);
+  \fill[red!15] (2,0) rectangle (3,1/2);
+  \fill[red!15] (3,0) rectangle (4,1/3);
+  \fill[red!15] (4,0) rectangle (5,1/4);
+  
+  \draw[red!60!black, thick] (1,1) -- (2,1) -- (2,1/2) -- (3,1/2) -- (3,1/3) -- (4,1/3) -- (4,1/4) -- (5,1/4) -- (5,0);
+  \addplot[blue, thick, domain=1:5.2] {1/x};
+  \node[blue, font=\footnotesize] at (axis cs: 3.2, 0.55) {\(y = \frac{1}{x}\)};
+  \node[red!80!black, font=\small] at (axis cs: 3.5, 0.85) {\textbf{面积膨胀 \(\to\) 发散}};
+
+% 右图：1/x^2 (收敛)
+\nextgroupplot[title={\small (b) \(f(x) = 1/x^2\)（面积 \(\int_1^\infty \frac{1}{x^2}\mathrm{d}x = 1\)）}]
+  \fill[blue!15] (1,0) rectangle (2,1/4);
+  \fill[blue!15] (2,0) rectangle (3,1/9);
+  \fill[blue!15] (3,0) rectangle (4,1/16);
+  \fill[blue!15] (4,0) rectangle (5,1/25);
+  
+  \draw[blue!60!black, thick] (1,0) -- (1,1/4) -- (2,1/4) -- (2,1/9) -- (3,1/9) -- (3,1/16) -- (4,1/16) -- (4,1/25) -- (5,1/25) -- (5,0);
+  \addplot[blue, thick, domain=1:5.2] {1/(x^2)};
+  \node[blue, font=\footnotesize] at (axis cs: 2.5, 0.45) {\(y = \frac{1}{x^2}\)};
+  \node[blue!80!black, font=\small] at (axis cs: 3.5, 0.85) {\textbf{面积封顶 \(\to\) 收敛}};
+
+\end{groupplot}
 \end{tikzpicture}
+\caption*{\small 面积视角下的收敛性：\(1/x\) 下方的阴影面积随 \(x \to \infty\) 无限积聚，导致级数发散；而 \(1/x^2\) 下方的总面积被严格限制在有限值以内，将级数部分和封顶。}
+\end{figure}
 
-\emph{同一条轴上，越往右尾部衰减越快。分界线不在``趋于零''这里——所有这些项都趋于零——而在一个细得出奇的位置：\(1/(n\ln n)\) 落在发散侧，只多一个对数因子的 \(1/(n\ln^2 n)\) 就落到了收敛侧。}
-\end{center}
+借助积分的换元工具，我们甚至能看清收敛与发散的分界线有多么细微：
+\begin{align*}
+\int_2^\infty \frac{1}{x \ln x} \,\mathrm{d}x &= \lim_{M\to\infty} \ln(\ln M) = \infty \quad \Rightarrow \quad \text{面积无界（极慢发散）} \\
+\int_2^\infty \frac{1}{x \ln^2 x} \,\mathrm{d}x &= \lim_{M\to\infty} \left( \frac{1}{\ln 2} - \frac{1}{\ln M} \right) = \frac{1}{\ln 2} \quad \Rightarrow \quad \text{面积有限（收敛）}
+\end{align*}
 
-进入这条主线之前要先把地基铺好。\hyperref[sec:02-Calculus/05-Sequences-and-Series/01]{``数列怎样收敛''} 把``越来越接近''换成可检验的窗口条件，并给出单调有界定理——它让你在算不出极限的情况下断言极限存在，这在递推数列和迭代算法里是常态。
+仅仅多了一个对数因子的二次方，就把无穷远处的尾部面积从无界压回到了有限。
 
-\hyperref[sec:02-Calculus/05-Sequences-and-Series/02]{``无穷级数与部分和''} 解释为什么``无限次加法''这个说法需要重新定义：加法是二元运算，无限步做不完，出路是把无穷和改写成部分和数列的极限。调和级数在这里第一次登场，把``项趋于零''和``和有限''之间那道裂缝撕开。
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=12cm, height=6.5cm,
+    xmin=2, xmax=15,
+    ymin=0, ymax=0.55,
+    axis lines=middle,
+    xlabel={\(x\)}, ylabel={\(y\)},
+    every axis x label/.style={at={(axis description cs:1,0)},anchor=west},
+    every axis y label/.style={at={(axis description cs:0,1)},anchor=south},
+    domain=2:15,
+    samples=200,
+    legend style={at={(0.9,0.88)},anchor=north east,draw=none,fill=white!80}
+]
 
-\hyperref[sec:02-Calculus/05-Sequences-and-Series/03]{``正项级数的比较''} 是上图的正文。正项级数的部分和只能上行，于是收敛等价于有上界，所有判别法都在给这个上界找证据。这一节也会指出学习率序列为什么被要求满足 \(\sum\alpha_t=\infty\) 与 \(\sum\alpha_t^2<\infty\)——它就是一道 \(p\) 级数题。
+\addplot[red, thick] {1/x};
+\addlegendentry{\(y = \frac{1}{x}\)}
 
-允许出现负号之后，情况变得更奇怪。\hyperref[sec:02-Calculus/05-Sequences-and-Series/04]{``交错与绝对收敛''} 会证明一件反直觉的事：条件收敛的级数可以通过重新排列项的顺序，收敛到你指定的任何一个数。求和顺序无关不是加法的自带属性，它是绝对收敛买来的。
+\addplot[orange, thick, dashed] {1/(x * ln(x))};
+\addlegendentry{\(y = \frac{1}{x\ln x}\)（发散临界）}
 
-最后两节把问题从数抬到函数。\hyperref[sec:02-Calculus/05-Sequences-and-Series/05]{``幂级数是一族函数''} 说明同一个形式级数对不同的 \(x\) 有不同命运，收敛半径划出了它有意义的地盘；\hyperref[sec:02-Calculus/05-Sequences-and-Series/06]{``Taylor 展开与余项：匹配局部变化信息''} 则把重点放在余项上——展开式能信到多远，由余项决定，而不由它写得多整齐。
+\addplot[teal, thick] {1/(x * (ln(x))^2)};
+\addlegendentry{\(y = \frac{1}{x\ln^2 x}\)（收敛临界）}
 
-读完这一章，看到一个无限求和你会先问尾巴的衰减尺度，而不是先找套路；看到一个近似展开你会先问余项界，而不是先数项数。若只想解决眼前的困惑，可以直接跳到最接近的一节，再沿链接回补前置。
+\addplot[blue, thick, dotted] {1/(x^2)};
+\addlegendentry{\(y = \frac{1}{x^2}\)}
+
+\node[orange!80!black, font=\small] at (axis cs: 10, 0.16) {发散区域（原函数为 \(\ln(\ln x)\)）};
+\node[teal!80!black, font=\small] at (axis cs: 10, 0.03) {收敛区域（原函数为 \(-1/\ln x\)）};
+
+\end{axis}
+\end{tikzpicture}
+\caption*{\small 临界衰减对比：\(1/(x\ln x)\) 与 \(1/(x\ln^2 x)\) 的图像极难区分，但后者指数上的微小改变，恰好压塌了无穷远处的累积面积。}
+\end{figure}
+
+\subsection*{本章路线图}
+
+在接下来的学习中，我们将沿着这条``用不同尺子量尾巴''的主线展开：
+
+\begin{itemize}
+  \item \hyperref[sec:02-Calculus/05-Sequences-and-Series/01]{``数列怎样收敛''}：先把``稳定到某个数''写成数列极限，再用单调有界性说明什么时候不必显式求出极限也能确认收敛。
+    
+  \item \hyperref[sec:02-Calculus/05-Sequences-and-Series/02]{``无穷级数与部分和''}：把``无限次加法''严格定义为部分和序列的极限，并看清通项趋于零为什么仍不足以保证总和有限。
+    
+  \item \hyperref[sec:02-Calculus/05-Sequences-and-Series/03]{``正项级数的比较''}：正项部分和单调递增，比较、积分、比值与根值判别法分别从不同尺度衡量尾部衰减，也解释学习率条件 \(\sum \alpha_t=\infty\) 与 \(\sum \alpha_t^2<\infty\) 的作用。
+    
+  \item \hyperref[sec:02-Calculus/05-Sequences-and-Series/04]{``交错与绝对收敛''}：引入符号变化，区分条件收敛与绝对收敛，并说明为什么只有绝对收敛能保证重排不改变和。
+
+  \item \hyperref[sec:02-Calculus/05-Sequences-and-Series/05]{``幂级数是一族函数''}：把常数项推广到变量，确定幂级数的收敛半径，并标出等式成立的有效区域。
+
+  \item \hyperref[sec:02-Calculus/05-Sequences-and-Series/06]{``Taylor 展开与余项：匹配局部变化信息''}：用有限阶展开逼近函数，再用余项界说明局部模型在多大范围内仍值得信任。
+\end{itemize}
+
+读完本章，当你再次面对一个无限求和时，直觉将驱动你首先去考察尾部的衰减尺度；而看到一个近似展开时，你的注意力也将自然落到余项的控制范围上。
