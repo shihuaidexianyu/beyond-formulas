@@ -16,8 +16,6 @@
 - `build_sections.py` — 生成“当前篇”临时编译入口。
 - `build_sections.ps1` — 编排当前篇的两遍编译，并保留与 PDF 同名的 SyncTeX 文件。
 - `section_common.ps1` — 编译/检查脚本共用的路径反解、目录工具。
-- `check_section.py`、`check_section.ps1` — 对当前篇做只读风格检查。
-- `mark_reviewed.py`、`mark_reviewed.ps1` — 把当前篇所在 Part/单元在 `docs/review.md` 中标记为已过审。
 - `review_summary.py` — 汇总 `docs/review.md` 的审校进度。
 
 ## 用法
@@ -45,12 +43,6 @@
 # 保留单章 aux/log 以便排查
 .\scripts\build_chapters.ps1 -Chapter ch:004 -KeepAux
 
-# 只检查当前篇的风格（不改文件）
-.\scripts\check_section.ps1 -File tex\01-Mathematical-Language\01-Logic\03-量词与否定.tex
-
-# 标记当前篇已审（自动更新进度）
-.\scripts\mark_reviewed.ps1 -File tex\01-Mathematical-Language\01-Logic\03-量词与否定.tex
-
 # 查看审校进度
 python scripts\review_summary.py
 ```
@@ -70,31 +62,17 @@ python scripts\review_summary.py
 
 ### VS Code 快捷操作
 
-`tasks.json` 里有两个任务：
+`tasks.json` 里有一个任务：
 
 - `编译当前篇`：默认构建任务，`Ctrl+Shift+B` 触发；
-- `检查当前篇`：只跑风格检查，不改文件。
-- `标记已审`：把当前篇所在 Part/单元标记为已过审，并打印最新汇总。
 
-如果想把“编译/检查”也绑定独立快捷键，在用户级 `keybindings.json` 加入：
+如果想把编译绑定独立快捷键，在用户级 `keybindings.json` 加入：
 
 ```json
 {
   "key": "ctrl+alt+b",
   "command": "workbench.action.tasks.runTask",
   "args": "编译当前篇",
-  "when": "editorTextFocus && resourceExtname == .tex"
-},
-{
-  "key": "ctrl+alt+k",
-  "command": "workbench.action.tasks.runTask",
-  "args": "检查当前篇",
-  "when": "editorTextFocus && resourceExtname == .tex"
-},
-{
-  "key": "ctrl+alt+m",
-  "command": "workbench.action.tasks.runTask",
-  "args": "标记已审",
   "when": "editorTextFocus && resourceExtname == .tex"
 }
 ```
@@ -133,6 +111,4 @@ python scripts\review_summary.py
 ### 审校进度
 
 `docs/review.md` 用 `- [ ]` / `- [~]` / `- [x]` 记录待校订、校订中、已过审。
-当前焦点默认放微积分导数部分。完成一篇后跑
-`.\scripts\mark_reviewed.ps1 -File ...`，脚本自动把对应 Part/单元改成
-`- [x]` 并打印最新汇总，不用手动改 markdown。
+当前焦点默认放微积分导数部分。审校状态可直接在该文件中维护。
