@@ -152,16 +152,11 @@ A(x) = x(100-2x) = 100x - 2x^2, \qquad 0 \le x \le 50.
     \draw[red!35!black, thin] plot[domain=-1:1, samples=32] (\x, \yy, {0.65*(\x*\x - \yy*\yy)});
   }
   \foreach \xx in {-1, -0.8, -0.6, -0.4, -0.2, 0.2, 0.4, 0.6, 0.8, 1} {
-    \draw[blue!35!black, thin] plot[domain=-1:1, samples=32] (\x, \xx, {0.65*(\x*\x - \xx*\xx)});
+    \draw[blue!35!black, thin] plot[domain=-1:1, samples=32] (\xx, \x, {0.65*(\xx*\xx - \x*\x)});
   }
   \draw[red!80!black, very thick] plot[domain=-1.1:1.1, samples=32] (\x, 0, {0.65*\x*\x});
   \draw[blue!80!black, very thick] plot[domain=-1.1:1.1, samples=32] (0, \x, {-0.65*\x*\x});
   \fill[black] (0,0,0) circle (2pt);
-  \node[above right=-1pt, font=\footnotesize] at (0,0,0) {鞍点};
-  \draw[->, red!80!black, thick] (0,0,0) -- (0.75,0,0.37);
-  \draw[->, blue!80!black, thick] (0,0,0) -- (0,0.75,-0.37);
-  \node[red!80!black, font=\footnotesize] at (0.95,0,0.48) {谷底方向};
-  \node[blue!80!black, font=\footnotesize] at (0,0.95,-0.48) {山峰方向};
 \end{tikzpicture}
 \qquad
 \begin{tikzpicture}[x=0.72cm, y=0.72cm, >=stealth, font=\small]
@@ -170,18 +165,18 @@ A(x) = x(100-2x) = 100x - 2x^2, \qquad 0 \le x \le 50.
   \draw[->, black!45] (0,-0.25) -- (0,1.25) node[above] {\(z\)};
   \draw[red!80!black, very thick] plot[domain=-1.1:1.1, samples=32] (\x,{0.75*\x*\x});
   \fill[black] (0,0) circle (1.5pt);
-  \node[red!80!black, font=\footnotesize] at (0.82,0.75) {谷底};
+  \node[red!80!black, font=\footnotesize] at (0.85,1.02) {谷底};
   \begin{scope}[yshift=-3.1cm]
     \node[font=\footnotesize] at (0,1.55) {沿 \(y\) 轴：\(z=-y^2\)};
     \draw[->, black!45] (-1.35,0) -- (1.35,0) node[right] {\(y\)};
     \draw[->, black!45] (0,-1.25) -- (0,0.25) node[above] {\(z\)};
     \draw[blue!80!black, very thick] plot[domain=-1.1:1.1, samples=32] (\x,{-0.75*\x*\x});
     \fill[black] (0,0) circle (1.5pt);
-    \node[blue!80!black, font=\footnotesize] at (0.82,-0.75) {山峰};
+    \node[blue!80!black, font=\footnotesize] at (0.85,-1.02) {山峰};
   \end{scope}
 \end{tikzpicture}
 
-\emph{左：双曲抛物面 \(z=x^2-y^2\) 及其两条彩色剖面线；右：把同一个鞍点沿两个方向单独切开，红色剖面是谷底，蓝色剖面是山峰。原点处梯度为零，但不同方向的二阶曲率符号相反。}
+\emph{左：双曲抛物面 \(z=x^2-y^2\)。原点的黑点就是鞍点；红色剖面沿 \(x\) 方向向上弯，是谷底方向，蓝色剖面沿 \(y\) 方向向下弯，是山峰方向。右：把同一个鞍点沿两个方向单独切开，红色剖面是谷底，蓝色剖面是山峰。原点处梯度为零，但不同方向的二阶曲率符号相反。}
 \end{center}
 
 \subsection{高阶展开与局部近似总结}
