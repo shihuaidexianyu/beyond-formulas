@@ -54,7 +54,7 @@ R_\theta=\begin{bmatrix}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{bmatri
 
 实矩阵还额外附赠一条对称性。特征多项式的系数都是实数，取共轭不改变方程，所以非实特征值必成共轭对出现；相应地，若 \(Av=\lambda v\)，则 \(A\overline v=\overline\lambda\,\overline v\)。一般复矩阵没有这个保证，\(\diag(i,2)\) 的谱就不成对。
 
-模长与幅角的分工在迭代时看得最清楚。若 \(\lambda=re^{i\theta}\)，则 \(\lambda^k=r^ke^{ik\theta}\)：每走一步，相位推进 \(\theta\)，半径乘上 \(r\)。所以复特征值读作``一个振荡模态'' ——幅角定振荡频率，模长定它是衰减、维持还是发散。
+模长与幅角的分工在迭代时看得最清楚。若 \(\lambda=re^{i\theta}\)，则 \(\lambda^k=r^ke^{ik\theta}\)：每走一步，相位推进 \(\theta\)，半径乘上 \(r\)。所以复特征值读作``一个振荡模态''——幅角定振荡频率，模长定它是衰减、维持还是发散。
 
 \begin{center}
 \begin{tikzpicture}[x=1cm,y=1cm,font=\footnotesize,>=stealth]
@@ -134,6 +134,6 @@ U=\frac1{\sqrt2}\begin{bmatrix}1&i\\i&1\end{bmatrix}
 
 复数没有凭空造出新自由度。一个 \(\C^n\) 中的向量拆成实部与虚部就是 \(\R^{2n}\) 中的向量，一个复线性算子也有对应的实分块矩阵。选复坐标的理由不是能装更多信息，而是旋转、相位和共轭对称在这套坐标里直接可见，写出来的式子短。
 
-但有两处要留神。第一，共轭映射 \(z\mapsto\overline z\) 只是实线性的：\(\overline{iz}=-i\,\overline z\)，它不能写成复矩阵乘法。凡是含共轭、取模、取实部的操作，都得先确认自己在哪个数域上讨论线性。第二，也是更常被误读的一处：特征多项式分裂不等于矩阵可对角化。\(\begin{bmatrix}1&1\\0&1\end{bmatrix}\) 在 \(\C\) 上的特征值仍是重根 \(1\)，独立特征向量仍然只有一个。复数解决的是``根存在吗''，解决不了``特征向量够不够'' ——\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/03]{``对角化失败与 Jordan 形''}讨论的那些麻烦一个也没消失。
+但有两处要留神。第一，共轭映射 \(z\mapsto\overline z\) 只是实线性的：\(\overline{iz}=-i\,\overline z\)，它不能写成复矩阵乘法。凡是含共轭、取模、取实部的操作，都得先确认自己在哪个数域上讨论线性。第二，也是更常被误读的一处：特征多项式分裂不等于矩阵可对角化。\(\begin{bmatrix}1&1\\0&1\end{bmatrix}\) 在 \(\C\) 上的特征值仍是重根 \(1\)，独立特征向量仍然只有一个。复数解决的是``根存在吗''，解决不了``特征向量够不够''——\hyperref[sec:03-Linear-Algebra/05-Eigenvalues-and-Eigenvectors/03]{``对角化失败与 Jordan 形''}讨论的那些麻烦一个也没消失。
 
 那么，在复空间里哪一类矩阵能保证有一组标准正交的特征基？实数情形的答案是对称矩阵，条件是 \(A^{\trans}=A\)。现在转置已经换成了共轭转置，下一节先把这个条件照样改写，再看看改写之后的谱定理还剩下什么、多出什么。
